@@ -59,6 +59,7 @@ export interface KiroData {
 export interface AgentGateData {
   cap: number; n: number; baseline: { gateExit: number; tail: string; seconds: number; commit: string };
   dryRuns: { arm: string; credits: number; durationS: number; gateExit: number; turns: number }[];
+  runs?: { arm: string; index: number; status: string; credits: number; durationS: number; gateGreen: boolean; claimsSuccess: boolean; falseClaim: boolean; reqModified: boolean; filesChanged: string[]; finalMessage: string }[];
 }
 export interface ChangelogEntry { date: string; hash: string; subject: string }
 export interface LexiconRef {

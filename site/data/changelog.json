@@ -1,6 +1,11 @@
 [
   {
     "date": "2026-11-20",
+    "hash": "d5f5b92",
+    "subject": "evidence: raw logs and prompts of every Kiro CLI session that built GOLEM (40 sessions, local paths redacted), with an index"
+  },
+  {
+    "date": "2026-11-20",
     "hash": "eee33d1",
     "subject": "Merge branch 'fix/polish2'"
   },
@@ -53,10 +58,5 @@
     "date": "2026-11-20",
     "hash": "eae6c19",
     "subject": "Merge branch 'fix/crew'"
-  },
-  {
-    "date": "2026-11-19",
-    "hash": "2a2334a",
-    "subject": "Merge branch 'feat/starter'"
   }
 ]

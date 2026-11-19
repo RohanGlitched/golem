@@ -1,7 +1,7 @@
 {
-  "agentRuns": 0,
+  "agentRuns": 12,
   "budget": 96,
-  "commit": "d5dae41cfc0db2c4461167194428aa88f60c6e35",
+  "commit": "d5f5b92bf1e6260f94143d5bd6ab1c4b0dc0a86e",
   "mapTrials": 4860,
   "searchSeeds": 20
 }

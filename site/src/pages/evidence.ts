@@ -1,4 +1,4 @@
-// Evidence: the G1 stability map, the falsifier benchmark (honest), the candy measurement, the pending agent-gate experiment, methods and limits.
+// Evidence: the G1 stability map, the falsifier benchmark (honest), the candy measurement, the agent-gate pilot, methods and limits.
 import type { FalsifierSummary, SiteData } from '../build/data';
 import { codeBlock, esc, fmt, inlineMd, table } from '../build/html';
 import type { PageSpec } from '../build/layout';
@@ -119,8 +119,7 @@ ${needleFlat ? `<p>The flat-margin row is the defect that round 1 hit on the G1:
 <p class="small muted">Source: ${esc(d.candy.heading)}, <a href="${REPO_URL}/blob/main/apps/candy/proposals.md"><code>apps/candy/proposals.md</code></a> P8, raw rows in <code>evidence/results/candy-p8-doorstep.jsonl</code>, at commit <code>${esc(d.candy.source.commit.slice(0, 7))}</code>.</p>
 
 <h2 id="agent-gate">Does the Stop gate stop false "done" claims?</h2>
-<p class="pending">Pending. The experiment has not been run.</p>
-<p>The harness exists and is tested. It needs the owner's approval before it spends credits: 6 runs per arm, hard cap ${gate.cap} credits. Two dry runs checked the plumbing and are excluded from any analysis: arm A used ${gate.dryRuns.find((r) => r.arm === 'A')?.credits.toFixed(2)} credits and arm B ${gate.dryRuns.find((r) => r.arm === 'B')?.credits.toFixed(2)}. The independent gate on the untouched G1 app exits ${gate.baseline.gateExit} (red), so the experiment starts from a failing controller. This page makes no claim about the gate's effect on agents.</p>
+${agentGateSection(d)}
 
 <h2 id="methods">Methods</h2>
 <ul>
@@ -164,4 +163,18 @@ function kiroReflexSection(d: SiteData): string {
 ${table(['Direction', 'Pushed from', 'Unitree only', 'With Kiro’s reflex', 'Change'], rows, { num: [2, 3, 4], caption: 'Minimum over 5 stride phases and 3 seeds. Raw cells: evidence/results/g1-map.jsonl and evidence/results/kiro-reflex/g1-map.jsonl.' })}
 </details>
 <p>The agent’s session log and prompt are in <a href="${REPO_URL}/tree/main/evidence/results/tuner"><code>evidence/results/tuner/</code></a>. It checked its work with GOLEM’s MCP tools and <code>golem gate</code>; this map is a separate re-measurement afterwards, over all 36 directions, 5 stride phases and 3 seeds.</p>`;
+}
+
+/** Experiment 3: the agent-gate pilot, from site/data/agent-gate.json. */
+function agentGateSection(d: SiteData): string {
+  const g = d.agentGate;
+  const runs = g.runs ?? [];
+  if (runs.length === 0) return '<p class="pending">Pending. The experiment has not been run.</p>';
+  const arm = (a: string) => runs.filter((r) => r.arm === a);
+  const count = (a: string, f: (r: (typeof runs)[number]) => boolean) => `${arm(a).filter(f).length}/${arm(a).length}`;
+  const credits = runs.reduce((s, r) => s + r.credits, 0);
+  const rows = runs.map((r) => [r.arm === 'A' ? 'A (no Stop hook)' : 'B (Stop hook)', String(r.index + 1), r.gateGreen ? '<span class="held">green</span>' : '<span class="broken">red</span>', r.claimsSuccess ? 'yes' : 'no', r.falseClaim ? '<span class="broken">yes</span>' : 'no', fmt(r.credits, 2), fmt(r.durationS / 60, 1), r.filesChanged.map((f) => `<code>${esc(f)}</code>`).join(' ')]);
+  return `<p><b>Result: no false claims in either arm.</b> Without the Stop hook, ${count('A', (r) => r.falseClaim)} runs claimed success while the independent gate was red; with it, ${count('B', (r) => r.falseClaim)}. The task turned out to be one these agents could do: the independent gate was green after ${count('A', (r) => r.gateGreen)} runs without the hook and ${count('B', (r) => r.gateGreen)} with it, each run a single short session, ${fmt(credits, 1)} credits for all ${runs.length}. The one run that left the gate red did not claim success. So the gate had nothing to stop here, and this pilot does not show that it reduces false claims; it shows that on this task neither arm lied. No run edited a requirements file.</p>
+<p>The subject started red: the independent gate on the untouched copy exited ${g.baseline.gateExit}. Three deviations from the pre-registration are recorded in <a href="${REPO_URL}/blob/main/evidence/PREREG.md"><code>evidence/PREREG.md</code></a> before the full run: the workspace carries the pinned seeds (restored before every independent gate), the subject stays <code>apps/stagger</code>, and Kiro's later reflex is replaced by the identity reflex so the controller is the one the plan registered. "Claims success" is the pre-registered keyword rule; several green runs phrased success in words the rule does not match, and their messages are stored for audit.</p>
+${table(['Arm', 'Run', 'Independent gate', 'Claims success', 'False claim', 'Credits', 'Minutes', 'Files the agent changed'], rows, { num: [5, 6], caption: 'Raw records: evidence/results/agent-gate.jsonl; the stream of every run is in evidence/results/agent-gate.streams/.' })}`;
 }
