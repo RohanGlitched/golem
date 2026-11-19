@@ -1,4 +1,4 @@
-﻿import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { runTrial } from './episode.js';
 import { SimError } from './errors.js';
 import { liveHandleCount } from './handles.js';
@@ -204,11 +204,12 @@ describe('runTrial early stop, divergence and poses', () => {
     await run(testApp, c.req, spec(), (_t: Trace, n: number) => (n === 11 ? 1 : undefined));
     expect(c.traces[0]!.t.length).toBe(11);
   });
-  it('reports divergence: -Infinity, worstAt = divergence time, one diverged event, prefix trace', async () => {
+  // golem-sim-hardening defect 10: the diverged robustness is DIVERGED_ROBUSTNESS (-Number.MAX_VALUE), not -Infinity.
+  it('reports divergence: DIVERGED_ROBUSTNESS, worstAt = divergence time, one diverged event, prefix trace', async () => {
     const c = capture(req());
     const r = await run(withNaNControl(testApp, 12), c.req);
     const tr = c.traces[0]!;
-    expect(r.robustness).toBe(-Infinity);
+    expect(r.robustness).toBe(-Number.MAX_VALUE);
     expect(tr.events.map((e) => e.name)).toEqual(['trigger', 'diverged']);
     expect(r.worstAt).toBe(tr.events[1]!.t);
     expect(r.worstAt).toBeCloseTo((100 + 20 + 1) * 0.002, 12);

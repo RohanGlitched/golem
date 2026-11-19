@@ -387,4 +387,32 @@ describe('defect 9: the early-stop hook decides the robustness', () => {
   });
 });
 
+describe('defect 10: robustness survives JSON', () => {
+  const roundTrip = (r: TrialResult) => JSON.parse(JSON.stringify(r)) as TrialResult;
+
+  it('reports a diverged trial with the finite DIVERGED_ROBUSTNESS, which JSON keeps', async () => {
+    const { DIVERGED_ROBUSTNESS } = await import('./episode.js');
+    expect(DIVERGED_ROBUSTNESS).toBe(-Number.MAX_VALUE);
+    const { result } = await run(boxDropApp, boxReq(0.5), { f: 1e30, a: 0 });
+    expect(result.robustness).toBe(DIVERGED_ROBUSTNESS);
+    const back = roundTrip(result);
+    expect(back.robustness).toBe(result.robustness);
+    expect(back.worstAt).toBe(result.worstAt);
+  });
+
+  it.each([[Infinity, Number.MAX_VALUE], [-Infinity, -Number.MAX_VALUE]])('clamps a monitor robustness of %s to %s', async (inf, want) => {
+    const req: CompiledRequirement = { ...boxReq(0.2, []), monitor: () => ({ robustness: inf, worstAt: 0.2, unit: 'm' }) };
+    const { result } = await run(boxDropApp, req);
+    expect(result.robustness).toBe(want);
+    expect(roundTrip(result).robustness).toBe(want);
+  });
+
+  it('rejects a NaN robustness or a non-finite worstAt from the monitor, naming the requirement', async () => {
+    const nanReq: CompiledRequirement = { ...boxReq(0.2, []), id: 'R7', monitor: () => ({ robustness: NaN, worstAt: 0.2, unit: 'm' }) };
+    await expect(run(boxDropApp, nanReq)).rejects.toThrow(/requirement R7 returned robustness NaN/);
+    const badAt: CompiledRequirement = { ...boxReq(0.2, []), id: 'R8', monitor: () => ({ robustness: 1, worstAt: Infinity, unit: 'm' }) };
+    await expect(run(boxDropApp, badAt)).rejects.toThrow(/requirement R8 returned worstAt Infinity/);
+  });
+});
+
 void makeStoolApp; void shoveCall;

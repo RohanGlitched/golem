@@ -10,7 +10,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 describe('sim public exports', () => {
   it('matches the documented export surface exactly', () => {
     expect(Object.keys(sim).sort()).toEqual([
-      'ModelCache', 'PoseRecorder', 'SimError', 'buildContext', 'changedModelFields', 'createSaturationMeter', 'forEachContact', 'geomDistance',
+      'DIVERGED_ROBUSTNESS', 'ModelCache', 'PoseRecorder', 'SimError', 'buildContext', 'changedModelFields', 'createSaturationMeter', 'forEachContact', 'geomDistance',
       'liveHandleCount', 'loadMujoco', 'makeTestRequirement', 'mulberry32', 'readWarnings', 'runTrial', 'testApp',
       'validateRobotPaths', 'withDoubleBuffer', 'writeRobotFiles',
     ]);

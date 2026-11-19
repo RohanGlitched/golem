@@ -13,6 +13,19 @@ import type {
 } from './types.js';
 import { validateTrial } from './validate.js';
 
+/**
+ * Robustness of a diverged trial (golem-sim-hardening defect 10): finite, so JSON keeps it, and below every
+ * physical margin, so the sign test and sorting still work. TrialResult.diagnostics.diverged says why.
+ */
+export const DIVERGED_ROBUSTNESS = -Number.MAX_VALUE;
+
+/** Clamps +-Infinity to +-Number.MAX_VALUE so JSON keeps it; NaN is rejected by the caller. */
+function finiteRobustness(r: number): number {
+  if (r === Infinity) return Number.MAX_VALUE;
+  if (r === -Infinity) return -Number.MAX_VALUE;
+  return r;
+}
+
 const MAXVAL = 1e10; // mjMAXVAL: the bound MuJoCo's own mj_checkPos / mj_checkVel / mj_checkAcc use
 
 /** Index of the first entry that is non-finite or above mjMAXVAL in magnitude, or -1. No allocation. */
@@ -242,9 +255,18 @@ export async function runTrial(
       // The empty trace gives no verdict; ask the monitor only for its unit.
       let unit = '';
       try { unit = req.monitor(trace).unit; } catch { unit = ''; }
-      m = { robustness: -Infinity, worstAt: simIndex * simDt, unit: typeof unit === 'string' ? unit : '' };
+      m = { robustness: DIVERGED_ROBUSTNESS, worstAt: simIndex * simDt, unit: typeof unit === 'string' ? unit : '' };
     } else {
       m = req.monitor(trace);
+      if (divergence === undefined) {
+        // D10: every number in a TrialResult must survive JSON.
+        if (decided === undefined && Number.isNaN(m.robustness)) {
+          throw new SimError(`The monitor of requirement ${req.id} returned robustness NaN; a number is required`);
+        }
+        if (!Number.isFinite(m.worstAt)) {
+          throw new SimError(`The monitor of requirement ${req.id} returned worstAt ${String(m.worstAt)}; a finite time in seconds is required`);
+        }
+      }
     }
     const integ = model.opt.integrator as number;
     const diagnostics: TrialDiagnostics = {
@@ -261,7 +283,7 @@ export async function runTrial(
     if (divergence !== undefined) diagnostics.diverged = divergence;
     const result: TrialResult = {
       spec,
-      robustness: divergence !== undefined ? -Infinity : decided !== undefined ? decided : m.robustness,
+      robustness: divergence !== undefined ? DIVERGED_ROBUSTNESS : decided !== undefined ? decided : finiteRobustness(m.robustness),
       worstAt: divergence !== undefined ? divergence.t : m.worstAt,
       unit: m.unit,
       wallMs: performance.now() - t0,
