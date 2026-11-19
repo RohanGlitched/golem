@@ -87,6 +87,18 @@
     "10.5 Write property test for exact matching": {
       "status": "passed",
       "lastRunTimestamp": 1795078861332
+    },
+    "12.2 Write property test for the horizon": {
+      "status": "passed",
+      "lastRunTimestamp": 1795079317367
+    },
+    "12.3 Write property test for diagnostics": {
+      "status": "passed",
+      "lastRunTimestamp": 1795079358040
+    },
+    "12.5 Write property test for compiled identity and dimensions": {
+      "status": "passed",
+      "lastRunTimestamp": 1795079431445
     }
   },
   "executionHistory": {
@@ -797,6 +809,11 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795079032647
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795079241257
       }
     ],
     "12.2 Write property test for the horizon": [
@@ -804,6 +821,16 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795076114208
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795079249029
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795079505452
       }
     ],
     "12.3 Write property test for diagnostics": [
@@ -811,6 +838,16 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795076114271
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795079249080
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795079505604
       }
     ],
     "12.4 Write property test for determinism and input immutability": [
@@ -818,6 +855,16 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795076114340
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795079249146
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795079505680
       }
     ],
     "12.5 Write property test for compiled identity and dimensions": [
@@ -825,6 +872,16 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795076114397
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795079249207
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795079667605
       }
     ],
     "13.1 Implement `format.ts`": [
@@ -837,6 +894,11 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795079032756
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795079241336
       }
     ],
     "13.2 Write property test for the parse and format round trip": [
@@ -844,6 +906,11 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795076114502
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795079669761
       }
     ],
     "13.3 Write property test for comma insensitivity": [
@@ -851,6 +918,11 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795076114567
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795079669829
       }
     ],
     "13.4 Write property test for canonical layout and idempotence": [
@@ -858,6 +930,11 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795076114623
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795079669879
       }
     ],
     "14.1 Implement `extract.ts`": [
@@ -870,6 +947,11 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795079032814
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795079241462
       }
     ],
     "14.2 Add the requirements-file generator": [
@@ -877,6 +959,16 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795076114745
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795079249260
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795079505778
       }
     ],
     "14.3 Write property test for extraction": [
@@ -905,6 +997,11 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795076115006
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795079669932
       }
     ],
     "15.2 Write property test for file compilation": [
@@ -1010,6 +1107,13 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795078877846
+      }
+    ],
+    "12. Compiler": [
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795079667670
       }
     ]
   }
