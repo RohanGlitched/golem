@@ -17,18 +17,20 @@ export function refEditDistance(a: readonly Item[], b: readonly Item[]): number 
   const n = kb.length;
   const d: number[][] = [];
   for (let i = 0; i <= m; i++) {
-    d.push(new Array<number>(n + 1).fill(0));
-    d[i][0] = i;
+    const row = new Array<number>(n + 1).fill(0);
+    row[0] = i;
+    d.push(row);
   }
-  for (let j = 0; j <= n; j++) d[0][j] = j;
+  const at = (i: number, j: number): number => d[i]![j]!;
+  for (let j = 0; j <= n; j++) d[0]![j] = j;
   for (let i = 1; i <= m; i++) {
     for (let j = 1; j <= n; j++) {
-      d[i][j] = Math.min(
-        d[i - 1][j - 1] + (ka[i - 1] === kb[j - 1] ? 0 : 1),
-        d[i - 1][j] + 1,
-        d[i][j - 1] + 1,
+      d[i]![j] = Math.min(
+        at(i - 1, j - 1) + (ka[i - 1] === kb[j - 1] ? 0 : 1),
+        at(i - 1, j) + 1,
+        at(i, j - 1) + 1,
       );
     }
   }
-  return d[m][n];
+  return at(m, n);
 }

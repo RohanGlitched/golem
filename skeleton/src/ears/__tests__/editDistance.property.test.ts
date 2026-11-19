@@ -14,7 +14,7 @@ describe('tokenEditDistance metric laws', () => {
         expect(d(a, a)).toBe(0);
         expect(d(a, b)).toBe(d(b, a));
         expect(d(a, b)).toBeGreaterThanOrEqual(0);
-        const equal = a.length === b.length && a.every((x, i) => refKey(x) === refKey(b[i]));
+        const equal = a.length === b.length && a.every((x, i) => refKey(x) === refKey(b[i]!));
         expect(d(a, b) === 0).toBe(equal);
         expect(d(a, c)).toBeLessThanOrEqual(d(a, b) + d(b, c));
         expect(d(a, b)).toBeGreaterThanOrEqual(Math.abs(a.length - b.length));

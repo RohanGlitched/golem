@@ -48,9 +48,58 @@ export function tokenEditDistance(a: readonly Item[], b: readonly Item[]): numbe
  */
 export function toWildcardSequence(clause: readonly Token[]): WildToken[] {
   const out: WildToken[] = [];
+  const isWord = (t: Token | undefined, w: string): boolean =>
+    t !== undefined && t.type === 'word' && t.text.toLowerCase() === w;
+  /** Index after `number [unit]` starting at i, or undefined when no number is there. */
+  const quantityEnd = (i: number): number | undefined => {
+    if (clause[i]?.type !== 'number') return undefined;
+    const nx = clause[i + 1];
+    return nx !== undefined && nx.type === 'unit' && lookupUnit(nx.text) ? i + 2 : i + 1;
+  };
+  const prevWord = (): string | undefined => {
+    const last = out[out.length - 1];
+    return last !== undefined && 'word' in last ? last.word : undefined;
+  };
   for (let i = 0; i < clause.length; i++) {
     const tok = clause[i]!;
     if (tok.type === 'comma') continue;
+    // Range phrases collapse to the wildcard of the slot that would take them:
+    // `up to <q>` and `<q> to <q>` to a range, `from any direction|behind` to a direction
+    // (keeping `from`), and `at any point in its stride` to a phase (keeping `at`).
+    if (isWord(tok, 'up') && isWord(clause[i + 1], 'to')) {
+      const e = quantityEnd(i + 2);
+      if (e !== undefined) {
+        out.push({ wild: 'range' });
+        i = e - 1;
+        continue;
+      }
+    }
+    if (tok.type === 'number') {
+      const e1 = quantityEnd(i)!;
+      const e2 = isWord(clause[e1], 'to') ? quantityEnd(e1 + 1) : undefined;
+      if (e2 !== undefined) {
+        out.push({ wild: 'range' });
+        i = e2 - 1;
+        continue;
+      }
+    }
+    if (isWord(tok, 'any') && isWord(clause[i + 1], 'direction') && prevWord() === 'from') {
+      out.push({ wild: 'direction' });
+      i += 1;
+      continue;
+    }
+    if (isWord(tok, 'behind') && prevWord() === 'from') {
+      out.push({ wild: 'direction' });
+      continue;
+    }
+    if (
+      isWord(tok, 'any') && isWord(clause[i + 1], 'point') && isWord(clause[i + 2], 'in') &&
+      isWord(clause[i + 3], 'its') && isWord(clause[i + 4], 'stride') && prevWord() === 'at'
+    ) {
+      out.push({ wild: 'phase' });
+      i += 4;
+      continue;
+    }
     if (tok.type === 'number') {
       const next = clause[i + 1];
       const spec = next && next.type === 'unit' ? lookupUnit(next.text) : undefined;

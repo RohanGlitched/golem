@@ -15,4 +15,12 @@ describe('test support', () => {
     expect(Object.isFrozen(v.a.b)).toBe(true);
     expect(Object.isFrozen(v.a.b[1])).toBe(true);
   });
+
+  it('freezes the object holding a non-empty typed array without throwing on the array', () => {
+    const t = new Float64Array([1, 2, 3]);
+    const v = deepFreeze({ t, signals: { x: new Float64Array([4]) } });
+    expect(Object.isFrozen(v)).toBe(true);
+    expect(Object.isFrozen(v.signals)).toBe(true);
+    expect(Object.isFrozen(t)).toBe(false);
+  });
 });

@@ -77,7 +77,7 @@ Conventions for every task:
     - Write example tests that generated lines tokenize without diagnostics.
     - _Requirements: 13.1, 13.2, 13.12_
 
-- [ ] 6. Quantity parsing
+- [x] 6. Quantity parsing
   - [x] 6.1 Implement `parseQuantity` and `quantityFromTokens` in `units.ts`
     - Quantity `text` is the exact source substring. `{count}` accepts an unsigned integer. `{ratio}` accepts `%` or a bare number in [0, 1], otherwise `BAD_RANGE` stating the interval. Other bare numbers give `MISSING_UNIT`. An unknown word after a number gives `UNKNOWN_PHRASE` listing accepted units. Kind mismatch is reported by the matcher.
     - Write example tests: `rejects a force without a unit` (`MISSING_UNIT` with line and column), `0.20 s` keeps its spelling, ratio 1.5 gives `BAD_RANGE`, count `3`.
@@ -85,27 +85,27 @@ Conventions for every task:
   - [x] 6.2 Write property test for quantity SI conversion
     - **Property 4: Quantities convert to SI with the table kind and preserve text**
     - **Validates: Requirements 2.1, 2.2, 2.3, 2.12**
-  - [-] 6.3 Write property test for quantity text round trip
+  - [x] 6.3 Write property test for quantity text round trip
     - **Property 6: Quantity text round trip**
     - **Validates: Requirements 2.12**
-  - [-] 6.4 Write property test for bare numbers
+  - [x] 6.4 Write property test for bare numbers
     - **Property 7: Bare numbers are accepted only for count and in-range ratio**
     - **Validates: Requirements 2.5, 2.6, 2.7, 2.8**
 
-- [ ] 7. Range phrases
+- [x] 7. Range phrases
   - [x] 7.1 Implement `ranges.ts`
     - `parseRangePhrase` for `up to <q>`, `<q> to <q>`, `from any direction` (0 to 2π, wrap), `from behind` (3π/4 to 5π/4, wrap), `at any point in its stride` (phase 0 to 1, wrap) and a lone fixed quantity. `rangeToDimension(name, range, severity)`.
     - `BAD_RANGE` at the second quantity for min > max and mixed kinds, at the quantity for a negative force, duration, length, speed or mass, and at the second range when a slot gets two ranges.
     - Write example tests: the constants for `from behind` and `at any point in its stride`, `up to 0 N` is a valid fixed range, a `BAD_RANGE` example with line and column.
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 4.10, 4.11, 4.12_
-  - [-] 7.2 Write property test for range phrases
+  - [x] 7.2 Write property test for range phrases
     - **Property 12: Range phrases produce the right interval and Dimension**
     - **Validates: Requirements 4.1, 4.2, 4.6, 4.11, 4.12, 5.8**
-  - [~] 7.3 Write property test for invalid ranges
+  - [x] 7.3 Write property test for invalid ranges
     - **Property 13: Invalid ranges are rejected with BAD_RANGE**
     - **Validates: Requirements 4.7, 4.8, 4.9**
 
-- [ ] 8. Parser
+- [x] 8. Parser
   - [x] 8.1 Implement `parser.ts`
     - Single pass for the five patterns, ID stripped of its trailing period, optional comma before THE and after THEN, clause boundary at the next `THE <robot> SHALL`, keywords stored in upper case, robot name as written, clause spans from first to last token.
     - Diagnostics: `PATTERN_MISMATCH` (naming the closest pattern and the expected keyword or clause, second SHALL, empty clause) and `UNKNOWN_ROBOT` with allowed names in `suggestion`. No AST when any error is found.
@@ -114,7 +114,7 @@ Conventions for every task:
   - [x] 8.2 Write property test for generated valid lines
     - **Property 9: Generated valid lines parse to the expected pattern, ID and clauses**
     - **Validates: Requirements 3.1, 3.2, 3.3, 3.4, 3.5, 3.8, 3.9, 3.12, 3.14**
-  - [-] 8.3 Write property test for unknown robot names
+  - [x] 8.3 Write property test for unknown robot names
     - **Property 11: Unknown robot names are rejected and listed**
     - **Validates: Requirements 3.11, 8.6**
 
@@ -153,37 +153,37 @@ Conventions for every task:
     - **Property 27: Monitors are pure and read-only** (deep-frozen trace, bit-identical results with `Object.is`)
     - **Validates: Requirements 7.1, 7.8, 7.15, 7.16**
 
-- [ ] 10. Lexicon matcher and suggestions
+- [x] 10. Lexicon matcher and suggestions
   - [x] 10.1 Add `toWildcardSequence` and `closestTemplate` to `editDistance.ts`
     - A number with its unit, or a bare count or ratio, collapses to one wildcard of its kind. Templates compare only within their class. Ties go to the earlier template. `tooFar` is true when `distance > max(lenA, lenB) / 2`.
     - Write example tests: a quantity counts as one token, a tie picks the first template, `tooFar` omits the suggestion, an empty class gives no template.
     - _Requirements: 9.2, 9.5, 9.6, 9.7, 9.8, 9.9_
-  - [-] 10.2 Write property test for wildcard edit distance from clauses
+  - [x] 10.2 Write property test for wildcard edit distance from clauses
     - **Property 17: Edit distance matches a reference and handles wildcards** (clause-level: quantities collapse to one wildcard)
     - **Validates: Requirements 9.1, 9.2, 9.3, 9.4**
-  - [~] 10.3 Implement `matcher.ts`
+  - [x] 10.3 Implement `matcher.ts`
     - `compileTemplate` (cached per Lexicon in a `WeakMap`), `matchPerturbation` and `matchPredicate`. Exact token-for-token matching, case-insensitive literals, slots by kind. `{range:<kind>}` passes the Dimension to the template `dims`. Strip a trailing `for <duration>` or `within <duration>` into a `TemporalWrapper`.
     - Diagnostics: `UNKNOWN_PHRASE` at the first unmatched token with the closest phrase as `suggestion` (or none when too far or the class is empty, with the message saying so), a kind mismatch naming both kinds, and one diagnostic listing all phrases in Lexicon order for an ambiguous clause.
     - Write example tests: an ambiguous template pair, an empty Lexicon class, a kind mismatch, a misspelt word gives a suggestion.
     - _Requirements: 2.10, 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.9, 5.10, 5.11, 9.7, 9.8, 9.9_
-  - [~] 10.4 Write property test for template matching
+  - [x] 10.4 Write property test for template matching
     - **Property 14: Template matching binds the written values**
     - **Validates: Requirements 5.1, 5.2, 5.10, 5.11**
-  - [~] 10.5 Write property test for exact matching
+  - [x] 10.5 Write property test for exact matching
     - **Property 15: Matching is exact, never approximate**
     - **Validates: Requirements 5.4, 5.6**
-  - [~] 10.6 Write property test for kind mismatch
+  - [x] 10.6 Write property test for kind mismatch
     - **Property 8: Quantity kind mismatch is rejected with both kinds named**
     - **Validates: Requirements 2.10, 5.3, 5.7**
-  - [~] 10.7 Write property test for the suggestion
+  - [x] 10.7 Write property test for the suggestion
     - **Property 18: The suggestion is the first closest template of the right class, or absent when too far**
     - **Validates: Requirements 5.4, 9.5, 9.6, 9.7, 9.8, 9.9, 9.12**
 
-- [~] 11. Checkpoint - Ensure all tests pass
+- [x] 11. Checkpoint - Ensure all tests pass
   - Run `npx vitest --run` in `skeleton/`. Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 12. Compiler
-  - [~] 12.1 Implement `compileRequirement` in `compile.ts`
+  - [-] 12.1 Implement `compileRequirement` in `compile.ts`
     - Run tokenizer, parser, matcher and monitor builder. Return no requirement when any diagnostic is an error, and return warnings with the requirement otherwise.
     - Set `id` (AST ID, else `options.id`, else `''`), `source` (input unchanged), `pattern`, `space.dims` (trigger Dimensions in source order for event and unwanted, template `dims` otherwise), one `PerturbationCall` per matched template (Dimension name for a searched value, SI number for a fixed one), and `horizon` (wrapper plus trigger duration, or `episodeSeconds` with a 10 s default). Duplicate Dimension names give an error at the second occurrence.
     - Write example tests: one compiled example per pattern, duplicate Dimension name, WHERE with a disabled feature, `episodeSeconds` override.
@@ -202,7 +202,7 @@ Conventions for every task:
     - **Validates: Requirements 12.1, 12.2, 12.3, 12.4, 12.5, 12.7**
 
 - [ ] 13. Formatter
-  - [~] 13.1 Implement `format.ts`
+  - [-] 13.1 Implement `format.ts`
     - Print the five canonical shapes, with an optional ID followed by one space, a comma attached to the previous token, and quantity text as written. Throw an `Error` naming the field for a missing or unknown `pattern`. Never mutate the AST.
     - Write example tests: each shape, `0.20 s` stays `0.20 s`, `200 N` is never printed as `0.2 kN`, the invalid pattern throws.
     - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7, 10.11_
@@ -217,7 +217,7 @@ Conventions for every task:
     - **Validates: Requirements 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7, 10.10**
 
 - [ ] 14. Extractor
-  - [~] 14.1 Implement `extract.ts`
+  - [-] 14.1 Implement `extract.ts`
     - `extractCriteria(text)`: split on `\r?\n` with a line-start table, track `### Requirement <n>` and `#### Acceptance Criteria`, accept `<m>.` and `<m>)`, ignore `-` and `*` bullets, join indented continuation lines with one space, end at a blank line, a numbered line or a heading. Return `id`, `text`, `line`, `column` and `offset`.
     - Emit `NON_EARS_LINE` warnings for non-EARS and `FOR ALL` lines. Use `R0` plus one warning for a criterion before any requirement heading.
     - Write example tests: a Kiro-style file with a comma before THE and one without, ids, texts, lines and columns, CRLF equals LF, no acceptance heading gives an empty list.

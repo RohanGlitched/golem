@@ -12,9 +12,15 @@ export const propConfig: Parameters<unknown> = {
   verbose: true,
 };
 
-/** Recursively freezes an object graph so tests can detect mutation. Returns the same value. */
+/**
+ * Recursively freezes an object graph so tests can detect mutation. Returns the same value.
+ * Typed arrays and other ArrayBuffer views are left unfrozen (JS forbids freezing views with
+ * elements); the objects that contain them are frozen.
+ */
 export function deepFreeze<T>(value: T): T {
-  if (value === null || typeof value !== 'object' || Object.isFrozen(value)) return value;
+  if (value === null || typeof value !== 'object' || ArrayBuffer.isView(value) || Object.isFrozen(value)) {
+    return value;
+  }
   Object.freeze(value);
   for (const key of Reflect.ownKeys(value as object)) {
     deepFreeze((value as Record<PropertyKey, unknown>)[key]);
