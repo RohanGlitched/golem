@@ -52,6 +52,7 @@ const lexiconOf = (shapes: readonly TemplateShape[], extra: PerturbationTemplate
   robotNames: ['robot'],
   predicates: [stay],
   perturbations: [...shapes.map((t) => perturbationOf(t)), ...extra],
+  features: ['suction cup'],
 });
 
 const arbShapes: fc.Arbitrary<TemplateShape[]> = fc

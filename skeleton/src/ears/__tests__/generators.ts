@@ -87,6 +87,17 @@ const FILLER_WORDS = [
 ];
 const ROBOT_WORDS = ['robot', 'golem', 'G1', 'walker', 'arm'];
 const FEATURE_WORDS = ['stairs', 'payload', 'camera', 'gripper', 'cooling', 'lights', 'battery'];
+/** Every feature arbFeature can write (ordered selections of 1 to 3 distinct words); arbLexicon declares them all. */
+export const ALL_FEATURES: readonly string[] = (() => {
+  const out: string[] = [];
+  const grow = (prefix: string[]): void => {
+    if (prefix.length > 0) out.push(prefix.join(' '));
+    if (prefix.length === 3) return;
+    for (const w of FEATURE_WORDS) if (!prefix.includes(w)) grow([...prefix, w]);
+  };
+  grow([]);
+  return out;
+})();
 
 const PERT_SLOTS = [
   'range:force', 'range:length', 'range:speed', 'range:mass', 'range:angle', 'range:duration',
@@ -163,7 +174,7 @@ export const arbLexicon: fc.Arbitrary<Lexicon> = fc
     arbTemplates(PERT_FIRST_WORDS, arbPerturbation),
     arbTemplates(PRED_FIRST_WORDS, arbPredicate),
   )
-  .map(([robotNames, perturbations, predicates]) => ({ robotNames, perturbations, predicates }));
+  .map(([robotNames, perturbations, predicates]) => ({ robotNames, perturbations, predicates, features: [...ALL_FEATURES] }));
 
 // ---------- valid lines ----------
 

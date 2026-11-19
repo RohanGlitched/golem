@@ -75,6 +75,7 @@ export interface Lexicon {
   predicates: PredicateTemplate[];
   perturbations: PerturbationTemplate[];
   episodeSeconds?: number;
+  features?: string[];
 }
 
 export interface Controller { step(ctx: SimContext, t: number): void }

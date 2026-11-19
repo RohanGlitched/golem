@@ -5,6 +5,7 @@ import { hasError, makeDiagnostic, sortDiagnostics, type Diagnostic } from './di
 import { extractCriteria, type RawCriterion } from './extract.js';
 import { matchPerturbation, matchPredicate, type BoundClause } from './matcher.js';
 import { buildDimensions } from './dimensions.js';
+import { tokenEditDistance } from './editDistance.js';
 import { buildMonitor } from './monitor.js';
 import { parse } from './parser.js';
 import { kiroText, tokenize } from './tokenizer.js';
@@ -23,6 +24,33 @@ export const DEFAULT_EPISODE_SECONDS = 10;
 
 const normaliseFeature = (s: string): string => s.trim().replace(/\s+/g, ' ').toLowerCase();
 
+
+/** UNKNOWN_PHRASE when `wanted` (normalised) is not a declared feature, with the closest one. */
+function featureDiagnostic(condition: Clause, wanted: string, features: readonly string[]): Diagnostic | undefined {
+  const pos = condition.span;
+  if (features.length === 0) {
+    return makeDiagnostic('UNKNOWN_PHRASE', `The Lexicon declares no features, so '${condition.text}' cannot match.`, pos);
+  }
+  if (features.some((f) => normaliseFeature(f) === wanted)) return undefined;
+  const words = (s: string) => normaliseFeature(s).split(' ').map((w) => ({ word: w }));
+  const a = words(wanted);
+  let best: string | undefined;
+  let bestD = Infinity;
+  let bestLen = 0;
+  for (const f of features) {
+    const b = words(f);
+    const d = tokenEditDistance(a, b);
+    if (d < bestD) { best = f; bestD = d; bestLen = Math.max(a.length, b.length); }
+  }
+  const close = best !== undefined && bestD <= bestLen / 2;
+  const hint = close ? ` Did you mean "${best}"?` : '';
+  return makeDiagnostic(
+    'UNKNOWN_PHRASE',
+    `Unknown feature '${condition.text}'.${hint} Declared features: ${features.join(', ')}`,
+    pos,
+    close ? { suggestion: best! } : {},
+  );
+}
 
 /** Duration the trigger itself lasts (fixed value, or the top of a range), or 0. */
 function triggerDuration(bound: BoundClause<PerturbationTemplate>): number {
@@ -154,8 +182,11 @@ export function compileRequirement(
     diagnostics.push(...m.diagnostics);
     stateBound = m.bound;
   } else if (pattern === 'optional' && condition) {
-    // The feature clause is a feature name; it is enabled only when listed in the options.
+    // The feature clause must name a feature the Lexicon declares; it is enabled only when
+    // listed in the options.
     const wanted = normaliseFeature(condition.text);
+    const unknown = featureDiagnostic(condition, wanted, lexicon.features ?? []);
+    if (unknown) diagnostics.push(unknown);
     const enabled = (options.enabledFeatures ?? []).some((f) => normaliseFeature(f) === wanted);
     disabledFeature = !enabled;
   }

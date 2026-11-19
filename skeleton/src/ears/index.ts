@@ -8,6 +8,8 @@ export { parse } from './parser.js';
 export { format } from './format.js';
 export { parseQuantity, toSI, fromSI } from './units.js';
 export { tokenEditDistance } from './editDistance.js';
+export { encodeRobustness, decodeRobustness, monitorResultToJSON, monitorResultFromJSON } from './serialize.js';
+export type { EncodedNumber, EncodedMonitorResult } from './serialize.js';
 
 export type { Diagnostic, DiagnosticKind } from './diagnostics.js';
 export type { ParsedRequirement, Clause } from './ast.js';

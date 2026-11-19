@@ -81,6 +81,8 @@ export interface Lexicon {
   perturbations: PerturbationTemplate[];
   /** Optional episode length in seconds (default 10). */
   episodeSeconds?: number;
+  /** Feature names a WHERE clause may name, such as "the payload kit is fitted". */
+  features?: string[];
 }
 
 // ---------- ears-internal ----------

@@ -34,7 +34,7 @@ const lit: PredicateTemplate = {
 };
 
 const lex = (extra: Partial<Lexicon> = {}): Lexicon => ({
-  robotNames: ['robot'], predicates: [upright, lit], perturbations: [push, dup], ...extra,
+  robotNames: ['robot'], predicates: [upright, lit], perturbations: [push, dup], features: ['suction cup'], ...extra,
 });
 
 const trace = (h: number): Trace => ({
