@@ -465,13 +465,13 @@ Conventions for every task:
     - Testing Library example tests: file order, empty message text, disabled-pool message, status change announced.
     - _Requirements: 1.7, 15.1, 15.5, 15.6, 15.9, 15.10, 18.11, 19.2, 19.4, 26.10_
 
-- [ ] 15. Verdict panel
-  - [ ] 15.1 Implement `verdict/number-tween.tsx`
+- [x] 15. Verdict panel
+  - [x] 15.1 Implement `verdict/number-tween.tsx`
     - A React number display using `TweenLoop` (250 ms ease-out, once per frame reads from the store), B612 Mono Tabular_Figures, a visual copy marked `aria-hidden` plus a visually hidden copy with the final value, `aria-label` that names the number.
     - Testing Library example tests: final value present in the DOM text immediately, Reduced_Motion shows the value at once.
     - _Requirements: 23.6, 23.7, 23.8, 23.9, 23.12, 23.15_
 
-  - [ ] 15.2 Implement `verdict/verdict-panel.tsx`
+  - [x] 15.2 Implement `verdict/verdict-panel.tsx`
     - A `region` with an accessible name showing the rows from `verdict-rows`, live counters while a run is active, the Aura_Summary text line, the held sentence with the Budget, and the stale marker.
     - Testing Library example tests: rows equal the `Verdict` after formatting, the Aura_Summary is a visible text line, no "proved" text.
     - _Requirements: 14.10, 19.6, 23.1, 23.10, 23.11, 23.13, 26.10_
