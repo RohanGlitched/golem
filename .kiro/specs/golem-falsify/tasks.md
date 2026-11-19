@@ -40,50 +40,50 @@ Test rules for every task (`testing.md`):
     - **Property 9: Normal CDF and quantile are consistent, truncated draws are monotone in `u`**
     - **Validates: Requirements 5.3**
 
-- [ ] 4. Wrapped normal and circular statistics
-  - [~] 4.1 Implement the wrapped draw and the circular fit in `cem.ts`
+- [x] 4. Wrapped normal and circular statistics
+  - [x] 4.1 Implement the wrapped draw and the circular fit in `cem.ts`
     - Add `drawWrappedNormal` with the floating-point guard to `[min, max)`, `fitCircular` (atan2 mean, resultant length `R`, `uniformCircle` fallback when `R < 1e-3`, sigma floor 1% of width), and the circular blend helper used by smoothing.
     - Write example tests for elites at 358 deg and 2 deg (mean near 0 deg, not 180 deg), `r === width` mapping to `min`, and `R < 1e-3` giving `uniformCircle`.
     - _Requirements: 5.4, 5.8_
-  - [~] 4.2 Write property test for circular fit and seam handling
+  - [x] 4.2 Write property test for circular fit and seam handling
     - **Property 8: Circular fit respects the seam**
     - **Validates: Requirements 5.4, 5.8**
 
-- [ ] 5. Latin hypercube sampler
-  - [~] 5.1 Implement `latinHypercube`
+- [x] 5. Latin hypercube sampler
+  - [x] 5.1 Implement `latinHypercube`
     - Per-dimension streams from `(searchSeed, generation, dimension name)`, Fisher-Yates strata, wrap guard, stratum repair, fixed dimensions with no draws, key order of `space.dims`.
     - Reject invalid `n` and invalid bounds with errors that name the value or dimension. `n = 0` returns `[]`.
     - Write example tests: `n = 0`, `n = -1`, `n = 1.5`, `NaN` bound, all-fixed space, wrap seam, `max` never returned for wrap dimensions.
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.10, 4.11, 4.12_
-  - [~] 5.2 Write property test for stratum coverage
+  - [x] 5.2 Write property test for stratum coverage
     - **Property 1: LHS stratum coverage**
     - **Validates: Requirements 4.1, 4.2, 4.7, 4.10, 21.5**
-  - [~] 5.3 Write property test for sampling ranges (LHS side)
+  - [x] 5.3 Write property test for sampling ranges (LHS side)
     - **Property 2: Sampling ranges, wrap-aware** (LHS part: values in `[min, max]`, wrap dimensions in `[min, max)`)
     - **Validates: Requirements 4.3, 4.4, 21.6**
-  - [~] 5.4 Write property test for LHS determinism and per-dimension independence
+  - [x] 5.4 Write property test for LHS determinism and per-dimension independence
     - **Property 3: LHS determinism and per-dimension independence**
     - **Validates: Requirements 4.5, 4.6, 4.7, 21.9**
 
-- [ ] 6. Failure-rate bound
-  - [~] 6.1 Implement `lnGamma`, `regularizedIncBeta`, `clopperPearsonUpper` and `failureRateUpper95`
+- [x] 6. Failure-rate bound
+  - [x] 6.1 Implement `lnGamma`, `regularizedIncBeta`, `clopperPearsonUpper` and `failureRateUpper95`
     - Lanczos log-gamma, modified Lentz continued fraction with the symmetry switch, bisection for the 0.95 quantile, rule of three for `k = 0`, `1` for `k = n`, `undefined` for `n = 0`.
     - Write example tests against committed reference values from `qbeta(0.95, k+1, n-k)` within 1e-6, and `n = 1`, `n = 10000`, `k = n - 1`.
     - _Requirements: 2.6, 2.7, 2.10_
-  - [~] 6.2 Write property test for bound validity
+  - [x] 6.2 Write property test for bound validity
     - **Property 21: Failure-rate bound is valid**
     - **Validates: Requirements 2.6, 2.7, 2.10, 21.12**
-  - [~] 6.3 Write property test for monotonicity and closed forms
+  - [x] 6.3 Write property test for monotonicity and closed forms
     - **Property 22: Failure-rate bound is monotone and matches closed forms**
     - **Validates: Requirements 2.6, 2.7, 21.13**
 
-- [ ] 7. Budget validation and accounting
-  - [~] 7.1 Implement `BudgetClock` and budget validation
+- [x] 7. Budget validation and accounting
+  - [x] 7.1 Implement `BudgetClock` and budget validation
     - Validation errors name the field and value (both missing fields, non-integer `maxTrials`, fractions outside [0, 1], fractions summing above 1 with both fractions and their sum in the message).
     - Phase quotas with Phase 1 carry-forward into Phase 2, no carry from Phase 2, `grant`, injectable clock, wall-time checks before each generation and shrink trial.
     - Write example tests for each rejection, the 40% default split, carry-forward, last-generation shrink to the grant, and the invariant `n0 + n1 + n2 + shrink <= T`.
     - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7, 8.8, 8.9, 8.10, 8.11, 8.12_
-  - [~] 7.2 Write property test for budget and fraction validation
+  - [x] 7.2 Write property test for budget and fraction validation
     - **Property 25: Budget validation and fractions**
     - **Validates: Requirements 8.1, 8.6, 8.7, 8.9, 4.11, 4.12**
 
