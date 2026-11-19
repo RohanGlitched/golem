@@ -77,7 +77,7 @@ describe('compileRequirement', () => {
   it('compiles a ubiquitous requirement with an empty id and the 10 s default horizon', () => {
     const r = compileRequirement('THE robot SHALL stay upright', lex());
     expect(r.diagnostics).toEqual([]);
-    expect(r.requirement).toMatchObject({ id: '', pattern: 'ubiquitous', horizon: 10 });
+    expect([r.requirement!.id, r.requirement!.pattern, r.requirement!.horizon]).toEqual(['', 'ubiquitous', 10]);
     expect(r.requirement!.space.dims).toEqual([]);
     expect(r.requirement!.perturbations).toEqual([]);
   });
