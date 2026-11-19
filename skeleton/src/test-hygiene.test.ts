@@ -29,4 +29,15 @@ describe('test hygiene', () => {
     }
     expect(bad).toEqual([]);
   });
+
+  it('removes temp directories in pool tests only through removeTempDir, which retries on Windows', () => {
+    const bad: string[] = [];
+    for (const f of filesUnder(join(SRC, 'pool'), isTestOrKit)) {
+      if (f.endsWith('temp-dir.testkit.ts')) continue;
+      readFileSync(f, 'utf8').split('\n').forEach((line, i) => {
+        if (/\brmSync\s*\(/.test(line)) bad.push(`${relative(SRC, f)}:${i + 1}`);
+      });
+    }
+    expect(bad).toEqual([]);
+  });
 });

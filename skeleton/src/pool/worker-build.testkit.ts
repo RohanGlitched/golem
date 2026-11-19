@@ -1,10 +1,11 @@
 // Test-only: compiles the worker entry (and everything it imports) to plain ESM so a real
 // worker_threads Worker can run it from the TypeScript sources. Output goes under
 // skeleton/node_modules/.cache so bare imports such as '@mujoco/mujoco' still resolve.
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import ts from 'typescript';
+import { removeTempDir } from './temp-dir.testkit.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const srcRoot = resolve(here, '..');
@@ -43,7 +44,7 @@ export function buildWorkerEntry(extraRoots: string[] = []): WorkerBuild {
     entry: pathToFileURL(join(outDir, 'pool', 'node-entry.js')),
     url: (rel) => pathToFileURL(join(outDir, rel)),
     outDir,
-    dispose: () => rmSync(outDir, { recursive: true, force: true }),
+    dispose: () => removeTempDir(outDir),
   };
 }
 

@@ -18,7 +18,7 @@ Rules for every task:
   - Split line 33 of `beta.property.test.ts`; check that Property 22 passes with the assertion live.
   - _Bugfix: 3.2–3.4_
 
-- [ ] 3. Retrying temp-directory removal (defect 6)
+- [x] 3. Retrying temp-directory removal (defect 6)
   - Test: the hygiene test fails on a direct `rmSync` in pool tests and testkits.
   - Add `removeTempDir` to a pool testkit with `maxRetries: 10, retryDelay: 50`; use it at every call site.
   - _Bugfix: 6.2–6.4_
