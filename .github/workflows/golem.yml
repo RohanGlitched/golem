@@ -48,6 +48,7 @@ jobs:
       - name: Build and pack the skeleton
         run: |
           npm run build -w skeleton
+          mkdir -p "$RUNNER_TEMP/pack"
           npm pack -w skeleton --pack-destination "$RUNNER_TEMP/pack"
       - name: Install the tarball in a fresh project and run init, check, test, gate
         run: node .github/scripts/starter-smoke.mjs "$RUNNER_TEMP/pack"
