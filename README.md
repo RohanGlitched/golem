@@ -47,7 +47,7 @@ Requirement 1.3 says the G1 survives a 100 N push from any direction. On Unitree
 | Weakest push survived | 62.5 N (pushed from the left, 80°) | **101.6 N** (90°) |
 | Directions that hold 100 N | 34 of 36 | **36 of 36** |
 | Mean of the weakest push per direction | 174.6 N | 185.4 N |
-| Strongest direction | 240.6 N | 231.3 N (it gave up some headroom) |
+| Largest loss in any one direction | | −23.4 N at 340° (front right): the reflex trades a little headroom there for the sides |
 
 The agent's session log is in [`evidence/results/tuner/`](evidence/results/tuner); the two maps are in [`evidence/results/`](evidence/results). The reflex ships as a switch (`GOLEM_REFLEX=kiro`); the default stays Unitree's policy exactly.
 
@@ -78,7 +78,7 @@ The same pack ships as a **Kiro Power** (`skeleton/power`) and a **Kiro Crew app
 | App | Robot | What GOLEM found |
 |---|---|---|
 | [`apps/stagger`](apps/stagger) | Unitree G1 humanoid running Unitree's published walking policy (it matches Unitree's own reference run to 2.5 µm) | It falls from **62.5 N** pushed from its left at 20% of its stride, yet holds **240 N** from the front right: 4,860 trials, all in `evidence/`. With Kiro's reflex the weakest direction rises to **101.6 N**. |
-| [`apps/candy`](apps/candy) | Franka Panda with a suction cup, sorting Halloween candy while trick-or-treaters reach in | 57 of 228 trials break "keep every link at least 0.10 m from the hand". The link closest to the hand is the **wrist** (link 7) in 48 of them and the cup in 9: the first safety controller watched only the cup. |
+| [`apps/candy`](apps/candy) | Franka Panda with a suction cup, sorting Halloween candy while trick-or-treaters reach in | 57 of 228 trials break "keep every link at least 0.10 m from the hand". Its speed-and-separation controller slows and stops the arm by the cup's distance to the hand, and stops too late for the **wrist**: link 7 is the closest link in 48 of the breaks, while the cup is still about 0.14 m away in most of them. |
 
 ## Evidence
 
@@ -86,7 +86,7 @@ Every number here comes from committed raw data in [`evidence/`](evidence), usin
 
 ## How Kiro built GOLEM
 
-Kiro CLI did the building: 15 specs (including 3 bugfix specs written from independent audits in [`docs/reviews/`](docs/reviews)), 224 requirements, 2,273 EARS acceptance criteria, 293 correctness properties, 663 completed tasks and 461 property-test assertions. The root [`.kiro/`](.kiro) holds the steering, specs, hooks, agents and MCP config used to build it. The full account is on the site's *How Kiro built this* page.
+Kiro CLI did the building: 15 specs (including 3 bugfix specs written from independent audits in [`docs/reviews/`](docs/reviews)), 224 requirements, 2,273 EARS acceptance criteria, 293 correctness properties, 663 completed tasks and 461 property-test assertions. The root [`.kiro/`](.kiro) holds the steering, specs, hooks, agents and MCP config used to build it. The full account is on the site's [How Kiro built it](https://d23v187fnxad7l.cloudfront.net/how-kiro/) page, and the raw log of every Kiro session is in [`evidence/kiro-sessions/`](evidence/kiro-sessions).
 
 ## Run it locally
 

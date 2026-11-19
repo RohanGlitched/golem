@@ -3,6 +3,11 @@ import { initTheme } from './theme';
 
 initTheme();
 
+// a hairline under the header once the page has scrolled
+const head = document.querySelector('.site-head');
+const onScroll = (): void => { head?.classList.toggle('scrolled', window.scrollY > 4); };
+window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
+
 document.addEventListener('click', (e) => {
   const btn = (e.target as Element | null)?.closest<HTMLButtonElement>('button.copy');
   if (!btn) return;

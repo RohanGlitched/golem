@@ -71,6 +71,8 @@ function ringsSection(d: SiteData): string {
     return `<div class="rings wide">${left}<figure class="ring-fig"><figcaption><b>After</b>The same map with Kiro’s reflex is still running. This half appears when its file is committed.</figcaption></figure></div>`;
   }
   const after = ringStats(d.mapKiro.summary.summary, LINE_N);
+  const byDir = new Map(d.mapKiro.summary.summary.map((x) => [x.dirDeg, x.minHeldN]));
+  const loss = d.map.summary.map((x) => ({ dir: x.dirDeg, d: (byDir.get(x.dirDeg) ?? x.minHeldN) - x.minHeldN })).sort((p, q) => p.d - q.d)[0]!;
   const right = `<figure class="ring-fig">${ringSvg(d.mapKiro.summary.summary, { id: 'ring-after', line: l13, lineN: LINE_N, after: true, label: 'After: the same policy with the reflex Kiro wrote' })}
 <figcaption><b>After</b>With the reflex Kiro’s agent wrote. It holds ${LINE_N} N from ${after.holding} of ${after.dirs} directions. Weakest: ${fmt(after.weakest.minHeldN)} N from ${sideName(after.weakest.dirDeg)}.</figcaption></figure>`;
   return `<div class="rings wide">${left}${right}</div>
@@ -78,7 +80,7 @@ function ringsSection(d: SiteData): string {
 <div class="stat"><b class="${after.weakest.minHeldN > before.weakest.minHeldN ? 'hold' : 'break'}">${fmt(before.weakest.minHeldN)} → ${fmt(after.weakest.minHeldN)} N</b><span>The weakest push it survives, over ${before.dirs} directions, 5 stride phases and 3 seeds.</span></div>
 <div class="stat"><b>${before.holding} → ${after.holding}</b><span>Directions out of ${before.dirs} that hold ${LINE_N} N, the force in requirement 1.3.</span></div>
 <div class="stat"><b>${fmt(before.meanMin)} → ${fmt(after.meanMin)} N</b><span>Mean over directions of the weakest push survived.</span></div>
-<div class="stat"><b class="${after.strongest.minHeldN >= before.strongest.minHeldN ? 'hold' : 'break'}">${fmt(before.strongest.minHeldN)} → ${fmt(after.strongest.minHeldN)} N</b><span>The strongest direction${after.strongest.minHeldN < before.strongest.minHeldN ? ' got a little weaker: the reflex trades some headroom from behind for the sides' : ''}.</span></div>
+<div class="stat"><b class="break">${fmt(loss.d)} N at ${loss.dir}°</b><span>The largest loss in any one direction, a push from ${sideName(loss.dir)}. The reflex trades a little headroom there for the sides.</span></div>
 </div>`;
 }
 
@@ -93,27 +95,37 @@ export function homePage(d: SiteData): PageSpec {
   const budget = d.graded.meta.budget;
   const k = d.kiro.totals;
   const hero = d.hero;
-  const heroLine = `WHEN the pelvis is pushed with up to ${hero.force} N for 0.2 s from any direction at any point in its stride, THE robot SHALL stay upright for 3 s`;
+  // The hero inscribes requirement 1.3 exactly, and replays each map direction's hardest recorded cell at its force.
+  const heroLine = (g1?.lines.find((l) => l.id === '1.3')?.source ?? '').replace(' THE robot', ', THE robot');
   const fell = hero.fellDeg.map((x) => `${x}°`).join(' and ');
+  const kiroHeld = hero.kiroFellDeg !== undefined && hero.kiroFellDeg.length === 0;
   const caps = [
-    { at: 0, k: 'A requirement for a Unitree G1 humanoid', h: 'This sentence is a robot’s requirement.', p: 'It is written in EARS, the format Kiro uses for acceptance criteria. GOLEM reads it as a test: a push, a duration, every direction, and a margin.' },
-    { at: 0.16, k: 'golem-spec compiles it to physics', h: `${hero.dirs} ghosts, one per direction.`, p: `Each ghost is one MuJoCo trial of Unitree’s published walking policy. Each is shoved with ${hero.force} N from a different side, ${360 / hero.dirs}° apart.` },
-    { at: 0.45, k: 'A counterexample', h: `Pushed from its left, the G1 falls.`, p: `${hero.fellDeg.length} of ${hero.dirs} directions break the sentence (${fell}). GOLEM keeps the mildest failing push as a pinned seed that runs first next time.` },
-    { at: 0.78, k: 'The verdict', h: 'Where the ring cracks, the sentence is false.', p: 'A Kiro Stop hook runs golem gate. While any sentence is cracked, Kiro’s agent cannot call the task done.' },
+    { at: 0, k: 'Requirement 1.3 for a Unitree G1 humanoid', h: 'This sentence is a robot’s requirement.', p: `Kiro writes acceptance criteria like this in EARS. GOLEM reads it as a test: ${hero.force} N for 0.2 s, from every direction, at any point in the stride.` },
+    { at: 0.16, k: 'golem-spec compiles it to physics', h: `${hero.dirs} ghosts, one per direction.`, p: `Each ghost is one MuJoCo trial of Unitree’s published walking policy, shoved with ${hero.force} N from its own side at that side’s weakest recorded moment.` },
+    { at: 0.45, k: 'A counterexample', h: 'Pushed from its left, the G1 falls.', p: `${hero.fellDeg.length} of ${hero.dirs} directions break the sentence (${fell}). GOLEM keeps the mildest failing push as a pinned seed that runs first next time.` },
+    { at: 0.78, k: 'The verdict', h: 'Where the ring cracks, the sentence is false.', p: `A Kiro Stop hook runs golem gate and blocks the agent while a line is cracked.${kiroHeld ? ' Now switch on the reflex Kiro wrote.' : ''}` },
+  ];
+  const capsKiro = [
+    { at: 0, k: 'Requirement 1.3, with Kiro’s reflex', h: 'The same sentence, the same 36 shoves.', p: 'Same scenarios and seeds. The one change: the balance reflex Kiro’s golem-tuner agent wrote under the gate.' },
+    { at: 0.16, k: 'Unitree’s policy + Kiro’s reflex', h: `${hero.dirs} ghosts again.`, p: 'The reflex adds a sideways step when the pelvis suddenly moves sideways, so the robot walks with a push instead of braking against it.' },
+    { at: 0.45, k: kiroHeld ? 'No counterexample' : 'A counterexample', h: kiroHeld ? 'Pushed from its left, it steps and stays up.' : 'It still falls.', p: kiroHeld ? `All ${hero.dirs} directions hold, including ${fell}.` : `${hero.kiroFellDeg?.length ?? 0} directions still break.` },
+    { at: 0.78, k: 'The verdict', h: kiroHeld ? 'The ring is whole: 1.3 holds.' : 'The ring is still cracked.', p: 'Re-measured over 4,860 trials, the weakest push it survives rose from 62.5 N to 101.6 N.' },
   ];
   const c0 = caps[0]!;
   const body = `
+<h1 class="sr-only">GOLEM: robot requirements that run as physics tests</h1>
 <section class="circle-scroll" data-circle-scroll aria-label="The Summoning Circle: a recorded test campaign of the G1, replayed as you scroll">
-<div class="circle-stage" data-circle data-line="${esc(heroLine)}" data-caps="${esc(JSON.stringify(caps))}">
-<div class="circle-fallback" style="background-image:url(/hero/poster.jpg)" role="img" aria-label="A clay Unitree G1 in a ring of text, with ghost copies of it pushed outward; two fall, and the letters crack red on that side."></div>
-<div class="circle-cap" data-circle-cap aria-live="polite"><span class="k">${esc(c0.k)}</span><h1>${esc(c0.h)}</h1><p>${esc(c0.p)}</p></div>
+<div class="circle-stage" data-circle data-line="${esc(heroLine)}" data-caps="${esc(JSON.stringify(caps))}" data-caps-kiro="${esc(JSON.stringify(capsKiro))}">
+<div class="circle-fallback" style="background-image:url(/hero/poster.jpg)" role="img" aria-label="A clay Unitree G1 in a ring of text, with ghost copies of it pushed outward; the ones pushed from its left fall, and the floor cracks through the letters."></div>
+<div class="circle-cap" data-circle-cap aria-live="polite"><span class="k">${esc(c0.k)}</span><p class="cap-h">${esc(c0.h)}</p><p class="cap-p">${esc(c0.p)}</p></div>
 <div class="circle-dots" aria-hidden="true">${caps.map((_, i) => `<i${i === 0 ? ' class="on"' : ''}></i>`).join('')}</div>
 <div class="circle-hint" aria-hidden="true">Scroll to run the test</div>
+${hero.kiroFellDeg !== undefined ? `<div class="circle-toggle" role="group" aria-label="Controller"><button type="button" data-pack="pack" aria-pressed="true">Unitree’s policy</button><button type="button" data-pack="pack-kiro" aria-pressed="false">+ Kiro’s reflex</button></div>` : ''}
 </div>
 </section>
 
-<p class="oneline"><em>GOLEM</em> is an npm package that turns the sentences in a Kiro spec into physics tests, and stops Kiro’s agent from saying “done” until every sentence holds.</p>
-<p class="lede">The robot in the circle is a simulated Unitree G1. The ring is the sentence above, written on the floor. The ghosts are real recorded trials. Where pushes from one side knock the robot over, the letters on that side crack.</p>
+<p class="oneline"><em>GOLEM</em> is an npm package that turns the sentences in a Kiro spec into physics tests, and blocks Kiro’s agent when it tries to finish with any sentence still false.</p>
+<p class="lede">The robot in the circle is a simulated Unitree G1. The ring is requirement 1.3, written on the floor. The ghosts are real recorded trials, the hardest one the stability map found in each direction. Where a ghost falls, the floor cracks through the sentence. The switch replays the same shoves with the reflex Kiro wrote.</p>
 <ol class="try-steps" aria-label="Three ways in">
 <li><b>Install it:</b> <code>npm i -D golem-spec</code>, then <code>npx golem-spec init</code> adds the hooks, agents and MCP server to <code>.kiro/</code>.</li>
 <li><b>Shove the robot yourself:</b> the <a href="#studio">live studio</a> below runs the same physics in your browser.</li>
@@ -182,13 +194,13 @@ ${ringsSection(d)}
 <li><b>This is simulation.</b> MuJoCo models a G1 and a Panda. No real robot ran any of these tests.</li>
 <li><b>One policy.</b> The G1 results are for Unitree’s published walking policy, with and without Kiro’s reflex.</li>
 <li><b>Guided search did not beat random sampling</b> on the G1 lines at budget ${budget}. It does on a synthetic narrow region. <a href="/evidence/#benchmark">Both results are on the evidence page.</a></li>
-<li><b>The hero is a recording.</b> The circle replays ${hero.dirs} trials recorded at ${hero.force} N with one seed each; the stability map uses three seeds and five stride phases, so its numbers are stricter.</li>
+<li><b>The hero is a recording.</b> No physics runs in the circle: it replays ${hero.dirs} trials recorded at ${hero.force} N, one per direction, each at the stride phase and seed of that direction’s weakest cell in the stability map. The live studio runs real physics.</li>
 </ul>
 
 <h2 id="start">Break the golem, then fix it</h2>
 <p class="lede">Shove the G1, read the sentence that broke, then hand that failure to an agent.</p>
 <div class="btn-row"><a class="btn primary" href="/stagger/">Shove the G1</a><a class="btn" href="https://www.npmjs.com/package/golem-spec">Install golem-spec</a><a class="btn" href="/evidence/">Read the evidence</a><a class="btn" href="${REPO_URL}" rel="noopener">View the source</a></div>
-<p class="small muted">The requirement the first figure shows reads: ${earsHtml(g1?.lines.find((l) => l.id === '1.2')?.source ?? '')}</p>
+<p class="small muted">The requirement in the circle, line 1.3 of <code>apps/stagger/.kiro/specs/g1-walking/requirements.md</code>: ${earsHtml(g1?.lines.find((l) => l.id === '1.3')?.source ?? '')}</p>
 `;
   return {
     id: 'home', path: '/',

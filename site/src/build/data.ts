@@ -73,7 +73,7 @@ export interface SiteData {
   /** The same map with Kiro's step-into-the-push reflex on top of Unitree's policy (GOLEM_REFLEX=kiro), when it has run. */
   mapKiro: { cells: MapCell[]; summary: MapSummary } | undefined;
   /** The recorded campaign the home hero replays (site/public/hero/pack.json): which of its directions fell. */
-  hero: { force: number; phase: number; dirs: number; fellDeg: number[] };
+  hero: { force: number; dirs: number; fellDeg: number[]; kiroFellDeg: number[] | undefined };
   falsifier: FalsifierSummary; graded: FalsifierSummary; graded256: FalsifierSummary | undefined;
   agentGate: AgentGateData; candy: CandyData; kiro: KiroData; changelog: ChangelogEntry[]; lexicons: LexiconRef[];
   reportMd: string; transcriptMd: string; preregMd: string;
@@ -158,10 +158,15 @@ export function loadSiteData(root: string = REPO_ROOT): SiteData {
     mapKiro = { cells, summary: kiroSummary };
   }
 
-  const pack = json<{ force: number; phase: number; trials: { idle?: boolean; angleDeg: number; fell: boolean }[] }>('site/public/hero/pack.json');
+  type HeroPack = { force: number; trials: { idle?: boolean; angleDeg: number; fell: boolean }[] };
+  const pack = json<HeroPack>('site/public/hero/pack.json');
   const pushes = pack.trials.filter((t) => !t.idle);
-  need(pushes.length > 0, 'site/public/hero/pack.json', 'no recorded pushes. Run: npx tsx site/scripts/hero-pack.mts 150');
-  const hero = { force: pack.force, phase: pack.phase, dirs: pushes.length, fellDeg: pushes.filter((t) => t.fell).map((t) => t.angleDeg) };
+  need(pushes.length > 0, 'site/public/hero/pack.json', 'no recorded pushes. Run: npx tsx site/scripts/hero-pack.mts 100');
+  const kiroPack = optionalJson<HeroPack>(root, 'site/public/hero/pack-kiro.json');
+  const hero = {
+    force: pack.force, dirs: pushes.length, fellDeg: pushes.filter((t) => t.fell).map((t) => t.angleDeg),
+    kiroFellDeg: kiroPack?.trials.filter((t) => !t.idle && t.fell).map((t) => t.angleDeg),
+  };
 
   const falsifier = json<FalsifierSummary>('evidence/results/falsifier.summary.json');
   validateFalsifier(falsifier, 'evidence/results/falsifier.summary.json');

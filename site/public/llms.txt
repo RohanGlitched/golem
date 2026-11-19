@@ -12,8 +12,8 @@
 ## Key measured facts (all from committed raw data in the repository's evidence/ folder)
 - Unitree's published G1 walking policy falls from a 0.2 s pelvis push of 62.5 N from its left (80°, counterclockwise from the heading) at 20% of its stride, but holds 240.6 N from the front right (340°). 36 directions x 5 stride phases x 3 seeds, 4,860 trials.
 - Kiro's golem-tuner agent wrote a lateral step-into-the-push reflex under GOLEM's Stop gate. With it, the same 4,860-trial map gives a weakest direction of 101.6 N (was 62.5 N) and 36 of 36 directions hold requirement 1.3's 100 N (was 34 of 36). The strongest direction fell from 240.6 N to 231.3 N.
-- The home page hero replays 24 recorded trials at 150 N (one seed each); the G1 falls when pushed from 90° and 105°.
-- The candy arm's first safety controller watched only the suction cup; 57 of 228 trials break the 0.10 m separation line, and the link closest to the hand is the wrist (link7) in 48 of them and the cup in 9.
+- The home page hero inscribes requirement 1.3 (100 N from any direction) and replays 36 recorded trials, one per direction, each at that direction's weakest cell of the stability map. On Unitree's policy the G1 falls at 80° and 90°; with Kiro's reflex all 36 hold (a switch in the hero replays both).
+- Candy arm (Franka Panda): 57 of 228 trials break "keep every link at least 0.10 m from the hand". The speed-and-separation controller (SSM v1) slows and stops the arm by the suction cup's distance to the hand and stops too late for the wrist: link7 is the closest link in 48 of the breaks, the cup in 9.
 - Guided search vs random sampling on the G1's requirements: no significant difference at budget 96; at budget 256 on the rarest failure, guided found it in a median 93 trials vs 158.5 (p = 0.26, not significant). On a synthetic 0.11% failure region guided search found it 30/30 vs random 7/30.
 - The G1 port matches Unitree's own Python reference run to within 2.5 micrometres after 2 s.
 

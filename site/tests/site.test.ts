@@ -117,7 +117,8 @@ describe.skipIf(!existsSync(path.join(dist, 'index.html')))('built site', () => 
         if (/^(https?:|mailto:|#|data:)/.test(url)) continue;
         expect(resolves(url), `${path.relative(dist, f)} -> ${url}`).toBe(true);
       }
-      for (const m of html.matchAll(/<(?:script|link|img)[^>]+(?:src|href)="(https?:[^"]+)"/g)) {
+      // rel="canonical" names the page's own public URL; it loads nothing
+      for (const m of html.replace(/<link rel="canonical"[^>]*>/g, '').matchAll(/<(?:script|link|img)[^>]+(?:src|href)="(https?:[^"]+)"/g)) {
         expect.fail(`${path.relative(dist, f)} loads a foreign resource ${m[1]}`);
       }
     }

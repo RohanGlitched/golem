@@ -4,6 +4,7 @@ import { esc } from './html';
 
 export const REPO_URL = 'https://github.com/RohanGlitched/golem';
 export const SITE_NAME = 'GOLEM';
+export const SITE_URL = 'https://d23v187fnxad7l.cloudfront.net';
 
 export interface PageSpec {
   id: string;
@@ -75,7 +76,9 @@ export function renderDocument(p: PageSpec, changelog: ChangelogEntry[]): string
 <meta property="og:site_name" content="${SITE_NAME}">
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(p.description)}">
-<meta property="og:image" content="/og.png">
+<meta property="og:image" content="${SITE_URL}/og.png">
+<meta property="og:url" content="${SITE_URL}${p.path}">${p.noindex ? '' : `
+<link rel="canonical" href="${SITE_URL}${p.path}">`}
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="A polar plot of the largest push the Unitree G1 survives from each direction, drawn in clay and cinnabar on a dark ground.">

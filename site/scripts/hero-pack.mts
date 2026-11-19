@@ -12,9 +12,16 @@ import { clusterSimplify, ghostCell } from '../../skeleton/src/ui/ghosts/ghost-l
 const OUT = fileURLToPath(new URL('../public/hero/', import.meta.url));
 const ROBOT = new URL('../../apps/stagger/robot/', import.meta.url);
 const VISUAL_GROUP = 2;
-const N_DIRS = 24;           // one ghost per 15 degrees around the robot
-const FORCE = Number(process.argv[2] ?? 150);   // N, the line the circle inscribes
-const PHASE = 0.2;           // the weakest stride phase in the stability map
+const FORCE = Number(process.argv[2] ?? 100);   // N, requirement 1.3's force
+const PHASE = 0.2;           // only used for the idle walk
+// One ghost per direction of the stability map (36, 10 degrees apart). Each is shoved at the stride phase and with the
+// seed of that direction's weakest cell on Unitree's policy (evidence/results/g1-map.jsonl), so the hero replays the
+// hardest recorded case of every direction. Both controllers get exactly the same scenarios.
+interface Cell { dirDeg: number; phase: number; seed: number; heldN: number }
+const cells = readFileSync(new URL('../../evidence/results/g1-map.jsonl', import.meta.url), 'utf8').trim().split(/\r?\n/).map((l) => JSON.parse(l) as Cell);
+const worst = new Map<number, Cell>();
+for (const c of cells) { const w = worst.get(c.dirDeg); if (!w || c.heldN < w.heldN) worst.set(c.dirDeg, c); }
+const DIRS = [...worst.values()].sort((a, b) => a.dirDeg - b.dirDeg);
 const FPS = 30;
 const REFLEX = (process.argv[3] ?? 'none') as 'none' | 'kiro';
 setReflex(REFLEX);
@@ -66,12 +73,12 @@ const req = (line: string) => {
 };
 const pushReq = req(`R1. WHEN the pelvis is pushed with up to ${FORCE} N for 0.2 s from any direction at any point in its stride THE robot SHALL stay upright for 3 s`);
 const trials: unknown[] = [];
-for (let i = 0; i < N_DIRS; i++) {
-  const angle = (2 * Math.PI * i) / N_DIRS;
-  const r = await runTrial(stagger, pushReq, { app: 'stagger', reqId: 'R1', seed: 7 + i, scenario: { 'push.force': FORCE, 'push.angle': angle, 'push.phase': PHASE }, record: 'poses' }, { cache });
+for (const c of DIRS) {
+  const angle = (c.dirDeg * Math.PI) / 180;
+  const r = await runTrial(stagger, pushReq, { app: 'stagger', reqId: 'R1', seed: c.seed, scenario: { 'push.force': FORCE, 'push.angle': angle, 'push.phase': c.phase }, record: 'poses' }, { cache });
   const p = r.poses!;
-  trials.push({ angleDeg: (360 * i) / N_DIRS, force: FORCE, robustness: r.robustness, worstAt: r.worstAt, fell: r.robustness < 0, frames: p.frames.length / (p.nbody * 7), fps: p.fps, poses: push(p.frames) });
-  process.stdout.write(`${(360 * i) / N_DIRS}deg ${r.robustness < 0 ? 'fell' : 'held'} (${r.robustness.toFixed(3)} m)  `);
+  trials.push({ angleDeg: c.dirDeg, phase: c.phase, seed: c.seed, force: FORCE, robustness: r.robustness, worstAt: r.worstAt, fell: r.robustness < 0, frames: p.frames.length / (p.nbody * 7), fps: p.fps, poses: push(p.frames) });
+  process.stdout.write(`${c.dirDeg}deg ${r.robustness < 0 ? 'FELL' : 'held'} (${r.robustness.toFixed(3)} m)  `);
 }
 // an idle walk (no push) for the hero standing in the circle
 {
@@ -88,7 +95,7 @@ for (const c of chunks) { bin.set(new Uint8Array(c), o); o += c.byteLength; }
 writeFileSync(OUT + NAME + '.bin', bin);
 writeFileSync(OUT + NAME + '.json', JSON.stringify({
   reflex: REFLEX,
-  note: 'Pose frames start at the trigger (t = warmup). Recorded real trials of Unitree\'s published G1 walking policy in MuJoCo (golem-spec), with visual meshes at ghost detail. Poses per frame: nbody x (x y z qw qx qy qz).',
+  note: 'Pose frames start at the trigger (t = warmup). One trial per stability-map direction, at that direction\'s weakest recorded stride phase and seed. Recorded real trials of Unitree\'s published G1 walking policy in MuJoCo (golem-spec), with visual meshes at ghost detail. Poses per frame: nbody x (x y z qw qx qy qz).',
   nbody, fps: FPS, warmup: stagger.warmup, force: FORCE, phase: PHASE, triangles: tris, geoms, trials,
 }));
 console.log(`\nwrote ${(offset / 1e6).toFixed(2)} MB, ${tris} triangles, ${trials.length} trials`);

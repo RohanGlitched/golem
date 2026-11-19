@@ -11,7 +11,8 @@ interface PackTrial { idle?: boolean; angleDeg: number; force: number; robustnes
 interface Pack { nbody: number; fps: number; warmup: number; force: number; phase: number; geoms: PackGeom[]; trials: PackTrial[] }
 
 export interface CircleOptions {
-  base: string;                      // folder holding pack.json and pack.bin
+  base: string;                      // folder holding the packs
+  pack?: string;                     // pack name: 'pack' (Unitree's policy, default) or 'pack-kiro' (with Kiro's reflex)
   line: string;                      // the EARS line inscribed on the floor
   onProgress?: (p: number) => void;  // scroll progress 0..1, for captions
   reduced?: boolean;
@@ -46,8 +47,8 @@ function quatWXYZ(q: number[], out: THREE.Quaternion): THREE.Quaternion { return
 
 export async function mountCircle(el: HTMLElement, o: CircleOptions): Promise<{ dispose(): void }> {
   const [pack, bin] = await Promise.all([
-    fetch(o.base + 'pack.json').then((r) => r.json() as Promise<Pack>),
-    fetch(o.base + 'pack.bin').then((r) => r.arrayBuffer()),
+    fetch(o.base + (o.pack ?? 'pack') + '.json').then((r) => r.json() as Promise<Pack>),
+    fetch(o.base + (o.pack ?? 'pack') + '.bin').then((r) => r.arrayBuffer()),
   ]);
   const f32 = (s: Slice) => new Float32Array(bin, s.off, s.len);
   const u16 = (s: Slice) => new Uint16Array(bin, s.off, s.len);
@@ -72,7 +73,8 @@ export async function mountCircle(el: HTMLElement, o: CircleOptions): Promise<{ 
   lantern.position.set(1.2, -1.6, 3.4);
   lantern.castShadow = true;
   lantern.shadow.mapSize.set(1024, 1024);
-  lantern.shadow.bias = -0.0005;
+  lantern.shadow.bias = -0.0002;
+  lantern.shadow.normalBias = 0.025;
   scene.add(lantern, lantern.target);
   const rim = new THREE.DirectionalLight(0x9fb7c9, 0.55);
   rim.position.set(-3, 2.5, 2.2);

@@ -156,7 +156,7 @@ function kiroReflexSection(d: SiteData): string {
 <div class="stats">
 <div class="stat"><b class="hold">${fmt(sa.weakest.minHeldN)} → ${fmt(sb.weakest.minHeldN)} N</b><span>Weakest push survived (${sa.weakest.dirDeg}° before, ${sb.weakest.dirDeg}° after).</span></div>
 <div class="stat"><b>${sa.holding} → ${sb.holding}</b><span>Directions of ${sa.dirs} that hold 100 N.</span></div>
-<div class="stat"><b class="break">${fmt(sa.strongest.minHeldN)} → ${fmt(sb.strongest.minHeldN)} N</b><span>Strongest direction. It lost some headroom.</span></div>
+<div class="stat"><b class="break">${fmt(sa.strongest.minHeldN)} → ${fmt(sb.strongest.minHeldN)} N</b><span>Strongest direction (${sa.strongest.dirDeg}° before, ${sb.strongest.dirDeg}° after). The largest loss is at the front, where the reflex trades a little headroom for the sides.</span></div>
 </div>
 <details><summary>All ${rows.length} directions, weakest push survived in newtons</summary>
 ${table(['Direction', 'Pushed from', 'Unitree only', 'With Kiro’s reflex', 'Change'], rows, { num: [2, 3, 4], caption: 'Minimum over 5 stride phases and 3 seeds. Raw cells: evidence/results/g1-map.jsonl and evidence/results/kiro-reflex/g1-map.jsonl.' })}

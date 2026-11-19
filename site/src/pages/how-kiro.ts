@@ -53,6 +53,17 @@ export function howKiroPage(d: SiteData): PageSpec {
 <div class="stat"><b>${t['tasksDone']}</b><span>tasks completed. ${k.tests.propertyAsserts} property assertions (<code>fc.assert</code>) in ${k.tests.files} test files</span></div>
 </div>
 
+<h2 id="tuner">The best session: a Kiro agent fixing the robot under the gate</h2>
+<p class="lede">The task: make requirement 1.3 hold (a 100 N push from any direction), changing only <code>controller/reflex.ts</code>, without breaking any line that holds today. The agent was <code>golem-tuner</code> from the kit pack, run headless in Kiro CLI on Opus 5.5. It took 13.6 minutes and 11.3 credits.</p>
+<ol class="try-steps">
+<li><b>It used GOLEM to look first.</b> Through the MCP server it called <code>list_requirements</code>, <code>falsify</code>, <code>get_counterexample</code>, <code>explain_margin</code> and <code>replay</code> before touching code. The counterexample: 55.6 N, early in the stride, below even line 1.1’s 60 N.</li>
+<li><b>Its first reflex made 1.3 hold and broke two other lines.</b> Correcting forward speed too, it fell on a 6.89° slope (3.1) and at 30.2 ms of sensor latency (6.1). GOLEM caught both on the next <code>golem test</code>.</li>
+<li><b>It narrowed the reflex.</b> Sideways only, and only sudden changes: smooth over 0.06 s, subtract a 1.5 s average, so a push counts and a slope’s steady drift does not. 3.1 and 6.1 held again.</li>
+<li><b>A different search seed broke it again.</b> With a gain of 1.6, 1.3 fell at 79.9 N from 108°: the command outran the robot and it kept accelerating sideways. A gain of 0.8 held under the default search and three more search seeds.</li>
+<li><b>It stopped honestly.</b> The gate was still red, only on the three lines marked Expected_Break, and it said so: the gate did not read the Expectation table yet. It also reported that the MCP server kept running the old reflex after the edit, and that our push-angle convention looked backwards. Both were real bugs, and both were fixed afterwards.</li>
+</ol>
+<p>The reflex ships as a switch, <code>GOLEM_REFLEX=kiro</code>. Re-measured afterwards over the full 4,860-trial stability map, the weakest push it survives rose from 62.5 N to 101.6 N, and all 36 directions hold 100 N (<a href="/evidence/#kiro-reflex">evidence</a>). The prompt and the full session log are in <a href="${REPO_URL}/tree/main/evidence/results/tuner"><code>evidence/results/tuner/</code></a>; the logs of every other Kiro session are in <a href="${REPO_URL}/tree/main/evidence/kiro-sessions"><code>evidence/kiro-sessions/</code></a>.</p>
+
 <h2 id="specs">Every spec</h2>
 <p>${specs.length} specs, ${earsTotal.toLocaleString('en-US')} EARS criteria. Bugfix specs have no requirements file of their own: they list tasks that fix the defects of an audit. The G1 and candy rows are the robots' own requirement files, which GOLEM tests.</p>
 ${table(['Spec', 'Type', 'Requirements', 'EARS criteria', 'Properties', 'Tasks done'], specRows, { caption: 'Specs across .kiro, apps/stagger/.kiro and apps/candy/.kiro', num: [2, 3, 4, 5] })}
@@ -78,7 +89,7 @@ ${table(['Where', 'Hook', 'Trigger'], [
 <h2 id="surfaces">Which Kiro surface did what</h2>
 <ul>
 <li><b>Kiro CLI v3, headless, spec mode</b> wrote the requirements, designs and tasks of the feature specs and the three bugfix specs.</li>
-<li><b>Kiro CLI v3, headless, default mode</b> carried out the tasks, one commit per task. Commit subjects start with the spec name, for example <code>golem-ears-hardening: 7 ...</code>.</li>
+<li><b>Kiro CLI v3, headless, default mode</b> carried out the tasks and committed them by task; commit subjects start with the spec name, for example <code>golem-ears-hardening: 7 ...</code>. Some sessions committed several finished tasks in a burst at the end of the run, so a few commits are seconds apart. The raw log of every session is in <code>evidence/kiro-sessions/</code>.</li>
 <li><b>Models:</b> Opus 5.5 and Sonnet 5.5. The <code>golem-auditor</code> agent is pinned to Sonnet 5.5.</li>
 <li><b>Hooks:</b> the Stop gate and the save hooks above ran inside those sessions. Hook behaviour was checked on kiro-cli 3.5.0: a Stop hook that blocks continues the agent, but fires once per user turn.</li>
 </ul>
@@ -92,7 +103,7 @@ ${table(['Where', 'Hook', 'Trigger'], [
 <h3>The push direction never reached the simulator</h3>
 <p>All tests passed, and the G1 pushes ignored their direction. The ears audit found it (defect 1): the compiler matched a dimension to the perturbation only by name, and the direction slot's dimension is called <code>push.angle</code>. A test hid it with a loose <code>toMatchObject</code>. The first run of the stability map was made on that build, so every direction gave the same boundary. That run is kept as invalid in <code>evidence/results/invalid/</code>, and the valid map was re-run after the fix. See ${link('docs/reviews/ears-audit.md')}.</p>
 <h3>The fallen margin was too flat for guided search</h3>
-<p>A fall scored a fixed −0.01 m. The cross-entropy search needs a slope, and flat robustness made it lose to random sampling on a synthetic needle (9/30 against 21/30 at budget 1000, the falsify audit's defect 2). The G1 app then got a graded margin (height and tilt headroom, same verdict), and the benchmark was run again. On the real G1 lines the arms still tied at budget 96. See <a href="/evidence/#benchmark">the benchmark</a>.</p>
+<p>A fall scored a fixed −0.01 m. The cross-entropy search needs a slope, and flat robustness made it lose to random sampling on a synthetic needle (9/30 against 21/30 at budget 1000 before the fix, the falsify audit's defect 2; 15/30 against 22/30 after it). The G1 app then got a graded margin (height and tilt headroom, same verdict), and the benchmark was run again. On the real G1 lines the arms still tied at budget 96. See <a href="/evidence/#benchmark">the benchmark</a>.</p>
 <h3>The scheduler doubled frames</h3>
 <p>In the studio, a render tick that called <code>requestOnce</code> while a reason to render was held queued a second animation-frame callback. The callbacks doubled every frame, and the G1 page took seconds per frame. It was found in the browser while building the signature moments, fixed in <code>RenderScheduler</code>, and given a regression test (commit <code>3d9f56c</code>).</p>
 <h3>Smaller ones, found while building this site</h3>
