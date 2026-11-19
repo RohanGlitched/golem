@@ -4,9 +4,14 @@ import { afterAll, describe, expect, it } from 'vitest';
 import { BOWLS, DISTMAX, HAND, HAND_START, Q_HOME, SIM_DT } from '../constants';
 import { compileRobot, getMj, robotFiles } from './helpers/mujoco';
 
+// CPU time of this process, not wall time: the suite runs many files in parallel and wall time then measures
+// the contention, not the scene.
+const cpu0 = process.cpuUsage();
 const t0 = performance.now();
 const compiled = await compileRobot();
-const loadMs = performance.now() - t0;
+const wallMs = performance.now() - t0;
+const cpu = process.cpuUsage(cpu0);
+const loadMs = (cpu.user + cpu.system) / 1000;
 const { mj, model } = compiled;
 afterAll(() => { model.delete(); });
 
@@ -35,7 +40,7 @@ describe('scene.xml', () => {
     expect(id('body', 'right_finger')).toBe(-1);
   });
   it('loads in under 4 s', () => {
-    console.log(`scene load + compile: ${loadMs.toFixed(0)} ms`);
+    console.log(`scene load + compile: ${loadMs.toFixed(0)} ms CPU, ${wallMs.toFixed(0)} ms wall`);
     expect(loadMs).toBeLessThan(4000);
   });
   it('puts the tip near (0.307, 0, 0.482) at the Home_Pose, 8 mm below the cup face, pointing down', () => {

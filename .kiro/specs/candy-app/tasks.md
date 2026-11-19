@@ -224,7 +224,7 @@ Conventions for every task:
     - File `test/p17-machine.test.ts`
     - **Validates: Requirements 5.3, 5.4, 5.5, 5.6, 5.7, 5.8, 5.9, 5.11, 5.12, 5.13**
 
-- [ ] 9. Checkpoint - Pure logic complete
+- [x] 9. Checkpoint - Pure logic complete
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 10. Controller composition
