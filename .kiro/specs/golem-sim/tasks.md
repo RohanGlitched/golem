@@ -101,13 +101,13 @@ Rules that apply to every task:
     - Example tests (fake `Mj`): ids in range, the same name twice gives the same id, an empty name makes no `mj_name2id` call, a wrong-type name throws naming the requested type, an unknown declared name throws and leaves `ctx.ids` unchanged, and the object references are identical.
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.9, 4.10, 4.11_
 
-- [ ] 9. Trial validation
-  - [~] 9.1 Implement `validate.ts` (`validateTrial`, `normaliseScenario`)
+- [x] 9. Trial validation
+  - [x] 9.1 Implement `validate.ts` (`validateTrial`, `normaliseScenario`)
     - Run checks in the design's order: app id, `simDt` and `controlDt`, warm-up, horizon, seed, scenario (missing, non-finite, normalised), template names and param dimension names. Build the `ResolvedCall` list with its `values` objects once. Touch no MuJoCo handle.
     - Example tests: one per error (app-id mismatch naming both ids, bad `controlDt/simDt`, bad warm-up naming seconds, bad horizon, bad seed, missing dimensions all named, non-finite value, out of range naming dimension and range in SI, unknown template, unknown param dimension), each leaving the handle counter and cache unchanged.
     - _Requirements: 5.12, 5.13, 5.14, 6.5, 6.6, 6.11, 6.12, 7.2, 14.4, 14.5, 14.6, 14.7, 14.8, 14.9, 14.10_
 
-  - [~] 9.2 Write property test for scenario normalisation
+  - [x] 9.2 Write property test for scenario normalisation
     - **Property 10: Scenario normalisation**
     - **Validates: Requirements 14.4, 14.5, 14.6, 14.7, 14.8, 6.5, 6.11**
 
