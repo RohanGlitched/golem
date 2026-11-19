@@ -5,9 +5,7 @@ const DRIVE = /^[A-Za-z]:\//;
 
 /** `\` to `/`, repeated `/` collapsed (a leading `//` is kept), no trailing `/` except for the root. */
 export function slash(p: string): string {
-  let s = p.replace(/\\/g, '/');
-  const lead = s.startsWith('//') && !s.startsWith('///') ? '/' : '';
-  s = lead + s.replace(/\/{2,}/g, '/');
+  let s = p.replace(/\\/g, '/').replace(/\/{2,}/g, '/');
   if (s.length > 1 && s.endsWith('/') && !/^[A-Za-z]:\/$/.test(s)) s = s.slice(0, -1);
   return s;
 }

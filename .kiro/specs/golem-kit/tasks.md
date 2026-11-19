@@ -29,75 +29,75 @@ This revision follows the current requirements and design:
     - Test that the synthetic trial gives the analytic robustness and is deterministic for equal (scenario, seed), that the memory `KitFs` behaves as the design requires, and that the fake runner reports a finalized file as skipped.
     - _Requirements: 28.1, 27.2, 27.6_
 
-- [ ] 2. CLI pure cores: arguments, config, Studio_URL, CSV, replay target
-  - [ ] 2.1 Implement the Arg_Parser and Arg_Formatter
+- [x] 2. CLI pure cores: arguments, config, Studio_URL, CSV, replay target
+  - [x] 2.1 Implement the Arg_Parser and Arg_Formatter
     - Create `skeleton/src/cli/args.ts` with `COMMANDS`, `GLOBAL_FLAGS`, `parseArgs`, `formatArgs` and `ArgError`, following the per-command flag table and parser rules in the design (including `--search-seed`).
     - Test with examples: `--flag=value`, `--flag value`, global flags before and after the command, `--help`, `--` handling, each failure message of criteria 2.2 to 2.4 and 2.9 to 2.11.
     - _Requirements: 1.7, 1.8, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.8, 2.9, 2.10, 2.11_
 
-  - [ ] 2.2 Write property test for argument round trip
+  - [x] 2.2 Write property test for argument round trip
     - **Property 1: Argument parse and format round trip**
     - Generate valid parsed commands (including positionals that start with `--`) and assert `parseArgs(formatArgs(c))` equals `c`.
     - fast-check, at least 100 runs, file `skeleton/src/cli/__tests__/prop-01-args-roundtrip.test.ts`.
     - **Validates: Requirements 1.7, 2.1, 2.5, 2.6, 2.7, 28.11**
 
-  - [ ] 2.3 Write property test for argument errors
+  - [x] 2.3 Write property test for argument errors
     - **Property 2: Argument errors name the culprit**
     - Generate argument lists with exactly one defect and assert the `ArgError` message contains the offending item as written, and lists every flag for an unknown flag.
     - fast-check, at least 100 runs, file `skeleton/src/cli/__tests__/prop-02-args-errors.test.ts`.
     - **Validates: Requirements 2.2, 2.3, 2.4, 2.9, 2.10, 2.11**
 
-  - [ ] 2.4 Implement Config locate, parse and write
+  - [x] 2.4 Implement Config locate, parse and write
     - Create `skeleton/src/cli/config.ts` with `GolemConfig`, `LocatedApp`, `ConfigError`, `locateApp`, `parseConfig` and `formatConfig` (field validation order: app, requirements, studioUrl, robot, toolTimeCapS, searchSeed; unknown fields dropped).
     - Test with examples on the memory `KitFs`: walk-up search, `--app` without parent lookup, missing config message with `golem init`, first invalid field named, relative and absolute path resolution.
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 9.12, 10.10, 15.6_
 
-  - [ ] 2.5 Write property test for config round trip
+  - [x] 2.5 Write property test for config round trip
     - **Property 3: Config write and parse round trip**
     - Generate valid configs with optional fields present or absent and any key order; assert `parseConfig(formatConfig(c))` equals `c` and the text has 2-space indentation, fixed key order and a trailing newline.
     - fast-check, at least 100 runs, file `skeleton/src/cli/__tests__/prop-03-config-roundtrip.test.ts`.
     - **Validates: Requirements 9.12, 9.13, 28.10**
 
-  - [ ] 2.6 Write property test for config validation
+  - [x] 2.6 Write property test for config validation
     - **Property 4: Config validation names the first invalid field**
     - Generate configs with one or more invalid fields and any extra unknown fields; assert the error names the path and the first invalid field in order, and extra fields change nothing.
     - fast-check, at least 100 runs, file `skeleton/src/cli/__tests__/prop-04-config-validation.test.ts`.
     - **Validates: Requirements 1.4, 1.5, 10.10, 15.6**
 
-  - [ ] 2.7 Write property test for the config locator
+  - [x] 2.7 Write property test for the config locator
     - **Property 5: Config locator selects the nearest directory**
     - Generate directory trees, working directories and sets of config-holding directories on the memory `KitFs`; assert nearest-first selection, no parent lookup with `--app`, and path resolution rules.
     - fast-check, at least 100 runs, file `skeleton/src/cli/__tests__/prop-05-config-locator.test.ts`.
     - **Validates: Requirements 1.1, 1.2, 1.3, 1.6**
 
-  - [ ] 2.8 Implement Studio_URL encode and decode
+  - [x] 2.8 Implement Studio_URL encode and decode
     - Create `skeleton/src/cli/studio-url.ts` with `encodeStudioHash`, `decodeStudioHash` and `studioUrl` (hash format and relative fallback `apps/<appId>/web/index.html` as in the design; reject NaN and infinities on encode).
     - Test with examples: reserved URL characters in dimension names, `-0`, `1e-7`, missing `studioUrl` fallback, malformed hash throws.
     - _Requirements: 6.5, 6.6, 6.10_
 
-  - [ ] 2.9 Write property test for the studio hash round trip
+  - [x] 2.9 Write property test for the studio hash round trip
     - **Property 6: Studio hash round trip**
     - Generate request ids, uint32 seeds and finite scenarios (including `-0`, tiny and huge magnitudes, reserved characters); assert decode(encode(h)) equals `h` and re-encoding gives the same hash.
     - fast-check, at least 100 runs, file `skeleton/src/cli/__tests__/prop-06-studio-hash.test.ts`.
     - **Validates: Requirements 6.5, 6.10, 6.11, 28.12**
 
-  - [ ] 2.10 Implement the trace CSV writer
+  - [x] 2.10 Implement the trace CSV writer
     - Create `skeleton/src/cli/csv.ts` with `formatNumber` (shortest round-trip decimal, `-0` kept) and `traceToCsv` (header `t` then signals in key order, one row per sample, `\n` line ends).
     - Test with examples: header order, row count, special values, byte-identical output on equal traces.
     - _Requirements: 6.4, 6.7_
 
-  - [ ] 2.11 Write property test for CSV exactness and determinism
+  - [x] 2.11 Write property test for CSV exactness and determinism
     - **Property 7: Replay CSV is exact and deterministic**
     - Generate traces of any signal and sample count; assert header, row count, every cell parses back to the identical number, and two calls give identical text.
     - fast-check, at least 100 runs, file `skeleton/src/cli/__tests__/prop-07-csv.test.ts`.
     - **Validates: Requirements 6.4, 6.7, 13.6**
 
-  - [ ] 2.12 Implement replay target selection
+  - [x] 2.12 Implement replay target selection
     - Create `skeleton/src/cli/replay-target.ts` with `selectReplay` (last pinned counterexample, `--seed` override on its scenario, fallback to the report `closest` when no pinned entry, MCP mode that matches a pinned seed exactly and lists pinned seeds on a miss).
     - Test with examples: last entry wins, `--seed` keeps the pinned scenario, `closest` fallback, no pinned entry and no `closest` gives the "no counterexample is pinned" message, an unknown seed lists the pinned seeds.
     - _Requirements: 6.1, 6.2, 6.8, 13.1, 13.7_
 
-  - [ ] 2.13 Write property test for replay target selection
+  - [x] 2.13 Write property test for replay target selection
     - **Property 8: Replay target selection**
     - Generate pinned lists, reports and seeds; assert the CLI picks the last pinned entry (or the `closest` scenario with `--seed`), the MCP mode picks exactly the entry whose seed matches, and a miss lists the pinned seeds and runs nothing.
     - fast-check, at least 100 runs, file `skeleton/src/cli/__tests__/prop-08-replay-target.test.ts`.
