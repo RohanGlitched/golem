@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { DIVERGED_ROBUSTNESS } from '../../sim/index.js';
 import {
   counterexampleSummary, isFall, lineStatusOf, marginText, predicatesOf, replayLabel, statusOfVerdict, statusText,
 } from '../run/status.js';
@@ -60,6 +61,10 @@ describe('status', () => {
     expect(marginText(0.1234, 'm')).toBe('0.123 m');
     expect(marginText(0.000123, 'm')).toBe('0.000123 m');
     expect(marginText(-Infinity, 'm')).toBe('diverged');
+  });
+  it('writes "diverged" for the sim sentinel of a numerically diverged trial, not its magnitude', () => {
+    expect(marginText(DIVERGED_ROBUSTNESS, 'm')).toBe('diverged');
+    expect(marginText(-1e300, 'm')).not.toBe('diverged');
   });
   it('states held lines as no counterexample found, never proved or verified', () => {
     const t = statusText({ status: 'held', verdict: verdict(), unit: 'm' });

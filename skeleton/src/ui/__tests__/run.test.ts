@@ -1,42 +1,41 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { RecordingPool } from '../run/recording-pool.js';
-import { callFalsify, standInFalsify } from '../run/falsify-adapter.js';
+import { callFalsify, defaultFalsify, golemFalsify, isAbort } from '../run/falsify-adapter.js';
 import { seedToJson } from '../run/seed-json.js';
 import { pinKey } from '../run/pins.js';
 import { FakePool, fakeFalsify, synthResult } from './fakes.js';
 import { lineOf, runRig } from './generators/run.js';
+import { swarmRig } from './generators/swarm.js';
 import type { Counterexample, FalsifyFn, TrialSpec } from '../types.js';
 
 const specs = (n: number): TrialSpec[] => Array.from({ length: n }, (_, i) => ({ app: 'test', reqId: '1.1', scenario: { 'push.force': i }, seed: i }));
 const tick = () => new Promise((r) => setTimeout(r, 0));
 
 describe('RecordingPool', () => {
-  it('splits 130 specs into chunks of 64, 64 and 2 with poses on', async () => {
+  it('forwards a run in one call with poses on, ingests each result once and strips poses from what it returns', async () => {
     const inner = new FakePool((s) => synthResult(s));
-    const log: string[] = [];
-    const rp = new RecordingPool(inner, { beginGeneration: () => log.push('b'), ingest: () => log.push('i'), commit: () => log.push('c') });
-    const out = await rp.run(specs(130));
-    expect(inner.calls.map((c) => c.length)).toEqual([64, 64, 2]);
-    expect(inner.calls.flat().every((s) => s.record === 'poses')).toBe(true);
+    const ingested: number[] = [];
+    const rp = new RecordingPool(inner, { ingest: (r) => { expect(r.poses).toBeDefined(); ingested.push(r.spec.seed); } }, 'test');
+    const out = await rp.run(specs(130).map((s) => ({ ...s, app: '' })));
+    expect(inner.calls.map((c) => c.length)).toEqual([130]);
+    expect(inner.calls.flat().every((s) => s.record === 'poses' && s.app === 'test')).toBe(true);
     expect(out).toHaveLength(130);
     expect(out.every((r) => !('poses' in r))).toBe(true);
-    expect(log.filter((x) => x === 'b')).toHaveLength(3);
-    expect(log.filter((x) => x === 'i')).toHaveLength(130);
+    expect(ingested).toEqual(specs(130).map((s) => s.seed));
     expect(rp.size).toBe(inner.size);
     await rp.close();
     expect(inner.closed).toBe(false);
   });
-  it('propagates a throwing chunk and skips commit', async () => {
+  it('propagates a throwing run', async () => {
     const inner = new FakePool(() => { throw new Error('worker crashed'); });
-    const log: string[] = [];
-    const rp = new RecordingPool(inner, { beginGeneration: () => log.push('b'), ingest: () => log.push('i'), commit: () => log.push('c') });
+    const rp = new RecordingPool(inner, { ingest: () => {} });
     await expect(rp.run(specs(3))).rejects.toThrow('worker crashed');
-    expect(log).toEqual(['b']);
+    expect(rp.lastChunk).toHaveLength(3);
   });
 });
 
 describe('falsify adapter', () => {
-  it('passes seeds, signal and generation size through to the falsifier', async () => {
+  it('passes seeds, signal, generation size and app id through to the falsifier', async () => {
     let seen: Parameters<FalsifyFn>[4] | undefined;
     const fake: FalsifyFn = async (req, _p, _b, _s, o) => {
       seen = o;
@@ -44,29 +43,57 @@ describe('falsify adapter', () => {
     };
     const ac = new AbortController();
     const seeds: Counterexample[] = [{ reqId: '1.1', scenario: { 'push.force': 3 }, seed: 9, robustness: -1, shrunk: true, foundAfter: 2 }];
-    await callFalsify(fake, lineOf('1.1').compiled!, new FakePool((s) => synthResult(s)), {}, 1, { signal: ac.signal, seeds, generationSize: 32 });
+    await callFalsify(fake, lineOf('1.1').compiled!, new FakePool((s) => synthResult(s)), {}, 1, { signal: ac.signal, seeds, generationSize: 32, appId: 'test' });
     expect(seen?.signal).toBe(ac.signal);
     expect(seen?.seeds).toEqual(seeds);
     expect(seen?.generationSize).toBe(32);
+    expect(seen?.appId).toBe('test');
   });
-  it('the stand-in runs pinned seeds first, then random generations, and stops at a break', async () => {
+  it('golem-falsify runs the pinned seed first, then random generations, then shrinks and classifies', async () => {
     const pool = new FakePool((s) => synthResult(s));
-    const seeds: Counterexample[] = [{ reqId: '1.1', scenario: { 'push.force': 5, 'push.angle': 0 }, seed: 9, robustness: 1, shrunk: false, foundAfter: 0 }];
-    const v = await standInFalsify(lineOf('1.1').compiled!, pool, { maxTrials: 100 }, 1, { seeds, generationSize: 10 });
-    expect(pool.calls[0]).toEqual([{ app: '', reqId: '1.1', scenario: seeds[0]!.scenario, seed: 9 }]);
+    const seeds: Counterexample[] = [{ reqId: '1.1', scenario: { 'push.force': 5, 'push.angle': 0 }, seed: 9, robustness: 95, shrunk: false, foundAfter: 0 }];
+    const events: { phase: number; generation: number; trials: number }[] = [];
+    const v = await golemFalsify(lineOf('1.1').compiled!, pool, { maxTrials: 100 }, 1, {
+      seeds, generationSize: 10, appId: 'test', onProgress: (e) => events.push(e),
+    });
+    expect(pool.calls[0]).toEqual([{ app: 'test', reqId: '1.1', scenario: seeds[0]!.scenario, seed: 9 }]);
+    expect(pool.calls[1]!).toHaveLength(10); // Phase 1 generation of the requested size
     expect(v.status).toBe('broken');
     expect(v.counterexample!.robustness).toBeLessThan(0);
-    expect(v.trials).toBe(1 + 10 * (pool.calls.length - 1));
+    expect(v.counterexample!.shrunk).toBe(true);
+    expect(['robust', 'seed-sensitive']).toContain(v.counterexample!.classification);
+    // The shrunk scenario is as mild as the 100 N edge of the synthetic requirement allows.
+    expect(v.counterexample!.scenario['push.force']).toBeLessThan(110);
+    expect(events[0]).toEqual({ phase: 0, generation: 0, trials: 1 });
+    expect(events.map((e) => e.phase)).toEqual([...events.map((e) => e.phase)].sort());
+    expect(events.at(-1)!.phase).toBe(3);
+    expect(events.at(-1)!.trials).toBe(v.trials);
   });
-  it('the stand-in reports held with the rule-of-three bound when nothing breaks', async () => {
+  it('golem-falsify reports held with the rule-of-three bound when nothing breaks, within the budget', async () => {
     const pool = new FakePool((s) => synthResult(s));
-    const v = await standInFalsify(lineOf('1.1', 50).compiled!, pool, { maxTrials: 30 }, 1, { generationSize: 10 });
+    const v = await golemFalsify(lineOf('1.1', 50).compiled!, pool, { maxTrials: 30 }, 1, { generationSize: 10 });
     expect(v.status).toBe('held');
     expect(v.trials).toBe(30);
-    expect(v.failureRateUpper95).toBeCloseTo(0.1, 12);
+    expect(v.counterexample).toBeUndefined();
+    // The bound comes from the Phase 1 random trials only: 0 failures in n gives 3 / n.
+    expect(v.randomTrials).toBeGreaterThan(0);
+    expect(v.failureRateUpper95).toBeCloseTo(3 / v.randomTrials, 12);
+  });
+  it('golem-falsify throws the recorded reason when no trial can complete', async () => {
+    const pool = new FakePool(() => { throw new Error('Worker 2 crashed'); });
+    await expect(golemFalsify(lineOf('1.1').compiled!, pool, { maxTrials: 30 }, 1, { generationSize: 10 })).rejects.toThrow('Worker 2 crashed');
+  });
+  it('golem-falsify rejects with an AbortError when the signal aborts', async () => {
+    const ac = new AbortController();
+    ac.abort();
+    const pool = new FakePool((s) => synthResult(s));
+    await expect(golemFalsify(lineOf('1.1').compiled!, pool, { maxTrials: 30 }, 1, { signal: ac.signal })).rejects.toSatisfy(isAbort);
+    expect(pool.calls).toHaveLength(0);
+  });
+  it('the studio falsifier defaults to golem-falsify', () => {
+    expect(defaultFalsify).toBe(golemFalsify);
   });
 });
-
 describe('RunController', () => {
   it('shows the running status within 100 ms of a summon', async () => {
     const { rc, line, clock } = runRig();
@@ -84,7 +111,42 @@ describe('RunController', () => {
     expect(l.summary).toMatch(/^fails from \d+ N at \d+ deg$/);
     expect(polite.textContent).toMatch(/^Requirement 1\.1 broken: fails from/);
   });
-  it('marks the previous verdict stale when a run is cancelled', async () => {
+  it('maps each falsifier progress event to one swarm generation and records poses for every trial', async () => {
+    const { swarm } = swarmRig();
+    const begin = vi.spyOn(swarm, 'beginGeneration');
+    const commit = vi.spyOn(swarm, 'commitGeneration');
+    const events: { phase: number; generation: number; trials: number }[] = [];
+    const pool = new FakePool((s) => synthResult(s));
+    const falsify: FalsifyFn = (req, p, b, s, o) => golemFalsify(req, p, b, s, { ...o, onProgress: (e) => { events.push(e); o.onProgress?.(e); } });
+    const r = runRig({ pool, falsify, deps: { swarm: () => swarm, generationSize: 16 } });
+    await r.rc.start('1.1');
+    const v = r.line('1.1').verdict!;
+    // Phase 0 had no pinned seed, so its event carries no trials and opens no generation.
+    const withTrials = events.filter((e) => e.phase !== 0);
+    expect(v.status).toBe('broken');
+    expect(withTrials.length).toBeGreaterThan(1);
+    expect(begin).toHaveBeenCalledTimes(withTrials.length);
+    expect(commit).toHaveBeenCalledTimes(withTrials.length);
+    expect(pool.calls.flat().every((s) => s.record === 'poses')).toBe(true);
+    expect(r.line('1.1').progress?.trials).toBe(v.trials);
+    expect(r.store.getState().run).toBeUndefined();
+    // The Phase 3 generation holds the shrink trials, one run call each, in a single swarm generation.
+    expect(pool.calls.filter((c) => c.length === 1).length).toBeGreaterThan(1);
+  });
+  it('closes the open generation when the verdict arrives without a final progress event', async () => {
+    const { swarm } = swarmRig();
+    const begin = vi.spyOn(swarm, 'beginGeneration');
+    const commit = vi.spyOn(swarm, 'commitGeneration');
+    const noEvents: FalsifyFn = async (req, pool) => {
+      await pool.run(Array.from({ length: 3 }, (_, i) => ({ app: 'test', reqId: req.id, scenario: { 'push.force': i }, seed: i })));
+      await pool.run([{ app: 'test', reqId: req.id, scenario: { 'push.force': 9 }, seed: 9 }]);
+      return { reqId: req.id, status: 'held', trials: 4, randomTrials: 4, guidedTrials: 0, closest: { robustness: 1, scenario: {}, seed: 0 }, ms: 1 };
+    };
+    const r = runRig({ falsify: noEvents, deps: { swarm: () => swarm } });
+    await r.rc.start('1.1');
+    expect(begin).toHaveBeenCalledTimes(1);
+    expect(commit).toHaveBeenCalledTimes(1);
+  });  it('marks the previous verdict stale when a run is cancelled', async () => {
     const slow: FalsifyFn = (req, pool, b, s, o) => new Promise((res, rej) => {
       o.signal?.addEventListener('abort', () => rej(Object.assign(new Error('aborted'), { name: 'AbortError' })));
       void fakeFalsify(5, 5)(req, pool, b, s, {}).then(() => {});

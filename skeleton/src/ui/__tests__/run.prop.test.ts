@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import fc from 'fast-check';
 import { RecordingPool } from '../run/recording-pool.js';
+import { syntheticTrialFields } from '../core/trial-fields.js';
 import { FakePool, fakeFalsify, synthPoses } from './fakes.js';
 import { runRig } from './generators/run.js';
 import { swarmRig } from './generators/swarm.js';
@@ -10,20 +11,24 @@ const R = { numRuns: 100 };
 
 /** Robustness from the spec seed; every k-th result has no poses. */
 function synth(noPoseEvery: number, frames = 8) {
-  return (s: TrialSpec): TrialResult => ({
-    spec: s, robustness: Math.sin(s.seed * 12.9898) * 10, worstAt: 0.5, unit: 'rad', wallMs: 1,
-    ...(s.record === 'poses' && (noPoseEvery === 0 || s.seed % noPoseEvery !== 0) ? { poses: synthPoses(3, frames) } : {}),
-  });
+  return (s: TrialSpec): TrialResult => {
+    const poses = s.record === 'poses' && (noPoseEvery === 0 || s.seed % noPoseEvery !== 0) ? synthPoses(3, frames) : undefined;
+    return {
+      spec: s, robustness: Math.sin(s.seed * 12.9898) * 10, worstAt: 0.5, unit: 'rad', wallMs: 1,
+      ...(poses ? { poses } : {}), ...syntheticTrialFields(s, poses),
+    };
+  };
 }
 
 /** Falsifier that runs the given generation sizes and calls `probe` after each. */
-const gens = (sizes: number[], probe?: () => void): FalsifyFn => async (req, pool) => {
+const gens = (sizes: number[], probe?: () => void): FalsifyFn => async (req, pool, _b, _s, o) => {
   let seed = 1, trials = 0;
   for (const n of sizes) {
     const specs: TrialSpec[] = Array.from({ length: n }, () => ({ app: 'test', reqId: req.id, scenario: { 'push.force': (seed * 37) % 200, 'push.angle': seed % 6 }, seed: seed++ }));
     await pool.run(specs);
     trials += n;
     probe?.();
+    o.onProgress?.({ phase: 1, generation: trials, trials });
   }
   return { reqId: req.id, status: 'held', trials, randomTrials: trials, guidedTrials: 0, closest: { robustness: 1, scenario: {}, seed: 0 }, ms: 1 };
 };
@@ -77,26 +82,23 @@ describe('run properties', () => {
   });
 
   // Feature: golem-studio-ui, Property 20: RecordingPool preserves results and records poses
-  it('forwards chunks of at most 64 with poses, returns results in order without poses and ingests each once', async () => {
+  it('forwards each run in one call with poses, returns results in order without poses and ingests each once', async () => {
     await fc.assert(fc.asyncProperty(fc.integer({ min: 0, max: 300 }), async (n) => {
       const inner = new FakePool(synth(3));
-      let ingested = 0, begins = 0, commits = 0;
-      const rp = new RecordingPool(inner, { beginGeneration: () => { begins++; }, ingest: () => { ingested++; }, commit: () => { commits++; } });
+      let ingested = 0;
+      const rp = new RecordingPool(inner, { ingest: () => { ingested++; } });
       const specs: TrialSpec[] = Array.from({ length: n }, (_, i) => ({ app: 'test', reqId: 'R1', scenario: { x: i }, seed: i }));
       const out = await rp.run(specs);
-      expect(inner.calls.every((c) => c.length <= 64)).toBe(true);
+      expect(inner.calls).toHaveLength(1);
       expect(inner.calls.flat().map((s) => s.seed)).toEqual(specs.map((s) => s.seed));
       expect(inner.calls.flat().every((s) => s.record === 'poses')).toBe(true);
       expect(out.map((r) => r.spec.seed)).toEqual(specs.map((s) => s.seed));
       expect(out.some((r) => 'poses' in r)).toBe(false);
       expect(ingested).toBe(n);
-      expect(begins).toBe(Math.ceil(n / 64));
-      expect(commits).toBe(begins);
       await rp.close();
       expect(inner.closed).toBe(false);
     }), R);
   });
-
   // Feature: golem-studio-ui, Property 21: Stale runs change nothing
   it('ignores every callback of a cancelled run, so the state equals the current run alone', async () => {
     await fc.assert(fc.asyncProperty(fc.array(fc.integer({ min: 1, max: 20 }), { minLength: 1, maxLength: 4 }), fc.integer({ min: 1, max: 80 }), async (staleSizes, n) => {

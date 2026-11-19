@@ -14,6 +14,7 @@
   "exports": {
     ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
     "./ui": { "types": "./dist/ui/index.d.ts", "default": "./dist/ui/index.js" },
+    "./ui/worker": { "types": "./dist/ui/worker.d.ts", "default": "./dist/ui/worker.js" },
     "./node": { "types": "./dist/node.d.ts", "default": "./dist/node.js" },
     "./testing": { "types": "./dist/testing.d.ts", "default": "./dist/testing.js" }
   },

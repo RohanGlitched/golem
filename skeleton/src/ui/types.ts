@@ -93,6 +93,9 @@ export type FalsifyFn = (
   req: CompiledRequirement, pool: TrialPool, budget: Budget, searchSeed: number,
   options: {
     signal?: AbortSignal; seeds?: Counterexample[]; generationSize?: number;
+    /** The app id the falsifier puts in its trial specs. */
+    appId?: string;
+    /** Called once per generation of trials, after the generation's results were delivered to the pool's onResult. */
     onProgress?: (e: { phase: 0 | 1 | 2 | 3; generation: number; trials: number }) => void;
   },
 ) => Promise<Verdict & { counterexample?: ClassifiedCounterexample }>;
@@ -110,7 +113,7 @@ export interface StudioTestHooks {
   createRenderer?: (canvas: HTMLCanvasElement) => unknown;
   /** Overrides the WebGL probe result. */
   webgl?: boolean;
-  /** Builds a pool from `workerUrl` (golem-pool's worker pool once it lands). */
+  /** Replaces the pool the studio builds from `workerUrl`. */
   createPool?: (workerUrl: string | URL) => TrialPool;
   clipboard?: { writeText(s: string): Promise<void> };
   /** Adds `summonSynthetic(n, seconds)` to the handle: feeds `n` synthetic pose results through the swarm (perf and e2e tests). */
@@ -119,7 +122,16 @@ export interface StudioTestHooks {
 
 export interface StudioOptions {
   pool?: TrialPool;
+  /**
+   * URL of the module the trial workers import. It exports `app` and `requirements`; build `requirements` with
+   * `studioRequirements` from `golem-spec/ui/worker`. Used to build a Web Worker pool when `pool` is absent.
+   * Trials run on the page thread when Workers are unavailable.
+   */
   workerUrl?: string | URL;
+  /** The worker script of the pool. Default: golem-pool's `browser-entry.js`; a dev server that serves TypeScript needs its own URL. */
+  workerEntry?: string | URL;
+  /** Number of workers. Default: `hardwareConcurrency - 1`, 1 to 8. */
+  workerCount?: number;
   seed?: number;
   budget?: Budget;
   theme?: ThemeName;

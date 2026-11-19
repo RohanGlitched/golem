@@ -1,6 +1,7 @@
 // InlinePool: a TrialPool that runs golem-sim trials in this thread, one at a time, yielding to the
-// event loop between trials. It is the stand-in until golem-pool's workers are wired in: the studio
-// registers each compiled requirement with it (duck-typed `register`), so `TrialSpec.reqId` resolves.
+// event loop between trials. It is the studio's fallback where Web Workers are unavailable (see studio-pool.ts)
+// and the pool of pages that pass it as `pool`. The studio registers each compiled requirement with it
+// (duck-typed `register`), so `TrialSpec.reqId` resolves.
 import { ModelCache, runTrial } from '../../sim/index.js';
 import { abortError } from './falsify-adapter.js';
 import type { CompiledRequirement, RobotApp, TrialPool, TrialResult, TrialSpec } from '../types.js';

@@ -1,13 +1,13 @@
-// RecordingPool: wraps the shared TrialPool so every trial records poses and every run() chunk of
-// at most 64 specs is one Generation. Results go back to the falsifier without poses.
+// RecordingPool: wraps the shared TrialPool so every trial records poses, and hands each result, with its
+// poses, to the studio as it arrives. Results go back to the falsifier without poses.
+//
+// The pool does not decide what a Generation is. golem-falsify submits some generations as one `run` (Phase 1
+// and 2) and others as many (each pinned seed, each shrink trial), and reports each generation in one progress
+// event. The RunController therefore closes a Generation on that event.
 import type { TrialPool, TrialResult, TrialSpec } from '../types.js';
 
-export const CHUNK = 64;
-
 export interface RecordingHooks {
-  beginGeneration(): void;
   ingest(r: TrialResult): void;
-  commit(): void;
 }
 
 export function stripPoses(r: TrialResult): TrialResult {
@@ -17,34 +17,26 @@ export function stripPoses(r: TrialResult): TrialResult {
 }
 
 export class RecordingPool implements TrialPool {
-  /** The chunk being run, so an error can name its trial. */
+  /** The specs of the latest `run` call, so an error can name its trial. */
   lastChunk: TrialSpec[] = [];
 
   /** `appId` fills specs whose app is empty (the falsifier may not know the app). */
-  constructor(
-    private readonly inner: TrialPool, private readonly hooks: RecordingHooks, private readonly chunk = CHUNK, private readonly appId = '',
-  ) {}
+  constructor(private readonly inner: TrialPool, private readonly hooks: RecordingHooks, private readonly appId = '') {}
 
   get size(): number { return this.inner.size; }
 
   async run(specs: TrialSpec[], onResult?: (r: TrialResult) => void, opts?: { signal?: AbortSignal }): Promise<TrialResult[]> {
-    const out: TrialResult[] = [];
-    for (let i = 0; i < specs.length; i += this.chunk) {
-      const chunk = specs.slice(i, i + this.chunk).map((s) => ({ ...s, app: s.app || this.appId, record: 'poses' as const }));
-      this.lastChunk = chunk;
-      this.hooks.beginGeneration();
-      let seen = 0;
-      const res = await this.inner.run(chunk, (r) => {
-        seen++;
-        this.hooks.ingest(r);
-        onResult?.(stripPoses(r));
-      }, opts);
-      // A pool that never calls onResult still feeds the studio once per result.
-      if (seen === 0) for (const r of res) { this.hooks.ingest(r); onResult?.(stripPoses(r)); }
-      this.hooks.commit();
-      for (const r of res) out.push(stripPoses(r));
-    }
-    return out;
+    const recorded = specs.map((s) => ({ ...s, app: s.app || this.appId, record: 'poses' as const }));
+    this.lastChunk = recorded;
+    let seen = 0;
+    const res = await this.inner.run(recorded, (r) => {
+      seen++;
+      this.hooks.ingest(r);
+      onResult?.(stripPoses(r));
+    }, opts);
+    // A pool that never calls onResult still feeds the studio once per result.
+    if (seen === 0) for (const r of res) { this.hooks.ingest(r); onResult?.(stripPoses(r)); }
+    return res.map(stripPoses);
   }
 
   /** Never closes the shared pool. */

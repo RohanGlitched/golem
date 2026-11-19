@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { act } from '@testing-library/react';
 import { mountStudio } from '../index.js';
 import { NOT_ELEMENT } from '../mount.js';
 import { EMPTY_TEXT } from '../tablet/tablet.js';
 import { NO_WEBGL_TEXT } from '../stage/stage.js';
+import { NO_WORKERS_TEXT } from '../run/studio-pool.js';
 import { FakeMj, FakePool, FakeRaf, FakeStorage, synthResult } from './fakes.js';
 import { GOOD_LINE, lexApp } from './generators/lexicon.js';
 import type { RobotApp, StudioOptions } from '../types.js';
@@ -111,6 +112,26 @@ describe('mountStudio', () => {
     expect(b.h.getState().poolConfigured).toBe(true);
     act(() => b.h.dispose());
     expect(built.closed).toBe(true);
+  });
+  it('builds the Web Worker pool from workerUrl and runs in-process, with a notice, where Workers are unavailable', async () => {
+    expect((globalThis as { Worker?: unknown }).Worker).toBeUndefined();
+    const { h } = await mount(MD, { workerUrl: '/worker-app.js' });
+    expect(h.getState().poolConfigured).toBe(true);
+    expect(h.getState().messages.map((m) => m.text)).toContain(NO_WORKERS_TEXT);
+    act(() => h.dispose());
+  });
+  it('builds a Web Worker pool when Workers exist and gives it the worker entry and count', async () => {
+    const urls: string[] = [];
+    class FakeWorker { constructor(u: unknown) { urls.push(String(u)); } postMessage(): void {} addEventListener(): void {} terminate(): void {} }
+    vi.stubGlobal('Worker', FakeWorker);
+    try {
+      const { h } = await mount(MD, { workerUrl: 'http://localhost/worker-app.js', workerEntry: 'http://localhost/entry.js', workerCount: 3 });
+      expect(urls).toEqual(['http://localhost/entry.js', 'http://localhost/entry.js', 'http://localhost/entry.js']);
+      expect(h.getState().messages.map((m) => m.id)).not.toContain('pool');
+      act(() => h.dispose());
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
   it('applies a valid share hash and reports what it ignored', async () => {
     const { shareFragment } = await import('../run/share-hash.js');

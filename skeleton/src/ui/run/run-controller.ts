@@ -48,6 +48,8 @@ interface Active {
   closest?: Retained;
   bestCe?: Retained;
   genResults: TrialResult[];
+  /** True while results of a Generation have arrived and its progress event has not. */
+  open: boolean;
   unit: string;
   settled: Promise<void>;
   rec?: RecordingPool;
@@ -131,7 +133,7 @@ export class RunController {
     if (canRegister(pool)) pool.register(req);
     let settle!: () => void;
     const a: Active = {
-      runId, lineId, ac: new AbortController(), trials: 0, generation: 0, genResults: [], unit: line.unit ?? '',
+      runId, lineId, ac: new AbortController(), trials: 0, generation: 0, genResults: [], open: false, unit: line.unit ?? '',
       settled: new Promise<void>((r) => { settle = r; }),
     };
     this.active = a;
@@ -146,11 +148,7 @@ export class RunController {
       lines: s.lines.map((l) => (l.id === lineId ? { ...l, status: 'running', progress: { trials: 0 }, stale: !!l.verdict } : l)),
     }));
     this.refreshAura();
-    const rec = new RecordingPool(pool, {
-      beginGeneration: () => this.guard(runId, () => this.beginGeneration(a)),
-      ingest: (r) => this.guard(runId, () => this.ingest(a, req, r, aura)),
-      commit: () => this.guard(runId, () => { this.d.swarm()?.commitGeneration(this.d.now() / 1000); }),
-    }, undefined, this.d.appId);
+    const rec = new RecordingPool(pool, { ingest: (r) => this.guard(runId, () => this.ingest(a, req, r, aura)) }, this.d.appId);
     a.rec = rec;
     this.inFlight++;
     try {
@@ -158,8 +156,11 @@ export class RunController {
         signal: a.ac.signal,
         seeds: this.d.pins.read(this.d.appId, req.id),
         generationSize: this.d.generationSize,
+        appId: this.d.appId,
+        // The falsifier reports one event per generation of trials: the swarm's Generation ends there.
         onProgress: (e) => this.guard(runId, () => {
-          this.d.store.update((s) => (s.run ? { run: { ...s.run, phase: e.phase, generation: e.generation } } : {}));
+          this.commitGeneration(a);
+          this.d.store.update((s) => (s.run ? { run: { ...s.run, phase: e.phase } } : {}));
           this.d.announcer.announceProgress(`Running ${lineId}: ${a.trials} trials`, this.d.now());
         }),
       });
@@ -178,10 +179,19 @@ export class RunController {
     // Drop the previous generation's poses except the retained closest call and best counterexample.
     a.genResults = [];
     a.generation++;
+    a.open = true;
     this.d.swarm()?.beginGeneration();
   }
 
+  /** The falsifier's progress event: the trials received since the last one are one Generation. */
+  private commitGeneration(a: Active): void {
+    if (!a.open) return;
+    a.open = false;
+    this.d.swarm()?.commitGeneration(this.d.now() / 1000);
+  }
+
   private ingest(a: Active, req: CompiledRequirement, r: TrialResult, aura: AuraModel | undefined): void {
+    if (!a.open) this.beginGeneration(a);
     a.trials++;
     if (!a.unit && r.unit) a.unit = r.unit;
     const dims = auraDims(req.space);
@@ -218,6 +228,7 @@ export class RunController {
   get closestCall(): Retained | undefined { return this.active?.closest; }
 
   private finish(a: Active, req: CompiledRequirement, v: Verdict & { counterexample?: ClassifiedCounterexample }): void {
+    this.commitGeneration(a); // trials that arrived after the last progress event
     const status = statusOfVerdict(v);
     const fall = this.d.isFall?.(req) ?? false;
     const ce = v.counterexample;

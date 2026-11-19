@@ -1,4 +1,5 @@
 // Test doubles shared by the studio tests.
+import { syntheticTrialFields } from '../core/trial-fields.js';
 import type { CompiledRequirement, FalsifyFn, TrialPool, TrialResult, TrialSpec, Verdict } from '../types.js';
 
 export class FakeRaf {
@@ -81,9 +82,11 @@ export function synthPoses(nbody: number, frames: number, fps = 30): NonNullable
 /** Synthetic robustness: margin shrinks with force. */
 export function synthResult(spec: TrialSpec, nbody = 3, frames = 12): TrialResult {
   const force = spec.scenario['push.force'] ?? 0;
+  const poses = spec.record === 'poses' ? synthPoses(nbody, frames) : undefined;
   return {
     spec, robustness: 100 - force, worstAt: 0.5, unit: 'N', wallMs: 1,
-    ...(spec.record === 'poses' ? { poses: synthPoses(nbody, frames) } : {}),
+    ...(poses ? { poses } : {}),
+    ...syntheticTrialFields(spec, poses),
   };
 }
 

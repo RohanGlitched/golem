@@ -11,6 +11,7 @@ import { deriveSeed, deriveStream } from './core/prng.js';
 import { RenderScheduler } from './core/scheduler.js';
 import { StudioStore } from './core/store.js';
 import { TOKENS } from './core/theme-tokens.js';
+import { syntheticTrialFields } from './core/trial-fields.js';
 import { GhostSwarm } from './ghosts/ghost-swarm.js';
 import { findTemplate, resolveArrow } from './ghosts/push-arrow.js';
 import { HeroSim, DIVERGED_TEXT, SLEEP_TEXT } from './hero/hero-sim.js';
@@ -26,6 +27,8 @@ import { COPY_FAILED_TEXT } from './reel/reel.js';
 import { ReplayController, applyReplayPose } from './reel/replay.js';
 import { DEFAULT_BUDGET, defaultFalsify } from './run/falsify-adapter.js';
 import { canRegister } from './run/inline-pool.js';
+import { createStudioPool } from './run/studio-pool.js';
+import type { StudioPool } from './run/studio-pool.js';
 import { PinnedSeedStore } from './run/pins.js';
 import { RunController } from './run/run-controller.js';
 import { seedToJson } from './run/seed-json.js';
@@ -41,11 +44,10 @@ import { Tablet } from './tablet/tablet.js';
 import { VerdictPanel } from './verdict/verdict-panel.js';
 import type {
   CompiledRequirement, Counterexample, LineModel, RobotApp, Scenario, ShareState, StudioHandle, StudioOptions, StudioState,
-  ThemeName, TrialPool, TrialResult,
+  ThemeName, TrialPool, TrialResult, TrialSpec,
 } from './types.js';
 
 export const NOT_ELEMENT = 'mountStudio needs an HTMLElement as its first argument';
-export const NO_WORKER_POOL_TEXT = 'Worker pools come with golem-pool, which is not available here: pass `pool` to mountStudio';
 const STYLE_ID = 'golem-studio-css';
 
 const errText = (e: unknown): string => (e instanceof Error ? e.message : String(e));
@@ -127,9 +129,18 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
   // ---------------------------------------------------------------- pool
   let ownedPool: TrialPool | undefined;
   let pool = options.pool;
+  let studioPool: StudioPool | undefined;
   if (!pool && options.workerUrl !== undefined) {
-    if (hooks.createPool) { pool = ownedPool = hooks.createPool(options.workerUrl); }
-    else messages.push({ id: 'pool', kind: 'warning', text: NO_WORKER_POOL_TEXT });
+    if (hooks.createPool) {
+      pool = ownedPool = hooks.createPool(options.workerUrl);
+    } else {
+      pool = ownedPool = studioPool = createStudioPool(app, {
+        workerUrl: options.workerUrl,
+        ...(options.workerEntry !== undefined ? { entry: options.workerEntry } : {}),
+        ...(options.workerCount !== undefined ? { size: options.workerCount } : {}),
+      });
+      if (studioPool.notice) messages.push({ id: 'pool', kind: 'info', text: studioPool.notice });
+    }
   }
 
   // ---------------------------------------------------------------- store and DOM
@@ -348,6 +359,11 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
   const reqOf = (id: string): CompiledRequirement | undefined => store.getState().lines.find((l) => l.id === id)?.compiled;
   const fallOf = (req: CompiledRequirement): boolean => isFall(predicatesOf(req.source, lexicon));
   const falsify = hooks.falsify ?? defaultFalsify;
+  if (studioPool) {
+    studioPool.onFallback = (text) => {
+      if (!disposed) store.update((s) => ({ messages: [...s.messages.filter((m) => m.id !== 'pool'), { id: 'pool', kind: 'info', text }] }));
+    };
+  }
   const rc = new RunController({
     appId: app.id, warmup: app.warmup, store, pool, falsify,
     pins: { read: (a: string, r: string) => [...(sharedSeeds.get(r) ?? []), ...pins.read(a, r)] } as unknown as PinnedSeedStore,
@@ -553,9 +569,11 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
           }
         }
         const robustness = falls ? -0.1 : 0.2;
+        const spec: TrialSpec = { app: app.id, reqId: 'synthetic', scenario: {}, seed: i, record: 'poses' };
+        const poses = { fps, nbody: nb, frames: f };
         const res: TrialResult = {
-          spec: { app: app.id, reqId: 'synthetic', scenario: {}, seed: i, record: 'poses' }, robustness,
-          worstAt: app.warmup + seconds * 0.8, unit: 'm', wallMs: 0, poses: { fps, nbody: nb, frames: f },
+          spec, robustness, worstAt: app.warmup + seconds * 0.8, unit: 'm', wallMs: 0, poses,
+          ...syntheticTrialFields(spec, poses, { warmup: app.warmup, timestep: app.simDt }),
         };
         swarm.accept(res, { robustness, worstAt: res.worstAt, warmup: app.warmup }, now() / 1000);
       }

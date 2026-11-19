@@ -5,7 +5,8 @@ import { TOKENS } from '../../core/theme-tokens.js';
 import { RenderScheduler } from '../../core/scheduler.js';
 import { FakeRaf, synthPoses } from '../fakes.js';
 import { modelFrom } from './model.js';
-import type { TrialResult } from '../../types.js';
+import { syntheticTrialFields } from '../../core/trial-fields.js';
+import type { TrialResult, TrialSpec } from '../../types.js';
 
 export function swarmRig(reduced = false, nbody = 3) {
   const parts = buildStage(modelFrom(nbody, [
@@ -21,7 +22,8 @@ export function swarmRig(reduced = false, nbody = 3) {
   return { parts, swarm, warns, sched };
 }
 
-export const result = (robustness = 1, frames = 31, nbody = 3): TrialResult => ({
-  spec: { app: 'test', reqId: 'R1', scenario: {}, seed: 1, record: 'poses' }, robustness, worstAt: 0.7, unit: 'rad', wallMs: 1,
-  poses: synthPoses(nbody, frames),
-});
+export const result = (robustness = 1, frames = 31, nbody = 3): TrialResult => {
+  const spec: TrialSpec = { app: 'test', reqId: 'R1', scenario: {}, seed: 1, record: 'poses' };
+  const poses = synthPoses(nbody, frames);
+  return { spec, robustness, worstAt: 0.7, unit: 'rad', wallMs: 1, poses, ...syntheticTrialFields(spec, poses) };
+};

@@ -15,7 +15,8 @@ export function lineStatusOf(s: { hasCompileError: boolean; running: boolean; ve
 }
 
 export function marginText(robustness: number, unit: string): string {
-  if (robustness === -Infinity) return 'diverged';
+  // -Infinity, and the sim's sentinel for a trial that diverged numerically (-Number.MAX_VALUE).
+  if (robustness <= -Number.MAX_VALUE) return 'diverged';
   if (Number.isNaN(robustness)) return 'not measured';
   return unit ? `${formatSig(robustness, 3)} ${unit}` : formatSig(robustness, 3);
 }

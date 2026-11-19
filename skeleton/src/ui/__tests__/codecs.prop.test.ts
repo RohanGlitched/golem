@@ -32,7 +32,8 @@ describe('status, codec and verdict properties', () => {
 
   // Feature: golem-studio-ui, Property 37: Margin text
   it('writes the unit and the robustness at three significant figures without an exponent', () => {
-    fc.assert(fc.property(fc.double({ noNaN: true, noDefaultInfinity: true }), fc.constantFrom('m', 'rad', 'N', 'm/s', 's'), (r, u) => {
+    fc.assert(fc.property(fc.double({ noNaN: true, noDefaultInfinity: true }).filter((x) => x > -Number.MAX_VALUE), fc.constantFrom('m', 'rad', 'N', 'm/s', 's'), (r, u) => {
+      // -Number.MAX_VALUE is the sim's sentinel for a diverged trial and reads 'diverged' (codecs.test.ts).
       const t = marginText(r, u);
       expect(t.endsWith(` ${u}`)).toBe(true);
       const num = t.slice(0, -u.length - 1);
