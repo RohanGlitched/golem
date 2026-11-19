@@ -13,15 +13,15 @@ Conventions for every task:
 
 ## Tasks
 
-- [ ] 1. Package scaffold and runtime state
-  - [ ] 1.1 Create the `apps/stagger` package scaffold
+- [x] 1. Package scaffold and runtime state
+  - [x] 1.1 Create the `apps/stagger` package scaffold
     - Add `package.json` (name `stagger`, ES modules, Node >= 20, Apache-2.0, script `assets` running `scripts/fetch-assets.mjs`, script `test` running `vitest --run`), `tsconfig.json` with `strict`, and `vitest.config.ts`
     - Dependencies: `golem-spec`, `@mujoco/mujoco`; dev dependencies: `quickhull3d`, `meshoptimizer`, `vitest`, `fast-check`, `typescript`, `vite`
     - Create the empty folders `controller/`, `robot/`, `scripts/lib/`, `web/`, `test/fixtures/`, and an Apache-2.0 `LICENSE` for app code at `apps/stagger/LICENSE`
     - Write `test/package.test.ts` (example): checks `package.json` fields, the `assets` script, strict TypeScript, and the dependency lists
     - _Requirements: 5.3, 10.1, 10.4, 10.6, 10.7, 21.5_
 
-  - [ ] 1.2 Implement `runtime.ts` with `StaggerRuntime`
+  - [x] 1.2 Implement `runtime.ts` with `StaggerRuntime`
     - Define `StaggerRuntime`, `runtimeFor(ctx)` (WeakMap lookup, allocates all arrays once per ctx) and `resetRuntime(rt)` exactly as in the design
     - Defaults: `command = [0.5, 0, 0]`, `delaySteps = 0`, trigger and push unlatched, `saved.has = false`
     - Write `test/runtime.test.ts` (example): the same ctx returns the same object, different ctx return different objects, `resetRuntime` restores defaults, and a second `runtimeFor` call allocates nothing new
