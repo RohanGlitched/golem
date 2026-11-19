@@ -48,11 +48,14 @@ import { LiveSentence } from './signature/live-sentence.js';
 import { SignatureBar } from './signature/signature-bar.js';
 import { TrailsView } from './signature/trails-view.js';
 import { savePhotograph } from './signature/photograph.js';
+import { Sonifier } from './signature/sonifier.js';
+import type { AudioContextLike } from './signature/sonifier.js';
+import type { Trace } from '../ears/index.js';
 import { SwarmClock } from './core/swarm-clock.js';
 import { BulletTime } from './core/bullet-time.js';
 import { EmetDecal, bodyPoints, highestBody } from './signature/emet-decal.js';
 import { emetTarget, foreheadSpot } from './core/emet.js';
-import { instantMargins, traceTrial } from './signature/trace-trial.js';
+import { instantMargins, sampleAt, traceTrial } from './signature/trace-trial.js';
 import type { TraceTrialResult } from './signature/trace-trial.js';
 import { VerdictPanel } from './verdict/verdict-panel.js';
 import type {
@@ -66,6 +69,8 @@ const STYLE_ID = 'golem-studio-css';
 export const PREVIEW_MS = 800;
 export const LONG_EXPOSURE_LABEL = 'Long exposure';
 export const PHOTO_LABEL = 'Save photograph';
+export const SOUND_LABEL = 'Sound';
+export const NO_AUDIO_TEXT = 'Sound needs Web Audio, which this browser does not offer';
 
 const errText = (e: unknown): string => (e instanceof Error ? e.message : String(e));
 
@@ -212,6 +217,17 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
   });
   bar.addToggle(LONG_EXPOSURE_LABEL, false, (on) => { trails?.setVisible(on); scheduler.requestOnce(); });
   bar.addButton(PHOTO_LABEL, () => { void photograph(); });
+  const sonifier = new Sonifier(() => {
+    if (hooks.createAudio) return hooks.createAudio() as AudioContextLike;
+    const AC = (win as unknown as { AudioContext?: new () => AudioContextLike; webkitAudioContext?: new () => AudioContextLike } | null);
+    const Ctor = AC?.AudioContext ?? AC?.webkitAudioContext;
+    return Ctor ? new Ctor() : undefined;
+  });
+  const soundBtn = bar.addToggle(SOUND_LABEL, false, (on) => {
+    sonifier.setEnabled(on);
+    if (on && !sonifier.enabled) { soundBtn.setAttribute('aria-pressed', 'false'); store.addMessage('info', NO_AUDIO_TEXT); }
+    scheduler.requestOnce();
+  });
   main.append(stageHost, bar.el, reelHost);
   root.append(actionsHost, tabletHost, main, verdictHost, liveHost);
   el.appendChild(root);
@@ -282,6 +298,7 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
     if (swarm) bar.setTimeline(swarm.scrubbable, clock.now - swarm.playStart, swarm.playDuration, clock.frozen);
     updateLive();
     if (emet?.animating) { emet.update(now()); scheduler.requestOnce(); }
+    if (sonifier.enabled) { const lm = liveMargin(nowMs); sonifier.setMargin(lm.margin, lm.unit); }
     if (pendingAura !== null && aura) { aura.write(pendingAura); pendingAura = null; }
     if (stage && parts) {
       const groups = parts.bodyGroups;
@@ -358,6 +375,51 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
     }
     scheduler.requestOnce();
   }
+
+  // ---------------------------------------------------------------- sonification (golem-signature 6)
+  const projV = new THREE.Vector3();
+  const heroSig: Record<string, number> = {};
+  const heroOne: Trace = { t: new Float64Array(1), signals: {}, events: [{ name: 'trigger', t: 0 }] };
+  let heroMargin = Number.NaN;
+  let heroMarginAt = -Infinity;
+  let heroSignalsFailed = false;
+  /** The selected line's live margin: the replay's trace, the run's closest call, the hero's signals (10 Hz), the verdict. */
+  function liveMargin(nowMs: number): { margin: number; unit: string } {
+    const s = store.getState();
+    const line = s.selectedId ? s.lines.find((l) => l.id === s.selectedId) : undefined;
+    if (!line) return { margin: Number.NaN, unit: '' };
+    const unit = line.unit ?? (line.compiled ? predicatesOf(line.text, lexicon)[0]?.unit ?? '' : '');
+    if (replay.active && replayLine === line.id && line.counterexample) {
+      const tr = traced.get(ceKey(line.id, line.counterexample));
+      if (tr && tr.inst.length > 0) return { margin: tr.inst[sampleAt(tr.trace.t, app.warmup + replay.t)] as number, unit };
+    }
+    if (s.run?.lineId === line.id) return { margin: rc.closestCall?.robustness ?? Number.NaN, unit };
+    if (hero && heroModel && line.compiled && !replay.active && !hero.sleeping && !heroSignalsFailed) {
+      if (nowMs - heroMarginAt >= 100) {
+        heroMarginAt = nowMs;
+        try {
+          app.signals(heroModel.ctx, heroSig);
+          const sig = heroOne.signals;
+          for (const k in heroSig) { (sig[k] ??= new Float64Array(1))[0] = heroSig[k] as number; }
+          heroOne.t[0] = hero.simTime;
+          (heroOne.events[0] as { t: number }).t = hero.simTime;
+          heroMargin = line.compiled.monitor(heroOne).robustness;
+        } catch { heroSignalsFailed = true; heroMargin = Number.NaN; }
+      }
+      if (heroMargin === heroMargin) return { margin: heroMargin, unit };
+    }
+    return { margin: line.verdict?.closest.robustness ?? Number.NaN, unit };
+  }
+  const lastStatus = new Map<string, string>();
+  cleanups.push(store.subscribe(() => {
+    for (const l of store.getState().lines) {
+      const prev = lastStatus.get(l.id);
+      if (prev !== l.status) {
+        lastStatus.set(l.id, l.status);
+        if (prev === 'running' && l.status === 'held') sonifier.chord();
+      }
+    }
+  }));
 
   // ---------------------------------------------------------------- emet (golem-signature 2)
   let emet: EmetDecal | undefined;
@@ -442,6 +504,7 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
       reducedMotion: reduced, warn: (m) => store.addMessage('warning', m), scheduler,
       onBreak: (_slot, x, y, _z, first) => {
         if (first && !reduced() && !clock.frozen && !replay.active && bullet.trigger(now(), x, y)) scheduler.requestOnce();
+        if (sonifier.enabled && stage) { projV.set(x, y, _z).project(stage.camera); sonifier.thud((projV.x + 1) / 2, now()); }
       },
     });
     stage.scene.add(swarm.group);
@@ -770,6 +833,7 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
       shove?.dispose();
       emet?.dispose();
       trails?.dispose();
+      sonifier.dispose();
       bar.dispose();
       swarm?.dispose();
       aura?.dispose();
@@ -839,6 +903,7 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
         clock: { now: clock.now, rate: clock.rate, frozen: clock.frozen }, bullet: bullet.active(now()), bulletAngle: bullet.angle(now()),
         timeline: bar.timelineVisible, playStart: swarm?.playStart ?? 0, playDuration: swarm?.playDuration ?? 0,
         trails: { count: trails?.store.count ?? 0, vertices: trails?.vertices ?? 0, visible: trails?.visible ?? false },
+        sound: { enabled: sonifier.enabled, state: sonifier.state, hz: sonifier.hz, thuds: sonifier.thuds, chords: sonifier.chords },
       };
     },
     /** Moves the camera to look at the emet decal from `distance` metres in front of it. */

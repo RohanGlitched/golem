@@ -120,6 +120,8 @@ export interface StudioTestHooks {
   clipboard?: { writeText(s: string): Promise<void> };
   /** Adds `summonSynthetic(n, seconds)` to the handle: feeds `n` synthetic pose results through the swarm (perf and e2e tests). */
   summonSynthetic?: boolean;
+  /** Replaces the AudioContext the Sound toggle creates (returns an AudioContext-like object). */
+  createAudio?: () => unknown;
 }
 
 export interface StudioOptions {

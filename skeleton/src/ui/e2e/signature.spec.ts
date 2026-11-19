@@ -147,6 +147,27 @@ test.describe('long exposure', () => {
   });
 });
 
+test.describe('sonification', () => {
+  test('is off by default; the toggle starts Web Audio, the drone follows the margin, ghosts thud and a held line chimes', async ({ page }) => {
+    test.setTimeout(600_000);
+    await openG1(page, '?sleep=600000&trials=2');
+    const snd = async () => (await page.evaluate(() => (window as unknown as W).studio.signature.state())).sound;
+    expect(await snd()).toMatchObject({ enabled: false, state: 'none' });
+    await expect(page.getByRole('button', { name: 'Sound' })).toHaveAttribute('aria-pressed', 'false');
+    await page.getByRole('button', { name: 'Select line 1.2' }).click();
+    await page.getByRole('button', { name: 'Sound' }).click();
+    await page.waitForFunction(() => (window as unknown as W).studio.signature.state().sound.state === 'running', null, { timeout: 5000 });
+    // The walking hero stands about 0.29 m above the 0.5 m line: above the 55 Hz centre.
+    await page.waitForFunction(() => (window as unknown as W).studio.signature.state().sound.hz > 56, null, { timeout: 10_000 });
+    await page.evaluate(() => (window as unknown as W).studio.summonSynthetic(64, 2));
+    await page.waitForFunction(() => (window as unknown as W).studio.signature.state().sound.thuds > 0, null, { timeout: 15_000 });
+    expect(await runLine(page, '6.1')).toBe('held');
+    await page.waitForFunction(() => (window as unknown as W).studio.signature.state().sound.chords > 0, null, { timeout: 5000 });
+    await page.getByRole('button', { name: 'Sound' }).click();
+    expect((await snd()).enabled).toBe(false);
+  });
+});
+
 test.describe('the living sentence', () => {
   test('sets the selected response clause large in Gloock', async ({ page }) => {
     await openG1(page);
