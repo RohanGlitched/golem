@@ -476,23 +476,23 @@ Conventions for every task:
     - Testing Library example tests: rows equal the `Verdict` after formatting, the Aura_Summary is a visible text line, no "proved" text.
     - _Requirements: 14.10, 19.6, 23.1, 23.10, 23.11, 23.13, 26.10_
 
-- [ ] 16. Layout, themes and accessibility
-  - [ ] 16.1 Implement `layout/styles.ts`
+- [x] 16. Layout, themes and accessibility
+  - [x] 16.1 Implement `layout/styles.ts`
     - One injected `<style>` string: theme token blocks for `[data-golem-theme]`, `@font-face` for B612 and B612 Mono from `fontBaseUrl`, grid at 1024 px (380 px Tablet column left, full-bleed Stage, Reel under it) and the single column below (Stage 56vh, primary actions, Tablet, Reel), 16 px body with line-height 1.55 and a 72ch measure, the type scale 13, 16, 20, 25, 31, 39, 61 px, 2 px control radius, 0 for the Stage, 1 px borders in `--clay` at 35%, no gradient, no drop shadow, 44 px touch targets below 1024 px, 2 px focus ring, no Gloock, no horizontal overflow.
     - Example tests on the CSS string: no `gradient`, no `box-shadow`, no `Gloock`, `56vh` present in the narrow block, focus ring width at least 2 px.
     - _Requirements: 15.2, 15.3, 15.5, 24.1, 24.2, 24.3, 24.5, 24.6, 24.7, 24.8, 24.9, 24.11, 24.12, 26.2_
 
-  - [ ] 16.2 Implement `layout/theme.ts`
+  - [x] 16.2 Implement `layout/theme.ts`
     - `ThemeController`: initial theme from saved `localStorage['golem:theme']`, then `prefers-color-scheme`, then `options.theme`, then dark; toggle with `aria-pressed` answering within 100 ms; follows system changes only while nothing is saved; in-memory fallback without storage; writes `data-golem-theme`, calls `stage.setTheme(tokens)` and `requestOnce()`.
     - Example tests: saved choice beats the system, system change followed only when nothing is saved, storage-less fallback.
     - _Requirements: 25.2, 25.3, 25.4, 25.5, 25.7, 25.8_
 
-  - [ ] 16.3 Implement `layout/boundary.tsx` and the live regions
+  - [x] 16.3 Implement `layout/boundary.tsx` and the live regions
     - `PanelErrorBoundary` showing "This panel failed to draw: {message}" with "Reload this panel" that remounts only that panel; the polite and alert Live_Region elements; landmark markup (`main`, `aside`, `region`) for the shell; the primary actions bar ("Summon 64 ghosts for every line", "Reset", theme toggle) under the Stage on narrow viewports; the replay controls container.
     - Testing Library example tests: a throwing child shows the message and the button, reloading remounts only that panel, the other panels stay mounted.
     - _Requirements: 24.4, 26.1, 26.3, 26.4, 26.7, 26.10, 29.8_
 
-- [ ] 17. Checkpoint - Stage, runs and panels complete
+- [x] 17. Checkpoint - Stage, runs and panels complete
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 18. Reel and replay

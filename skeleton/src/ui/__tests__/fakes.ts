@@ -131,11 +131,14 @@ export class FakeStorage implements Storage {
 export class FakeMatchMedia {
   matches: Record<string, boolean> = {};
   private listeners = new Map<string, Set<() => void>>();
-  fn = (q: string) => ({
-    matches: this.matches[q] ?? false,
-    addEventListener: (_t: string, cb: () => void) => { (this.listeners.get(q) ?? this.listeners.set(q, new Set()).get(q)!).add(cb); },
-    removeEventListener: (_t: string, cb: () => void) => { this.listeners.get(q)?.delete(cb); },
-  });
+  fn = (q: string) => {
+    const self = this;
+    return {
+      get matches(): boolean { return self.matches[q] ?? false; },
+      addEventListener: (_t: string, cb: () => void) => { (this.listeners.get(q) ?? this.listeners.set(q, new Set()).get(q)!).add(cb); },
+      removeEventListener: (_t: string, cb: () => void) => { this.listeners.get(q)?.delete(cb); },
+    };
+  };
   set(q: string, v: boolean): void { this.matches[q] = v; this.listeners.get(q)?.forEach((cb) => cb()); }
 }
 
