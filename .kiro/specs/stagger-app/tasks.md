@@ -90,49 +90,49 @@ Conventions for every task:
     - **Property 10: The asset pipeline is reproducible**
     - **Validates: Requirements 5.4**
 
-- [ ] 3. Controller
-  - [ ] 3.1 Implement `controller/policy.ts`
+- [x] 3. Controller
+  - [x] 3.1 Implement `controller/policy.ts`
     - `OBS_DIM`, `ACT_DIM`, `HIDDEN`, class `Policy` with `reset`, `step`, `fromBytes`, and free functions `lstmStep`, `linear`, `elu`
     - Convert weights to Float64 once, preallocate all scratch, gate order `i, f, g, o`, throw named errors on shape or length mismatch
     - Write `test/policy.test.ts` (examples): hand-computed single LSTM step, ELU at negative and positive inputs, wrong input length error text, wrong tensor shape error text, `h` and `c` zero after construct and `reset`, source scan finds no allocation inside `Policy.step`
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.8, 6.9, 6.10_
 
-  - [ ]* 3.2 Write property tests for the Policy
+  - [x]* 3.2 Write property tests for the Policy
     - **Property 11: The Policy matches a reference network**
     - **Property 12: Policy output is finite**
     - **Property 13: Policy is deterministic and reset restores the initial state**
     - **Validates: Requirements 6.1, 6.2, 6.3, 6.6, 6.7, 6.11, 6.12, 6.13**
 
-  - [ ] 3.3 Implement `controller/observation.ts`
+  - [x] 3.3 Implement `controller/observation.ts`
     - `DEFAULT_POSE`, `GAIT_PERIOD`, `gaitPhase`, `projectedGravity`, `buildObservation` with the exact slice layout of the design, writing into a caller-supplied Float64Array(47)
     - Write `test/observation.test.ts` (examples): hand-written layout case, upright quaternion gives `(0, 0, -1)`, phase 0 at `t = 0`, first-step previous action is zero, source scan finds no allocation
     - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7, 7.10, 7.11, 7.12, 7.13_
 
-  - [ ]* 3.4 Write property tests for the observation
+  - [x]* 3.4 Write property tests for the observation
     - **Property 14: Observation layout**
     - **Property 15: Projected gravity is a unit vector and is yaw invariant**
     - **Validates: Requirements 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7, 7.8, 7.9, 7.13**
 
-  - [ ] 3.5 Implement `controller/pd.ts` and `controller/latency.ts`
+  - [x] 3.5 Implement `controller/pd.ts` and `controller/latency.ts`
     - `KP`, `KD`, `ACTION_SCALE`, `actionToTarget`, `pdTorque`
     - `LatencyBuffer` (26 preallocated rows, `reset`, `push`, `delayed`) and `delaySteps(duration)` clamped to [0, 25]
     - Write `test/pd.test.ts` and `test/latency.test.ts` (examples): gains values, zero torque at target, delay 0 identity, oldest-row fallback, clamp at 25, `delaySteps(0.5) = 25`
     - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.8, 15.2, 15.3, 15.4, 15.5, 15.6, 15.7_
 
-  - [ ]* 3.6 Write property tests for the PD law and the latency buffer
+  - [x]* 3.6 Write property tests for the PD law and the latency buffer
     - **Property 16: PD law and action mapping**
     - **Property 31: Latency delay is a whole number of Control_Steps**
     - **Property 32: Latency buffer returns the observation from d steps earlier**
     - **Validates: Requirements 8.1, 8.2, 8.3, 8.4, 8.8, 8.9, 15.2, 15.3, 15.4, 15.5, 15.6, 15.7, 15.11, 15.12, 15.13**
 
-  - [ ] 3.7 Implement `controller/walker.ts`
-    - `Walker implements Controller`: constructor resets policy, previous action, latency buffer, substep counter and target; `step` runs the Policy every tenth call and the PD law on every call, reading `qpos[7:19]` and `qvel[6:18]` from live views
+  - [x] 3.7 Implement `controller/walker.ts`
+    - `Walker implements Controller`: constructor resets policy, previous action, latency buffer, call counter and target; `step` is called once per Control_Step, holds Default_Pose on the first call, runs the Policy on every later call and writes the target to `data.ctrl`; the Robot_MJCF PD actuators apply the PD law every Sim_Step (design revision)
     - Uses `rt.command` and `rt.delaySteps`; allocates nothing inside `step`
-    - Write `test/walker.test.ts` (examples with a counting Policy stub and a typed-array stub ctx): policy call count, target held for 10 steps, constructor state reset, source scan finds no allocation inside `Walker.step`
+    - Write `test/walker.test.ts` (examples with a counting Policy stub and a typed-array stub ctx): policy call count, Default_Pose on the first call, constructor state reset, source scan finds no allocation inside `Walker.step`
     - _Requirements: 8.5, 8.6, 8.7, 8.10, 8.11, 8.12, 15.9, 15.10_
 
-  - [ ]* 3.8 Write property test for the Walker schedule
-    - **Property 17: The Walker evaluates the Policy every tenth Sim_Step and the PD law every Sim_Step**
+  - [x]* 3.8 Write property test for the Walker schedule
+    - **Property 17: The Walker evaluates the Policy once per Control_Step and holds its target in data.ctrl**
     - **Validates: Requirements 8.5, 8.6, 8.7**
 
 - [ ] 4. Signals

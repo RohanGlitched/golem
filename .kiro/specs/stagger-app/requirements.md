@@ -104,7 +104,7 @@ Out of scope: the EARS compiler, the episode runner, the falsifier, the shared U
 5. THE Robot_MJCF SHALL declare a body named `pelvis` as the free-joint root and a body named `torso_link` or the Upstream_MJCF's equivalent torso body.
 6. THE Asset_Fetcher SHALL write `robot/scene.xml` so that it includes the Robot_MJCF and adds a floor geom named `floor`.
 7. THE Scene_File SHALL set the simulation timestep to 0.002 s.
-8. THE Robot_MJCF SHALL declare motor actuators that accept torque in N·m so that the PD_Law output is written directly to `data.ctrl`.
+8. THE Robot_MJCF SHALL declare one PD actuator per leg joint with `gainprm = kp` and `biasprm = (0, -kp, -kd)` from Requirement 8, so that MuJoCo applies the PD_Law at every Sim_Step with `data.ctrl` as the joint target. (Revised: golem-sim calls the controller once per Control_Step, see the design's Walker revision note.)
 9. WHEN the Robot_MJCF is rewritten a second time from its own output, THE Asset_Fetcher SHALL produce a Robot_MJCF equal to the first (rewrite idempotence property).
 10. WHEN the Scene_File is compiled with `mj.MjModel.from_xml_path('/robot/scene.xml')` after the files are written with `mj.FS.writeFile`, THE Stagger_App SHALL give a model with 12 actuators and `nq` equal to 19.
 11. WHEN the Scene_File is compiled in Node, THE Stagger_App SHALL complete the compile within 5 s on the reference development machine.
@@ -188,8 +188,8 @@ Out of scope: the EARS compiler, the episode runner, the falsifier, the shared U
 1. THE Walker SHALL compute the joint target as `action * 0.25 + Default_Pose`, for the 12 leg joints.
 2. THE Walker SHALL use `kp = [100, 100, 100, 150, 40, 40]` repeated for both legs, in N·m/rad.
 3. THE Walker SHALL use `kd = [2, 2, 2, 4, 2, 2]` repeated for both legs, in N·m·s/rad.
-4. THE Walker SHALL compute `ctrl = (target - q) * kp - qd * kd` for each joint and SHALL write the result to `data.ctrl`.
-5. THE Walker SHALL update `data.ctrl` with the PD_Law every Sim_Step, using the current `q` and `qd` and the target of the latest Control_Step.
+4. THE Stagger_App SHALL apply the torque `(target - q) * kp - qd * kd` to each leg joint, with the Walker writing `target` to `data.ctrl` and the Robot_MJCF PD actuators of Requirement 3.8 computing the torque.
+5. THE Stagger_App SHALL evaluate the PD_Law every Sim_Step, using the current `q` and `qd` and the target of the latest Control_Step.
 6. THE Walker SHALL evaluate the Policy once every Control_Step (50 Hz) and SHALL hold the target constant over the 10 Sim_Steps of that Control_Step.
 7. THE Walker SHALL store the action of each Control_Step as the previous action for the next Observation.
 8. WHEN `q` equals the target and `qd` is 0, THE Walker SHALL write a `ctrl` of 0 for every joint.

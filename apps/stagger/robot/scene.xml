@@ -1,6 +1,8 @@
 <mujoco model="stagger scene">
   <include file="g1_12dof.xml"/>
-  <option timestep="0.002"/>
+  <option timestep="0.002">
+    <flag autoreset="disable"/>
+  </option>
 
   <statistic center="1.0 0.7 1.0" extent="0.8"/>
 

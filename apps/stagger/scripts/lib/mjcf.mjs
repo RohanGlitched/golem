@@ -100,7 +100,9 @@ export function referencedMeshFiles(xml) {
 export function writeScene(robotMjcfName) {
   return `<mujoco model="stagger scene">
   <include file="${robotMjcfName}"/>
-  <option timestep="0.002"/>
+  <option timestep="0.002">
+    <flag autoreset="disable"/>
+  </option>
 
   <statistic center="1.0 0.7 1.0" extent="0.8"/>
 

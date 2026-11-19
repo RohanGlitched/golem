@@ -53,6 +53,7 @@ describe('writeScene', () => {
   it('includes the robot MJCF, a floor geom and a 0.002 s timestep', () => {
     expect(scene).toContain('<include file="g1_12dof.xml"/>');
     expect(scene).toMatch(/<geom name="floor"/);
-    expect(scene).toContain('<option timestep="0.002"/>');
+    expect(scene).toContain('<option timestep="0.002">');
+    expect(scene).toContain('<flag autoreset="disable"/>');
   });
 });
