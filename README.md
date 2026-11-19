@@ -97,7 +97,7 @@ Every number here comes from committed raw data in [`evidence/`](evidence), usin
 
 ## How Kiro built GOLEM
 
-Kiro CLI did the building: 15 specs (including 3 bugfix specs written from independent audits in [`docs/reviews/`](docs/reviews)), 224 requirements, 2,273 EARS acceptance criteria, 293 correctness properties, 663 completed tasks and 461 property-test assertions. The root [`.kiro/`](.kiro) holds the steering, specs, hooks, agents and MCP config used to build it. The full account is on the site's [How Kiro built it](https://d23v187fnxad7l.cloudfront.net/how-kiro/) page, and the raw log of every Kiro session is in [`evidence/kiro-sessions/`](evidence/kiro-sessions).
+Kiro CLI did the building: 14 specs that were built (including 3 bugfix specs written from independent audits in [`docs/reviews/`](docs/reviews)) plus one written and not started, 213 requirements, 2,141 EARS acceptance criteria, 273 correctness properties, 699 of 707 tasks done and 490 property-test assertions in 387 test files (counted by `scripts/kiro-stats.mjs`; pack copies installed into the apps are counted once). The root [`.kiro/`](.kiro) holds the steering, specs, hooks, agents and MCP config used to build it. The full account is on the site's [How Kiro built it](https://d23v187fnxad7l.cloudfront.net/how-kiro/) page, and the raw log of every Kiro session is in [`evidence/kiro-sessions/`](evidence/kiro-sessions).
 
 ## Run it locally
 
