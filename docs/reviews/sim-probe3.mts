@@ -1,4 +1,4 @@
-const SRC = 'file:///I:/Programs/ListofHackathon/hackathons/39-kiroween/golem/skeleton/src/sim/';
+const SRC = new URL('../../skeleton/src/sim/', import.meta.url).href;
 const { runTrial, ModelCache, liveHandleCount, loadMujoco } = await import(SRC + 'index.ts');
 const mj: any = await loadMujoco();
 const heapNow = () => { const { model } = { model: null as any }; return (globalThis as any).__heap?.() ?? 0; };

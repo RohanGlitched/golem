@@ -9,6 +9,7 @@ fileMatchPattern: ["skeleton/src/sim/**", "skeleton/src/pool/**", "apps/**/contr
 - Enum values need `.value`: `mj.mj_name2id(model, mj.mjtObj.mjOBJ_BODY.value, 'pelvis')`.
 - `data.qpos`, `qvel`, `ctrl`, `xfrc_applied`, `xpos`, `xquat`, `xmat`, `site_xpos` are **live views** into WASM memory. Re-read the view after a model reload. Never keep a view past `data.delete()`.
 - `data.contact` is a **copy** (a vector handle): read it once per step if needed, and `.delete()` it.
+- `data.warning` is the opposite: a **reference** into MjData. Never `.delete()` it (the WASM module aborts). Each `.get(i)` returns a copy that you must `.delete()`. Read it at divergence and at the end of a trial, not per step.
 - Out-parameters (Jacobians and friends) need `new mj.DoubleBuffer(n)` (4.0.1 takes a length; the array form throws). Read `.GetView()`, then `.delete()`. Passing a plain `Float64Array` silently writes nowhere. Use the `sim` helpers instead of raw buffers.
 - **Auto-reset hides divergence:** MuJoCo silently resets `qpos` on bad accelerations unless `mjDSBL_AUTORESET` is set. A reset robot looks upright, so trials must disable auto-reset and treat any `data.warning` count increase as divergence.
 - `mj_geomDistance(m, d, g1, g2, distmax, fromto)` gives signed distance between two geoms. Use it for separation monitors.

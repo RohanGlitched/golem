@@ -1,4 +1,4 @@
-﻿// Shared helpers for sim tests: fixed logged fast-check seed, run counts, failure reporting.
+// Shared helpers for sim tests: fixed logged fast-check seed, run counts, failure reporting.
 import type { Parameters } from 'fast-check';
 
 const envSeed = Number.parseInt(process.env.GOLEM_SEED ?? '', 10);

@@ -1,0 +1,557 @@
+// Regression tests for golem-sim-hardening (one describe per defect or improvement).
+// Each test failed on the runner before its fix; see docs/reviews/sim-hardening.md.
+import { readdirSync, readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { afterAll, describe, expect, it } from 'vitest';
+import { runTrial } from './episode.js';
+import { ModelCache } from './model-cache.js';
+import {
+  alwaysAbove, boxDropApp, kickCall, makeStoolApp, shoveCall, stoolApp,
+} from './test-models.js';
+import type { CompiledRequirement, EarlyStopHook, RobotApp, Trace, TrialResult, TrialSpec } from './types.js';
+
+const cache = new ModelCache();
+afterAll(() => cache.dispose());
+const here = dirname(fileURLToPath(import.meta.url));
+
+const AUTORESET = 65536;
+
+export interface Captured { result: TrialResult; trace: Trace }
+async function run(
+  app: RobotApp, req: CompiledRequirement, scenario: Record<string, number> = { f: 0, a: 0 }, seed = 1,
+  extra: { earlyStop?: EarlyStopHook; record?: 'poses'; cache?: ModelCache } = {},
+): Promise<Captured> {
+  let trace: Trace | undefined;
+  const wrapped: CompiledRequirement = {
+    ...req,
+    monitor: (t) => {
+      trace = {
+        t: t.t.slice(), events: t.events.map((e) => ({ ...e })),
+        signals: Object.fromEntries(Object.entries(t.signals).map(([k, v]) => [k, v.slice()])),
+      };
+      return req.monitor(t);
+    },
+  };
+  const spec: TrialSpec = { app: app.id, reqId: req.id, scenario, seed, ...(extra.record ? { record: extra.record } : {}) };
+  const result = await runTrial(app, wrapped, spec, { cache: extra.cache ?? cache, ...(extra.earlyStop ? { earlyStop: extra.earlyStop } : {}) });
+  return { result, trace: trace ?? { t: new Float64Array(0), signals: {}, events: [] } };
+}
+
+const boxReq = (horizon = 1, perturbations = [kickCall()]) =>
+  alwaysAbove({ signal: 'box.z', bound: 0.05, horizon, perturbations });
+
+describe('defect 1: auto-reset is disabled during trials', () => {
+  it('sets mjDSBL_AUTORESET while the controller runs and restores the flags afterwards', async () => {
+    const { model } = await cache.getModel(boxDropApp);
+    const before = model.opt.disableflags as number;
+    const seen: number[] = [];
+    const app: RobotApp = {
+      ...boxDropApp,
+      makeController: (ctx) => ({ step: () => { seen.push(ctx.model.opt.disableflags as number); } }),
+    };
+    await run(app, boxReq(0.2, []));
+    expect(seen.length).toBeGreaterThan(0);
+    expect(seen.every((f) => (f & AUTORESET) !== 0)).toBe(true);
+    expect(model.opt.disableflags).toBe(before);
+    expect(before & AUTORESET).toBe(0);
+  });
+
+  it('does not silently reset the box after a 1e30 N kick: time never runs backwards', async () => {
+    const { trace } = await run(boxDropApp, boxReq(1), { f: 1e30, a: 0 });
+    const time = trace.signals['time']!;
+    for (let k = 1; k < time.length; k++) expect(time[k]!).toBeGreaterThan(time[k - 1]!);
+    // An auto-reset puts the box back at its initial height (0.3 m) and the trace looks healthy.
+    const z = trace.signals['box.z']!;
+    expect(z.every((v) => Math.abs(v - 0.3) > 1e-9 || v === z[0])).toBe(true);
+  });
+});
+
+describe('defect 2 and improvement 1: bounded divergence check and numerical diagnostics', () => {
+  it('reports a finite 1e30 N blow-up as diverged, with the cause, the warning counters, solver and contact counts', async () => {
+    const { result, trace } = await run(boxDropApp, boxReq(1), { f: 1e30, a: 0 });
+    const div = trace.events.filter((e) => e.name === 'diverged') as any[];
+    expect(div).toHaveLength(1);
+    const ev = div[0];
+    expect(['qpos', 'qvel', 'qacc']).toContain(ev.cause);
+    expect(ev.phase).toBe('trial');
+    expect(Math.abs(ev.value) > 1e10 || !Number.isFinite(ev.value)).toBe(true);
+    expect(ev.warnings.BADQACC).toBeGreaterThanOrEqual(1);
+    expect(typeof ev.solverIterations).toBe('number');
+    expect(typeof ev.contacts).toBe('number');
+    // The kick starts at the trigger (0.2 s) and the blow-up is caught within the kick.
+    expect(ev.t).toBeGreaterThan(0.2);
+    expect(ev.t).toBeLessThanOrEqual(0.2 + 0.02 + 1e-9);
+    expect(result.robustness).toBeLessThan(0);
+    expect(result.worstAt).toBe(ev.t);
+    const { name: _name, ...info } = ev;
+    expect(result.diagnostics.diverged).toEqual(info);
+    expect(result.diagnostics.numerical).toBe(true);
+    // The trace holds only samples before the divergence.
+    expect(trace.t[trace.t.length - 1]!).toBeLessThan(ev.t);
+  });
+
+  it('reports a healthy contact-rich trial with contacts, solver iterations and no warnings', async () => {
+    const { result, trace } = await run(stoolApp, alwaysAbove({ signal: 'torso.z', bound: 0.25, horizon: 1 }));
+    expect(trace.events.map((e) => e.name)).toEqual(['trigger']);
+    const d = result.diagnostics;
+    expect(d.maxContacts).toBeGreaterThanOrEqual(5);
+    expect(d.maxSolverIterations).toBeGreaterThanOrEqual(1);
+    expect(d.solverSaturatedSteps).toBeGreaterThanOrEqual(0);
+    expect(Object.values(d.warnings).every((n) => n === 0)).toBe(true);
+    expect(d.warnings).toHaveProperty('BADQACC');
+    expect(d.numerical).toBe(false);
+    expect(d.diverged).toBeUndefined();
+    expect(d.simSteps).toBe(100 + 500);
+    expect(d.timestep).toBe(0.002);
+    expect(d.integrator).toBe('euler');
+    expect(d.horizon).toBe(1);
+  });
+
+  it('treats a BAD* warning counter raised during the trial as divergence even when the state looks bounded', async () => {
+    const app: RobotApp = {
+      ...boxDropApp,
+      makeController: (ctx) => {
+        let n = 0;
+        return {
+          step: () => {
+            if (n++ !== 15) return;
+            const w = ctx.data.warning;           // a reference into MjData: never delete it
+            const s = w.get(3);                   // mjWARN_BADQPOS; get() returns a copy
+            s.number = 1; w.set(3, s); s.delete();
+          },
+        };
+      },
+    };
+    const { result, trace } = await run(app, boxReq(0.6, []));
+    const div = trace.events.filter((e) => e.name === 'diverged') as any[];
+    expect(div).toHaveLength(1);
+    expect(div[0].cause).toBe('warning');
+    expect(div[0].warnings.BADQPOS).toBe(1);
+    expect(result.robustness).toBeLessThan(0);
+    expect(result.diagnostics.numerical).toBe(true);
+  });
+});
+
+describe('defect 4: mj_forward after initState', () => {
+  it('lets sample 0 and the first controller step see the pose initState wrote (warm-up 0)', async () => {
+    const seen: number[][] = [];
+    const app: RobotApp = {
+      ...boxDropApp,
+      warmup: 0,
+      initState: (ctx) => { (ctx.data.qpos as Float64Array)[2] = 0.9; },
+      makeController: (ctx) => ({
+        step: () => { if (seen.length === 0) seen.push(Array.from(ctx.data.sensordata as Float64Array)); },
+      }),
+    };
+    const { trace } = await run(app, boxReq(0.1, []));
+    expect(trace.signals['box.z']![0]).toBe(0.9);
+    expect(seen[0]).toEqual([0, 0, 0.9]);
+  });
+});
+
+describe('defect 3 and improvement 4: Controller.substep at the sim rate, and the saturation meter', () => {
+  it('calls substep before every mj_step, warm-up included, with tSim = simIndex * simDt', async () => {
+    const calls: Array<{ t: number; time: number }> = [];
+    const app: RobotApp = {
+      ...boxDropApp,
+      makeController: (ctx) => ({
+        step: () => {},
+        substep: (_c, tSim) => { calls.push({ t: tSim, time: ctx.data.time as number }); },
+      }),
+    };
+    await run(app, boxReq(0.5, []));
+    expect(calls).toHaveLength(100 + 25 * 10);
+    calls.forEach((c, i) => {
+      expect(c.t).toBe(i * 0.002);
+      expect(Math.abs(c.time - c.t)).toBeLessThan(1e-12);
+    });
+  });
+
+  it('calls substep after xfrc is cleared and before every perturbation apply', async () => {
+    const order: string[] = [];
+    const spy = { phrase: 'spy', name: 'spy', dims: () => [], apply: () => { order.push('apply'); } };
+    const app: RobotApp = {
+      ...boxDropApp,
+      lexicon: { ...boxDropApp.lexicon, perturbations: [spy] },
+      makeController: (ctx) => ({
+        step: () => { order.push('step'); },
+        substep: () => {
+          const x = ctx.data.xfrc_applied as Float64Array;
+          order.push(x.every((v) => v === 0) ? 'substep' : 'substep-dirty');
+          x[8] = 1; // a controller may write xfrc; the next step clears it again
+        },
+      }),
+    };
+    await run(app, alwaysAbove({ signal: 'box.z', bound: 0, horizon: 0.04, perturbations: [{ template: 'spy', params: {} }] }));
+    const trial = order.slice(order.indexOf('apply') - 1);
+    expect(trial.slice(0, 4)).toEqual(['substep', 'apply', 'substep', 'apply']);
+    expect(order).not.toContain('substep-dirty');
+    expect(order.filter((o) => o === 'step')).toHaveLength(10 + 2);
+  });
+
+  it('keeps the stool standing with a 500 Hz PD in substep; without torque it collapses', async () => {
+    const req = alwaysAbove({ signal: 'torso.z', bound: 0.25, horizon: 1.5 });
+    const held = await run(stoolApp, req, { f: 0, a: 0 }, 3);
+    expect(held.result.robustness).toBeGreaterThan(0.02);
+    const limp = await run(makeStoolApp('none'), req, { f: 0, a: 0 }, 3);
+    expect(limp.result.robustness).toBeLessThan(0);
+  });
+
+  it('logs torque saturation as a signal: below 1 at rest, at least 1 while a shove saturates the hips', async () => {
+    const req = alwaysAbove({ signal: 'torso.z', bound: 0, horizon: 1, perturbations: [shoveCall(0.3)] });
+    const calm = await run(stoolApp, req, { f: 0, a: 0 }, 3);
+    const sat = calm.trace.signals['saturation']!;
+    expect(sat.length).toBe(calm.trace.t.length);
+    expect(Math.max(...sat.slice(10))).toBeLessThan(1);
+    const shoved = await run(stoolApp, req, { f: 800, a: 0 }, 3);
+    expect(Math.max(...shoved.trace.signals['saturation']!)).toBeGreaterThanOrEqual(1);
+  });
+});
+
+describe('defect 7: PerturbationTemplate.begin runs once at the trigger', () => {
+  it('calls begin once per call, in array order, at the trigger, before sample 0 and the first apply; a mass doubling does not compound', async () => {
+    const log: string[] = [];
+    const { model } = await cache.getModel(boxDropApp);
+    const box = 1; // body id of "box"
+    const mass0 = model.body_mass[box] as number;
+    const mk = (name: string) => ({
+      phrase: name, name, dims: () => [],
+      begin: (ctx: any, values: Record<string, number>) => {
+        log.push(`begin:${name}:${Math.abs((ctx.data.time as number) - 0.2) < 1e-12}:${values['k']}`);
+        ctx.model.body_mass[box] *= 2;
+      },
+      apply: () => { if (!log.includes(`apply:${name}`)) log.push(`apply:${name}`); },
+    });
+    const masses: number[] = [];
+    const app: RobotApp = {
+      ...boxDropApp,
+      lexicon: { ...boxDropApp.lexicon, perturbations: [mk('A'), mk('B')] },
+      signals: (ctx, out) => {
+        if (masses.length === 0) log.push('sample0');
+        masses.push(ctx.model.body_mass[box] as number);
+        boxDropApp.signals(ctx, out);
+      },
+    };
+    await run(app, alwaysAbove({
+      signal: 'box.z', bound: 0, horizon: 0.5,
+      perturbations: [{ template: 'A', params: { k: 1 } }, { template: 'B', params: { k: 2 } }],
+    }));
+    expect(log).toEqual(['begin:A:true:1', 'begin:B:true:2', 'sample0', 'apply:A', 'apply:B']);
+    expect(masses.every((m) => m === mass0 * 4)).toBe(true);
+    expect(model.body_mass[box]).toBe(mass0);
+  });
+});
+
+describe('defect 6 and improvement 5: full model snapshot and restore', () => {
+  /** Fields the old allow-list guard did not cover. */
+  const scramble = {
+    phrase: 'scramble', name: 'scramble', dims: () => [],
+    begin: (ctx: any) => {
+      const m = ctx.model;
+      m.body_pos[3 * (ctx.ids['body:crate'] as number) + 2] = 3;
+      m.actuator_ctrlrange[1] = 1;
+      m.jnt_stiffness[2] = 7;
+      m.geom_solref[0] = 0.05;
+      m.dof_armature[6] = 0.5;
+      m.eq_data[0] = 0.25;
+      m.opt.o_margin = 0.01;
+      m.opt.impratio = 3;
+    },
+    apply: () => {},
+  };
+  const app: RobotApp = { ...stoolApp, lexicon: { ...stoolApp.lexicon, perturbations: [scramble] } };
+  const read = (m: any) => ({
+    bodyPos: m.body_pos[3 * 2 + 2], ctrlrange: m.actuator_ctrlrange[1], stiffness: m.jnt_stiffness[2],
+    solref: m.geom_solref[0], armature: m.dof_armature[6], eq: m.eq_data[0], margin: m.opt.o_margin, impratio: m.opt.impratio,
+  });
+
+  it('restores fields outside the old allow-list (body_pos, ctrlrange, stiffness, solref, armature, eq_data, opt)', async () => {
+    const { model } = await cache.getModel(app);
+    const before = read(model);
+    const bytes = Uint8Array.from(model.buffer as Uint8Array);
+    await run(app, alwaysAbove({ signal: 'torso.z', bound: 0, horizon: 0.2, perturbations: [{ template: 'scramble', params: {} }] }));
+    expect(read(model)).toEqual(before);
+    expect(Buffer.compare(Buffer.from(model.buffer as Uint8Array), Buffer.from(bytes))).toBe(0);
+  });
+
+  it('isolates trials: a scrambled trial leaves no trace in the next one', async () => {
+    const plain = alwaysAbove({ signal: 'torso.z', bound: 0.25, horizon: 0.6 });
+    // Reference from a freshly compiled model, so an earlier leak in the shared cache cannot hide one here.
+    const fresh = new ModelCache();
+    const a = await run(stoolApp, plain, { f: 0, a: 0 }, 9, { cache: fresh });
+    fresh.dispose();
+    await run(app, alwaysAbove({ signal: 'torso.z', bound: 0, horizon: 0.2, perturbations: [{ template: 'scramble', params: {} }] }));
+    const b = await run(stoolApp, plain, { f: 0, a: 0 }, 9);
+    expect(Object.is(a.result.robustness, b.result.robustness)).toBe(true);
+    expect(Array.from(b.trace.signals['torso.z']!)).toEqual(Array.from(a.trace.signals['torso.z']!));
+  });
+
+  it('names every changed field with changedModelFields, and none after a restore', async () => {
+    const snapMod = await import('./model-snapshot.js');
+    const { model } = await cache.getModel(app);
+    expect(snapMod.changedModelFields(model)).toEqual([]);
+    const ctx = { model, ids: { 'body:crate': 2 } };
+    scramble.begin(ctx);
+    expect(snapMod.changedModelFields(model).sort()).toEqual(
+      ['actuator_ctrlrange', 'body_pos', 'dof_armature', 'eq_data', 'geom_solref', 'jnt_stiffness', 'opt.impratio', 'opt.o_margin'],
+    );
+    snapMod.restoreModelSnapshot(model);
+    expect(snapMod.changedModelFields(model)).toEqual([]);
+  });
+});
+
+describe('defect 5: pose frames follow the sim-step schedule and the reported fps', () => {
+  it('records floor(horizon * 30) + 1 frames, frame f being the state at trial step ceil(f / (30 * simDt))', async () => {
+    const states = new Map<number, number[]>();
+    const app: RobotApp = {
+      ...boxDropApp,
+      makeController: (ctx) => ({
+        step: () => {},
+        substep: (_c, tSim) => {
+          const i = Math.round(tSim / 0.002);
+          states.set(i, [...Array.from(ctx.data.xpos as Float64Array), ...Array.from(ctx.data.xquat as Float64Array)]);
+        },
+      }),
+      signals: (ctx, out) => {
+        boxDropApp.signals(ctx, out);
+        const i = Math.round((ctx.data.time as number) / 0.002);
+        states.set(i, [...Array.from(ctx.data.xpos as Float64Array), ...Array.from(ctx.data.xquat as Float64Array)]);
+      },
+    };
+    const horizon = 1.8;
+    const { result } = await run(app, boxReq(horizon, []), { f: 0, a: 0 }, 1, { record: 'poses' });
+    const p = result.poses!;
+    expect(p.fps).toBe(30);
+    const nb = p.nbody;
+    const frames = p.frames.length / (nb * 7);
+    expect(frames).toBe(Math.floor(horizon * 30) + 1); // 55; the old recorder gave 46 (25 fps)
+    for (let f = 0; f < frames; f++) {
+      const s = Math.ceil(f / (30 * 0.002) - 1e-9);
+      expect(Math.abs(s * 0.002 - f / 30)).toBeLessThan(0.002);
+      const st = states.get(100 + s)!;
+      for (let b = 0; b < nb; b++) {
+        const o = (f * nb + b) * 7;
+        expect(p.frames[o]).toBe(Math.fround(st[3 * b]!));
+        expect(p.frames[o + 2]).toBe(Math.fround(st[3 * b + 2]!));
+        expect(p.frames[o + 3]).toBe(Math.fround(st[3 * nb + 4 * b]!));
+      }
+    }
+  });
+});
+
+describe('defect 8: divergence during warm-up is a counterexample, not an error', () => {
+  const blowUpInWarmup = (monitor?: CompiledRequirement['monitor']): [RobotApp, CompiledRequirement] => {
+    const app: RobotApp = {
+      ...boxDropApp,
+      makeController: (ctx) => ({
+        step: () => {},
+        substep: (_c, tSim) => {
+          if (Math.round(tSim / 0.002) === 50) (ctx.data.xfrc_applied as Float64Array)[6 + 2] = 1e30;
+        },
+      }),
+    };
+    const req = boxReq(1, []);
+    return [app, monitor ? { ...req, monitor } : req];
+  };
+
+  it('returns a broken result with one diverged event in the warm-up phase and an empty trace', async () => {
+    const [app, req] = blowUpInWarmup();
+    const { result, trace } = await run(app, req);
+    expect(trace.t.length).toBe(0);
+    expect(trace.events).toHaveLength(1);
+    const ev = trace.events[0] as any;
+    expect(ev.name).toBe('diverged');
+    expect(ev.phase).toBe('warmup');
+    expect(ev.t).toBeCloseTo(51 * 0.002, 12);
+    expect(result.robustness).toBeLessThan(0);
+    expect(result.worstAt).toBe(ev.t);
+    expect(result.unit).toBe('m');
+    expect(result.diagnostics.diverged?.phase).toBe('warmup');
+    expect(result.diagnostics.simSteps).toBe(51);
+  });
+
+  it('uses an empty unit when the monitor cannot handle an empty trace', async () => {
+    const [app, req] = blowUpInWarmup(() => { throw new Error('empty trace'); });
+    const r = await runTrial(app, req, { app: app.id, reqId: req.id, scenario: { f: 0, a: 0 }, seed: 1 }, { cache });
+    expect(r.robustness).toBeLessThan(0);
+    expect(r.unit).toBe('');
+  });
+});
+
+describe('defect 9: the early-stop hook decides the robustness', () => {
+  it.each([[123], [-0.5]])('returns the hook value %s, with worstAt and unit from the monitor on the prefix', async (value) => {
+    const req = alwaysAbove({ signal: 'torso.z', bound: 0.25, horizon: 1 });
+    const { result, trace } = await run(stoolApp, req, { f: 0, a: 0 }, 2, { earlyStop: (_t, n) => (n === 10 ? value : undefined) });
+    expect(trace.t.length).toBe(10);
+    expect(result.robustness).toBe(value);
+    const prefix = req.monitor(trace);
+    expect(result.worstAt).toBe(prefix.worstAt);
+    expect(result.unit).toBe('m');
+  });
+});
+
+describe('defect 10: robustness survives JSON', () => {
+  const roundTrip = (r: TrialResult) => JSON.parse(JSON.stringify(r)) as TrialResult;
+
+  it('reports a diverged trial with the finite DIVERGED_ROBUSTNESS, which JSON keeps', async () => {
+    const { DIVERGED_ROBUSTNESS } = await import('./episode.js');
+    expect(DIVERGED_ROBUSTNESS).toBe(-Number.MAX_VALUE);
+    const { result } = await run(boxDropApp, boxReq(0.5), { f: 1e30, a: 0 });
+    expect(result.robustness).toBe(DIVERGED_ROBUSTNESS);
+    const back = roundTrip(result);
+    expect(back.robustness).toBe(result.robustness);
+    expect(back.worstAt).toBe(result.worstAt);
+  });
+
+  it.each([[Infinity, Number.MAX_VALUE], [-Infinity, -Number.MAX_VALUE]])('clamps a monitor robustness of %s to %s', async (inf, want) => {
+    const req: CompiledRequirement = { ...boxReq(0.2, []), monitor: () => ({ robustness: inf, worstAt: 0.2, unit: 'm' }) };
+    const { result } = await run(boxDropApp, req);
+    expect(result.robustness).toBe(want);
+    expect(roundTrip(result).robustness).toBe(want);
+  });
+
+  it('rejects a NaN robustness or a non-finite worstAt from the monitor, naming the requirement', async () => {
+    const nanReq: CompiledRequirement = { ...boxReq(0.2, []), id: 'R7', monitor: () => ({ robustness: NaN, worstAt: 0.2, unit: 'm' }) };
+    await expect(run(boxDropApp, nanReq)).rejects.toThrow(/requirement R7 returned robustness NaN/);
+    const badAt: CompiledRequirement = { ...boxReq(0.2, []), id: 'R8', monitor: () => ({ robustness: 1, worstAt: Infinity, unit: 'm' }) };
+    await expect(run(boxDropApp, badAt)).rejects.toThrow(/requirement R8 returned worstAt Infinity/);
+  });
+});
+
+describe('improvement 3: trajectory hash', () => {
+  /** Independent reference: reads each qpos double as two little-endian uint32 words through a DataView. */
+  function referenceHash(states: Float64Array[], nq: number): string {
+    const rotl = (x: number, r: number) => (x << r) | (x >>> (32 - r));
+    const mm = (h: number, w: number) => {
+      let k = Math.imul(w, 0xcc9e2d51); k = rotl(k, 15); k = Math.imul(k, 0x1b873593);
+      h ^= k; h = rotl(h, 13); return (Math.imul(h, 5) + 0xe6546b64) | 0;
+    };
+    const fmix = (h: number) => {
+      h ^= h >>> 16; h = Math.imul(h, 0x85ebca6b); h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35); h ^= h >>> 16; return h >>> 0;
+    };
+    let a = 0x811c9dc5, b = 0x9747b28c;
+    for (const s of states) {
+      const dv = new DataView(s.buffer, s.byteOffset, s.byteLength);
+      for (let i = 0; i < s.byteLength; i += 4) {
+        const w = dv.getUint32(i, true);
+        a = Math.imul(a ^ w, 0x01000193); b = mm(b, w);
+      }
+    }
+    const n = states.length;
+    a = Math.imul(a ^ nq, 0x01000193); a = Math.imul(a ^ n, 0x01000193);
+    b = mm(b, nq); b = mm(b, n);
+    const hex = (x: number) => (x >>> 0).toString(16).padStart(8, '0');
+    return hex(fmix(a)) + hex(fmix(b ^ Math.imul(n, 4)));
+  }
+
+  /** Logs qpos before every step (substep) and after the last one (last signals call). */
+  function logging(base: RobotApp, states: Float64Array[]): RobotApp {
+    return {
+      ...base,
+      makeController: (ctx, rng) => {
+        const inner = base.makeController(ctx, rng);
+        return {
+          step: (c, t) => inner.step(c, t),
+          substep: (c, tSim) => { states[Math.round(tSim / 0.002)] = Float64Array.from(c.data.qpos as Float64Array); inner.substep?.(c, tSim); },
+        };
+      },
+      signals: (ctx, out) => {
+        base.signals(ctx, out);
+        states[Math.round((ctx.data.time as number) / 0.002)] = Float64Array.from(ctx.data.qpos as Float64Array);
+      },
+    };
+  }
+
+  it('hashes qpos after mj_forward and after every sim step, matching an independent reference', async () => {
+    const states: Float64Array[] = [];
+    const req = alwaysAbove({ signal: 'torso.z', bound: 0.25, horizon: 0.6, perturbations: [shoveCall(0.1)] });
+    const { result } = await run(logging(stoolApp, states), req, { f: 40, a: 1 }, 4);
+    expect(result.hash).toMatch(/^[0-9a-f]{16}$/);
+    expect(states).toHaveLength(100 + 300 + 1);
+    expect(result.hash).toBe(referenceHash(states, states[0]!.length));
+  });
+
+  it('is stable across repeats and pose recording, changes with the seed, and survives JSON', async () => {
+    const req = alwaysAbove({ signal: 'torso.z', bound: 0.25, horizon: 0.6, perturbations: [shoveCall(0.1)] });
+    const a = await run(stoolApp, req, { f: 40, a: 1 }, 4);
+    const b = await run(stoolApp, req, { f: 40, a: 1 }, 4, { record: 'poses' });
+    const c = await run(stoolApp, req, { f: 40, a: 1 }, 5);
+    expect(b.result.hash).toBe(a.result.hash);
+    expect(c.result.hash).not.toBe(a.result.hash);
+    expect(JSON.parse(JSON.stringify(a.result)).hash).toBe(a.result.hash);
+  });
+
+  it('covers only the steps that ran when the hook stops early', async () => {
+    const states: Float64Array[] = [];
+    const req = alwaysAbove({ signal: 'torso.z', bound: 0.25, horizon: 0.6 });
+    const { result } = await run(logging(stoolApp, states), req, { f: 0, a: 0 }, 4, { earlyStop: (_t, n) => (n === 6 ? 1 : undefined) });
+    expect(states).toHaveLength(100 + 50 + 1);
+    expect(result.hash).toBe(referenceHash(states, states[0]!.length));
+  });
+});
+
+describe('defect 11: low-severity defects', () => {
+  it('rounds a horizon up to whole control steps and reports the simulated horizon', async () => {
+    // 0.205 s / 0.02 s = 10.25 control steps: 11 steps cover 0.22 s (round() gave 10 steps, 0.20 s < 0.205 s).
+    const { result, trace } = await run(boxDropApp, boxReq(0.205, []));
+    expect(trace.t.length).toBe(12);
+    expect(trace.t[11]).toBe(0.2 + 11 * 0.02);
+    expect(result.diagnostics.horizon).toBeCloseTo(0.22, 12);
+  });
+
+  it('keeps an exact multiple of controlDt unchanged', async () => {
+    const { trace } = await run(boxDropApp, boxReq(0.3, []));
+    expect(trace.t.length).toBe(16);
+  });
+
+  it('records NaN, not the stale value, when the app stops writing a signal', async () => {
+    let calls = 0;
+    const app: RobotApp = {
+      ...boxDropApp,
+      signals: (ctx, out) => { boxDropApp.signals(ctx, out); if (calls++ === 0) out['flaky'] = 1; },
+    };
+    const { trace } = await run(app, boxReq(0.1, []));
+    const s = trace.signals['flaky']!;
+    expect(s[0]).toBe(1);
+    expect(Array.from(s.slice(1)).every(Number.isNaN)).toBe(true);
+  });
+
+  it('removes the robot files from the in-memory FS after compiling', async () => {
+    const fresh = new ModelCache();
+    try {
+      const { mj } = await fresh.getModel(makeStoolApp('none'));
+      expect((mj as any).FS.analyzePath('/robot/scene.xml').exists).toBe(false);
+    } finally {
+      fresh.dispose();
+    }
+  });
+});
+
+describe('defect 11: source hygiene in skeleton/src/sim', () => {
+  const files = readdirSync(here).filter((n) => n.endsWith('.ts'));
+  it('has no UTF-8 BOM in any file', () => {
+    const withBom = files.filter((n) => {
+      const b = readFileSync(join(here, n));
+      return b[0] === 0xef && b[1] === 0xbb && b[2] === 0xbf;
+    });
+    expect(withBom).toEqual([]);
+  });
+  it('uses `any` in non-test sources only for the contract SimContext fields', () => {
+    const offenders: string[] = [];
+    for (const n of files.filter((f) => !f.endsWith('.test.ts') && !f.startsWith('test-'))) {
+      readFileSync(join(here, n), 'utf8').split('\n').forEach((line, i) => {
+        const code = line.replace(/\/\/.*$/, '').replace(/\/\*.*?\*\//g, '').replace(/^\s*\*.*$/, '');
+        if (/\bany\b/.test(code) && !/mj: any; model: any; data: any;/.test(code)) offenders.push(`${n}:${i + 1}`);
+      });
+    }
+    expect(offenders).toEqual([]);
+  });
+  it('drops the unused warmupSimSteps from validateTrial', async () => {
+    const { validateTrial } = await import('./validate.js');
+    const v = validateTrial(boxDropApp, boxReq(0.2, []), { app: boxDropApp.id, reqId: 'R1', scenario: { f: 0, a: 0 }, seed: 1 });
+    expect('warmupSimSteps' in v).toBe(false);
+  });
+});
+
+void makeStoolApp;

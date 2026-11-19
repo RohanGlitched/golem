@@ -1,4 +1,4 @@
-﻿// Seeded PRNG (mulberry32): one uint32 of state, no BigInt, no allocation per draw.
+// Seeded PRNG (mulberry32): one uint32 of state, no BigInt, no allocation per draw.
 export function mulberry32(seed: number): () => number {
   let a = seed >>> 0;
   return function next(): number {

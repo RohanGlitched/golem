@@ -1,4 +1,4 @@
-﻿// Handle registry: every MuJoCo handle the sim module creates is tracked here and deleted through
+// Handle registry: every MuJoCo handle the sim module creates is tracked here and deleted through
 // `release`, which is idempotent. The live count is derived from the set, so it cannot drift.
 export interface Deletable { delete(): void }
 

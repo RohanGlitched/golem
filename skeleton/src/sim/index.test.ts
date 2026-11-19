@@ -10,9 +10,10 @@ const here = dirname(fileURLToPath(import.meta.url));
 describe('sim public exports', () => {
   it('matches the documented export surface exactly', () => {
     expect(Object.keys(sim).sort()).toEqual([
-      'ModelCache', 'PoseRecorder', 'SimError', 'buildContext', 'forEachContact', 'geomDistance', 'liveHandleCount',
-      'loadMujoco', 'makeTestRequirement', 'mulberry32', 'runTrial', 'testApp', 'validateRobotPaths',
-      'withDoubleBuffer', 'writeRobotFiles',
+      'DIVERGED_ROBUSTNESS', 'ModelCache', 'PoseRecorder', 'SimError', 'buildContext', 'changedModelFields', 'createSaturationMeter', 'forEachContact', 'geomDistance',
+      'liveHandleCount', 'loadMujoco', 'makeTestRequirement', 'mulberry32', 'otherIntegrator', 'readWarnings', 'recheckTrial',
+      'runTrial', 'testApp',
+      'validateRobotPaths', 'withDoubleBuffer', 'writeRobotFiles',
     ]);
   });
   it('keeps the registry, scope, test seams and fixtures internal', () => {

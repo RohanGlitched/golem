@@ -1,7 +1,7 @@
-﻿// Runner properties (Test_App, at most 2 s simulated per trial, 25 cases each, fixed logged seed).
+// Runner properties (Test_App, at most 2 s simulated per trial, 25 cases each, fixed logged seed).
 import fc from 'fast-check';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { runTrial } from './episode.js';
+import { DIVERGED_ROBUSTNESS, runTrial } from './episode.js';
 import { SimError } from './errors.js';
 import { liveHandleCount } from './handles.js';
 import { ModelCache } from './model-cache.js';
@@ -13,7 +13,10 @@ import {
   withThrowingController, withThrowingSignals,
 } from './test-fixtures.js';
 import { PHYSICS_RUNS, PURE_RUNS, SEED, describeTrial } from './test-support.js';
-import type { CompiledRequirement, EarlyStopHook, RobotApp, Trace, TrialResult, TrialSpec } from './types.js';
+import { alwaysAbove, boxDropApp, kickCall, stoolApp } from './test-models.js';
+import type {
+  CompiledRequirement, EarlyStopHook, PerturbationTemplate, RobotApp, Trace, TrialResult, TrialSpec,
+} from './types.js';
 import { normaliseScenario } from './validate.js';
 
 const cache = new ModelCache();
@@ -84,7 +87,8 @@ describe('runTrial properties', () => {
       const posesSame = (a.result.poses === undefined) === (b.result.poses === undefined)
         && (a.result.poses === undefined || bytesEq(a.result.poses.frames, b.result.poses!.frames));
       return traceEq(a.trace, b.trace) && Object.is(a.result.robustness, b.result.robustness)
-        && Object.is(a.result.worstAt, b.result.worstAt) && a.result.unit === b.result.unit && posesSame;
+        && Object.is(a.result.worstAt, b.result.worstAt) && a.result.unit === b.result.unit && posesSame
+        && a.result.hash === b.result.hash;
     }), cfg);
   });
 
@@ -315,32 +319,98 @@ describe('fault properties', () => {
       }), cfg);
   });
 
-  // Feature: golem-sim, Property 11: Finite robustness unless diverged
-  it('Property 11: robustness is finite unless the trace diverged, and then it is -Infinity at the divergence time', async () => {
-    await fc.assert(fc.asyncProperty(fc.boolean(), arbScenario, arbSeed, arbSteps(30), fc.nat(40), async (diverge, sc, seed, steps, j) => {
-      const p = plan(diverge ? 'diverge' : 'ok', sc, seed, steps, j);
-      const { result, trace } = await runCaptured(p.app, p.req, p.spec);
+  // Feature: golem-sim, Property 11: Finite robustness unless diverged.
+  // golem-sim-hardening: the old version was hollow (the fixture disabled auto-reset and wrote NaN
+  // itself). This one blows a contact-rich model up for real through the runner, with no flag fiddling.
+  it('Property 11: a real blow-up (kick >= 1e12 N) diverges with DIVERGED_ROBUSTNESS, a healthy kick never does, and every result survives JSON', async () => {
+    const arbForce = fc.oneof(
+      fc.double({ min: 0, max: 50, noNaN: true }).map((f) => ({ f, blow: false })),
+      fc.double({ min: 12, max: 30, noNaN: true }).map((e) => ({ f: 10 ** e, blow: true })),
+    );
+    await fc.assert(fc.asyncProperty(arbForce, arbSeed, arbSteps(30), fc.nat(9), async ({ f, blow }, seed, steps, j) => {
+      const delay = Math.min(j, steps - 2) * 0.02;
+      const req = alwaysAbove({ signal: 'box.z', bound: 0.05, horizon: horizonOf(steps), perturbations: [kickCall(0.02, delay)] });
+      const { result, trace } = await runCaptured(boxDropApp, req, { app: boxDropApp.id, reqId: 'R1', scenario: { f, a: 0 }, seed });
       const divs = trace.events.filter((e) => e.name === 'diverged');
-      if (divs.length === 0) return !diverge && Number.isFinite(result.robustness);
+      // golem-sim-hardening defect 10: every result survives JSON (a diverged one is DIVERGED_ROBUSTNESS, not -Infinity).
+      const back = JSON.parse(JSON.stringify(result)) as TrialResult;
+      if (!Object.is(back.robustness, result.robustness) || !Object.is(back.worstAt, result.worstAt)) return false;
+      if (!blow) return divs.length === 0 && Number.isFinite(result.robustness) && result.diagnostics.numerical === false;
       const lastSample = trace.t[trace.t.length - 1]!;
-      return divs.length === 1 && result.robustness === -Infinity && result.worstAt === divs[0]!.t
-        && divs[0]!.t > lastSample && Object.values(trace.signals).every((s) => s.length === trace.t.length);
+      const d = divs[0]! as { t: number; cause?: string };
+      return divs.length === 1 && result.robustness === DIVERGED_ROBUSTNESS && result.worstAt === d.t
+        && d.t > lastSample && d.t > 0.2 + delay && d.t <= 0.2 + delay + 0.02 + 1e-9
+        && d.cause !== undefined && result.diagnostics.numerical
+        && Object.values(trace.signals).every((s) => s.length === trace.t.length);
     }), cfg);
   });
 
-  // Feature: golem-sim, Property 14: The cached model is unchanged by trials
-  it('Property 14: guarded model arrays are byte-equal before and after every trial', async () => {
-    const guarded = () => {
-      const m = model;
-      return [m.body_mass, m.body_inertia, m.geom_friction, m.geom_size, m.actuator_gainprm, m.actuator_biasprm,
-        m.dof_damping, m.dof_frictionloss, m.opt.gravity, m.opt.wind]
-        .map((a: Float64Array) => Float64Array.from(a))
-        .concat([Float64Array.of(m.opt.timestep, m.opt.density, m.opt.viscosity, m.opt.impratio, m.opt.tolerance, m.opt.iterations, m.opt.disableflags)]);
-    };
+  // Feature: golem-sim, Property 14: The cached model is unchanged by trials.
+  // golem-sim-hardening: the old version compared the same eight arrays the guard copied, so it could
+  // not see a leak anywhere else. This one edits random Float64 fields drawn from every model array of
+  // the contact-rich stool (in begin and at a random step of apply) and compares the whole model.buffer
+  // and every opt field, whatever way the trial ends.
+  it('Property 14: random edits to any model array or opt field leave model.buffer and opt byte-equal after every trial', async () => {
+    const app0 = stoolApp;
+    const sm: any = (await cache.getModel(app0)).model;
+    const proto = Object.getPrototypeOf(sm);
+    const bufAll = sm.buffer as Uint8Array;
+    const fields = Object.getOwnPropertyNames(proto).filter((name) => {
+      if (name === 'buffer') return false;
+      let v: unknown;
+      try { v = sm[name]; } catch { return false; }
+      return v instanceof Float64Array && v.length > 0 && v.buffer === bufAll.buffer
+        && v.byteOffset >= bufAll.byteOffset && v.byteOffset + v.byteLength <= bufAll.byteOffset + bufAll.byteLength;
+    });
+    const optNames = ['timestep', 'impratio', 'o_margin', 'density', 'viscosity', 'tolerance', 'iterations', 'integrator', 'cone'];
+    const optState = () => JSON.stringify(Object.getOwnPropertyNames(Object.getPrototypeOf(sm.opt))
+      .map((k) => { const v = sm.opt[k]; return [k, typeof v === 'number' ? v : ArrayBuffer.isView(v) ? Array.from(v as Float64Array) : null]; }));
+    expect(fields.length).toBeGreaterThan(50); // 71 non-empty Float64 arrays in the stool model
+    const arbEdit = fc.record({
+      field: fc.constantFrom(...fields), at: fc.nat(), scale: fc.double({ min: 0.5, max: 2, noNaN: true }),
+    });
+    const arbOpt = fc.record({ name: fc.constantFrom(...optNames), scale: fc.double({ min: 0.5, max: 2, noNaN: true }) });
+    await fc.assert(fc.asyncProperty(
+      fc.array(arbEdit, { minLength: 1, maxLength: 6 }), fc.option(arbOpt, { nil: undefined }), fc.nat(19),
+      fc.constantFrom('ok', 'throw', 'early'), arbSeed,
+      async (edits, optEdit, step, mode, seed) => {
+        const bytes = Uint8Array.from(sm.buffer as Uint8Array);
+        const opt0 = optState();
+        let calls = 0;
+        const doEdits = (m: any) => {
+          for (const e of edits) {
+            const a = m[e.field] as Float64Array;
+            const i = e.at % a.length;
+            a[i] = (a[i] as number) === 0 ? e.scale - 1 : (a[i] as number) * e.scale;
+          }
+          if (optEdit !== undefined) {
+            const v = m.opt[optEdit.name] as number;
+            m.opt[optEdit.name] = optEdit.name === 'iterations' || optEdit.name === 'integrator' || optEdit.name === 'cone'
+              ? (v === 0 ? 1 : 0) : v * optEdit.scale;
+          }
+        };
+        const edit: PerturbationTemplate = {
+          phrase: 'edit', name: 'edit', dims: () => [],
+          begin: (ctx) => doEdits(ctx.model),
+          apply: (ctx) => {
+            if (calls++ === step * 10) doEdits(ctx.model);
+            if (mode === 'throw' && calls === 150) throw new Error('template failed');
+          },
+        };
+        const app: RobotApp = { ...app0, lexicon: { ...app0.lexicon, perturbations: [edit] } };
+        const req = alwaysAbove({ signal: 'torso.z', bound: 0, horizon: 0.4, perturbations: [{ template: 'edit', params: {} }] });
+        await runTrial(app, req, { app: app0.id, reqId: 'R1', scenario: { f: 0, a: 0 }, seed },
+          { cache, ...(mode === 'early' ? { earlyStop: (_t: Trace, n: number) => (n === 5 ? 1 : undefined) } : {}) })
+          .catch(() => undefined);
+        return Buffer.compare(Buffer.from(sm.buffer as Uint8Array), Buffer.from(bytes)) === 0 && optState() === opt0;
+      }), cfg);
+  });
+
+  it('Property 14 (every fault mode, pendulum): the whole model.buffer is byte-equal after each trial', async () => {
     await fc.assert(fc.asyncProperty(
       fc.array(fc.tuple(arbMode, arbScenario, arbSeed, arbSteps(20), fc.nat(40), fc.boolean()), { minLength: 1, maxLength: 3 }),
       async (items) => {
-        const before = guarded();
+        const bytes = Uint8Array.from(model.buffer as Uint8Array);
         for (const [mode, sc, seed, steps, j, alter] of items) {
           const p = plan(mode, sc, seed, steps, j);
           let app = p.app;
@@ -350,8 +420,7 @@ describe('fault properties', () => {
             req = { ...req, perturbations: [...req.perturbations, { template: 'alter', params: {} }] };
           }
           await runTrial(app, req, p.spec, { cache, ...(p.hook ? { earlyStop: p.hook } : {}) }).catch(() => undefined);
-          const after = guarded();
-          if (!after.every((a, i) => bytesEq(a, before[i]!))) return false;
+          if (Buffer.compare(Buffer.from(model.buffer as Uint8Array), Buffer.from(bytes)) !== 0) return false;
         }
         return true;
       }), cfg);
@@ -361,34 +430,43 @@ describe('fault properties', () => {
 // ---------------------------------------------------------------- poses and seeds
 
 describe('pose and seed properties', () => {
-  // Feature: golem-sim, Property 12: Pose frame layout
-  it('Property 12: frames hold float32 xpos and xquat at samples at least 1/30 s apart', async () => {
+  // Feature: golem-sim, Property 12: Pose frame layout.
+  // golem-sim-hardening: the old version asserted frames at control samples at least 1/30 s apart, which
+  // is the 25 fps bug. Frames now follow the sim-step schedule; this checks count, timing and content.
+  it('Property 12: frame f holds float32 xpos and xquat of trial step ceil(f/(30*simDt)), within one simDt of f/30', async () => {
     await fc.assert(fc.asyncProperty(arbScenario, arbSeed, arbSteps(40), fc.option(fc.integer({ min: 1, max: 12 }), { nil: undefined }),
       async (sc, seed, steps, stopAt) => {
-        const logs: Array<{ xpos: Float64Array; xquat: Float64Array }> = [];
+        const states = new Map<number, { xpos: Float64Array; xquat: Float64Array }>();
+        const log = (ctx: any, i: number) => states.set(i, { xpos: Float64Array.from(ctx.data.xpos), xquat: Float64Array.from(ctx.data.xquat) });
         const app: RobotApp = {
           ...testApp,
-          signals: (ctx, out) => {
-            testApp.signals(ctx, out);
-            logs.push({ xpos: Float64Array.from(ctx.data.xpos), xquat: Float64Array.from(ctx.data.xquat) });
+          makeController: (ctx, rng) => {
+            const inner = testApp.makeController(ctx, rng);
+            return { step: (c, t) => inner.step(c, t), substep: (c, tSim) => log(c, Math.round(tSim / 0.002)) };
           },
+          signals: (ctx, out) => { testApp.signals(ctx, out); log(ctx, Math.round(ctx.data.time / 0.002)); },
         };
         const hook: EarlyStopHook | undefined = stopAt === undefined ? undefined : (_t, n) => (n === stopAt ? 1 : undefined);
-        const { result, trace } = await runCaptured(app, reqFor(steps), mkSpec(sc, seed, 'poses'), hook);
+        const { result } = await runCaptured(app, reqFor(steps), mkSpec(sc, seed, 'poses'), hook);
         const poses = result.poses;
         if (!poses || poses.fps !== 30 || poses.nbody !== model.nbody) return false;
-        const picked: number[] = [];
-        let last = 0;
-        for (let k = 0; k < trace.t.length; k++) {
-          if (picked.length === 0 || trace.t[k]! - last >= 1 / 30 - 1e-9) { picked.push(k); last = trace.t[k]!; }
+        const lastStep = (stopAt === undefined || stopAt > steps ? steps : stopAt - 1) * 10;
+        const expected: number[] = [];
+        for (let f = 0; ; f++) {
+          const s = Math.ceil(f / (30 * 0.002) - 1e-9);
+          if (s > lastStep) break;
+          expected.push(s);
         }
-        if (picked[0] !== 0 || poses.frames.length !== poses.nbody * 7 * picked.length) return false;
-        for (let f = 0; f < picked.length; f++) {
-          const { xpos, xquat } = logs[picked[f]!]!;
+        if (poses.frames.length !== poses.nbody * 7 * expected.length) return false;
+        for (let f = 0; f < expected.length; f++) {
+          const s = expected[f]!;
+          if (!(Math.abs(s * 0.002 - f / 30) < 0.002)) return false;
+          const st = states.get(100 + s);
+          if (st === undefined) return false;
           for (let b = 0; b < poses.nbody; b++) {
             const o = (f * poses.nbody + b) * 7;
-            const expected = [xpos[3 * b], xpos[3 * b + 1], xpos[3 * b + 2], xquat[4 * b], xquat[4 * b + 1], xquat[4 * b + 2], xquat[4 * b + 3]];
-            for (let i = 0; i < 7; i++) if (!Object.is(poses.frames[o + i], Math.fround(expected[i]!))) return false;
+            const want = [st.xpos[3 * b], st.xpos[3 * b + 1], st.xpos[3 * b + 2], st.xquat[4 * b], st.xquat[4 * b + 1], st.xquat[4 * b + 2], st.xquat[4 * b + 3]];
+            for (let i = 0; i < 7; i++) if (!Object.is(poses.frames[o + i], Math.fround(want[i]!))) return false;
           }
         }
         return true;
@@ -408,7 +486,7 @@ describe('pose and seed properties', () => {
       const a = await runCaptured(testApp, reqFor(steps), mkSpec(sc, seed, 'none'));
       const b = await runCaptured(testApp, reqFor(steps), mkSpec(sc, seed, 'poses'));
       return traceEq(a.trace, b.trace) && Object.is(a.result.robustness, b.result.robustness)
-        && Object.is(a.result.worstAt, b.result.worstAt);
+        && Object.is(a.result.worstAt, b.result.worstAt) && a.result.hash === b.result.hash;
     }), cfg);
   });
 

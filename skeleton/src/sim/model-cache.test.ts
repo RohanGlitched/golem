@@ -70,7 +70,7 @@ describe('ModelCache', () => {
     expect(liveHandleCount()).toBe(before + 1);
     cache.dispose();
     cache.dispose();
-    expect(model.deleteCalls).toBe(1);
+    expect((model as unknown as { deleteCalls: number }).deleteCalls).toBe(1);
     expect(liveHandleCount()).toBe(before);
     expect(cache.size).toBe(0);
     await cache.getModel(mk('a'));

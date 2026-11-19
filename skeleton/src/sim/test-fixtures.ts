@@ -1,4 +1,4 @@
-﻿// Test-only fixtures. Not exported from index.ts.
+// Test-only fixtures. Not exported from index.ts.
 import { runtimeOf } from './test-app.js';
 import type {
   CompiledRequirement, Controller, Dimension, Mj, PerturbationTemplate, RobotApp, SimContext, TrialSpec,
@@ -99,6 +99,9 @@ export function withFakeMj(): FakeMjControl {
       const parent = path.slice(0, path.lastIndexOf('/')) || '/';
       if (!dirs.has(parent)) throw new Error(`ENOENT: ${parent}`);
       files.set(path, Uint8Array.from(data));
+    },
+    unlink(path: string): void {
+      if (!files.delete(path)) throw new Error(`ENOENT: ${path}`);
     },
     readFile(path: string): Uint8Array {
       const d = files.get(path);
@@ -218,18 +221,16 @@ export function withThrowingSignals(app: RobotApp, atStep: number): RobotApp {
   };
 }
 
-const AUTORESET_BIT = 65536; // mjDSBL_AUTORESET in MuJoCo 4.x
 /**
  * At control step `atStep` the controller writes NaN into ctrl and into the hinge qpos.
- * MuJoCo's auto-reset would silently repair that, so the wrapper turns auto-reset off for the
- * trial and restores it in endTrial. (NaN in ctrl alone does not make qpos non-finite.)
+ * The runner disables MuJoCo's auto-reset for every trial (golem-sim-hardening defect 1), so the
+ * wrapper no longer touches the flags. For a real physical blow-up use test-models.ts (kick).
  */
 export function withNaNControl(app: RobotApp, atStep: number): RobotApp {
   return {
     ...app,
     makeController(ctx, rng): Controller {
       const inner = app.makeController(ctx, rng);
-      ctx.model.opt.disableflags = ctx.model.opt.disableflags | AUTORESET_BIT;
       let n = 0;
       return {
         step(c, t) {
@@ -242,10 +243,7 @@ export function withNaNControl(app: RobotApp, atStep: number): RobotApp {
         },
       };
     },
-    endTrial(ctx) {
-      ctx.model.opt.disableflags = ctx.model.opt.disableflags & ~AUTORESET_BIT;
-      app.endTrial?.(ctx);
-    },
+
   };
 }
 

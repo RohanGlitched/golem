@@ -1,4 +1,4 @@
-﻿// Loads @mujoco/mujoco once per worker (module instance). Same call in Node and the browser.
+// Loads @mujoco/mujoco once per worker (module instance). Same call in Node and the browser.
 // In Vite, add `optimizeDeps.exclude: ['@mujoco/mujoco']` (a consumer concern).
 import load from '@mujoco/mujoco';
 import { SimError, errorMessage } from './errors.js';

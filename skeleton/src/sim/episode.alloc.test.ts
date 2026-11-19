@@ -1,4 +1,4 @@
-﻿import v8 from 'node:v8';
+import v8 from 'node:v8';
 import vm from 'node:vm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { runTrial } from './episode.js';

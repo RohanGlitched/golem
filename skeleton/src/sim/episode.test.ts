@@ -1,4 +1,4 @@
-﻿import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { runTrial } from './episode.js';
 import { SimError } from './errors.js';
 import { liveHandleCount } from './handles.js';
@@ -204,11 +204,12 @@ describe('runTrial early stop, divergence and poses', () => {
     await run(testApp, c.req, spec(), (_t: Trace, n: number) => (n === 11 ? 1 : undefined));
     expect(c.traces[0]!.t.length).toBe(11);
   });
-  it('reports divergence: -Infinity, worstAt = divergence time, one diverged event, prefix trace', async () => {
+  // golem-sim-hardening defect 10: the diverged robustness is DIVERGED_ROBUSTNESS (-Number.MAX_VALUE), not -Infinity.
+  it('reports divergence: DIVERGED_ROBUSTNESS, worstAt = divergence time, one diverged event, prefix trace', async () => {
     const c = capture(req());
     const r = await run(withNaNControl(testApp, 12), c.req);
     const tr = c.traces[0]!;
-    expect(r.robustness).toBe(-Infinity);
+    expect(r.robustness).toBe(-Number.MAX_VALUE);
     expect(tr.events.map((e) => e.name)).toEqual(['trigger', 'diverged']);
     expect(r.worstAt).toBe(tr.events[1]!.t);
     expect(r.worstAt).toBeCloseTo((100 + 20 + 1) * 0.002, 12);
@@ -228,8 +229,9 @@ describe('runTrial early stop, divergence and poses', () => {
     expect(p.fps).toBe(30);
     expect(p.nbody).toBe(3);
     expect(p.frames.length % (3 * 7)).toBe(0);
-    // 1 s at 50 Hz sampling, frames at least 1/30 s apart: every 2nd sample, so 26 frames.
-    expect(p.frames.length / 21).toBe(26);
+    // 1 s after the trigger on the sim-step schedule: floor(1 * 30) + 1 = 31 frames
+    // (golem-sim-hardening defect 5; this test used to assert 26, the 25 fps bug).
+    expect(p.frames.length / 21).toBe(31);
   });
 });
 

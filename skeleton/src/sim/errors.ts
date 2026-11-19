@@ -1,4 +1,4 @@
-﻿/** Error type for everything the sim module throws on purpose. Plain-language messages, SI units. */
+/** Error type for everything the sim module throws on purpose. Plain-language messages, SI units. */
 export class SimError extends Error {
   /** True once the error carries a trial identity prefix. */
   trialIdentified = false;

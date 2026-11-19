@@ -1,4 +1,4 @@
-const SRC = 'file:///I:/Programs/ListofHackathon/hackathons/39-kiroween/golem/skeleton/src/sim/';
+const SRC = new URL('../../skeleton/src/sim/', import.meta.url).href;
 const { runTrial, ModelCache } = await import(SRC + 'index.ts');
 const XML = `<mujoco><option timestep="0.002"/><worldbody><geom type="plane" size="5 5 .1"/>
 <body name="pelvis" pos="0 0 0.8"><freejoint/><geom type="box" size=".1 .1 .1" mass="1"/><site name="imu"/></body></worldbody>

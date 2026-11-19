@@ -17,7 +17,7 @@ describe('withDoubleBuffer', () => {
   it('deletes once on return and returns the result', () => {
     const f = withFakeMj();
     const before = liveHandleCount();
-    expect(withDoubleBuffer(f.mj, 6, (b: FakeBuffer) => b.view.length)).toBe(6);
+    expect(withDoubleBuffer(f.mj, 6, (b) => (b as unknown as FakeBuffer).view.length)).toBe(6);
     expect(f.handles.map((h) => h.deleteCalls)).toEqual([1]);
     expect(liveHandleCount()).toBe(before);
   });
@@ -33,13 +33,13 @@ describe('geomDistance', () => {
   it('returns the distance and uses a buffer of length 6', () => {
     const f = withFakeMj();
     f.geomDist = 0.25;
-    expect(geomDistance(f.mj, {}, {}, 0, 1, 1)).toBe(0.25);
+    expect(geomDistance(f.mj, {} as never, {} as never, 0, 1, 1)).toBe(0.25);
     expect((f.handles[0] as FakeBuffer).view.length).toBe(6);
   });
   it('returns a fromto copy that stays valid after the buffer is deleted', () => {
     const f = withFakeMj();
     f.fromto = [1, 2, 3, 4, 5, 6];
-    const r = geomDistance(f.mj, {}, {}, 0, 1, 1, { nearestPoints: true });
+    const r = geomDistance(f.mj, {} as never, {} as never, 0, 1, 1, { nearestPoints: true });
     (f.handles[0] as FakeBuffer).view.fill(-1);
     expect(Array.from(r.fromto)).toEqual([1, 2, 3, 4, 5, 6]);
     expect(f.handles[0]!.deleteCalls).toBe(1);
@@ -78,7 +78,7 @@ describe('helper properties', () => {
         let result: unknown;
         try { result = withDoubleBuffer(f.mj, n, () => { if (throws) throw err; return 'ok'; }); } catch (e) { caught = e; }
         if (throws ? caught !== err : result !== 'ok') return false;
-        try { geomDistance(f.mj, {}, {}, 0, 1, 1); } catch { return false; }
+        try { geomDistance(f.mj, {} as never, {} as never, 0, 1, 1); } catch { return false; }
         const data = new (f.mj as any).MjData({});
         const seen: number[] = [];
         caught = undefined;
