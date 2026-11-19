@@ -6,7 +6,7 @@ import { extractCriteria, type RawCriterion } from './extract.js';
 import { matchPerturbation, matchPredicate, type BoundClause } from './matcher.js';
 import { buildMonitor } from './monitor.js';
 import { parse } from './parser.js';
-import { tokenize } from './tokenizer.js';
+import { kiroText, tokenize } from './tokenizer.js';
 import type {
   CompileOptions, CompiledRequirement, Dimension, Lexicon, PerturbationCall, PerturbationTemplate,
   PredicateTemplate, Span, TemporalWrapper,
@@ -138,9 +138,11 @@ export function compileRequirement(
     return { requirement, diagnostics: sorted };
   };
 
-  const tk = tokenize(line);
+  // Kiro markup is blanked with spaces, so positions in `text` are positions in `line`.
+  const text = kiroText(line);
+  const tk = tokenize(text);
   diagnostics.push(...tk.diagnostics);
-  const ps = parse(tk.tokens, lexicon.robotNames, line);
+  const ps = parse(tk.tokens, lexicon.robotNames, text);
   diagnostics.push(...ps.diagnostics);
   const ast = ps.ast;
   if (!ast || hasError(diagnostics)) return finish();

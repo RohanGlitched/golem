@@ -17,7 +17,7 @@ Conventions: sources in `skeleton/src/ears/`, tests in `skeleton/src/ears/__test
   - _Bugfix: 13.1–13.3_
 - [x] 5. Accept THEN before THE in WHEN, WHILE and WHERE (defect 8)
   - _Bugfix: 8.1–8.4_
-- [ ] 6. Kiro markup and trailing periods (defect 2)
+- [x] 6. Kiro markup and trailing periods (defect 2)
   - `kiroText` in the tokenizer module, used by `compileRequirement`; extractor start test
   - _Bugfix: 2.1–2.9_
 - [ ] 7. Compiler-built dimensions (defects 1 and 10)

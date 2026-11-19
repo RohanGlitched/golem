@@ -3,7 +3,7 @@ export { compileRequirement, compileRequirementsFile } from './compile.js';
 export type { CompileResult, FileCompileResult } from './compile.js';
 export { extractCriteria } from './extract.js';
 export type { RawCriterion } from './extract.js';
-export { tokenize } from './tokenizer.js';
+export { kiroText, tokenize } from './tokenizer.js';
 export { parse } from './parser.js';
 export { format } from './format.js';
 export { parseQuantity, toSI, fromSI } from './units.js';
