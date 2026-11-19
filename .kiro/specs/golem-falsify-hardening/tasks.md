@@ -44,7 +44,7 @@ Rules for every task:
   - Tests: a failing window (130, 165) N that bisection jumps over is found from 240 N (before: 200.6 N); a second pass lowers force from 151.6 N to about 50 N when a later dimension changed; a single severity dimension gets no second pass; Properties 10–14 still hold.
   - _Bugfix: 7.3–7.7_
 
-- [ ] 9. Physical-core pool size (defect 8)
+- [x] 9. Physical-core pool size (defect 8)
   - Tests: the `/proc/cpuinfo` parser counts (physical id, core id) pairs; `defaultNodePoolSize()` equals `physicalCoreCount()` when known.
   - _Bugfix: 8.2–8.4_
 

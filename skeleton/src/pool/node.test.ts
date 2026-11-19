@@ -115,7 +115,7 @@ describe('createNodePool', () => {
     }
   });
 
-  it('defaults size to the available cores minus one, at least 1', () => {
+  it('defaults size to at least 1 worker (physical cores, see cores.test.ts)', () => {
     expect(defaultNodePoolSize()).toBeGreaterThanOrEqual(1);
   });
 });

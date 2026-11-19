@@ -1,6 +1,7 @@
 // Node adapter (golem-spec/node only): one worker_threads Worker per slot, driven by the shared TrialScheduler.
 import { availableParallelism } from 'node:os';
 import { Worker } from 'node:worker_threads';
+import { physicalCoreCount } from './cores.js';
 import { LoadError, errorMessage } from '../falsify/errors.js';
 import type { WorkerConfig, WorkerMessage } from './protocol.js';
 import { TrialScheduler, type SchedulerOptions } from './scheduler.js';
@@ -18,8 +19,10 @@ export interface NodePoolOptions extends PoolOptions {
   onWorker?: (w: Worker) => void;
 }
 
+/** One worker per physical core; logical cores minus one when the core count cannot be probed. */
 export function defaultNodePoolSize(): number {
-  return Math.max(1, availableParallelism() - 1);
+  const physical = physicalCoreCount();
+  return physical !== undefined ? Math.max(1, physical) : Math.max(1, availableParallelism() - 1);
 }
 
 function nodeWorker(entry: string | URL, onWorker?: (w: Worker) => void): WorkerLike {
