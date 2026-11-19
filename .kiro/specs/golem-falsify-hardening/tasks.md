@@ -52,7 +52,7 @@ Rules for every task:
   - Tests: events carry seeds, `elapsedMs`, `timeFraction` and Phase 2 `cem`; `onResult` info matches the generation; a found counterexample replays with `reproduced: true` and poses; `lowestRobustness` is `-0` after `[0, -0]`.
   - _Bugfix: 10.5–10.9, D.1_
 
-- [ ] 11. Exact Clopper-Pearson on the Verdict (item C)
+- [x] 11. Exact Clopper-Pearson on the Verdict (item C)
   - Test: `failureRateUpper95Exact` equals `1 - 0.05^(1/n)` with no failures and `clopperPearsonUpper(n, k)` otherwise, and is set exactly when `failureRateUpper95` is.
   - _Bugfix: C.1–C.2_
 

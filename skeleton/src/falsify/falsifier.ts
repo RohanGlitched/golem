@@ -2,7 +2,7 @@
 // Phase 3 (shrink and classify). It never writes the seed database (design D2) and never calls
 // Math.random(); every random choice comes from mulberry32 streams derived from the search seed.
 import { BudgetClock, validateBudget, type SearchPhase } from './budget.js';
-import { failureRateUpper95 } from './beta.js';
+import { clopperPearsonUpper, failureRateUpper95 } from './beta.js';
 import {
   initCem, refitCem, sampleGeneration, validateCemParams, type CemParams, type CemState, type DimDist, type Observed,
 } from './cem.js';
@@ -572,7 +572,11 @@ export async function falsify(
     ms: budget.elapsedMs(),
   };
   const rate = failureRateUpper95(phase1Done, phase1Failed);
-  if (rate !== undefined) verdict.failureRateUpper95 = rate;
+  if (rate !== undefined) {
+    verdict.failureRateUpper95 = rate;
+    // exact one-sided 95% Clopper-Pearson beside the rule of three (golem-falsify-hardening item C)
+    verdict.failureRateUpper95Exact = clopperPearsonUpper(phase1Done, phase1Failed, 0.95);
+  }
   if (counterexample !== undefined) verdict.counterexample = counterexample;
   const result: FalsifyResult = { verdict, meta };
   if (pinEntry !== undefined) result.pinEntry = pinEntry;
