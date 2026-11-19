@@ -272,14 +272,14 @@ Test rules for every task (`testing.md`):
     - Write example tests with a fake `Worker` global and a fake `navigator`: size defaults (`undefined`, 0, 1.5, 2, 32), explicit size 9 rejected, load failure message on `run`, `close` terminates every worker, dispatch order identical to the Node adapter for the same event script.
     - _Requirements: 15.1, 15.2, 15.3, 15.4, 15.5, 15.6, 15.7, 15.9, 15.10, 15.11, 15.12, 15.13_
 
-- [ ] 19. Cross-pool and cross-run properties
-  - [~] 19.1 Write property test for pool equivalence
+- [x] 19. Cross-pool and cross-run properties
+  - [x] 19.1 Write property test for pool equivalence
     - **Property 32: Pool results in input order, for every pool kind**
     - **Validates: Requirements 12.2, 12.3, 12.5, 12.11, 12.12, 12.13, 19.7, 21.14**
-  - [~] 19.2 Write property test for falsifier determinism across pools
+  - [x] 19.2 Write property test for falsifier determinism across pools
     - **Property 19: Falsifier determinism and independence from pool and completion order** (`InProcessPool` and a `FakeWorker` scheduler of size 1 to 64 with shuffled completion order, with and without callbacks, and after an earlier cancelled run on the same pool)
     - **Validates: Requirements 1.14, 5.12, 9.10, 19.2, 19.3, 19.5, 19.9, 21.9**
-  - [~] 19.3 Write property test for falsifier abort
+  - [x] 19.3 Write property test for falsifier abort
     - **Property 35: Abort leaves pool reusable and database unchanged** (falsifier part: abort before the first dispatch, mid-generation and during Phase 3 rejects with `AbortError`, emits no later progress event, and leaves every `memoryFileSystem` seed file byte-identical)
     - **Validates: Requirements 17.6, 17.7**
 
