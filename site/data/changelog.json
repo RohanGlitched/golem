@@ -1,6 +1,11 @@
 [
   {
     "date": "2026-11-19",
+    "hash": "29234cb",
+    "subject": "README cover and hero poster from the 100 N recording; gate claim worded as what the hook does"
+  },
+  {
+    "date": "2026-11-19",
     "hash": "d5dae41",
     "subject": "README: designed cover, links, the Kiro-reflex before/after table, current counts; report and llms.txt regenerated with the counterclockwise push convention"
   },
@@ -53,10 +58,5 @@
     "date": "2026-11-19",
     "hash": "109af58",
     "subject": "golem-site: 5 evidence page (polar G1 map, honest falsifier benchmark, needle, candy, agent-gate pending, methods, limits)"
-  },
-  {
-    "date": "2026-11-19",
-    "hash": "3cb7f3d",
-    "subject": "golem-site: 4 kit page (CLI output, MCP tools, hooks, agents, skills, Power, workflow, Crew app, EARS dialect)"
   }
 ]

@@ -113,8 +113,10 @@ ${needleFlat ? `<p>The flat-margin row is the defect that round 1 hit on the G1:
 
 <h2 id="candy">The candy measurement</h2>
 <p>Line ${esc(d.candy.line)} of the Panda sorter: the arm keeps every link at least 0.10 m from the hand. ${d.candy.broken} of ${d.candy.trials} trials break it. The worst case is ${fmt(d.candy.worstMinDistanceM, 3)} m. The closest link is the wrist (link7) in ${d.candy.closestLinkAtBreak['link7'] ?? 0} breaks and the cup in ${d.candy.closestLinkAtBreak['cup'] ?? 0}.</p>
-<p class="small muted">Source: ${esc(d.candy.heading)}, <code>apps/candy/proposals.md</code> P8, from ${esc(d.candy.source.where)} at commit <code>${esc(d.candy.source.commit.slice(0, 7))}</code>.</p>
-${candyParas}
+<p>The arm's speed-and-separation controller (SSM v1) slows and then stops the arm by the suction cup's distance to the hand. While the cup was still at least 0.40 m away, no link came closer than 0.259 m, so the arm never swung its body into a hand early. The breaks happen at the end of the slowdown: the arm stops with the cup about 0.14 m from the hand and the wrist inside 0.10 m. A fix would measure the separation from every link, not only the cup; that fix has not been made, so line 1.1 stays broken on purpose.</p>
+<p>Hands enter from the doorstep side only (an arc of 120° on the table edge facing away from the base), at 0.05 m to 0.25 m above the table and 0.8 m/s. An earlier straight-line path model let a hand pass through the robot's base column, which said nothing about the controller, so it was replaced. 108 trials sit on a grid over the arc ends and middle, 3 heights and 3 entry times; 120 are random.</p>
+<details><summary>The full measurement notes</summary>${candyParas}</details>
+<p class="small muted">Source: ${esc(d.candy.heading)}, <a href="${REPO_URL}/blob/main/apps/candy/proposals.md"><code>apps/candy/proposals.md</code></a> P8, raw rows in <code>evidence/results/candy-p8-doorstep.jsonl</code>, at commit <code>${esc(d.candy.source.commit.slice(0, 7))}</code>.</p>
 
 <h2 id="agent-gate">Does the Stop gate stop false "done" claims?</h2>
 <p class="pending">Pending. The experiment has not been run.</p>
