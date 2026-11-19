@@ -511,13 +511,13 @@ Conventions for every task:
     - Testing Library example tests: empty message, clipboard failure shows the JSON field and announces, pin twice stores once, selecting another line aborts the pending replay, replay trial error keeps the two buttons active.
     - _Requirements: 20.1, 20.5, 20.6, 20.7, 20.8, 20.9, 20.11, 20.12, 20.13, 22.1, 22.2, 22.3, 22.5, 22.6, 22.9, 26.7_
 
-- [ ] 19. Studio assembly
-  - [ ] 19.1 Implement `mount.ts`
+- [x] 19. Studio assembly
+  - [x] 19.1 Implement `mount.ts`
     - `mountStudio(el, app, requirementsMarkdown, options)`: `TypeError('mountStudio needs an HTMLElement as its first argument')` for a non-element, extract with the `golem-ears` extractor and compile each criterion, render Tablet, Reel and Verdict_Panel first, then start the async hero load, WebGL probe with the no-WebGL message, apply a valid Share_Hash and show the messages for ignored parts, defaults for pool, seed, budget and other options, pool built from `workerUrl` only when `pool` is absent (closed on dispose, a supplied pool is not), wire stage, hero, shove, swarm, aura, run controller, store, announcer, theme controller and layout, `ready` promise, `performance.mark('golem:first-frame')` and `data-first-frame`, `testHooks`, and an idempotent `dispose` in the order from the design (cancel runs, remove listeners, dispose geometry, material, renderer and the offscreen target, `.delete()` MuJoCo handles, unmount React roots, remove DOM).
     - Example tests with fakes: non-element throws, empty markdown mounts the empty Tablet, no-WebGL mounts the panels with the message, `dispose()` twice is silent, `.delete()` counts, an injected pool is not closed, a pool built from `workerUrl` is closed.
     - _Requirements: 1.1, 1.2, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 1.10, 6.12, 22.10, 22.11, 27.2, 27.7, 28.6, 29.1, 29.7_
 
-  - [ ] 19.2 Finish `index.ts` and write the source-scan tests
+  - [x] 19.2 Finish `index.ts` and write the source-scan tests
     - Replace the stub with the real `mountStudio` export and keep the exports to the documented API.
     - Source scans in Vitest: no `Math.random`, no `react` import in `core/`, `stage/`, `hero/`, `ghosts/`, `aura/` or `run/`, the module dependency order from the design, no `fetch` or `XMLHttpRequest` except for static assets, no `react-three-fiber`, no analytics or tracker import, exports equal the documented API only.
     - _Requirements: 28.1, 28.2, 28.3, 28.4, 28.7, 28.8, 28.9_

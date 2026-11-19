@@ -104,10 +104,16 @@ export interface StudioTestHooks {
   storage?: Storage | undefined;
   matchMedia?: (q: string) => { matches: boolean; addEventListener?: (t: string, cb: () => void) => void; removeEventListener?: (t: string, cb: () => void) => void };
   falsify?: FalsifyFn;
-  loadHero?: unknown;
-  createRenderer?: unknown;
+  /** Replaces the MuJoCo loader of the hero (returns the `@mujoco/mujoco` module instance). */
+  loadHero?: () => Promise<unknown>;
+  /** Replaces WebGLRenderer creation; skips the WebGL probe. */
+  createRenderer?: (canvas: HTMLCanvasElement) => unknown;
+  /** Overrides the WebGL probe result. */
+  webgl?: boolean;
+  /** Builds a pool from `workerUrl` (golem-pool's worker pool once it lands). */
+  createPool?: (workerUrl: string | URL) => TrialPool;
   clipboard?: { writeText(s: string): Promise<void> };
-  /** Feeds `n` synthetic pose results through the swarm (perf and e2e tests). */
+  /** Adds `summonSynthetic(n, seconds)` to the handle: feeds `n` synthetic pose results through the swarm (perf and e2e tests). */
   summonSynthetic?: boolean;
 }
 

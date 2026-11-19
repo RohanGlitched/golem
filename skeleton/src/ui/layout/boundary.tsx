@@ -10,7 +10,7 @@ export const panelFailedText = (message: string): string => `This panel failed t
 
 interface BoundaryState { error: Error | undefined; generation: number }
 
-export class PanelErrorBoundary extends Component<{ name: string; children: ReactNode; onError?(e: Error): void }, BoundaryState> {
+export class PanelErrorBoundary extends Component<{ name: string; children?: ReactNode; onError?(e: Error): void }, BoundaryState> {
   override state: BoundaryState = { error: undefined, generation: 0 };
 
   static getDerivedStateFromError(error: Error): Partial<BoundaryState> { return { error }; }
@@ -54,6 +54,7 @@ export function ActionsBar({ store, actions }: { store: StoreLike; actions: Stud
       <button type="button" className="golem-btn" aria-pressed={theme === 'light'} onClick={() => actions.toggleTheme()}>
         Light theme
       </button>
+      <Messages store={store} />
     </section>
   );
 }
