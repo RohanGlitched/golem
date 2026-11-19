@@ -4,7 +4,7 @@ import { closestTemplate } from './editDistance.js';
 import { duplicateRangeDiagnostic, parseRangePhrase, type RangePhrase } from './ranges.js';
 import type {
   CompiledTemplate, Dimension, Kind, Lexicon, PerturbationTemplate, PredicateTemplate, Quantity,
-  SlotKind, TemporalWrapper, Token,
+  SlotKind, Span, TemporalWrapper, Token,
 } from './types.js';
 import { quantityFromTokens } from './units.js';
 
@@ -32,6 +32,22 @@ export interface BoundClause<T> {
   ranges: Record<string, RangePhrase>;
   /** Result of the template's `dims` called with `slots`, when the template has one. */
   dimensions?: Dimension[];
+  /**
+   * Parallel to `dimensions`: the source span each Dimension came from. A Dimension is attributed to
+   * the unused range slot whose name it ends with, else to the range slot at the same index in source
+   * order. `undefined` when neither applies (callers fall back to the clause span).
+   */
+  dimensionSources?: (Span | undefined)[];
+}
+
+function attributeDimensions(dims: readonly Dimension[], ranges: Record<string, RangePhrase>): (Span | undefined)[] {
+  const bySource = Object.entries(ranges).sort((a, b) => a[1].span.start - b[1].span.start);
+  const taken = new Set<string>();
+  return dims.map((d, i) => {
+    const hit = bySource.find(([s]) => !taken.has(s) && (d.name === s || d.name.endsWith('.' + s)));
+    if (hit) { taken.add(hit[0]); return hit[1].span; }
+    return bySource[i]?.[1].span;
+  });
 }
 
 export interface PerturbationMatch { bound?: BoundClause<PerturbationTemplate>; diagnostics: Diagnostic[] }
@@ -342,7 +358,10 @@ function run<T extends { phrase: string; dims?: (slots: Record<string, SlotValue
     const bound: BoundClause<T> = {
       template, slots: a.binding.slots, si: a.binding.si, ranges: a.binding.ranges,
     };
-    if (typeof template.dims === 'function') bound.dimensions = template.dims(a.binding.slots);
+    if (typeof template.dims === 'function') {
+      bound.dimensions = template.dims(a.binding.slots);
+      bound.dimensionSources = attributeDimensions(bound.dimensions, bound.ranges);
+    }
     const out: Outcome<T> = { bound, diagnostics: [] };
     const w = viaWrapper ? stripped!.wrapper : allowWrapper ? ownWrapper(compiled[idx]!, a.binding) : undefined;
     if (w) out.wrapper = w;
