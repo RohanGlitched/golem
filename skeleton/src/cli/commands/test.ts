@@ -1,7 +1,8 @@
 // `golem test`: falsify every requirement, pin counterexamples, write the report.
 import { testExitCode } from '../exit.js';
+import { formatIssue, tableErrors } from '../expectation.js';
 import { requirementLine, testSummary } from '../format.js';
-import { bootstrap, loadExpectations, runRequirements, withPool, writeRunReport } from '../service.js';
+import { bootstrap, displayPath, loadExpectations, runRequirements, withPool, writeRunReport } from '../service.js';
 import type { CommandHandler } from '../run.js';
 import type { RunOptions } from '../types.js';
 import { appFlag, compileForRun, errLine, line, pickRequirement, runFlags } from './common.js';
@@ -15,7 +16,8 @@ export const handler: CommandHandler = async (p, io, deps) => {
   if (only !== undefined && pickRequirement(io, requirements, only) === undefined) return 1;
   const json = p.flags['json'] === true;
   const expectations = await loadExpectations(boot.app, deps);
-  for (const m of expectations.problems) errLine(io, `golem test: warning: ${m}`);
+  for (const i of expectations.issues) errLine(io, `golem test: ${formatIssue(i, (f) => displayPath(io.cwd, f))}`);
+  if (tableErrors(expectations).length > 0) errLine(io, `golem test: the Expectation table has ${tableErrors(expectations).length} error(s); the tags below treat those lines as Expected_Hold. Run npx golem-spec check`);
   const o: RunOptions = {
     mode: 'full', budgetKind: 'test', ...runFlags(p), ...(only !== undefined ? { req: only } : {}),
     onOutcome: (x) => { if (!json) line(io, requirementLine(x, expectations.byId.get(x.verdict.reqId))); },

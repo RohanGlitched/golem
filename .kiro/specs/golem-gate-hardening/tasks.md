@@ -28,11 +28,11 @@ Rules for every task:
   - [x] 3.2 Property test: `nearestId(x, ids)` is `undefined` or an element of `ids`, and `nearestId(id, ids) === id` for every id.
   - _Bugfix: 1.4, 1.5, 1.7, 1.9, 1.10_
 
-- [ ] 4. Table errors stop the gate and reach the agent (defects 1 and 2)
+- [x] 4. Table errors stop the gate and reach the agent (defects 1 and 2)
   - `runGateOnce` returns `table-error`; `gate` exits 1 and prints the issues; `gate --kiro` blocks with the table block and counts it; the notes block for warnings; `check` prints and counts the issues; `test` warns; MCP `list_requirements` adds `expectationIssues`. Unreadable marks are errors.
   - Tests: every row of the audit's "Stop-hook output" table (typo, orphan, missing row, break held, hold broken, green), M7 and M8 mutants, `check --json`, exit code of `check`, `golem test` exit unchanged.
-  - [ ] 4.1 Property test (T.3.5): for random tables over the Tiny app, adding an orphan row never turns exit 2 into 0, always exits 1 with a message that names the id, and runs no trial (`createPool` spy is 0).
-  - [ ] 4.2 Property test (T.3.6): `--kiro` stdout is empty or one JSON line with `decision: 'block'`, `reason` of at most 4000 characters, exit 0.
+  - [x] 4.1 Property test (T.3.5): for random tables over the Tiny app, adding an orphan row never turns exit 2 into 0, always exits 1 with a message that names the id, and runs no trial (`createPool` spy is 0).
+  - [x] 4.2 Property test (T.3.6): `--kiro` stdout is empty or one JSON line with `decision: 'block'`, `reason` of at most 4000 characters, exit 0.
   - _Bugfix: 1.6, 1.8 (check), 2.1 to 2.9_
 
 - [ ] 5. Record the marks and show the moves (defect 3)

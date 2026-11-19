@@ -1,10 +1,13 @@
 // Output formatting: one line per requirement, gate blocks, the bounded Kiro reason, Diagnostics.
 // Voice follows product.md: plain and exact, a unit on every physical number.
 import type { Kind } from '../ears/index.js';
-import { expectationTag, type Expectation, type Judged } from './expectation.js';
+import { expectationTag, formatIssue, type Expectation, type Judged, type TableIssue } from './expectation.js';
 import { heldWording, type ProgressEvent } from '../falsify/index.js';
 import type { CompiledRequirement, Scenario, ScenarioSpace } from './sibling-types.js';
 import type { FileDiagnostic, RequirementOutcome } from './types.js';
+
+/** What check and the gate show of a problem: a file position, a severity and a sentence. Diagnostics and table issues both fit. */
+export type ShownDiagnostic = Pick<FileDiagnostic, 'file' | 'line' | 'column' | 'severity' | 'message'> & { suggestion?: string };
 
 export const UNIT_NOT_DECLARED = 'unit not declared';
 export const REASON_MAX = 4000;
@@ -142,6 +145,23 @@ export function gateGroups(judged: readonly Judged[]): string[] {
   return out;
 }
 
+/** A table issue as a diagnostic at column 1 of its line, so `check` can show it next to the EARS diagnostics. */
+export const tableIssueDiagnostic = (i: TableIssue): ShownDiagnostic => ({ file: i.file ?? '', line: i.line, column: 1, severity: i.severity, message: i.message });
+
+/** The Stop reason block of a gate that cannot run because the Expectation table is wrong (defect 2). */
+export function tableErrorBlock(errors: readonly TableIssue[], show: (file: string) => string): string {
+  return [
+    `The Expectation table has ${errors.length} error(s), so the gate cannot run. Fix the rows named here (a wrong id or a misspelt mark). `
+    + 'If you may not edit requirements.md, tell the user. Do not change a mark to make the gate pass.',
+    ...errors.map((i) => `  ${formatIssue(i, show)}`),
+  ].join('\n');
+}
+
+/** The warnings of the table, last in the Stop reason so that the 4000-character cut removes them before a counterexample. */
+export function tableNotesBlock(warnings: readonly TableIssue[], show: (file: string) => string): string {
+  return ['Expectation table notes:', ...warnings.map((i) => `  ${formatIssue(i, show)}`)].join('\n');
+}
+
 /** Joins blocks with one blank line and cuts at a line boundary to at most `max` characters (requirement 8.7). */
 export function buildReason(blocks: readonly string[], reportPath: string, max = REASON_MAX): string {
   const joined = blocks.join('\n\n');
@@ -165,7 +185,7 @@ export function sortDiagnostics(d: readonly FileDiagnostic[], fileOrder: readonl
     rank(a.x.file) - rank(b.x.file) || a.x.line - b.x.line || a.x.column - b.x.column || a.i - b.i).map((e) => e.x);
 }
 
-export function diagnosticText(d: FileDiagnostic): string {
+export function diagnosticText(d: ShownDiagnostic): string {
   const head = `${d.file}:${d.line}:${d.column}: ${d.severity}: ${d.message}`;
   return d.suggestion !== undefined ? `${head}\n  suggestion: ${d.suggestion}` : head;
 }
@@ -185,7 +205,7 @@ export interface CheckJson {
   diagnostics: { file: string; line: number; col: number; severity: string; message: string; suggestion: string | null }[];
 }
 
-export function checkJson(reqs: readonly CompiledRequirement[], d: readonly FileDiagnostic[]): CheckJson {
+export function checkJson(reqs: readonly CompiledRequirement[], d: readonly ShownDiagnostic[]): CheckJson {
   return {
     ok: !d.some((x) => x.severity === 'error'),
     requirements: reqs.map((r) => ({ id: r.id, source: r.source, pattern: r.pattern })),

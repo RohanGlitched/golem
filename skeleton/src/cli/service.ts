@@ -3,7 +3,7 @@ import { extractCriteria } from '../ears/index.js';
 import type { FalsifyOptions, FalsifyResult, PinnedSeedEntry } from '../falsify/index.js';
 import type { KitDeps } from './deps.js';
 import { locateApp, type LocatedApp } from './config.js';
-import { readExpectations, type ParsedExpectations } from './expectation.js';
+import { readExpectations, tableErrors, type ParsedExpectations } from './expectation.js';
 import { sortDiagnostics } from './format.js';
 import { relative } from './paths.js';
 import { reportVerdict, createUnitCapture } from './signal-units.js';
@@ -218,6 +218,7 @@ export async function withPool<T>(
 export type GateRun =
   | { kind: 'compile-error'; diagnostics: FileDiagnostic[]; compiled: CompileOutcome }
   | { kind: 'empty'; compiled: CompileOutcome }
+  | { kind: 'table-error'; expectations: ParsedExpectations; compiled: CompileOutcome }
   | { kind: 'ran'; outcomes: RequirementOutcome[]; compiled: CompileOutcome; expectations: ParsedExpectations; durationS: number; totalTrials: number };
 
 /** One gate pass: compile, then pinned seeds and the quick budget for every requirement, then the pinned rule. */
@@ -231,6 +232,8 @@ export async function runGateOnce(
   if (compiled.requirements.length === 0) return { kind: 'empty', compiled };
   // The table comes from the text that was compiled, before the first trial (defect 9).
   const expectations = readExpectations(compiled.texts, compiled.files);
+  // A wrong table is a gate that cannot run, like a compile error: no trial is worth running against a doubtful mark.
+  if (tableErrors(expectations).length > 0) return { kind: 'table-error', expectations, compiled };
   const t0 = deps.clock();
   const o: RunOptions = { mode: 'full', budgetKind: 'gate', ...flags, ...(signal !== undefined ? { signal } : {}) };
   const raw = await withPool(deps, app, robotApp, flags.workers, (pool) => runRequirements(app, robotApp, compiled.requirements, o, deps, pool));
