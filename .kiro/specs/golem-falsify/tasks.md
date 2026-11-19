@@ -259,8 +259,8 @@ Test rules for every task (`testing.md`):
     - Write example tests: already-aborted signal runs nothing, abort from a timer mid-run, throwing trial, results equal the injected function's output, closed pool rejects.
     - _Requirements: 12.1, 12.13, 13.1, 13.2, 13.3, 13.4, 13.5, 13.6, 13.7, 13.8, 13.9, 17.13_
 
-- [ ] 17. Node worker_threads adapter
-  - [~] 17.1 Implement `createNodePool` and `node-entry.ts`
+- [x] 17. Node worker_threads adapter
+  - [x] 17.1 Implement `createNodePool` and `node-entry.ts`
     - Adapter in `skeleton/src/pool/node.ts` exported only through `golem-spec/node`: default `size = max(1, os.availableParallelism() - 1)`, size validation naming field and value, `new Worker` per slot mapped to `WorkerLike` (`message`, `error`, `exit`), structured-clone specs, `transferList` for `poses.frames`, construction awaits `ready` and on a load failure terminates every worker and rejects with the worker index and `cause`, no network use.
     - Also export `nodeFileSystem()` (wrapping `node:fs/promises`) from `golem-spec/node`.
     - Write example tests with a real `worker_threads` worker and a synthetic `trialModule`: results match `InProcessPool`, `poses.frames` transferred with byte length 0 in the worker afterwards, bad worker module rejects construction and leaves no worker running, `close` is clean, invalid `size` rejected, `nodeFileSystem` round trips a seed file in a temp directory.

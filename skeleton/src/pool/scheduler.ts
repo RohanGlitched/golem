@@ -198,7 +198,11 @@ export class TrialScheduler implements TrialPool {
         if (slot.state !== 'loading') return;
         slot.lastMessage = m.message;
         if (slot.loadKind === 'crash') this.restart(slot, m.message, 'crash');
-        else this.fail(new LoadError(`worker ${slot.index} failed to load: ${m.message}`));
+        else {
+          const cause = new Error(m.message);
+          if (m.stack !== undefined) cause.stack = m.stack;
+          this.fail(new LoadError(`worker ${slot.index} failed to load: ${m.message}`, { cause }));
+        }
         return;
       case 'result':
         this.onResultMessage(slot, m.id, m.result);
@@ -225,7 +229,7 @@ export class TrialScheduler implements TrialPool {
     slot.job = undefined;
     if (wasLoading && kind !== 'crash') {
       void slot.worker.terminate().catch(() => undefined);
-      this.fail(new LoadError(`worker ${slot.index} failed to load: ${reason}`));
+      this.fail(new LoadError(`worker ${slot.index} failed to load: ${reason}`, { cause: new Error(reason) }));
       return;
     }
     if (job !== undefined && slot.state === 'busy' && job.run.status === 'active') {
