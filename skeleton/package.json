@@ -75,7 +75,8 @@
     "e2e:perf": "playwright test -c ui-demo/playwright.config.ts --grep @perf",
     "pack:build": "vite-node scripts/build-pack.ts",
     "pack:sync": "vite-node scripts/sync-power.ts",
-    "pack:check": "vite-node scripts/sync-power.ts -- --check"
+    "pack:check": "vite-node scripts/sync-power.ts -- --check",
+    "crew:assets": "vite-node scripts/make-crew-assets.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
