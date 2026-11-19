@@ -251,7 +251,12 @@ describe('golem gate', () => {
     const h = createHarness({ requirements: GREEN_REQUIREMENTS });
     expect(await h.run('gate')).toBe(0);
     expect(h.io.stdoutText()).toMatch(/^no counterexample in \d+ trials \(3 requirements/);
-    expect(h.io.stdoutText()).toContain('in ' + String(h.report().verdicts.reduce((n: number, v: { trials: number }) => n + v.trials, 0)) + ' trials');
+    // The total counts the first pass (the verdicts) and the confirmation pass (meta.confirm.trials).
+    const first = h.report().verdicts.reduce((n: number, v: { trials: number }) => n + v.trials, 0);
+    const total = first + h.report().meta.confirm.trials;
+    expect(h.io.stdoutText()).toContain('in ' + String(total) + ' trials');
+    expect(h.io.stdoutText()).toContain('confirmed');
+    expect(h.io.stdoutText()).toContain(String(total) + ' in total');
     expect(h.report().meta).toMatchObject({ lastGateExitCode: 0, budget: { maxTrials: 24 } });
   });
 

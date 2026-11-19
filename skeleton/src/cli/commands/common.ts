@@ -1,7 +1,7 @@
 // Helpers shared by the command handlers.
 import type { CliIo, KitDeps } from '../deps.js';
 import { diagnosticText, type ShownDiagnostic } from '../format.js';
-import { MissingFileError, compileAll, displayPath, hasErrors, type Bootstrapped } from '../service.js';
+import { MissingFileError, compileAll, displayPath, hasErrors, type Bootstrapped, type GateFlags } from '../service.js';
 import type { ParsedCommand } from '../args.js';
 import type { CompileOutcome, FileDiagnostic, RunOptions } from '../types.js';
 import type { CompiledRequirement, RobotApp } from '../sibling-types.js';
@@ -20,6 +20,18 @@ export function runFlags(p: ParsedCommand): Pick<RunOptions, 'budget' | 'timeS' 
   const t = flagNumber(p, 'time'); if (t !== undefined) o.timeS = t;
   const w = flagNumber(p, 'workers'); if (w !== undefined) o.workers = w;
   const s = flagNumber(p, 'search-seed'); if (s !== undefined) o.searchSeed = s;
+  return o;
+}
+
+/** The gate's flags: the run flags and the confirmation pass (--no-confirm turns it off, --confirm-budget <n> sets its search trials per line). */
+export function gateFlags(p: ParsedCommand): GateFlags {
+  const o: GateFlags = runFlags(p);
+  const cb = flagNumber(p, 'confirm-budget');
+  if (p.flags['no-confirm'] === true) {
+    if (cb !== undefined) throw new Error('--no-confirm and --confirm-budget cannot be used together');
+    o.confirm = false;
+  }
+  if (cb !== undefined) o.confirmBudget = cb;
   return o;
 }
 

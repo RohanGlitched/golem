@@ -1,5 +1,16 @@
 ﻿# Changelog
 
+## 0.1.2
+
+- `golem gate` confirms a green. When every line meets its expectation, each `Expected_Hold` line is searched again with a second, independent search seed before the gate prints green. Experiment 3b found agents trusting a 24-trial green that another search seed broke (a 200 N push that still breaks requirement 1.3).
+- The second seed is `fmix32(first seed XOR 0xC0DEF57A)`: a pure function of the first seed (1 by default, or `--search-seed`, or `searchSeed` in `golem.config.json`), a uint32 that is never 0 and never the first seed. Seed 1 confirms with 588244584. The budget is that of the first pass, as searched trials on top of the pinned seeds, which re-run first.
+- A line that held under the first seed and breaks under the second makes the gate red. The output (and the `--kiro` block reason) says so, with both seeds, `reproduce: npx golem-spec replay <id>` and a `search again` command; the counterexample is pinned. An error in the confirmation run is red too. A green prints `confirmed: ...` with both seeds and the total trials.
+- New flags: `--confirm-budget <n>` (searched trials per line in the second pass) and `--no-confirm` (skip it; the output says `NOT confirmed (--no-confirm)`; the two cannot be combined). Both work with `--kiro` and `--json`.
+- `.golem/report.json` gains `meta.confirm` (`status`, `firstSeed`, `secondSeed`, `budget`, `reqIds`, `failedIds`, `trials`) and a `confirmation` on each searched verdict. `--json` gains `confirm` and `totalTrials`. The total trials in the green line now include the confirmation pass.
+- The pass runs only when every line already meets its expectation; a red first pass is reported as before. `Expected_Break` lines keep their 4-times retry and are not confirmed. The MCP tools do not gate and are unchanged.
+- A gate takes about twice as long as in 0.1.1 when it is green. Changed in the pack: `steering/golem-ears.md` (a section on the confirmation, the Stop hook row of the timeout table).
+- Projects should run `npx golem-spec init --force` to replace the installed pack.
+
 ## 0.1.1
 
 - The Kiro pack runs every command as `npx --no-install golem-spec <command>`. Kiro's hook shells and MCP launcher do not have `node_modules/.bin` on the path, so the bare `golem` of 0.1.0 was not found, and a bare `npx golem` resolves to an unrelated npm package. `--no-install` makes npx use the copy installed by `npm i -D golem-spec` and never download another.

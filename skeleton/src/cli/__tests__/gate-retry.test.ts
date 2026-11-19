@@ -1,4 +1,5 @@
 // golem-gate-hardening task 7 (defect 8): a line marked Expected_Break that holds is run again at 4 times the budget.
+// Tests that count trials run with --no-confirm, so that they count the retry alone (the confirmation pass has its own tests).
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 import { GREEN_REQUIREMENTS, RED_REQUIREMENTS, createHarness, stopPayload } from '../../../test/support/harness.js';
@@ -60,16 +61,16 @@ describe('a held Expected_Break line is searched again at 4 times the budget', (
 
   it('runs every other line once: no mark, a mark on a broken line, a mark on a line that holds', async () => {
     const none = createHarness({ requirements: RED_REQUIREMENTS });
-    await none.run('gate');
+    await none.run('gate', '--no-confirm');
     const base = none.spies.poolSpecs.length;
     const brokenMarked = createHarness({ requirements: withTable(RED_REQUIREMENTS, ['| 1.2 | x | Expected_Break |']) });
-    await brokenMarked.run('gate');
+    await brokenMarked.run('gate', '--no-confirm');
     expect(brokenMarked.spies.poolSpecs).toHaveLength(base);
     const holdMarked = createHarness({ requirements: withTable(RED_REQUIREMENTS, ['| 1.1 | x | Expected_Hold |', '| 1.2 | x | Expected_Hold |']) });
-    await holdMarked.run('gate');
+    await holdMarked.run('gate', '--no-confirm');
     expect(holdMarked.spies.poolSpecs).toHaveLength(base);
     const heldMarked = createHarness({ requirements: withTable(RED_REQUIREMENTS, ['| 1.3 | x | Expected_Break |']) });
-    await heldMarked.run('gate');
+    await heldMarked.run('gate', '--no-confirm');
     expect(heldMarked.spies.poolSpecs).toHaveLength(base + 4 * GATE_QUICK_TRIALS);
   });
 
@@ -109,13 +110,13 @@ describe('the budget of the retry (toFalsifyOptions, gate-retry)', () => {
 describe('which lines are retried (property)', () => {
   it('adds exactly 96 trials per Expected_Break line that held, and changes no verdict of another line', async () => {
     const baseline = createHarness({ requirements: RED_REQUIREMENTS });
-    await baseline.run('gate');
+    await baseline.run('gate', '--no-confirm');
     const baseTrials = baseline.spies.poolSpecs.length;
     const baseVerdicts = baseline.report().verdicts.map((v: { reqId: string; status: string }) => [v.reqId, v.status]);
     await fc.assert(fc.asyncProperty(fc.array(arbMark, { minLength: 3, maxLength: 3 }), async (marks) => {
       const rows = TINY_IDS.map((id, i) => [id, marks[i] as Mark] as const);
       const h = createHarness({ requirements: RED_REQUIREMENTS.replace('### Requirement 1', `${tableText(rows)}\n### Requirement 1`) });
-      await h.run('gate');
+      await h.run('gate', '--no-confirm');
       // 1.1 and 1.3 hold at every budget and 1.2 breaks; a mark of Expected_Break on a held line triggers the retry.
       const retried = (marks[0] === 'Expected_Break' ? 1 : 0) + (marks[2] === 'Expected_Break' ? 1 : 0);
       expect(h.spies.poolSpecs.length).toBe(baseTrials + retried * 4 * GATE_QUICK_TRIALS);
@@ -127,7 +128,7 @@ describe('which lines are retried (property)', () => {
     await fc.assert(fc.asyncProperty(fc.array(fc.boolean(), { minLength: 3, maxLength: 3 }), async (brk) => {
       const rows = TINY_IDS.map((id, i) => [id, brk[i] ? 'Expected_Break' : 'Expected_Hold'] as const);
       const h = createHarness({ requirements: GREEN_REQUIREMENTS.replace('### Requirement 1', `${tableText(rows as never)}\n### Requirement 1`) });
-      await h.run('gate');
+      await h.run('gate', '--no-confirm');
       expect(h.spies.poolSpecs.length).toBe(3 * GATE_QUICK_TRIALS + brk.filter(Boolean).length * 4 * GATE_QUICK_TRIALS);
     }), { numRuns: 50 });
   });
