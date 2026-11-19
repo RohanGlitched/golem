@@ -87,6 +87,8 @@ export interface SiteData {
   agentGate: AgentGateData;
   /** Experiment 3b (pre-registered 2026-11-20): the same pilot with requirement 1.3 raised to an unreachable 200 N. */
   agentGateHard: AgentGateData['runs'];
+  /** The 3b controllers re-gated by golem-spec 0.1.2 (evidence/results/agent-gate-hard/confirm-check.md), rebuilt rows only. */
+  confirmCheck: ConfirmCheckRow[];
   candy: CandyData; hover: HoverData; kiro: KiroData; changelog: ChangelogEntry[]; lexicons: LexiconRef[];
   reportMd: string; transcriptMd: string; preregMd: string;
   reviews: { name: string; file: string; text: string }[];
@@ -193,6 +195,8 @@ export function loadSiteData(root: string = REPO_ROOT): SiteData {
     ? parseJsonl<NonNullable<AgentGateData['runs']>[number] & { kind: string }>(readText(root, hardFile), hardFile).filter((r) => r.kind === 'run')
     : undefined;
   need(Array.isArray(agentGate.dryRuns), 'site/data/agent-gate.json', 'dryRuns is missing');
+  const checkFile = 'evidence/results/agent-gate-hard/confirm-check.md';
+  const confirmCheck = existsSync(path.join(root, checkFile)) ? parseConfirmCheck(readText(root, checkFile)) : [];
   const candy = json<CandyData>('site/data/candy.json');
   need(isNum(candy.broken) && isNum(candy.trials), 'site/data/candy.json', 'broken and trials must be numbers');
   const hover = json<HoverData>('site/data/hover.json');
@@ -211,7 +215,7 @@ export function loadSiteData(root: string = REPO_ROOT): SiteData {
     : [];
 
   return {
-    mapCells, map, mapKiro, hero, falsifier, graded, graded256: g256, agentGate, agentGateHard, candy, hover, kiro, changelog, lexicons,
+    mapCells, map, mapKiro, hero, falsifier, graded, graded256: g256, agentGate, agentGateHard, confirmCheck, candy, hover, kiro, changelog, lexicons,
     reportMd: readText(root, 'evidence/REPORT.md'),
     transcriptMd: readText(root, 'docs/cli-transcript.md'),
     preregMd: readText(root, 'evidence/PREREG.md'),
@@ -223,3 +227,19 @@ export function loadSiteData(root: string = REPO_ROOT): SiteData {
 }
 
 export { rel };
+
+export interface ConfirmCheckRow { stream: string; claimed: boolean; quick: 'GREEN' | 'RED'; confirmed: 'GREEN' | 'RED'; independent: 'GREEN' | 'RED' }
+
+/** Reads the result table of confirm-check.md: the rows whose controller was rebuilt (the others say "skipped"). */
+export function parseConfirmCheck(md: string): ConfirmCheckRow[] {
+  const verdict = (cell: string): 'GREEN' | 'RED' | undefined => (/^GREEN\b/.test(cell) ? 'GREEN' : /^RED\b/.test(cell) ? 'RED' : undefined);
+  const rows: ConfirmCheckRow[] = [];
+  for (const line of md.split(/\r?\n/)) {
+    const c = line.split('|').slice(1, -1).map((x) => x.trim());
+    if (c.length < 6 || !/^[AB]-\d+$/.test(c[0] ?? '')) continue;
+    const quick = verdict(c[3] ?? ''), confirmed = verdict(c[4] ?? ''), independent = verdict(c[5] ?? '');
+    if (!quick || !confirmed || !independent) continue;
+    rows.push({ stream: c[0]!, claimed: /claimed success/.test(c[1] ?? ''), quick, confirmed, independent });
+  }
+  return rows;
+}
