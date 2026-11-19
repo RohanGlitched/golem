@@ -1,6 +1,6 @@
 {
-  "generated": "2026-11-19T18:53:27.226Z",
-  "commit": "7dfd31b",
+  "generated": "2026-11-19T19:39:33.205Z",
+  "commit": "e3cf4fb",
   "workspaces": [
     {
       "path": ".kiro",
@@ -234,7 +234,7 @@
         "steering": [
           "design-language.md:3e9b01d9aaa8",
           "ears-for-robots.md:0b727c1e6fe6",
-          "experience.md:6a801099b477",
+          "experience.md:ead1f7d4aac0",
           "interfaces.md:73364196627e",
           "mujoco-wasm.md:f1872c1da58c",
           "product.md:1e36e153ad4e",
@@ -475,18 +475,18 @@
     }
   ],
   "commits": {
-    "total": 259,
+    "total": 273,
     "byPrefix": {
-      "evidence": 8,
-      "merge": 19,
-      "other": 24,
-      "golem-kit": 20,
+      "docs": 2,
+      "merge": 20,
+      "stagger": 7,
+      "golem-kit": 25,
+      "site": 8,
+      "evidence": 9,
+      "other": 27,
       "candy": 1,
       "apps": 1,
-      "stagger": 6,
       "studios": 1,
-      "site": 6,
-      "docs": 1,
       "candy-app": 26,
       "studio": 2,
       "golem-site": 5,
@@ -506,7 +506,7 @@
     }
   },
   "tests": {
-    "files": 387,
+    "files": 388,
     "propertyAsserts": 490
   },
   "totals": {
