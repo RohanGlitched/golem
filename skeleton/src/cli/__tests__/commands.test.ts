@@ -181,6 +181,7 @@ describe('golem falsify', () => {
 describe('golem replay', () => {
   it('replays the pinned counterexample, writes a CSV, prints the summary and the studio url, twice identically', async () => {
     const h = createHarness();
+    h.fs.put(h.path('web/index.html'), '<!doctype html>');
     await h.run('falsify', '1.2', '--budget', '24');
     h.clearOutput();
     expect(await h.run('replay', '1.2')).toBe(0);
@@ -243,7 +244,7 @@ describe('golem gate', () => {
     expect(out).toMatch(/scenario: push\.force = [\d.]+ N \(seed \d+\)/);
     expect(out).toMatch(/margin: -[\d.]+ m/);
     expect(out).toContain('reproduce: npx golem-spec replay 1.2');
-    expect(out).toContain('gate RED: 1 of 3 requirements are not held');
+    expect(out).toContain('gate RED: 1 of 3 requirements is not held');
     expect(h.report().meta.lastGateExitCode).toBe(2);
   });
 

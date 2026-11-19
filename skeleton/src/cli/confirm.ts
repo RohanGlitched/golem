@@ -13,7 +13,7 @@ function fmix32(z: number): number {
 export const CONFIRM_SALT = 0xc0def57a;
 
 /**
- * The second, independent search seed of the confirmation pass: `fmix32(first XOR 0xC0DEF57A)`, a pure function of the
+ * The second search seed of the confirmation pass, derived from the first: `fmix32(first XOR 0xC0DEF57A)`, a pure function of the
  * first seed. The result is a uint32 in [1, 2^32), never equal to the first seed, so it is also a valid `--search-seed`.
  * Where that mixing would give 0 or the first seed itself, the mixing is repeated on the result plus 1.
  */
@@ -56,7 +56,7 @@ export function confirmSummary(c: ConfirmInfo, totalTrials: number): string {
   const seeds = `search seed ${c.firstSeed}, then confirmation seed ${c.secondSeed}`;
   switch (c.status) {
     case 'confirmed':
-      return `confirmed: ${c.reqIds.length} Expected_Hold ${c.reqIds.length === 1 ? 'line' : 'lines'} searched again with a second, independent search seed (${seeds}; ${budgetWords(c.budget)} per line; ${c.trials} confirmation trials, ${totalTrials} in total)`;
+      return `confirmed: ${c.reqIds.length} Expected_Hold ${c.reqIds.length === 1 ? 'line' : 'lines'} searched again with a second search seed derived from the first (${seeds}; ${budgetWords(c.budget)} per line; ${c.trials} confirmation trials, ${totalTrials} in total)`;
     case 'broke':
       return `NOT confirmed: ${c.failedIds.join(', ')} held under search seed ${c.firstSeed} and did not hold under confirmation seed ${c.secondSeed} (${budgetWords(c.budget)} per line; ${c.trials} confirmation trials, ${totalTrials} in total)`;
     case 'skipped':

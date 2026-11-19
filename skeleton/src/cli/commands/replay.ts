@@ -56,6 +56,10 @@ export const handler: CommandHandler = async (p, io, deps) => {
     line(io, `  ${s.signal}: min ${sig3(s.min)} ${u}, max ${sig3(s.max)} ${u}, at worst ${sig3(s.atWorst)} ${u}`);
   }
   line(io, `trace: ${displayPath(io.cwd, csvPath)} (${trace.t.length} samples)`);
-  line(io, `studio: ${studioUrl(app.config, robotApp.id, { reqId: id, seed: target.seed, scenario: target.scenario })}`);
+  // The Studio_URL is printed when the config names one or the app has its own studio page (web/index.html);
+  // otherwise a project without a studio (the starter) would be pointed at a path that does not exist.
+  const hasStudio = app.config.studioUrl !== undefined || await deps.fs.stat(`${app.appDir}/web/index.html`).then((s) => s.isFile, () => false);
+  if (hasStudio) line(io, `studio: ${studioUrl(app.config, robotApp.id, { reqId: id, seed: target.seed, scenario: target.scenario })}`);
+  else line(io, 'studio: this app has no studio page (set studioUrl in golem.config.json to link one)');
   return 0;
 };

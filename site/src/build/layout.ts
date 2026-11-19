@@ -25,6 +25,13 @@ export const NAV: { href: string; label: string; id: string }[] = [
   { href: '/how-kiro/', label: 'How Kiro built it', id: 'how-kiro' },
 ];
 
+/** The three robot studios, in the order the switcher shows them. */
+export const STUDIOS: { href: string; label: string; id: string }[] = [
+  { href: '/stagger/', label: 'G1', id: 'stagger' },
+  { href: '/candy/', label: 'Panda', id: 'candy' },
+  { href: '/hover/', label: 'X2', id: 'hover' },
+];
+
 export const SITEMAP: { href: string; label: string; note: string }[] = [
   { href: '/', label: 'Home', note: 'Shove the G1, summon the ghosts' },
   { href: '/stagger/', label: 'Stagger studio', note: 'Unitree G1 walking under Unitree’s policy' },
@@ -46,8 +53,13 @@ export const LICENCES: { what: string; licence: string; href: string }[] = [
 ];
 
 export function renderHeader(current: string): string {
-  const links = NAV.map((n) => `<a href="${n.href}"${n.id === current ? ' aria-current="page"' : ''}>${esc(n.label)}</a>`).join('');
-  return `<header class="site-head"><a class="wordmark" href="/" aria-label="GOLEM, home">GOLEM</a><nav aria-label="Main">${links}<a href="${REPO_URL}" rel="noopener">Source</a></nav><button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to the light theme">Light</button></header>`;
+  const studio = STUDIOS.some((st) => st.id === current);
+  const links = NAV.map((n) => `<a href="${n.href}"${n.id === current || (studio && n.id === 'stagger') ? ' aria-current="page"' : ''}>${esc(n.label)}</a>`).join('');
+  // On a studio page, a switcher between the three robots sits next to the wordmark.
+  const switcher = studio
+    ? `<nav class="studio-switch" aria-label="Robot">${STUDIOS.map((st) => `<a href="${st.href}"${st.id === current ? ' aria-current="page"' : ''}>${esc(st.label)}</a>`).join('')}</nav>`
+    : '';
+  return `<header class="site-head"><a class="wordmark" href="/" aria-label="GOLEM, home">GOLEM</a>${switcher}<nav aria-label="Main">${links}<a href="${REPO_URL}" rel="noopener">Source</a></nav><button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to the light theme">Light</button></header>`;
 }
 
 export function renderFooter(changelog: ChangelogEntry[]): string {

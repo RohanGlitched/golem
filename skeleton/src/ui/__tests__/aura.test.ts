@@ -107,13 +107,13 @@ describe('auraSummary', () => {
     const m = new AuraModel(200);
     m.add(deg(135), 168.4, -0.2);
     m.add(deg(45), 190, -0.2);
-    expect(auraSummary(m)).toBe('Weakest direction 135 deg: breaks at 168 N');
+    expect(auraSummary(m)).toBe('Weakest sector, around 135 deg: breaks at 168 N');
   });
   it('takes the lowest bin index on a tie', () => {
     const m = new AuraModel(200);
     m.add(deg(275), 100, -1);
     m.add(deg(95), 100, -1);
-    expect(auraSummary(m)).toBe('Weakest direction 95 deg: breaks at 100 N');
+    expect(auraSummary(m)).toBe('Weakest sector, around 95 deg: breaks at 100 N');
   });
   it('reports no break found with the strongest held push and the trial count', () => {
     const m = new AuraModel(200);

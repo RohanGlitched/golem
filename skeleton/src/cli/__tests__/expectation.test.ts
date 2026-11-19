@@ -114,7 +114,7 @@ describe('golem gate with an Expectation table', () => {
     const out = h.io.stdoutText();
     expect(out).toMatch(/FAIL {2}1\.2 {2}HELD.*<- expected to break but held within budget \d+ trials/);
     expect(out).toContain('1.2: WHEN the base is pushed with up to 100 N');
-    expect(out).toContain('gate RED: 1 of 3 requirements do not meet their expectation');
+    expect(out).toContain('gate RED: 1 of 3 requirements does not meet its expectation');
   });
 
   it('is red when an Expected_Hold line breaks, with the counterexample block', async () => {

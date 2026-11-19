@@ -69,9 +69,10 @@ describe('CLI end to end', () => {
     expect(state()).toBeUndefined();
 
     // 9. replay: exit 0 whatever the robustness, with the CSV and the Studio_URL
+    // The tiny app has no studio page, so replay says so instead of printing a path that does not exist.
     h.clearOutput();
     expect(await h.run('replay', '1.2')).toBe(0);
-    expect(h.io.stdoutText()).toMatch(/studio: apps\/tiny\/web\/index\.html#r=1\.2&seed=\d+/);
+    expect(h.io.stdoutText()).toContain('studio: this app has no studio page (set studioUrl in golem.config.json to link one)');
     expect(h.io.stdoutText()).toMatch(/robustness \+[\d.]+ m/);
     expect(h.fs.text(h.path('.golem/replays/1.2.csv'))?.split('\n')[0]).toBe('t,height,tilt');
     expect(h.fs.text(h.path('.kiro/specs/robot/requirements.md'))).toBe(requirementsBefore);

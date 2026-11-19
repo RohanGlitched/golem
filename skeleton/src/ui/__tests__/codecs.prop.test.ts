@@ -137,7 +137,8 @@ describe('status, codec and verdict properties', () => {
       expect(get('Random trials')).toBe(String(v.randomTrials));
       expect(get('Guided trials')).toBe(String(v.guidedTrials));
       expect(get('Wall time')).toBe(`${(v.ms / 1000).toFixed(1)} s`);
-      expect(get('Closest call')).toBe(marginText(v.closest.robustness, 'm'));
+      // The margin row's label says how to read the sign: below 0 means the line broke.
+      expect(get(v.closest.robustness < 0 ? 'Worst margin (below 0 = broke)' : 'Closest margin')).toBe(marginText(v.closest.robustness, 'm'));
       expect(get('Failure-rate bound (95%, random trials)')).toBe(v.failureRateUpper95 === undefined ? 'not available' : `${formatSig(v.failureRateUpper95 * 100, 2)}%`);
       expect(get('Pool size')).toBe(String(size));
       if (v.status === 'held') expect(sentence).toContain(`No counterexample in ${v.trials} trials`);

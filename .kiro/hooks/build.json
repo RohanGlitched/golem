@@ -29,7 +29,7 @@
       "matcher": "apps[\\/][a-z]+[\\/]\\.kiro[\\/]specs[\\/].*requirements\\.md$",
       "action": {
         "type": "command",
-        "command": "node skeleton/dist/cli/main.js check --app apps/stagger && node skeleton/dist/cli/main.js check --app apps/candy"
+        "command": "node skeleton/dist/cli/main.js check --app apps/stagger && node skeleton/dist/cli/main.js check --app apps/candy && node skeleton/dist/cli/main.js check --app apps/hover"
       },
       "timeout": 60
     }

@@ -66,7 +66,7 @@ describe('a green gate is confirmed', () => {
     expect(h.spies.poolSpecs).toHaveLength(2 * 3 * GATE_QUICK_TRIALS);
     const out = h.io.stdoutText();
     expect(out).toMatch(/^no counterexample in 144 trials \(3 requirements/);
-    expect(out).toContain('confirmed: 3 Expected_Hold lines searched again with a second, independent search seed');
+    expect(out).toContain('confirmed: 3 Expected_Hold lines searched again with a second search seed derived from the first');
     expect(out).toContain(`search seed 1, then confirmation seed ${SECOND_OF_1}`);
     expect(out).toContain('24 trials per line');
     expect(out).toContain('72 confirmation trials, 144 in total');

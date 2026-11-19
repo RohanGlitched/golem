@@ -158,6 +158,7 @@ ${skillsTable()}
 <h2 id="power">Power, workflow and Crew app</h2>
 <h3>Power</h3>
 <p>The <code>${esc(power['name'] ?? 'golem')}</code> Power bundles the MCP server, the skills and the steering: ${esc(power['description'] ?? '')}</p>
+<p>Tried in kiro-cli 3.5.0: <code>kiro-cli powers install ./skeleton/power</code> installs it, and its two skills appear in every session. Its MCP server did not start in headless sessions, so the MCP tools come from the <code>.kiro/settings/mcp.json</code> that <code>golem init</code> writes. The sessions and their logs: <a href="${REPO_URL}/tree/main/evidence/results/power"><code>evidence/results/power/</code></a>.</p>
 <h3>Workflow</h3>
 <p>The <code>falsify-and-fix</code> workflow repeats the tuner and <code>golem gate</code> up to 6 times and pauses if the gate is still red. The kit README marks its file format as the least verified part of the pack.</p>
 ${codeBlock(wf, 'the workflow file')}

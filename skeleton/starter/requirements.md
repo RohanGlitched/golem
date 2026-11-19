@@ -4,7 +4,7 @@
 
 The cart-pole starter robot: a 1 kg cart on a 4 m rail carrying a 0.1 kg pole, balanced by the controller in `app.js` through a motor limited to 15 N. GOLEM compiles each numbered line below against the phrases in `app.js` and searches for a counterexample in MuJoCo. A pass means no counterexample was found within the search budget.
 
-Lines 1.1 and 2.1 are expected to hold. 1.2 breaks today: the motor gives 15 N. `golem gate` stays red until you change app.js (a stronger motor, a better controller), or a person marks 1.2 Expected_Break in an Expectation table. This spec has no Expectation table, so every line counts as Expected_Hold and the red gate is on purpose. Lines are never edited to make a failing run pass; change `app.js` instead.
+Lines 1.1 and 2.1 are expected to hold. 1.2 breaks today: the motor gives 15 N. `golem gate` stays red until you change app.js and the motor (a stronger motor and gains that use it), or a person marks 1.2 Expected_Break in an Expectation table. This spec has no Expectation table, so every line counts as Expected_Hold and the red gate is on purpose. Lines are never edited to make a failing run pass; change `app.js` instead.
 
 ## Requirements
 

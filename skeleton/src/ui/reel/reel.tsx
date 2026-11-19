@@ -96,7 +96,7 @@ export function Reel({ store, actions }: { store: StoreLike; actions: StudioActi
         <>
           <p className="golem-reel-summary">
             {actions.summaryOf(line.id, ce)}
-            {ce.classification ? <span className="golem-note">{` (classification: ${ce.classification})`}</span> : null}
+            {ce.classification ? <span className="golem-note">{ce.classification === 'robust' ? ' (fails again with other seeds)' : ' (fails only with some seeds)'}</span> : null}
           </p>
           {data ? (
             <div className="golem-reel-strip" role="list" aria-label="Frames around the failure">

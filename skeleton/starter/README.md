@@ -23,6 +23,6 @@ Measured with `test --budget 24` over six search seeds (1, 2, 3, 7, 99, 12345):
 | 1.2 | push up to 30 N for 0.2 s, same response | broken | shrunk to a push of 14.5 to 15.1 N; the margin there is -0.13 to -0.93 deg at the edge, or about -300 deg once the pole tumbles |
 | 2.1 | the cart stays within 0.3 m of the centre | held | +0.19 to +0.26 m |
 
-1.2 breaks today: the motor gives 15 N. `golem gate` stays red until you change app.js (a stronger motor, a better controller), or a person marks 1.2 Expected_Break in an Expectation table. The starter has no Expectation table, so the gate is red on purpose.
-A push of 15 N for 0.2 s cannot be resisted and the pole falls; below that the controller catches it.
-To make it hold, change the controller in `app.js` or the motor limit in `robot/scene.xml` (and `FORCE_LIMIT`), never the line.
+1.2 breaks today: the motor gives 15 N. `golem gate` stays red until you change app.js and the motor (a stronger motor and gains that use it), or a person marks 1.2 Expected_Break in an Expectation table. The starter has no Expectation table, so the gate is red on purpose.
+A push of about 15 N for 0.2 s cannot be resisted and the pole falls; below that the controller catches it.
+To make it hold, change the controller in `app.js` and the motor limit in `robot/scene.xml` (and `FORCE_LIMIT`), never the line. One fix that turns the gate green (checked with search seeds 1 to 5): raise the motor to 60 N (`ctrlrange="-60 60"` in `robot/scene.xml` and `FORCE_LIMIT = 60` in `app.js`) and double the four gains (`KX = 2.5`, `KTH = 58.8`, `KXD = 4.4`, `KTHD = 11.6`). A stronger motor alone is not enough: with the old gains the controller never asks for the extra force, and 1.2 still breaks at about 19 N.

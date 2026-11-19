@@ -12,5 +12,9 @@ This product includes software and assets developed by third parties:
   Copyright Google DeepMind. Licensed under the Apache License, Version 2.0.
   Used in apps/candy.
 
+- Skydio X2 model from MuJoCo Menagerie
+  Copyright Google DeepMind. Licensed under the Apache License, Version 2.0.
+  Used in apps/hover.
+
 - MuJoCo
   Copyright Google DeepMind. Licensed under the Apache License, Version 2.0.

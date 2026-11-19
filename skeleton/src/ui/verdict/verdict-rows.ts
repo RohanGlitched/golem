@@ -31,7 +31,7 @@ export function verdictRows(v: Verdict, poolSize: number, unit: string, budget: 
     { label: 'Trials', value: String(v.trials) },
     { label: 'Random trials', value: String(v.randomTrials) },
     { label: 'Guided trials', value: String(v.guidedTrials) },
-    { label: 'Closest call', value: marginText(v.closest.robustness, unit) },
+    { label: v.closest.robustness < 0 ? 'Worst margin (below 0 = broke)' : 'Closest margin', value: marginText(v.closest.robustness, unit) },
     { label: 'Failure-rate bound (95%, random trials)', value: failureRateText(v.failureRateUpper95) },
     { label: 'Wall time', value: wallTimeText(v.ms) },
     { label: 'Pool size', value: String(poolSize) },

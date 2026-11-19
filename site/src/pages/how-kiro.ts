@@ -12,6 +12,12 @@ const AUDITS: { name: string; file: string; fix: string; what: string }[] = [
   { name: 'golem-falsify and pool', file: 'docs/reviews/falsify-audit.md', fix: 'golem-falsify-hardening', what: 'the falsifier and trial pool' },
 ];
 
+/** The packed Kiro CLI logs: runs, distinct Kiro sessions and the credits their own logs record. */
+export function sessionCounts(): { runs: number; sessions: number; credits: number } {
+  const idx = readRepoJson<{ sessions: string[]; credits: number }[]>('evidence/kiro-sessions/index.json');
+  return { runs: idx.length, sessions: new Set(idx.flatMap((r) => r.sessions)).size, credits: Math.round(idx.reduce((a, r) => a + r.credits, 0)) };
+}
+
 const link = (rel: string): string => `<a href="${REPO_URL}/blob/main/${rel}"><code>${esc(rel)}</code></a>`;
 
 function specRow(s: KiroSpec): string[] {
@@ -29,6 +35,7 @@ function auditCard(d: SiteData, a: (typeof AUDITS)[number], specs: KiroSpec[]): 
 
 export function howKiroPage(d: SiteData): PageSpec {
   const k = d.kiro;
+  const sc = sessionCounts();
   const t = k.totals;
   const specs = k.workspaces.flatMap((w) => w.specs);
   const counted = specs.filter((s) => s.status !== 'not started');
@@ -67,7 +74,7 @@ export function howKiroPage(d: SiteData): PageSpec {
 <p>The reflex ships as a switch, <code>GOLEM_REFLEX=kiro</code>. Re-measured afterwards over the full 4,860-trial stability map, the weakest push it survives rose from 62.5 N to 101.6 N, and all 36 directions hold 100 N (<a href="/evidence/#kiro-reflex">evidence</a>). The prompt and the full session log are in <a href="${REPO_URL}/tree/main/evidence/results/tuner"><code>evidence/results/tuner/</code></a>; the logs of the other Kiro runs are in <a href="${REPO_URL}/tree/main/evidence/kiro-sessions"><code>evidence/kiro-sessions/</code></a>.</p>
 
 <h2 id="specs">Every spec</h2>
-<p>${counted.length} specs counted, ${earsTotal.toLocaleString('en-US')} EARS criteria. ${specs.length - counted.length} more ${specs.length - counted.length === 1 ? 'is' : 'are'} listed as not started and left out of every total. Bugfix specs have no requirements file of their own: they list tasks that fix the defects of an audit. The G1 and candy rows are the robots' own requirement files, which GOLEM tests.</p>
+<p>${counted.length} specs counted, ${earsTotal.toLocaleString('en-US')} EARS criteria. ${specs.length - counted.length} more ${specs.length - counted.length === 1 ? 'is' : 'are'} listed as not started and left out of every total. Bugfix specs have no requirements file of their own: they list tasks that fix the defects of an audit. The G1, candy and hover rows are the robots' own requirement files, which GOLEM tests.</p>
 ${table(['Spec', 'Type', 'Requirements', 'EARS criteria', 'Properties', 'Tasks done'], specRows, { caption: 'Specs across .kiro, apps/stagger/.kiro and apps/candy/.kiro', num: [2, 3, 4, 5] })}
 
 <h2 id="config">What is in .kiro</h2>
@@ -90,8 +97,8 @@ ${table(['Where', 'Hook', 'Trigger'], [
 
 <h2 id="surfaces">Which Kiro surface did what</h2>
 <ul>
-<li><b>Kiro CLI v3, headless, spec mode</b> wrote the requirements, designs and tasks of the feature specs and the three bugfix specs.</li>
-<li><b>Kiro CLI v3, headless, default mode</b> carried out the tasks and committed them by task; commit subjects start with the spec name, for example <code>golem-ears-hardening: 7 ...</code>. Some sessions committed several finished tasks in a burst at the end of the run, so a few commits are seconds apart. The raw logs of the 40 headless runs we kept (33 Kiro sessions; resumed runs share a session) are in <code>evidence/kiro-sessions/</code>.</li>
+<li><b>Kiro CLI v3, headless, spec mode</b> wrote the requirements, designs and tasks of the feature specs and the bugfix specs.</li>
+<li><b>Kiro CLI v3, headless, default mode</b> carried out the tasks and committed them by task; commit subjects start with the spec name, for example <code>golem-ears-hardening: 7 ...</code>. Some sessions committed several finished tasks in a burst at the end of the run, so a few commits are seconds apart. The raw logs of the ${sc.runs} headless runs we kept (${sc.sessions} Kiro sessions, ${sc.credits.toLocaleString('en-US')} credits in their own records; resumed runs share a session) are in <code>evidence/kiro-sessions/</code>.</li>
 <li><b>Models:</b> Opus 5.5 and Sonnet 5.5. The <code>golem-auditor</code> agent is pinned to Sonnet 5.5.</li>
 <li><b>Hooks:</b> the root hooks were added after the engine and hardening specs; the Stop gate and the save hooks ran inside the sessions after that (the kit, candy, evidence and tuner runs). Hook behaviour was checked on kiro-cli 3.5.0: a Stop hook that blocks continues the agent, but fires once per user turn.</li>
 </ul>

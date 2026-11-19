@@ -575,6 +575,59 @@
   "finalMessage": "I'll start by looking at the repo state.\nNow write the helper and wire it in.\nI'll use the edit tool instead.\nThe first replace did not match. I'll use the edit tool.\nNow commit fix 1.\nNow item 3: the G1 studio.\nNow implement the hold in HeroSim and mount.\nItem 7: the flaky assets test.\nAll seven fixes are committed on `fix/polish2`. Tests pass in skeleton (1941), stagger (212), candy (366) and site (41). The monorepo typecheck, `npm run pack:build` and every `kiro-cli agent validate --path` also pass. I did not run the Playwright e2e specs; I only edited `signature.spec.ts`.\n\n**Held line as printed**, from a re-run of the packed starter (4 random trials out of 24; `golem test --budget 24`):\n```\n1.1  HELD  closest margin +17.9 deg  no counterexample in 24 trials; from the 4 uniformly random ones, failure rate below 75 % (95 % confidence)\n```\n\n**Commits**\n1. `802e63e` golem-kit: held-line wording in the CLI, MCP summary, gate summary and studio verdict panel. The panel row now reads \"Failure-rate bound (95%, random trials)\".\n2. `c7febd5` golem-kit: starter spec intro and README say 1.2 breaks today and the gate stays red until you change app.js or add an Expectation table. The transcript is re-run, and a test pins the sentence and the red gate.\n3. `29940e3` site: the G1 studio has a \"Controller: Unitree's policy / + Kiro's reflex\" control, default Unitree. The choice reaches every trial worker over a `BroadcastChannel`, and the live robot restarts under it. A test imports the "
  },
  {
+  "name": "power",
+  "file": "power.jsonl.gz",
+  "sessions": [
+   "sess_ff245c6c-d3a9-4741-ba02-aed61873e7f0"
+  ],
+  "modes": [
+   "vibe"
+  ],
+  "models": [
+   "auto",
+   "claude-sonnet-5.5"
+  ],
+  "credits": 0.23,
+  "toolCalls": 2,
+  "filesWritten": 0,
+  "finalMessage": "I couldn't run any of the four steps. The golem MCP tools (`list_requirements`, `falsify`, `explain_margin`) aren't available in this session.\n\nThe tool catalogue only offers `code`, `createHook`, `knowledge`, `remote_web_search` and `update_session_information`. Loading `tool::golem::list_requirements` and `plugin::golem::tool::golem::list_requirements` both failed with \"not in the catalogue\". The golem plugin exposes only two skills, `falsify-and-fix` and `robot-ears`. Those skills describe the `npx golem-spec` shell commands and don't give me the MCP tools.\n\nI didn't fall back to the shell. You told me to use only the MCP tools, and any numbers I gave without running them would be made up. I also didn't edit any files.\n\n| Line | Expectation | Verdict | Margin | Meets expectation? |\n|---|---|---|---|---|\n| hover-hold 1.3 | not retrieved | not run | n/a | Unknown |\n| hover-hold 1.1 | not retrieved | not run | n/a | Unknown |\n\nThe Power install probably didn't register its MCP server. Check that `golem` appears in `<home>\\.kiro\\settings/mcp.json` or the workspace `.kiro/settings/mcp.json`, and that the server is running. Then re-run the session. If you'd rather I use `npx --no-install golem-spec` from the shell, tell me and I'll do that."
+ },
+ {
+  "name": "power2",
+  "file": "power2.jsonl.gz",
+  "sessions": [
+   "sess_78897bc7-5705-405d-9d5e-71f55dab4b26"
+  ],
+  "modes": [
+   "vibe"
+  ],
+  "models": [
+   "claude-sonnet-5.5"
+  ],
+  "credits": 0.6,
+  "toolCalls": 8,
+  "filesWritten": 0,
+  "finalMessage": "Two catalogue entries contain \"golem\", and both are skills, not tools:\n- `plugin::golem::skill::falsify-and-fix`\n- `plugin::golem::skill::robot-ears`\n\nNo `tool::golem::...` ID is present. I'll wait once for the MCP server to start, as step 2 says.\n**Catalogue (step 1).** My first answer was wrong. I said no golem tool was present, but the catalogue listed these from the start:\n- `tool::golem::check_requirement`\n- `tool::golem::explain_margin`\n- `tool::golem::falsify`\n- `tool::golem::get_counterexample`\n- `tool::golem::list_requirements`\n- `tool::golem::propose_requirement`\n- `tool::golem::replay`\n- `tool::golem::run_requirement`\n\nIt also holds two skills: `plugin::golem::skill::falsify-and-fix` and `plugin::golem::skill::robot-ears`. The `sleep 20` wasn't needed. I used only the golem tools and edited no files.\n\n**Requirement 1.3 (20 N gust, 1.0 m limit).**\n- **Counterexample:** a 10.04 N gust at 11.1° (0.193 rad), seed 3909821944. It was found on the first trial. The search ran 15 trials of the 32 allowed, and the counterexample was not shrunk. The tool reported the pin as \"duplicate\", because it matched one already recorded.\n- **Margin:** −0.015 m. The drone drifts about 1.015 m from its hover point, at t = 2.79 s.\n- **explain_margin:** the lowest-margin signal is `hover_distance`, and the tool listed no other signals.\n\n**Requirement 1.1 (2 N gust, 0.25 m limit).** No counterexample in 32 trials, 6 of them uniformly random. Its closest scenario was a 1.75 N gust at 4.4° (se"
+ },
+ {
+  "name": "power3",
+  "file": "power3.jsonl.gz",
+  "sessions": [
+   "sess_e630f936-99dd-4c4c-9839-c98ca4c41f0f"
+  ],
+  "modes": [
+   "vibe"
+  ],
+  "models": [
+   "auto",
+   "claude-sonnet-5.5"
+  ],
+  "credits": 0.21,
+  "toolCalls": 1,
+  "filesWritten": 0,
+  "finalMessage": "I couldn't run the falsification, because no golem MCP tools are available in this session.\n\n**1. Tool IDs containing \"golem\"**\n\nNone. The catalogue lists only these tool IDs:\n- `tool::code`\n- `tool::createHook`\n- `tool::knowledge`\n- `tool::remote_web_search`\n- `tool::update_session_information`\n\nThe name \"golem\" appears only in two plugin skill IDs, `plugin::golem::skill::falsify-and-fix` and `plugin::golem::skill::robot-ears`. They are instruction skills, not MCP tools. The catalogue lists no GOLEM Power and no `power::...` entries. When I tried to load `tool::golem::list_requirements`, the load was rejected because that ID isn't in the catalogue.\n\n**2. list_requirements and falsifying requirement 1.2**\n\nI did not run either one. The only other route to them is the `npx golem-spec` CLI, and you ruled out the shell. I also didn't make up a counterexample or a margin. The GOLEM Power probably isn't installed or enabled in this Kiro session.\n\n| line | verdict | margin |\n|------|---------|--------|\n| 1.2 | not run (no golem MCP tools available) | n/a |\n\nTo get a real result, enable the GOLEM Power in Kiro and rerun. Or allow the shell, and I'll run `npx --no-install golem-spec test` on requirement 1.2 instead."
+ },
+ {
   "name": "scaffold",
   "file": "scaffold.jsonl.gz",
   "sessions": [

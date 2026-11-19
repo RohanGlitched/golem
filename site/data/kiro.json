@@ -1,6 +1,6 @@
 {
-  "generated": "2026-11-19T23:10:10.419Z",
-  "commit": "20466a0",
+  "generated": "2026-11-19T23:55:10.143Z",
+  "commit": "e501f53",
   "workspaces": [
     {
       "path": ".kiro",
@@ -217,7 +217,7 @@
           "name": "Compile robot requirements",
           "trigger": "PostFileSave",
           "action": "command",
-          "command": "node skeleton/dist/cli/main.js check --app apps/stagger && node skeleton/dist/cli/main.js check --app apps/candy"
+          "command": "node skeleton/dist/cli/main.js check --app apps/stagger && node skeleton/dist/cli/main.js check --app apps/candy && node skeleton/dist/cli/main.js check --app apps/hover"
         }
       ],
       "agents": [
@@ -230,7 +230,8 @@
       ],
       "mcp": [
         "golem-stagger",
-        "golem-candy"
+        "golem-candy",
+        "golem-hover"
       ],
       "skills": [],
       "keys": {
@@ -240,7 +241,7 @@
         "hooks": [
           "Typecheck gate|Stop|node scripts/kiro-stop-typecheck.mjs",
           "Unit tests for the saved engine file|PostFileSave|npx vitest related --run --root skeleton --passWithNoTests",
-          "Compile robot requirements|PostFileSave|node skeleton/dist/cli/main.js check --app apps/stagger && node skeleton/dist/cli/main.js check --app apps/candy"
+          "Compile robot requirements|PostFileSave|node skeleton/dist/cli/main.js check --app apps/stagger && node skeleton/dist/cli/main.js check --app apps/candy && node skeleton/dist/cli/main.js check --app apps/hover"
         ],
         "skills": [],
         "steering": [
@@ -250,7 +251,7 @@
           "interfaces.md:4f0147b41337",
           "mujoco-wasm.md:f1872c1da58c",
           "product.md:1e36e153ad4e",
-          "structure.md:9b6767ddb5d8",
+          "structure.md:7a4f8bccff6e",
           "tech.md:72f2fa2b3e20",
           "testing.md:4c832aa84ac7"
         ]
@@ -364,7 +365,7 @@
           "robot-ears:d03e01ddcc8c"
         ],
         "steering": [
-          "golem-ears.md:c7946da45d71"
+          "golem-ears.md:8673e1091f7d"
         ]
       },
       "workflows": [
@@ -478,7 +479,7 @@
           "robot-ears:d03e01ddcc8c"
         ],
         "steering": [
-          "golem-ears.md:c7946da45d71"
+          "golem-ears.md:8673e1091f7d"
         ]
       },
       "workflows": [
@@ -592,7 +593,7 @@
           "robot-ears:d03e01ddcc8c"
         ],
         "steering": [
-          "golem-ears.md:c7946da45d71"
+          "golem-ears.md:8673e1091f7d"
         ]
       },
       "workflows": [
@@ -601,9 +602,9 @@
     }
   ],
   "commits": {
-    "total": 319,
+    "total": 320,
     "byPrefix": {
-      "evidence": 15,
+      "evidence": 16,
       "golem-kit": 29,
       "hover": 9,
       "merge": 23,

@@ -2,13 +2,48 @@
   "mcpServers": {
     "golem-stagger": {
       "command": "node",
-      "args": ["skeleton/dist/cli/main.js", "mcp", "--app", "apps/stagger"],
-      "autoApprove": ["list_requirements", "check_requirement", "explain_margin", "get_counterexample"]
+      "args": [
+        "skeleton/dist/cli/main.js",
+        "mcp",
+        "--app",
+        "apps/stagger"
+      ],
+      "autoApprove": [
+        "list_requirements",
+        "check_requirement",
+        "explain_margin",
+        "get_counterexample"
+      ]
     },
     "golem-candy": {
       "command": "node",
-      "args": ["skeleton/dist/cli/main.js", "mcp", "--app", "apps/candy"],
-      "autoApprove": ["list_requirements", "check_requirement", "explain_margin", "get_counterexample"]
+      "args": [
+        "skeleton/dist/cli/main.js",
+        "mcp",
+        "--app",
+        "apps/candy"
+      ],
+      "autoApprove": [
+        "list_requirements",
+        "check_requirement",
+        "explain_margin",
+        "get_counterexample"
+      ]
+    },
+    "golem-hover": {
+      "command": "node",
+      "args": [
+        "skeleton/dist/cli/main.js",
+        "mcp",
+        "--app",
+        "apps/hover"
+      ],
+      "autoApprove": [
+        "list_requirements",
+        "check_requirement",
+        "explain_margin",
+        "get_counterexample"
+      ]
     }
   }
 }

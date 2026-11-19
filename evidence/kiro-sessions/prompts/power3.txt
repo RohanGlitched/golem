@@ -1,0 +1,4 @@
+This folder is a fresh GOLEM project (the cart-pole starter robot, golem-spec installed in node_modules). It has no MCP configuration of its own; the only source of golem MCP tools is the GOLEM Power installed in Kiro. Do not edit any file and do not use the shell.
+1. Report every tool ID in your load_resource catalogue whose name contains "golem".
+2. Using only the golem MCP tools: list_requirements; falsify requirement 1.2 with a budget of about 24 trials and report the counterexample and its margin.
+Finish with a short table: line, verdict, margin.

@@ -53,8 +53,8 @@ describe('VerdictPanel', () => {
   it('shows the aura summary as a text line and the held sentence without a proof claim', async () => {
     const s = store();
     const { container } = render(<VerdictPanel store={s} poolSize={4} budget={{ maxTrials: 240 }} />);
-    await act(async () => { s.update({ aura: { total: 3, ignored: 0, summary: 'Weakest direction 135 deg: breaks at 168 N' } }); await Promise.resolve(); });
-    expect(screen.getByText('Weakest direction 135 deg: breaks at 168 N')).toBeTruthy();
+    await act(async () => { s.update({ aura: { total: 3, ignored: 0, summary: 'Weakest sector, around 135 deg: breaks at 168 N' } }); await Promise.resolve(); });
+    expect(screen.getByText('Weakest sector, around 135 deg: breaks at 168 N')).toBeTruthy();
     expect(screen.getByText(/No counterexample in 480 trials; from the 400 uniformly random ones, failure rate below 0.63 % \(95 % confidence\)/)).toBeTruthy();
     expect(container.textContent).not.toMatch(/proved|verified/i);
   });

@@ -1,0 +1,12 @@
+$ kiro-cli --version
+kiro-cli 3.5.0
+
+$ kiro-cli powers install ./skeleton/power
+Installed power "golem"
+exit 0
+
+🤖 default:
+
+  kiro_default
+    • golem-candy  node
+    • golem-hover  node

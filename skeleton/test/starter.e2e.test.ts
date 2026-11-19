@@ -62,13 +62,13 @@ describe.skipIf(!built)('the starter robot through the built CLI, in an empty pr
     const gate = golem(['gate']);
     expect(gate.status).toBe(2);
     expect(gate.stdout).toContain('reproduce: npx golem-spec replay 1.2');
-    expect(gate.stdout).toMatch(/gate RED: 1 of 3 requirements are not held/);
+    expect(gate.stdout).toMatch(/gate RED: 1 of 3 requirements is not held/);
   }, 300000);
 });
 
 describe('the starter says why its gate is red', () => {
   const text = (f: string): string => readFileSync(join(SKELETON_DIR, 'starter', f), 'utf8');
-  const sentence = '1.2 breaks today: the motor gives 15 N. `golem gate` stays red until you change app.js (a stronger motor, a better controller), or a person marks 1.2 Expected_Break in an Expectation table.';
+  const sentence = '1.2 breaks today: the motor gives 15 N. `golem gate` stays red until you change app.js and the motor (a stronger motor and gains that use it), or a person marks 1.2 Expected_Break in an Expectation table.';
 
   it('has the sentence in the spec intro and in the README, and no Expectation table', () => {
     expect(text('requirements.md')).toContain(sentence);

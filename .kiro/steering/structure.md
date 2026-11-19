@@ -16,7 +16,8 @@ skeleton/              the reusable kit, npm package `golem-spec` (bin: golem)
   kiro-pack/           templates `golem init` copies into a project's .kiro/
 apps/stagger/          app 1: Unitree G1 humanoid (own package.json, own .kiro/ installed by `golem init`)
 apps/candy/            app 2: Franka Panda candy sorter (own package.json, own .kiro/)
-site/                  landing page, kit docs, evidence pages; links the two app studios
+apps/hover/            app 3: Skydio X2 quadrotor holding a hover point in wind (own package.json, own .kiro/)
+site/                  landing page, kit docs, evidence pages; links the three app studios
 evidence/              benchmark scripts and committed raw results (JSONL) + logs
 ```
 

@@ -50,7 +50,7 @@ export const handler: CommandHandler = async (p, io, deps) => {
   if (!grouped) {
     if (code === 0) line(io, `no counterexample in ${run.totalTrials} trials (${run.outcomes.length} requirements, pinned seeds first, then the quick budget)`);
     confirmLine();
-    if (code !== 0) line(io, `gate RED: ${unmet.length} of ${run.outcomes.length} requirements are not held`);
+    if (code !== 0) line(io, `gate RED: ${unmet.length} of ${run.outcomes.length} ${run.outcomes.length === 1 ? 'requirement' : 'requirements'} ${unmet.length === 1 ? 'is' : 'are'} not held`);
     return code;
   }
   const count = (e: string, met: boolean): number => judged.filter((j) => j.expectation === e && j.met === met).length;
@@ -59,7 +59,7 @@ export const handler: CommandHandler = async (p, io, deps) => {
     confirmLine();
   } else {
     confirmLine();
-    line(io, `gate RED: ${unmet.length} of ${run.outcomes.length} requirements do not meet their expectation`);
+    line(io, `gate RED: ${unmet.length} of ${run.outcomes.length} ${run.outcomes.length === 1 ? 'requirement' : 'requirements'} ${unmet.length === 1 ? 'does not meet its' : 'do not meet their'} expectation`);
   }
   return code;
 };

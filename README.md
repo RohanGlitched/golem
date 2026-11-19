@@ -35,7 +35,7 @@ at any point in its stride, THE robot SHALL stay upright for 3 s
    - a *scenario space*: force 0–100 N, angle 0–360°, gait phase 0–1;
    - a *monitor* with quantitative semantics: a signed margin in physical units. It prints the compiled formula too: `G[t₀, t₀+3 s] margin("stay upright") > 0 m`.
 2. **Falsify.** It re-runs pinned seeds first, then random Latin-hypercube trials, then a cross-entropy search toward the lowest margin. It **shrinks** each failure to the mildest push that still breaks the line, then re-checks it on fresh seeds and at half the timestep, so a solver artefact isn't reported as a robot failure.
-3. **Gate.** Kiro hooks run `golem check` when a requirements file is saved, and `golem test` when a controller is saved. A **Stop hook runs `golem gate`**, so the agent can't finish while a requirement is red. A green is confirmed: the gate searches every `Expected_Hold` line a second time with a second search seed derived from the first, so a green needs two independent searches to agree. Re-gated this way, 3 of the 4 controllers that falsely claimed success in experiment 3b come out red; one still passes, so a second seed lowers the odds of a lucky green without removing them ([re-check](evidence/results/agent-gate-hard/confirm-check.md)). A guard stops the tuning agent editing the requirement instead of the robot.
+3. **Gate.** Kiro hooks run `golem check` when a requirements file is saved, and `golem test` when a controller is saved. A **Stop hook runs `golem gate`**, so the agent can't finish while a requirement is red. A green is confirmed: the gate searches every `Expected_Hold` line a second time with a second search seed derived from the first, so a green needs two different searches to agree. Re-gated this way, 3 of the 4 controllers that falsely claimed success in experiment 3b come out red; one still passes, so a second seed lowers the odds of a lucky green without removing them ([re-check](evidence/results/agent-gate-hard/confirm-check.md)). A guard stops the tuning agent editing the requirement instead of the robot.
 
 The engine is MuJoCo 4 compiled to WebAssembly, the same build in Node and the browser. Every trial is reproducible from its scenario and seed.
 
@@ -76,9 +76,11 @@ The same pack ships as a **Kiro Power** (`skeleton/power`) and a **Kiro Crew app
 
 ## Three robots, one skeleton (Skeleton Crew)
 
+Three different jobs for three different users: push recovery for a humanoid, keeping a cobot arm clear of a child's hand, and wind tolerance for a drone. Each app is a MuJoCo model, a TypeScript controller and a small lexicon of what its requirement lines can say; the skeleton does the rest.
+
 | App | Robot | What GOLEM found |
 |---|---|---|
-| [`apps/stagger`](apps/stagger) | Unitree G1 humanoid running Unitree's published walking policy (it matches Unitree's own reference run to 2.5 µm) | It survives **62.5 N** and falls at 64.1 N pushed from its left at 20% of its stride, yet holds **240 N** from the front: 4,860 trials, all in `evidence/`. With Kiro's reflex the weakest direction rises to **101.6 N**. |
+| [`apps/stagger`](apps/stagger) | Unitree G1 humanoid running Unitree's published walking policy (after 2 s its pelvis is within 2.5 µm of Unitree's own Python reference run, which is stored to 10 µm: [`parity.test.ts`](apps/stagger/test/parity.test.ts)) | It survives **62.5 N** and falls at 64.1 N pushed from its left at 20% of its stride, yet holds **240.6 N** from the front right: 4,860 trials, all in `evidence/`. With Kiro's reflex the weakest direction rises to **101.6 N**. |
 | [`apps/candy`](apps/candy) | Franka Panda with a suction cup, sorting Halloween candy while trick-or-treaters reach in | At a hand speed of 0.8 m/s, 57 of 228 trials break "keep every link at least 0.10 m from the hand". Its speed-and-separation controller slows and stops the arm by the cup's distance to the hand, and stops too late for the **wrist**: link 7 is the closest link in 48 of the breaks, while the cup is still about 0.14 m away in most of them. |
 | [`apps/hover`](apps/hover) | Skydio X2 quadrotor holding a hover point 1.0 m above the floor under wind gusts, a sagging battery and a lagging position estimate (a cascaded PD controller; the third app, built on the same skeleton with a lexicon, a controller and the model file) | Line 1.3 asks it to stay within 1.0 m in a gust of up to 20 N, and it breaks from **9.98 N** (the smallest gust that broke it over three search seeds of 64 trials, from any direction). Line 1.1, a gust of up to 2 N within 0.25 m, holds with at least 0.0966 m to spare. A position estimate that lags by 0.275 s breaks line 3.2 (0.30 s asked) while 0.10 s holds (line 3.1). The numbers are read from the real CLI output in [`apps/hover/docs/cli-transcript.md`](apps/hover/docs/cli-transcript.md). |
 
@@ -88,11 +90,14 @@ Falsifying cyber-physical systems against temporal logic is an established field
 
 | Work | What it does | How GOLEM differs |
 |---|---|---|
+| EARS-CTRL (Lúcio et al., 2017) | EARS requirements checked for realisability, a controller synthesised and simulated in Simulink | The closest on the requirements side. GOLEM does not synthesise; it searches for the scenario that breaks an existing controller, and gates the agent on the result. |
+| FRET with CoCoSim, Simulink Requirements Table | Monitors and test cases generated from structured requirements, in MATLAB toolchains | GOLEM does requirements-based testing for MuJoCo in Node, the browser and CI, and searches for the worst case instead of running fixed cases. |
 | NASA FRET | No physics search of its own; exports to analysis tools | GOLEM reads the EARS lines an AI agent already writes in a Kiro spec, and searches a physics simulation for the scenario that breaks them. |
 | S-TaLiRo, Breach | Robustness-guided falsification of Simulink models in MATLAB | Same idea of robustness-guided falsification; GOLEM runs it on MuJoCo in Node and the browser, with no MATLAB, and adds shrinking and pinned regression seeds. |
 | RTAMT | Online and offline monitoring (Python, C++) | A monitor library only; GOLEM compiles its monitors from sentences and drives the search and the gate. |
 | VerifAI with Scenic | Falsification with samplers, including cross-entropy, for autonomous vehicles | The nearest ancestor. GOLEM starts from requirement sentences instead of a scenario program, and gates an AI coding agent on the result. |
 | nl2spec, NL2TL | Translation only | GOLEM parses a fixed EARS dialect deterministically: no language model decides what a line means or whether it held. |
+| Eureka and other LLM plus simulation loops | A language model writes reward or controller code and keeps what scores best in simulation | There the model judges itself by a score it optimises. In GOLEM a fixed monitor decides, and the agent cannot finish while a line misses its expectation. |
 | Property-based testing (Hypothesis, fast-check) | Random generation and shrinking | GOLEM borrows shrinking and seed pinning, and applies them to physics trials stated in a spec. |
 | Runtime action gates for robots | Blocks unsafe robot actions while running | Those gate the robot. GOLEM gates the coding agent's claim that the work is done, before anything ships. |
 
@@ -104,8 +109,8 @@ Falsifying cyber-physical systems against temporal logic is an established field
 | **Unitree's policy.** Requirement 1.3 on the floor, 36 recorded shoves at 100 N. Pushed from its left (80° and 90°) the G1 falls and the floor cracks. | **+ Kiro's reflex.** The same shoves and seeds with the reflex Kiro's `golem-tuner` wrote. All 36 hold; the ring is whole. |
 | <img src="docs/screens/studio-g1.jpg" alt="The G1 studio mid-run: the requirement list on the left, the clay robot and translucent ghosts on the stage, the verdict panel counting trials."> | <img src="docs/screens/rings.jpg" alt="Two polar rings, before and after: the measured push boundary in each direction with the requirement written around it; the before ring cracks red on the left."> |
 | **The studio.** Real MuJoCo in the browser: drag to shove, or summon 64 ghosts on a line and read the verdict. | **Before and after,** from the full 4,860-trial stability map: weakest push 62.5 → 101.6 N. |
-| <img src="docs/screens/candy.jpg" alt="The candy studio: a Franka Panda arm on a table with bowls and a child's hand reaching in."> | |
-| **Candy.** A Franka Panda sorting Halloween candy while a hand reaches in; GOLEM found the wrist too close to it. | |
+| <img src="docs/screens/candy.jpg" alt="The candy studio: a Franka Panda arm on a table with bowls and a child's hand reaching in."> | <img src="docs/screens/hover.jpg" alt="The hover studio: a clay Skydio X2 quadrotor on its hover-point marker; translucent ghosts of it are blown sideways by a gust, the failing ones in red.">
+| **Candy.** A Franka Panda sorting Halloween candy while a hand reaches in; GOLEM found the wrist too close to it. | **Hover.** A Skydio X2 holding its point in the wind. Line 1.3 asks for 20 N; GOLEM shrinks the gust that blows it out to about 10 N. |
 
 ## Evidence
 
@@ -113,7 +118,7 @@ Every number here comes from committed raw data in [`evidence/`](evidence), usin
 
 ## How Kiro built GOLEM
 
-Kiro CLI did the building: 16 specs, among them 4 bugfix specs written from audits in [`docs/reviews/`](docs/reviews) and the three robots' own requirement files, which GOLEM tests (a 17th, golem-cloud, is written and not started). Together they hold 217 requirements, 2,157 EARS acceptance criteria and 273 correctness properties; 728 of 736 tasks are done, and the tests make 543 property-test assertions in 415 files (counted by `scripts/kiro-stats.mjs`, with pack copies installed into the apps counted once). The root [`.kiro/`](.kiro) holds the steering, specs, hooks, agents and MCP config used to build it. The full account is on the site's [How Kiro built it](https://d23v187fnxad7l.cloudfront.net/how-kiro/) page, and the raw logs of the 48 headless Kiro runs we kept (41 sessions) are in [`evidence/kiro-sessions/`](evidence/kiro-sessions).
+Kiro CLI did the building: 16 specs, among them 4 bugfix specs written from audits in [`docs/reviews/`](docs/reviews) and the three robots' own requirement files, which GOLEM tests (a 17th, golem-cloud, is written and not started). Together they hold 217 requirements, 2,157 EARS acceptance criteria and 273 correctness properties; 728 of 736 tasks are done, and the tests make 543 property-test assertions in 415 files (counted by `scripts/kiro-stats.mjs`, with pack copies installed into the apps counted once). The root [`.kiro/`](.kiro) holds the steering, specs, hooks, agents and MCP config used to build it. The full account is on the site's [How Kiro built it](https://d23v187fnxad7l.cloudfront.net/how-kiro/) page, and the raw logs of the 51 headless Kiro runs we kept (44 sessions) are in [`evidence/kiro-sessions/`](evidence/kiro-sessions).
 
 ## Run it locally
 
@@ -125,6 +130,17 @@ npm run dev -w apps/hover      # the hover studio
 npm test                       # every workspace
 ```
 
+## Words used here
+
+| Word | Meaning |
+|---|---|
+| EARS | Easy Approach to Requirements Syntax: "WHEN <trigger> THE <system> SHALL <response>". Kiro writes acceptance criteria this way. |
+| Margin | How far a trial stayed from breaking a line, in the line's own unit (m, deg). Positive held, negative broke. |
+| Counterexample | A scenario (force, direction, stride phase, seed) that breaks a line, shrunk to the mildest one that still does. |
+| Expected_Hold, Expected_Break | The row of a spec's Expectation table that says whether a line should hold or is written to break. The gate checks both. |
+| Pinned seed | A counterexample saved in `.golem/seeds`, re-run first every time so a fixed bug stays fixed. |
+| Lexicon | The phrases an app's requirement lines can use, each mapped to a perturbation or a measurement. |
+
 ## Licences and credits
 
-GOLEM is Apache-2.0. The Unitree G1 model and walking policy are © Unitree Robotics, under BSD-3-Clause (`apps/stagger/robot/LICENSE`). The Franka Emika Panda model comes from MuJoCo Menagerie, Apache-2.0 (`apps/candy/robot/LICENSE`). MuJoCo is Apache-2.0. The B612 and Gloock typefaces are SIL OFL 1.1.
+GOLEM is Apache-2.0. The Unitree G1 model and walking policy are © Unitree Robotics, under BSD-3-Clause (`apps/stagger/robot/LICENSE`). The Franka Emika Panda model comes from MuJoCo Menagerie, Apache-2.0 (`apps/candy/robot/LICENSE`). The Skydio X2 model comes from MuJoCo Menagerie too, Apache-2.0 (`apps/hover/robot/LICENSE`; the commit and file hashes are in `apps/hover/robot/SOURCE.json`). MuJoCo is Apache-2.0. The B612 and Gloock typefaces are SIL OFL 1.1.

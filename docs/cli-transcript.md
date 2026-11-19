@@ -64,7 +64,7 @@ studio: apps/stagger/web/index.html#r=1.3&seed=1291121316&d.push.angle=1.5384007
 ```
 
 The robot is pushed from its left at 28 % of its stride and falls: the pelvis reaches the floor with 87.7 deg of tilt and 0.061 m of height at t = 4.84 s, 2.8 s after the push at t = 2 s. The trace is written to `.golem/replays/1.3.csv` (git-ignored).
-### 5. golem gate  (exit 2, 31 s)
+### 5. golem gate  (exit 2, 38 s)
 
 ```text
 $ golem gate
@@ -88,12 +88,12 @@ Expected_Break (3 lines: must break)
   margin: -0.439 m
   reproduce: npx golem-spec replay 1.3
 
-gate RED: 1 of 11 requirements do not meet their expectation
+gate RED: 1 of 11 requirements does not meet its expectation
 ```
 
 Default configuration: Unitree's policy alone. Exit code 2. The gate prints the two groups of the Expectation table. 1.2, 4.2 and 6.2 broke as the spec expects (ok). 1.3 is Expected_Hold and broke (FAIL), so it gets a block with the scenario, the margin and the reproduction command, and the gate is RED. The gate re-runs the pinned seeds first and then 24 trials per line. 1.3 is red because its pinned seed fails: 24 trials alone do not find it (see step 2). 4.2 and 6.2 say `not shrunk` because their pinned seeds are already shrunk (15 kg, 0.05 s) and the re-shrink found nothing milder; the seed files hold the shrunk entries. Because a line already misses its expectation, the gate does not run its confirmation pass (second search seed); it does that only when every line would meet its expectation, so this run is the first pass alone. Re-recorded on 2026-11-20 with `golem-spec` 0.1.2, starting from the seeds committed in `.golem/seeds/stagger/`. The verdict lines are the same as in the earlier recording; the wall time was 24 s then and 31 s now (one run each, on a machine that was not otherwise idle).
 
-### 6. GOLEM_REFLEX=kiro golem gate  (exit 0, 42 s)
+### 6. GOLEM_REFLEX=kiro golem gate  (exit 0, 47 s)
 
 ```text
 $ GOLEM_REFLEX=kiro golem gate
@@ -113,7 +113,7 @@ Expected_Break (3 lines: must break)
   ok    6.2  BROKEN  margin -0.441 m  15 trials  latency.duration = 0.05 s  (not shrunk, seed 229287175)
 
 gate GREEN: every requirement meets its expectation (8 held as expected, 3 broke as expected; 355 trials, pinned seeds first, then the quick budget)
-confirmed: 8 Expected_Hold lines searched again with a second, independent search seed (search seed 1, then confirmation seed 588244584; 24 trials per line; 154 confirmation trials, 355 in total)
+confirmed: 8 Expected_Hold lines searched again with a second search seed derived from the first (search seed 1, then confirmation seed 588244584; 24 trials per line; 154 confirmation trials, 355 in total)
 ```
 
 The same spec and the same pinned seeds, with the balance reflex that Kiro's `golem-tuner` agent wrote (`GOLEM_REFLEX=kiro`). Exit code 0. The pinned 1.3 seed from step 5 now holds (closest margin +0.216 m), so 1.3 meets its Expected_Hold. 1.2, 4.2 and 6.2 still break, which is what their Expected_Break rows ask for, so every line meets its expectation, and the gate then runs its confirmation pass: each of the 8 Expected_Hold lines is searched again with a second search seed derived from the first (search seed 1, confirmation seed 588244584; see `skeleton/CHANGELOG.md` 0.1.2). No line broke the second time, so the gate prints GREEN with both seeds and the total trials: 355, of which 154 are the confirmation (the first pass was 201 trials, as before). The confirmation added a second search to a green gate: 25 s before, 42 s now (one run each). This is the result of the new gate, not a weakened one: the Kiro reflex holds 1.3 under both seeds at 24 trials per line. A green gate still means no counterexample found within two searches of 24 trials per line. It is not a proof, and step 4 of `evidence/results/agent-gate-hard/confirm-check.md` checks the new gate against the reflexes that experiment 3b found to be weak.
