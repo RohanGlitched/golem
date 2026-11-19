@@ -11,7 +11,7 @@ export {
 } from './errors.js';
 
 export type {
-  Budget, SeedReader, PinnedSeedEntry, ProgressEvent, FalsifyOptions, ResolvedConfig, RunMetadata, FalsifyResult,
+  Budget, SeedReader, PinnedSeedEntry, ProgressEvent, FalsifyOptions, ResolvedConfig, RunMetadata, FalsifyResult, ReplayOptions,
 } from './types.js';
 export type { SeedDatabase } from './seed-db.js';
 export type { FileSystem, MemoryFileSystem, FsMethod, FsCall } from './fs.js';

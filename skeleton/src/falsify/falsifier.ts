@@ -16,7 +16,7 @@ import { deriveSeed, SALT } from './prng.js';
 import { ProgressEmitter, safeInvoke } from './progress.js';
 import { shrink, type ShrinkTrialOutcome } from './shrink.js';
 import type {
-  FalsifyOptions, FalsifyResult, PinnedSeedEntry, ResolvedConfig, RunMetadata,
+  FalsifyOptions, FalsifyResult, PinnedSeedEntry, ReplayOptions, ResolvedConfig, RunMetadata,
 } from './types.js';
 
 interface Completed { phase: 0 | 1 | 2 | 3; scenario: Scenario; seed: number; robustness: number; run: number }
@@ -37,6 +37,10 @@ function resolveConfig(o: FalsifyOptions): { cfg: ResolvedConfig; randomOnly: bo
   validateBudget(o.budget, f1, f2);
   const g1 = o.phase1GenerationSize ?? 32;
   if (!Number.isInteger(g1) || g1 < 1) throw new RangeError(`phase1GenerationSize must be a positive integer, got ${String(g1)}`);
+  const maxPinned = o.maxPinned ?? Infinity;
+  if (!(maxPinned === Infinity || (Number.isInteger(maxPinned) && maxPinned >= 0))) {
+    throw new RangeError(`maxPinned must be a non-negative integer, got ${String(o.maxPinned)}`);
+  }
   const sh = { tolerance: 0.01, maxTrials: 60, reserveFraction: 0.15, reserveMin: 12, ...stripUndefined(o.shrink ?? {}) };
   if (!(sh.tolerance > 0 && sh.tolerance < 1)) throw new RangeError(`shrink.tolerance must be in (0, 1), got ${String(sh.tolerance)}`);
   if (!Number.isInteger(sh.maxTrials) || sh.maxTrials < 1) throw new RangeError(`shrink.maxTrials must be an integer of at least 1, got ${String(sh.maxTrials)}`);
@@ -50,6 +54,7 @@ function resolveConfig(o: FalsifyOptions): { cfg: ResolvedConfig; randomOnly: bo
       phase1Fraction: randomOnly ? 1 : f1,
       phase2Fraction: randomOnly ? 0 : f2,
       phase1GenerationSize: g1,
+      maxPinned: maxPinned === Infinity ? null : maxPinned,
       cem,
       shrink: sh,
     },
@@ -74,6 +79,32 @@ function pinnedProblem(space: FalsifiableRequirement['space'], reqId: string, e:
     if (!(v >= d.min && v <= d.max)) return `${d.name}=${v} is outside [${d.min}, ${d.max}]`;
   }
   return undefined;
+}
+
+/**
+ * Options that rerun a finished run trial for trial without a clock (golem-falsify-hardening 5.3).
+ * Every generation but the last of a phase is full size in both runs, and the last is the prefix of
+ * the same full-size draw, so fixing the per-phase trial counts reproduces the run.
+ */
+function replayOptionsOf(appId: string, searchSeed: number, meta: RunMetadata, cfg: ResolvedConfig): ReplayOptions {
+  const { p0, p1, p2 } = meta.phaseTrials;
+  const T = p0 + p1 + p2;
+  const k = meta.p3Detail.shrink;
+  const shrinkRan = meta.verification !== undefined || k > 0;
+  return {
+    appId,
+    budget: { maxTrials: Math.max(1, T) },
+    searchSeed,
+    mode: meta.mode,
+    phase1Fraction: T > 0 ? p1 / T : 0,
+    phase2Fraction: T > 0 ? p2 / T : 0,
+    phase1GenerationSize: cfg.phase1GenerationSize,
+    maxPinned: p0,
+    cem: { ...cfg.cem },
+    shrink: shrinkRan
+      ? { tolerance: cfg.shrink.tolerance, maxTrials: Math.max(1, k), reserveFraction: 0, reserveMin: k }
+      : { ...cfg.shrink },
+  };
 }
 
 function sameSpec(a: TrialSpec, b: TrialSpec): boolean {
@@ -109,6 +140,7 @@ export async function falsify(
     phaseTrials: { p0: 0, p1: 0, p2: 0, p3: 0 }, p3Detail: { shrink: 0, verification: 0 },
     shrinkReserve: budget.shrinkReserve, stopReason: 'completed', budgetExhausted: false,
     resolvedPinned: [], skippedPinned: [], skippedSeedFiles: [], pinnedNotRun: 0, errors: [],
+    replayOptions: undefined as unknown as RunMetadata['replayOptions'], // set before returning
   };
 
   // ---- run state
@@ -242,6 +274,7 @@ export async function falsify(
   let ranP0 = 0;
   for (const e of ordered) {
     if (aborted()) { emitter.stop(); throw abortError(); }
+    if (cfg.maxPinned !== null && ranP0 >= cfg.maxPinned) break;
     if (budget.grant(0, 1) === 0) break;
     const spec = specFor({ ...e.scenario }, e.seed);
     const b = await runBatch([spec]);
@@ -267,7 +300,8 @@ export async function falsify(
       if (aborted()) { emitter.stop(); throw abortError(); }
       const size = budget.grant(1, cfg.phase1GenerationSize);
       if (size === 0) break;
-      const scenarios = latinHypercube(space, size, searchSeed, g);
+      // the generation prefix: a shortened generation is the start of the full-size hypercube (5.5)
+      const scenarios = latinHypercube(space, cfg.phase1GenerationSize, searchSeed, g).slice(0, size);
       const specs = scenarios.map((s, k) => specFor(s, deriveSeed(searchSeed, SALT.phase1, i1 + k)));
       const b = await runBatch(specs);
       budget.record(1, countOf(b));
@@ -434,6 +468,7 @@ export async function falsify(
   meta.budgetExhausted = trialsExhausted || timeUp;
   meta.stopReason = broken ? 'failure-found' : status === 'error' && errorSeen ? 'error'
     : timeUp ? 'time-budget' : trialsExhausted ? 'trial-budget' : 'completed';
+  meta.replayOptions = replayOptionsOf(appId, searchSeed, meta, cfg);
 
   const verdict: Verdict = {
     reqId: req.id,

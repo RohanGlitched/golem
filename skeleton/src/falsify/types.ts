@@ -32,6 +32,8 @@ export interface FalsifyOptions {
   phase1Fraction?: number;
   phase2Fraction?: number;
   phase1GenerationSize?: number;
+  /** At most this many pinned seeds run in Phase 0 (default: no limit beyond the trial budget). */
+  maxPinned?: number;
   /** Defaults: generationSize 32, eliteFraction 0.25, smoothing 1, lhsFraction 0.2 (share of each Phase 2 generation drawn by LHS). */
   cem?: { generationSize?: number; eliteFraction?: number; smoothing?: number; lhsFraction?: number };
   /**
@@ -50,6 +52,8 @@ export interface ResolvedConfig {
   phase1Fraction: number;
   phase2Fraction: number;
   phase1GenerationSize: number;
+  /** null: no limit. */
+  maxPinned: number | null;
   cem: { generationSize: number; eliteFraction: number; smoothing: number; lhsFraction: number };
   shrink: { tolerance: number; maxTrials: number; reserveFraction: number; reserveMin: number };
 }
@@ -79,9 +83,28 @@ export interface RunMetadata {
    * `classification === 'seed-sensitive'` when the shrink changed nothing; unset when a trial errored.
    */
   boundarySensitive?: boolean;
+  /**
+   * Options that rerun this run trial for trial with a trial limit instead of a clock (same requirement,
+   * trial function, seed database and search seed). Pass them to alsify as they are.
+   */
+  replayOptions: ReplayOptions;
   verification?: { scenario: Scenario; seeds: number[]; robustness: (number | null)[]; errors: string[] };
   /** The same seeds at the shrunk scenario; absent when the shrink changed nothing. */
   boundaryVerification?: { scenario: Scenario; seeds: number[]; robustness: (number | null)[]; errors: string[] };
+}
+
+/** The deterministic subset of FalsifyOptions that reproduces a run (golem-falsify-hardening defect 5). */
+export interface ReplayOptions {
+  appId: string;
+  budget: { maxTrials: number };
+  searchSeed: number;
+  mode: 'full' | 'random-only';
+  phase1Fraction: number;
+  phase2Fraction: number;
+  phase1GenerationSize: number;
+  maxPinned: number;
+  cem: { generationSize: number; eliteFraction: number; smoothing: number; lhsFraction: number };
+  shrink: { tolerance: number; maxTrials: number; reserveFraction: number; reserveMin: number };
 }
 
 export interface FalsifyResult { verdict: Verdict; meta: RunMetadata; pinEntry?: PinnedSeedEntry }

@@ -84,9 +84,12 @@ export class BudgetClock {
     const T = this.maxTrials;
     const remaining0 = T - this.used[0];
     if (phase === 0) return T;
-    const q1 = this.cfg.randomOnly ? remaining0 : Math.min(remaining0, Math.floor(this.cfg.phase1Fraction * T));
+    // floor(x + 1e-9): f = p/T from replay options must give back exactly p (golem-falsify-hardening 5.4)
+    const q1 = this.cfg.randomOnly ? remaining0 : Math.min(remaining0, Math.floor(this.cfg.phase1Fraction * T + 1e-9));
     if (phase === 1) return q1;
-    return Math.min(T - this.used[0] - this.used[1], Math.floor(this.cfg.phase2Fraction * T) + (q1 - this.used[1]));
+    // cumulative Phase 1 + 2 cap, so unused Phase 1 trials carry over and no trial is lost to two floors
+    const q12 = Math.floor((this.cfg.phase1Fraction + this.cfg.phase2Fraction) * T + 1e-9);
+    return Math.min(T - this.used[0] - this.used[1], q12 - this.used[1]);
   }
 
   private deadlineMs(phase: SearchPhase | 3): number {

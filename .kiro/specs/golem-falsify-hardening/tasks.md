@@ -32,7 +32,7 @@ Rules for every task:
   - Tests: `eliteSet` includes every tie and flags no information; a flat generation gives a uniform state; carried elites survive a bad generation; the LHS share sits at interleaved positions; the flat needle at 1000 trials is found no less often than random-only minus 8% (fails before: 9/30 against 21/30).
   - _Bugfix: 2.2–2.9_
 
-- [ ] 6. Generation prefix, quota flooring, `maxPinned`, `meta.replayOptions` (defect 5)
+- [x] 6. Generation prefix, quota flooring, `maxPinned`, `meta.replayOptions` (defect 5)
   - Tests: `maxTrials = 7` uses 7 search trials; full-mode Phase 1 is a prefix of random-only Phase 1 for every Phase 1 size; replaying a timed run (fake clock) with `meta.replayOptions` gives the identical spec sequence and verdict.
   - _Bugfix: 5.3–5.7_
 
