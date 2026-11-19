@@ -345,27 +345,27 @@ Conventions for every task:
     - **Property 12: Pixel ratio cap**
     - **Validates: Requirements 5.5**
 
-- [ ] 10. Hero simulation and shove
-  - [ ] 10.1 Implement `hero/load-hero.ts`
+- [x] 10. Hero simulation and shove
+  - [x] 10.1 Implement `hero/load-hero.ts`
     - The only file touching `golem-sim` loader names: load the `RobotApp` files, create `MjModel`, `MjData` and `SimContext`, copy model arrays once into a `ModelLike`, report `app.files()` rejection and MuJoCo load failure as messages that name the app and the failure.
     - Example tests with `FakeMj`: copied arrays do not alias the source, rejection of `files()` yields the message text from the design.
     - _Requirements: 2.10, 29.1, 29.2_
 
-  - [ ] 10.2 Implement `hero/hero-sim.ts`
+  - [x] 10.2 Implement `hero/hero-sim.ts`
     - `HeroSim` with `advance` using `FixedStepAccumulator`, controller decimation by `round(controlDt / simDt)`, `xfrc_applied` zeroed before forces each step, view refresh on `buffer` identity change, `app.makeController` and `app.initState` with the studio-derived PRNG, body groups synced from `xpos` and `xquat`, divergence reset with its announcement, `reset` (answers within 100 ms), `pause`, `resume`, `wake`, idle sleep after `idleSleepMs`, `snapshot` and `restore`, the `simulating` reason while running and visible, "Running slower than real time" flag when the Step_Cap is hit, `dispose` calling `.delete()` on `MjData` then `MjModel` once. No allocation in the step loop.
     - Example tests with `FakeMj`: zeroing before every step, view refresh, divergence resets and announces, `.delete()` counts, sleep releases `simulating`.
     - _Requirements: 6.1, 6.4, 6.6, 6.7, 6.8, 6.9, 6.10, 6.11, 6.12, 6.13, 27.10_
 
-  - [ ]* 10.3 Write property test for control decimation
+  - [x]* 10.3 Write property test for control decimation
     - **Property 7: Control decimation**
     - **Validates: Requirements 6.4**
 
-  - [ ] 10.4 Implement `hero/shove.ts` pointer and touch shove
+  - [x] 10.4 Implement `hero/shove.ts` pointer and touch shove
     - `ShoveController`: raycast against stage meshes, Grab_Point stored in body-local frame, target from ray and Shove_Plane (keep the previous target on a miss), `springForce` through `hero.setForce('shove', …)` with torque about the centre of mass, Shove_Arrow and the live label in whole newtons with Tabular_Figures, release within one frame, `dragging` reason, second pointer ignored, touch with non-passive listeners and `touch-action: none` only while on a body, peak force announced on release, Escape cancels.
     - Example tests with a fake raycaster: arrow and label cleared on release and on cancel, second pointer ignored, label rounds to the nearest 1 N.
     - _Requirements: 7.1, 7.2, 7.3, 7.5, 7.6, 7.7, 7.8, 7.9, 7.10, 7.13, 7.14, 8.9_
 
-  - [ ] 10.5 Add the keyboard Key_Push to `hero/shove.ts`
+  - [x] 10.5 Add the keyboard Key_Push to `hero/shove.ts`
     - Arrow without Shift applies 100 N for `round(0.2 / simDt)` steps on the primary push body (from `options.primaryPushBody`, defaulting to the first perturbation template's `visual` body), a second arrow restarts it, same arrow and label as the pointer shove, `dragging` reason held for the duration, announcement "Pushed 100 N toward the <direction>" at the end, Escape cancels.
     - Example tests: restart with a new direction, end announces the direction, Escape cancels and clears the arrow.
     - _Requirements: 8.2, 8.3, 8.4, 8.5, 8.6, 8.7, 8.8, 8.9_
