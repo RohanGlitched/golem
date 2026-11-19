@@ -302,171 +302,171 @@ This revision follows the current requirements and design:
 - [x] 7. Checkpoint - pure cores, guard and seams
   - Run `vitest --run` for `skeleton`. Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 8. CLI services and commands
-  - [ ] 8.1 Implement the run service
+- [x] 8. CLI services and commands
+  - [x] 8.1 Implement the run service
     - Create `skeleton/src/cli/service.ts` with `compileAll`, `toFalsifyOptions`, `runRequirements`, `runGateOnce`, `applyPinnedRule`, `withPool` (close in `finally`) and the pin-after-broken step.
     - Budget arithmetic follows A1: gate `24 + pinnedValid`, test and falsify default 64, MCP run `n`, MCP falsify `n + pinnedValid`. The seed database is passed read-only. The seed comes from flag, config or default 1.
     - Test with examples on the Tiny_Test_App: a counterexample is pinned, the pool closes on a thrown error, `runGateOnce` returns verdicts and Diagnostics.
     - _Requirements: 4.1, 4.3, 4.4, 4.5, 4.6, 4.7, 4.14, 4.16, 7.1, 7.2, 7.3, 12.1, 12.2, 27.1_
 
-  - [ ] 8.2 Write property test for budget mapping
+  - [x] 8.2 Write property test for budget mapping
     - **Property 23: Flags map to the right budget**
     - Generate flag combinations, config seeds and pinned counts; assert `maxTrials` and `maxWallMs` per budget kind, both limits passed when both given, and a read-only seed database.
     - fast-check, at least 100 runs, file `skeleton/src/cli/__tests__/prop-23-budget.test.ts`.
     - **Validates: Requirements 4.3, 4.4, 4.6, 4.7, 7.1, 7.2, 12.1, 12.2**
 
-  - [ ] 8.3 Write property test for pinned seeds breaking a requirement
+  - [x] 8.3 Write property test for pinned seeds breaking a requirement
     - **Property 18: A pinned seed with robustness not above zero breaks the requirement**
     - Generate pinned seeds with re-run robustness above, at and below 0; assert the requirement is `broken` whenever any pinned seed has robustness not greater than 0, and is decided by the Quick_Budget only when all pinned seeds hold.
     - fast-check, at least 100 runs, file `skeleton/src/cli/__tests__/prop-18-pinned-break.test.ts`.
     - **Validates: Requirements 7.1, 7.3**
 
-  - [ ] 8.4 Implement default deps, the `main` entry point and the bin wrapper
+  - [x] 8.4 Implement default deps, the `main` entry point and the bin wrapper
     - Create `createDefaultDeps` in `deps.ts` (heavy modules loaded by `await import()` inside function bodies), `skeleton/src/cli/run.ts` (`main(argv, io, deps)` returning an exit code, catching every error as `golem: <message>` with exit 1) and the 10-line `main.ts` wrapper.
     - The dispatch table loads `commands/<name>.ts` by dynamic import, and maps `gate` with `--kiro` to `commands/gate-kiro.ts` (the two output protocols of D10).
     - Test: `--help` prints usage with exit 0 and does not search for config; an argument error exits 1 without creating a pool.
     - _Requirements: 1.8, 2.8, 3.8, 10.5, 27.3_
 
-  - [ ] 8.5 Implement `golem check`
+  - [x] 8.5 Implement `golem check`
     - Create `skeleton/src/cli/commands/check.ts`: compile every file in listed order or only `<file>`, sorted Diagnostics, summary line, `--json` object, missing file and zero-criteria warning handling.
     - Test in-process: exit 1 on an error line, exit 0 on valid lines, JSON shape with `suggestion: null`, nearest-template suggestion, no pool created and no lazy loader called.
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 3.10, 28.2_
 
-  - [ ] 8.6 Implement `golem test`
+  - [x] 8.6 Implement `golem test`
     - Create `skeleton/src/cli/commands/test.ts`: compile, exit 1 on Diagnostics or no requirements, validate `--req`, run inside `withPool`, print one line per requirement, write the report, `--json` output.
     - Test in-process on the Tiny_Test_App: broken gives exit 2, all held gives exit 0, an error verdict gives exit 1, unknown `--req` lists ids, report fields present, other entries untouched with `--req`.
     - _Requirements: 4.1, 4.2, 4.8, 4.9, 4.10, 4.11, 4.12, 4.13, 4.14, 4.15, 4.17_
 
-  - [ ] 8.7 Write property test for `golem test` determinism
+  - [x] 8.7 Write property test for `golem test` determinism
     - **Property 40: `golem test` is deterministic for a fixed seed**
     - Generate requirement sets, budgets (at most 24) and search seeds on the Tiny_Test_App; assert byte-identical per-requirement lines and equal report verdict content apart from `ms`, `wallMs` and timestamps.
     - fast-check, at least 100 runs, file `skeleton/src/cli/__tests__/prop-40-determinism.test.ts`.
     - **Validates: Requirements 27.2**
 
-  - [ ] 8.8 Implement `golem falsify`
+  - [x] 8.8 Implement `golem falsify`
     - Create `skeleton/src/cli/commands/falsify.ts`: one requirement, progress line per Generation with phase labels, final line, single-entry report merge, `--json` line stream ending with the verdict.
     - Test in-process: unknown or missing id exits 1 and lists ids, report created with only that entry when absent, counterexample pinned.
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8_
 
-  - [ ] 8.9 Implement `golem replay`
+  - [x] 8.9 Implement `golem replay`
     - Create `skeleton/src/cli/commands/replay.ts`: `selectReplay`, run through `runTraced`, print the trace summary with units, write `.golem/replays/<reqId>.csv`, print the Studio_URL, never write the seed database or report.
     - Test in-process: replaying twice gives byte-identical CSV, no pinned counterexample exits 1 with no CSV, a missing trace exposure exits 1 naming the id and cause, a completed replay exits 0 whatever the robustness.
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.8, 6.9, 6.12, 6.13, 6.14_
 
-  - [ ] 8.10 Implement `golem gate` (without `--kiro`)
+  - [x] 8.10 Implement `golem gate` (without `--kiro`)
     - Create `skeleton/src/cli/commands/gate.ts`: pinned seeds first, then the Quick_Budget, per-requirement blocks, the pass line with the total trial count, "nothing to check" exits 2, a compile error exits 1, the report written after every run that reaches the trial phase with `meta.lastGateExitCode` (A13).
     - Test in-process: exit 2 when broken, exit 0 when every requirement holds, an `error` verdict exits 2, a failing pinned seed breaks the requirement.
     - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7, 7.8, 7.9, 7.10, 7.11, 28.2_
 
-  - [ ] 8.11 Implement `golem gate --kiro` with dedupe and the compile-error path
+  - [x] 8.11 Implement `golem gate --kiro` with dedupe and the compile-error path
     - Create `skeleton/src/cli/commands/gate-kiro.ts`: read Stop stdin for at most 1 s, session id, prune and read state, compute `elapsedS` from the stored `updatedAt` and the start of the invocation, call `gateCounter`, write state before any stdout, print the block JSON with exit 0, print 0 bytes on green or allowed stop, print the RED stderr message listing broken ids and EARS lines, append a Gate_Override only for an allow at count 5.
     - A compile error in a Requirements_File is a Red_Gate: no trial runs, the counter counts it, the block `reason` lists the Diagnostics and the exit code is 0. "Nothing to check" is a Red_Gate. A usage or Config_File error prints 0 bytes and exits 1 before the state is read.
     - Test in-process: first five red runs of one session block with parseable JSON and exit 0, the sixth prints 0 bytes with "RED" on stderr and a Gate_Override in the report, the seventh blocks again; green deletes the key; two sessions count apart; no `session_id` uses `default`; invalid state treated as empty with a warning; old entries pruned; state written through temp file and rename; two runs 0.5 s apart (fake clock) advance the count once and two runs 3 s apart advance it twice; a compile error blocks with the Diagnostics and runs no trial.
     - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7, 8.8, 8.9, 8.10, 8.16, 8.17, 8.18, 8.19, 8.20, 8.21, 8.22, 8.24, 28.2, 28.18, 28.19, 28.26_
 
-  - [ ] 8.12 Write property test for the `golem gate --kiro` output protocol
+  - [x] 8.12 Write property test for the `golem gate --kiro` output protocol
     - **Property 19: `golem gate --kiro` output protocol**
     - Drive `main` with scripted verdicts, Diagnostics, session ids and call sequences; assert stdout is exactly one JSON line with `decision` `block` and a non-empty `reason` on a blocked red gate, 0 bytes on green and allowed stops, exit 0 in every outcome except a usage or Config_File error (1, 0 bytes), all other messages on stderr, and a Gate_Override only on an allow at count 5.
     - fast-check, at least 100 runs, file `skeleton/src/cli/__tests__/prop-19-gate-kiro.test.ts`.
     - **Validates: Requirements 8.1, 8.3, 8.4, 8.8, 8.9, 8.10, 8.20, 8.21, 8.22, 8.23, 28.2, 28.18, 28.26**
 
-  - [ ] 8.13 Write property test for pool closing
+  - [x] 8.13 Write property test for pool closing
     - **Property 22: The pool is closed exactly once on every path**
     - With a fake pool and fake falsifier, generate outcomes (held, broken, error verdict, thrown error, abort) for `test`, `falsify` and `gate`; assert exactly one close before `main` returns, and no pool when the command fails before needing one.
     - fast-check, at least 100 runs, file `skeleton/src/cli/__tests__/prop-22-pool-close.test.ts`.
     - **Validates: Requirements 4.16, 5.9, 7.10, 10.3**
 
-  - [ ] 8.14 Implement the init engine
+  - [x] 8.14 Implement the init engine
     - Create `skeleton/src/cli/init.ts` with `readManifest`, `buildPlan` (read-only, `realpath` containment), `executePlan` (atomic writes, byte copies, stop on first failure), `mergeMcpSettings` (A9, A10) and `containedIn`.
     - Test with examples on the memory `KitFs` and a fixture pack: skip lines, wrote lines, no executable bit set, unreadable pack names the path and writes nothing, a mid-run failure stops and keeps the old file, a symlink escape exits 1 with no file written, invalid `mcp.json` JSON exits 1.
     - _Requirements: 9.1, 9.3, 9.4, 9.5, 9.7, 9.8, 9.9, 9.11, 9.14, 9.15, 22.4, 22.5_
 
-  - [ ] 8.15 Write property test for init idempotence
+  - [x] 8.15 Write property test for init idempotence
     - **Property 26: Init is idempotent and writes exactly the missing files**
     - Generate manifests and subsets of existing targets; assert the first run writes exactly the missing files and keeps existing files byte-identical, and a second run writes nothing and prints one `skipped` line per file.
     - fast-check, at least 100 runs, file `skeleton/src/cli/__tests__/prop-26-init-idempotent.test.ts`.
     - **Validates: Requirements 9.1, 9.3, 9.6, 28.14**
 
-  - [ ] 8.16 Write property test for init `--force`
+  - [x] 8.16 Write property test for init `--force`
     - **Property 27: Force replaces with template bytes**
     - Generate existing files with arbitrary content; assert `--force` leaves each pack file byte-identical to its template (the `settings/mcp.json` merge excepted) and every written file equals its pack file.
     - fast-check, at least 100 runs, file `skeleton/src/cli/__tests__/prop-27-init-force.test.ts`.
     - **Validates: Requirements 9.4, 9.11, 9.16, 16.5, 28.3, 28.22**
 
-  - [ ] 8.17 Write property test for init containment
+  - [x] 8.17 Write property test for init containment
     - **Property 28: Init never writes outside the target**
     - Generate pack paths with `..` segments, absolute paths and symlink layouts on the memory `KitFs`; assert targets stay inside the real target directory, or exit 1 naming the path with no file written.
     - fast-check, at least 100 runs, file `skeleton/src/cli/__tests__/prop-28-init-containment.test.ts`.
     - **Validates: Requirements 9.8**
 
-  - [ ] 8.18 Write property test for the MCP settings merge
+  - [x] 8.18 Write property test for the MCP settings merge
     - **Property 29: MCP settings merge preserves other servers and top-level fields**
     - Generate `mcpServers` maps and other top-level fields with and without a `golem` entry; assert non-`golem` entries and other fields are deeply equal, `golem` is present, a second merge returns the same text, and an existing `golem` entry is unchanged unless `force`.
     - fast-check, at least 100 runs, file `skeleton/src/cli/__tests__/prop-29-mcp-merge.test.ts`.
     - **Validates: Requirements 9.4, 22.4, 22.5**
 
-  - [ ] 8.19 Implement the `golem init` command
+  - [x] 8.19 Implement the `golem init` command
     - Create `skeleton/src/cli/commands/init.ts`: target directory from the positional argument or cwd, placeholder Config_File through `formatConfig`, `--force`, report which `mcp.json` outcome occurred, exit 0 including when every file was skipped.
     - Test in-process with a fixture pack: the guard is copied to `.kiro/hooks/golem-guard-requirements.mjs` byte-identical, the steering file is copied byte-identical, the placeholder config passes the field checks of Requirement 1.4.
     - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 9.10, 9.13, 9.16, 16.5, 22.4, 22.5, 28.22_
 
-- [ ] 9. MCP server and tools
-  - [ ] 9.1 Implement the server factory and the in-memory test harness
+- [x] 9. MCP server and tools
+  - [x] 9.1 Implement the server factory and the in-memory test harness
     - Create `skeleton/src/mcp/server.ts` with `McpAppContext`, `ToolDef`, `ToolCtx`, `createGolemServer` (low-level `Server`, `ListTools` and `CallTool` handlers, schema validation, lazy pool with retry, logs on stderr only, default registry that loads the eight `tools/*.ts` modules by name, each exporting `tool: ToolDef`) and `runStdioServer` (closes the pool when stdin closes).
     - Add a harness in `skeleton/test/support` that connects a `Client` through `InMemoryTransport.createLinkedPair()` with an injectable tool list.
     - Test with a dummy tool: the pool is not created until a tool asks for it, a failed pool creation gives an error Tool_Result and is retried, a no-config or invalid config server starts and every call returns an error naming the cause.
     - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.6, 10.7, 10.8, 10.9, 10.10, 11.9_
 
-  - [ ] 9.2 Implement `list_requirements`, `check_requirement` and `get_counterexample`
+  - [x] 9.2 Implement `list_requirements`, `check_requirement` and `get_counterexample`
     - Create `tools/list.ts`, `tools/check.ts` and `tools/counterexample.ts`.
     - Test through the in-memory transport: ids and statuses in file order, `unknown` when the report is absent or unreadable (with a note, file untouched), `check_requirement` writes nothing and runs no trial and returns Diagnostics as a success for bad text, `get_counterexample` returns the last pinned entry or null with a plain statement, an unknown `reqId` lists valid ids.
     - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5, 11.6, 11.7, 11.8_
 
-  - [ ] 9.3 Implement `run_requirement` and `falsify`
+  - [x] 9.3 Implement `run_requirement` and `falsify`
     - Create `tools/run.ts` and `tools/falsify.ts` sharing the `RunService`, one `FifoQueue`, `withTimeCap`, and a partial verdict built from the `onResult` stream (flagged `partial`, never pinned or written) when the time cap ends the run (A12).
     - `run_requirement` uses mode `random-only`; `falsify` runs the full search with shrinking; both pin and update the report before returning.
     - Test: valid budgets, default 24, a budget of 0 or 1025 names `budget`, a counterexample is pinned and the report updated.
     - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.5, 12.6, 12.8_
 
-  - [ ] 9.4 Write property test for the time cap
+  - [x] 9.4 Write property test for the time cap
     - **Property 34: Time cap gives a result for run and falsify and an error for the rest**
     - With fake falsifiers that outlast the cap, assert `run_requirement` and `falsify` return a non-error `partial` result with the trial count recorded before the abort and a mention of the cap, and every other tool returns an error result that says the cap ended the call.
     - fast-check, at least 100 runs, file `skeleton/src/mcp/__tests__/prop-34-time-cap.test.ts`.
     - **Validates: Requirements 12.6, 15.5**
 
-  - [ ] 9.5 Write property test for cancellation
+  - [x] 9.5 Write property test for cancellation
     - **Property 35: Cancellation leaves disk state unchanged**
     - Cancel `run_requirement` and `falsify` at generated points; assert the seed database and report are byte-identical to before the call, the abort completes within 1 s of fake time, and the pool serves the next call.
     - fast-check, at least 100 runs, file `skeleton/src/mcp/__tests__/prop-35-cancel.test.ts`.
     - **Validates: Requirements 12.5, 12.7**
 
-  - [ ] 9.6 Implement `replay` and `explain_margin`
+  - [x] 9.6 Implement `replay` and `explain_margin`
     - Create `tools/replay.ts` and `tools/explain.ts` using `runTraced`, `selectReplay`, the replay summariser and `explain`; `explain_margin` uses the latest pinned counterexample, else the report `closest` (stated in the result), else an error that suggests `falsify`.
     - Test through the in-memory transport: identical replay results for equal scenario and seed, unknown seed lists pinned seeds, no counterexample runs no trial, a missing trace exposure gives an error naming the cause, the `margins` map is used when present and the recompute path otherwise.
     - _Requirements: 13.1, 13.2, 13.3, 13.4, 13.5, 13.6, 13.7, 13.8, 28.23_
 
-  - [ ] 9.7 Implement `propose_requirement`
+  - [x] 9.7 Implement `propose_requirement`
     - Create `tools/propose.ts`: order of checks is schema, compile, duplicate, then append through the `WriteQueue`; rejections are success results that name the reason; no tool code path writes a Requirements_File.
     - Test through the in-memory transport: an accepted line is appended and every Requirements_File stays byte-identical, a non-compiling line is not recorded, a duplicate names file and line, two overlapping calls both appear in arrival order, a write failure names path and cause.
     - _Requirements: 11.5, 14.1, 14.2, 14.3, 14.4, 14.5, 14.6, 14.7, 14.8, 14.10, 14.11, 28.6_
 
-  - [ ] 9.8 Write property test for proposal acceptance
+  - [x] 9.8 Write property test for proposal acceptance
     - **Property 36: propose_requirement only appends accepted, new, compilable lines**
     - Generate proposal texts (compilable or not, duplicates of proposals or requirement lines up to whitespace) and prior files; assert the file equals the old file plus one entry only for compiling, non-duplicate text, and every Requirements_File is unchanged.
     - fast-check, at least 100 runs, file `skeleton/src/mcp/__tests__/prop-36-propose.test.ts`.
     - **Validates: Requirements 11.5, 14.1, 14.3, 14.4, 14.6, 28.6**
 
-  - [ ] 9.9 Test the registry of all eight tools and the error paths
+  - [x] 9.9 Test the registry of all eight tools and the error paths
     - Add `skeleton/src/mcp/__tests__/server.test.ts`: through the in-memory transport the default registry lists exactly eight tools, each with a non-empty name, description and JSON input schema; each called once with valid arguments returns no error flag; every result has a one-line first block and a JSON second block; a schema mismatch runs no trial and writes nothing; a failed call leaves the seed database and report unchanged.
     - Fix any registry wiring found missing in the tool modules.
     - _Requirements: 11.1, 11.9, 15.1, 15.3, 28.5, 28.8_
 
-  - [ ] 9.10 Implement the `golem mcp` command
+  - [x] 9.10 Implement the `golem mcp` command
     - Create `skeleton/src/cli/commands/mcp.ts`: locate the app once, validate `toolTimeCapS` (exit 1 naming field and value), start `runStdioServer`, exit 0 within 5 s when stdin closes.
     - Test in-process with a fake stdio and the in-memory harness: invalid cap exits 1, a missing config still starts the server, stdin close closes the pool and exits 0.
     - _Requirements: 10.1, 10.4, 10.6, 10.7, 15.6_
 
-- [ ] 10. Checkpoint - CLI and MCP server
+- [x] 10. Checkpoint - CLI and MCP server
   - Run `vitest --run` for `skeleton`. Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 11. Kiro pack

@@ -8,13 +8,13 @@ import type { FileDiagnostic, RequirementOutcome } from './types.js';
 export const UNIT_NOT_DECLARED = 'unit not declared';
 export const REASON_MAX = 4000;
 
-/** Three significant digits, no trailing zeros, no exponent for ordinary magnitudes. */
+/** Three significant digits, no trailing zeros, no exponent for ordinary magnitudes (8.78e-5 prints as 0.0000878). */
 export function sig3(x: number): string {
   if (Object.is(x, -0)) return '0';
   const n = Number(x.toPrecision(3));
   const a = Math.abs(n);
-  if (n !== 0 && (a < 1e-3 || a >= 1e6)) return n.toExponential(2).replace(/\.?0+e/, 'e');
-  return String(n);
+  if (n !== 0 && (a < 1e-9 || a >= 1e12)) return n.toExponential(2).replace(/\.?0+e/, 'e');
+  return n.toLocaleString('en-US', { maximumFractionDigits: 12, useGrouping: false });
 }
 
 /** SI value to text with its unit: 168 -> "168 N", 2.356 rad (angle) -> "135 deg", ratio 0.3 -> "30 %". */
@@ -162,4 +162,20 @@ export function redAllowMessage(sessionId: string, notHeld: readonly { id: strin
   const lines = [`golem gate: the gate is still RED after 5 blocks for session ${sessionId}; allowing this stop.`];
   for (const r of notHeld) lines.push(`  ${r.id}: ${r.ears}`);
   return `${lines.join('\n')}\n`;
+}
+
+/** "24 trials per requirement", "5 s per requirement" or both. */
+export function budgetText(b: { maxTrials?: number; maxWallMs?: number } | undefined): string {
+  const parts: string[] = [];
+  if (b?.maxTrials !== undefined) parts.push(`${b.maxTrials} trials`);
+  if (b?.maxWallMs !== undefined) parts.push(`${sig3(b.maxWallMs / 1000)} s`);
+  return parts.length > 0 ? `${parts.join(' or ')} per requirement` : 'no budget recorded';
+}
+
+/** One closing line for `golem test`: counts, the budget and the honest meaning of "held". */
+export function testSummary(outcomes: readonly RequirementOutcome[], seconds: number): string {
+  const n = (s: string): number => outcomes.filter((o) => o.verdict.status === s).length;
+  const budget = budgetText(outcomes[0]?.meta.budget);
+  return `${outcomes.length} requirements: ${n('broken')} broken, ${n('held')} held, ${n('error')} error, in ${sig3(seconds)} s `
+    + `(search budget ${budget}; held means no counterexample found within that budget, not a proof)`;
 }

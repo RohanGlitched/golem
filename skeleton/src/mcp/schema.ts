@@ -2,6 +2,8 @@
 import type { KitDeps } from '../cli/deps.js';
 import type { LocatedApp } from '../cli/config.js';
 import type { RobotApp, TrialPool } from '../cli/sibling-types.js';
+import type { CompileOutcome } from '../cli/types.js';
+import type { FifoQueue, WriteQueue } from './queue.js';
 import type { ToolResult } from './result.js';
 
 export interface JsonSchemaProp {
@@ -29,14 +31,23 @@ export interface McpAppContext {
 }
 
 export interface ToolCtx {
+  /** Aborts on a client cancel or when the time cap fires. */
   signal: AbortSignal;
+  /** True when the Tool_Time_Cap (and not a client cancel) ended the call. */
+  capFired(): boolean;
   deps: KitDeps;
   app: McpAppContext;
+  /** The located app and loaded RobotApp (the server answers with an error before a tool runs when they are missing). */
+  located: LocatedApp;
+  robotApp: RobotApp;
+  /** Creates the pool at the first call, reuses it, and retries after a failure (requirements 10.3, 10.9). */
   getPool(): Promise<TrialPool>;
-  /** Ids of the compiled requirements in file order. */
-  reqIds(): Promise<string[]>;
-  /** The located app, or undefined when the context holds a config error (the server answers that earlier). */
-  located(): LocatedApp;
+  /** Compiles the Requirements_Files on every call, so edits are seen at once. */
+  compile(): Promise<CompileOutcome>;
+  /** One falsification at a time, in arrival order (12.8). */
+  runQueue: FifoQueue;
+  /** Serialises proposal writes (14.11). */
+  writeQueue: WriteQueue;
 }
 
 export interface ToolDef {

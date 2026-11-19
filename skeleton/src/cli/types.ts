@@ -24,6 +24,8 @@ export interface RunOptions {
   budgetKind: 'test' | 'gate' | 'mcp-run' | 'mcp-falsify';
   signal?: AbortSignal;
   onProgress?: (e: ProgressEvent, req: CompiledRequirement) => void;
+  /** Called after each requirement finished (and was pinned), so commands can print its line at once. */
+  onOutcome?: (o: RequirementOutcome) => void;
   onResult?: (r: { robustness: number; unit: string; spec: { seed: number; scenario: Record<string, number> } }, req: CompiledRequirement) => void;
 }
 
