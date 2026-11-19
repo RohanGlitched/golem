@@ -62,7 +62,14 @@ export function robotFileList(sourceJson: Uint8Array): string[] {
 async function loadFiles(): Promise<Record<string, Uint8Array>> {
   const source = await readOne('SOURCE.json');
   const out: Record<string, Uint8Array> = {};
-  for (const path of robotFileList(source)) out[path] = path === 'SOURCE.json' ? source : await readOne(path);
+  // in parallel: on a CDN cache miss each file is a round trip to the origin, so a serial loop took ~45 s
+  const paths = robotFileList(source);
+  const settled = await Promise.allSettled(paths.map((path) => (path === 'SOURCE.json' ? Promise.resolve(source) : readOne(path))));
+  // wait for every read, then report the first failure in file order (deterministic, and no read left open)
+  const failed = settled.find((r) => r.status === 'rejected');
+  if (failed) throw (failed as PromiseRejectedResult).reason;
+  const bytes = settled.map((r) => (r as PromiseFulfilledResult<Uint8Array>).value);
+  paths.forEach((path, i) => { out[path] = bytes[i]!; });
   return out;
 }
 
