@@ -138,6 +138,7 @@ export async function runTrial(
     const signals: Record<string, Float64Array> = {};
     const traceView: Trace = { t: traceT, signals, events };
     let recorded = 0;
+    let decided: number | undefined; // D9: the early-stop hook's decided robustness
     let pose: PoseRecorder | undefined;
 
     // ---- warm-up: no perturbation, no sample; xfrc is cleared before every step.
@@ -192,6 +193,7 @@ export async function runTrial(
             if (typeof r !== 'number' || !Number.isFinite(r)) {
               throw new SimError(`Early-stop hook returned ${String(r)}; a finite number or undefined is required`);
             }
+            decided = r;
             break;
           }
         }
@@ -259,7 +261,7 @@ export async function runTrial(
     if (divergence !== undefined) diagnostics.diverged = divergence;
     const result: TrialResult = {
       spec,
-      robustness: divergence !== undefined ? -Infinity : m.robustness,
+      robustness: divergence !== undefined ? -Infinity : decided !== undefined ? decided : m.robustness,
       worstAt: divergence !== undefined ? divergence.t : m.worstAt,
       unit: m.unit,
       wallMs: performance.now() - t0,

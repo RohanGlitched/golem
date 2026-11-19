@@ -375,4 +375,16 @@ describe('defect 8: divergence during warm-up is a counterexample, not an error'
   });
 });
 
+describe('defect 9: the early-stop hook decides the robustness', () => {
+  it.each([[123], [-0.5]])('returns the hook value %s, with worstAt and unit from the monitor on the prefix', async (value) => {
+    const req = alwaysAbove({ signal: 'torso.z', bound: 0.25, horizon: 1 });
+    const { result, trace } = await run(stoolApp, req, { f: 0, a: 0 }, 2, { earlyStop: (_t, n) => (n === 10 ? value : undefined) });
+    expect(trace.t.length).toBe(10);
+    expect(result.robustness).toBe(value);
+    const prefix = req.monitor(trace);
+    expect(result.worstAt).toBe(prefix.worstAt);
+    expect(result.unit).toBe('m');
+  });
+});
+
 void makeStoolApp; void shoveCall;
