@@ -111,6 +111,37 @@ describe('HeroSim', () => {
     expect(sleeps).toEqual([true, false]);
   });
 
+  it('holds still while ghosts run, without stepping or sleeping, and walks on when released', () => {
+    const holds: boolean[] = [];
+    const sleeps: boolean[] = [];
+    const { h, mj, sched, clock } = hero({ onHoldChange: (x) => holds.push(x), onSleepChange: (s) => sleeps.push(s) });
+    h.setHeld(true);
+    expect(sched.has('simulating')).toBe(false);
+    clock.advance(60000); // far longer than idleSleepMs
+    expect(h.advance(5, clock.now()).steps).toBe(0);
+    expect(mj.steps).toBe(0);
+    expect(h.sleeping).toBe(false);
+    h.setHeld(true); // no second announcement
+    h.setHeld(false);
+    expect(sched.has('simulating')).toBe(true);
+    expect(h.sleeping).toBe(false);
+    expect(h.advance(0.02, clock.now()).steps).toBe(10); // the hidden time is not stepped, the next 20 ms is
+    expect(holds).toEqual([true, false]);
+    expect(sleeps).toEqual([]);
+  });
+
+  it('ends the hold when the user shoves or resets the robot', () => {
+    const { h, mj } = hero();
+    h.setHeld(true);
+    h.setForce('shove', () => true);
+    expect(h.held).toBe(false);
+    h.setHeld(true);
+    h.reset();
+    expect(h.held).toBe(false);
+    expect(h.advance(0.002, 0).steps).toBe(1);
+    expect(mj.steps).toBe(1);
+  });
+
   it('does not step for hidden time after a pause', () => {
     const { h, mj } = hero();
     h.advance(0.001, 0);

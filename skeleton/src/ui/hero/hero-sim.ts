@@ -4,6 +4,7 @@ import { FixedStepAccumulator } from '../core/accumulator.js';
 import type { RobotApp, SimContext } from '../types.js';
 
 export const DIVERGED_TEXT = 'The simulation diverged and was reset';
+export const HOLD_TEXT = 'The live robot holds still while the ghosts run. Reset it or shove it to make it walk again.';
 export const SLEEP_TEXT = 'Paused to save power: shove the robot to wake it';
 
 export interface HeroViews {
@@ -20,6 +21,8 @@ export interface HeroDeps {
   now(): number;
   onDiverged?(): void;
   onSleepChange?(sleeping: boolean): void;
+  /** The live robot was held still for the ghosts (true) or released (false). */
+  onHoldChange?(held: boolean): void;
   onSlowChange?(slow: boolean): void;
   /** Writes body poses into the stage body groups. */
   sync?(xpos: Float64Array, xquat: Float64Array): void;
@@ -40,6 +43,8 @@ export class HeroSim {
   private lastActivity: number;
   sleeping = false;
   paused = false;
+  /** Held still while ghosts run: no physics steps, so the live robot stays where it is and in view of the camera that follows the swarm. */
+  held = false;
   slow = false;
   private holding = false;
   private disposed = false;
@@ -67,7 +72,16 @@ export class HeroSim {
     this.xfrcBuf = this.views.xfrc.buffer;
   }
 
-  private get running(): boolean { return !this.paused && !this.sleeping && !this.disposed; }
+  private get running(): boolean { return !this.paused && !this.held && !this.sleeping && !this.disposed; }
+
+  /** Holds the live robot still (or lets it walk again). A shove, a key push or eset() also ends the hold. */
+  setHeld(held: boolean): void {
+    if (held === this.held) return;
+    this.held = held;
+    if (!held) { this.acc.resumeAfterHidden(); this.lastActivity = this.d.now(); }
+    this.updateHold();
+    this.d.onHoldChange?.(held);
+  }
 
   private updateHold(): void {
     const want = this.running;
@@ -129,7 +143,7 @@ export class HeroSim {
   setForce(slot: Slot, f: ForceProvider | null, onEnd?: () => void): void {
     this.providers[slot] = f;
     this.onEnd[slot] = f ? onEnd ?? null : null;
-    if (f) this.wake();
+    if (f) { this.setHeld(false); this.wake(); }
   }
 
   hasForce(slot: Slot): boolean { return this.providers[slot] !== null; }
@@ -163,6 +177,7 @@ export class HeroSim {
     this.controller = app.makeController(ctx, rng);
     this.ctrlCountdown = 0;
     this.simTime = 0;
+    this.setHeld(false);
     this.acc.resumeAfterHidden();
     this.wake();
     this.sync();

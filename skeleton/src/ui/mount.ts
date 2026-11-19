@@ -14,7 +14,7 @@ import { TOKENS } from './core/theme-tokens.js';
 import { syntheticTrialFields } from './core/trial-fields.js';
 import { GhostSwarm } from './ghosts/ghost-swarm.js';
 import { DEFAULT_PUSH_S, arrowLength, findTemplate, resolveArrow, resolveValues } from './ghosts/push-arrow.js';
-import { HeroSim, DIVERGED_TEXT, SLEEP_TEXT } from './hero/hero-sim.js';
+import { HeroSim, DIVERGED_TEXT, HOLD_TEXT, SLEEP_TEXT } from './hero/hero-sim.js';
 import { loadHero } from './hero/load-hero.js';
 import type { HeroModel } from './hero/load-hero.js';
 import { DragController } from './hero/drag.js';
@@ -280,6 +280,7 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
   });
   let replayLine = '';
   let following = false;
+  let ghostHold = false;
   let replayPush = { forceN: 0, durS: 0 };
 
   const tick = (ts: number): void => {
@@ -309,6 +310,8 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
       const groups = parts.bodyGroups;
       const root = groups[1] ?? groups[0];
       const c = swarm && swarm.shown > 0 ? swarm.centroid : null;
+      // While ghosts run the camera follows them, so the live robot stands still: otherwise it keeps walking out of the frame.
+      if (hero) { const ghostsRun = !!swarm && swarm.shown > 0; if (ghostsRun !== ghostHold) { ghostHold = ghostsRun; hero.setHeld(ghostsRun); } }
       if (c) stage.follow(c[0], c[1]);
       else if (root) stage.follow(root.position.x, root.position.y);
       // The aura is the boundary around the robot being tested: it rides under the ghost swarm while one
@@ -494,6 +497,7 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
       scheduler: { acquire: (r) => scheduler.acquire(r), release: (r) => scheduler.release(r) }, now,
       onDiverged: () => announcer.announceFinal(DIVERGED_TEXT),
       onSleepChange: (s) => { store.update({ hero: s ? 'sleeping' : 'running' }); stage?.showMessage(s ? SLEEP_TEXT : undefined); scheduler.requestOnce(); },
+      onHoldChange: (held) => { stage?.showMessage(held ? HOLD_TEXT : hero?.sleeping ? SLEEP_TEXT : undefined); scheduler.requestOnce(); },
       onSlowChange: (s) => stage?.setSlow(s),
       sync,
     });
