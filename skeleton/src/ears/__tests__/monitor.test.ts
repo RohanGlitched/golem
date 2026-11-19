@@ -34,10 +34,17 @@ describe('buildMonitor', () => {
     expect(r).toEqual({ robustness: 2, worstAt: 4, unit: 'm' });
   });
 
-  it('takes the maximum for eventually within a window', () => {
+  it('for within, takes the minimum from the deadline to the end and reports the last violation', () => {
+    // F[1,3] G[., 5]: reached at t=3 and held; the last violation was at t=2.
     const tr = trace(ts, { z: [9, -1, -2, 0.5, 7, 8] }, trig);
     const r = buildMonitor(spec({ wrapper: { kind: 'eventually', duration: 2 } }))(tr);
-    expect(r).toEqual({ robustness: 0.5, worstAt: 3, unit: 'm' });
+    expect(r).toEqual({ robustness: 0.5, worstAt: 2, unit: 'm' });
+  });
+
+  it('for within, fails a predicate that holds at the deadline and breaks afterwards', () => {
+    const tr = trace(ts, { z: [9, 5, 5, 5, -1, 8] }, trig);
+    const r = buildMonitor(spec({ wrapper: { kind: 'eventually', duration: 2 } }))(tr);
+    expect(r).toEqual({ robustness: -1, worstAt: 4, unit: 'm' });
   });
 
   it('evaluates only samples up to the last one when the window extends past it', () => {
@@ -54,8 +61,9 @@ describe('buildMonitor', () => {
   it('keeps the earliest time when several samples tie', () => {
     const tr = trace(ts, { z: [0, 2, 1, 1, 5, 5] }, trig);
     expect(buildMonitor(spec({}))(tr).worstAt).toBe(2);
+    // within 4 s: the hold window is the single sample at t=5; nothing was violated.
     const ev = buildMonitor(spec({ wrapper: { kind: 'eventually', duration: 4 } }))(tr);
-    expect(ev).toEqual({ robustness: 5, worstAt: 4, unit: 'm' });
+    expect(ev).toEqual({ robustness: 5, worstAt: 5, unit: 'm' });
   });
 
   it('returns NaN with unit trace when there is no trigger event', () => {

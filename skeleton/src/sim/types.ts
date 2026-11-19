@@ -47,18 +47,30 @@ export interface SimContext {
   lookup?: NameLookups;
 }
 
+/** Slot name → scenario Dimension name and severity; the ears compiler builds the Dimension. */
+export interface SlotDimension { dim: string; severity: 'up' | 'down' | 'none' }
+/** The parsed SI range of one slot (min === max when fixed). */
+export interface SlotRange { kind: Kind; min: number; max: number; wrap: boolean }
+type SlotValue = Quantity | [Quantity, Quantity] | string;
+
 export interface PredicateTemplate {
   phrase: string;
   signals: string[];
   margin(s: Record<string, number>, slots: Record<string, number>): number;
   unit: string;
-  dims?(slots: Record<string, Quantity | [Quantity, Quantity] | string>): Dimension[];
+  slots?: Record<string, SlotDimension>;
+  /** @deprecated declare `slots` instead. */
+  dims?(slots: Record<string, SlotValue>, ranges: Record<string, SlotRange>): Dimension[];
 }
 export interface PerturbationTemplate {
   phrase: string;
   /** Optional short name that a PerturbationCall.template may use instead of the phrase. */
   name?: string;
-  dims(slots: Record<string, Quantity | [Quantity, Quantity] | string>): Dimension[];
+  slots?: Record<string, SlotDimension>;
+  /** Latest start of the effect in seconds after tTrigger (ears adds it to windows and horizons). */
+  maxOnset?: number;
+  /** @deprecated declare `slots` instead; ears calls it only when `slots` is absent. */
+  dims?(slots: Record<string, SlotValue>, ranges: Record<string, SlotRange>): Dimension[];
   apply(ctx: SimContext, t: number, tTrigger: number, values: Record<string, number>): void;
   /**
    * Approved addition (golem-sim-hardening): called once per perturbation call at the trigger, in array
@@ -72,6 +84,7 @@ export interface Lexicon {
   predicates: PredicateTemplate[];
   perturbations: PerturbationTemplate[];
   episodeSeconds?: number;
+  features?: string[];
 }
 
 export interface Controller {

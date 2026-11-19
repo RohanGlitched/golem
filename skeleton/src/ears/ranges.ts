@@ -57,10 +57,12 @@ function buildText(tokens: readonly Token[]): string {
 function make(
   kind: Kind, min: number, max: number, wrap: boolean, tokens: readonly Token[],
 ): RangePhrase {
+  // A borrowed unit reuses the number token as the quantity's last token: drop the repeat.
+  const used = tokens.filter((t, i) => i === 0 || t !== tokens[i - 1]);
   return {
     kind, min, max, wrap, fixed: min === max,
-    span: buildSpan(tokens[0]!, tokens[tokens.length - 1]!),
-    text: buildText(tokens),
+    span: buildSpan(used[0]!, used[used.length - 1]!),
+    text: buildText(used),
   };
 }
 

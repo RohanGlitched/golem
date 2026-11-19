@@ -1,4 +1,4 @@
-import { compileRequirement, compileRequirementsFile } from 'I:/Programs/ListofHackathon/hackathons/39-kiroween/golem/skeleton/src/ears/index.ts';
+import { compileRequirement, compileRequirementsFile } from '../../skeleton/src/ears/index.ts';
 
 const DIRS: Record<string, [number, number]> = { 'any direction': [0, 2 * Math.PI], behind: [3 * Math.PI / 4, 5 * Math.PI / 4] };
 const lex: any = {

@@ -65,12 +65,17 @@ interface PredicateTemplate {
   signals: string[];                          // signals it reads
   margin(s: Record<string, number>, slots: Record<string, number>): number; // >0 holds, physical unit
   unit: string;
+  slots?: Record<string, SlotDimension>;      // optional: Dimensions this predicate adds (same rules as below)
 }
 interface PerturbationTemplate {
   phrase: string;                             // "the pelvis is pushed with {range:force} for {duration} from {direction}"
-  dims(slots: Record<string, Quantity | [Quantity, Quantity] | string>): Dimension[];
-  apply(ctx: SimContext, t: number, tTrigger: number, values: Record<string, number>): void;
+  slots?: Record<string, SlotDimension>;      // slot name → Dimension name + severity; the compiler builds the Dimension
+  /** @deprecated declare `slots`; called only when `slots` is absent */
+  dims?(slots: Record<string, Quantity | [Quantity, Quantity] | string>, ranges: Record<string, SlotRange>): Dimension[];
+  apply(ctx: SimContext, t: number, tTrigger: number, values: Record<string, number>): void;  // values keyed by slot name
 }
+interface SlotDimension { dim: string; severity: 'up' | 'down' | 'none' }   // e.g. direction → { dim: 'push.angle', severity: 'none' }
+interface SlotRange { kind: Kind; min: number; max: number; wrap: boolean }  // a slot's parsed range in SI (min === max when fixed)
 
 // ---------- trials and verdicts (sim / falsify / pool) ----------
 interface TrialSpec { app: string; reqId: string; scenario: Scenario; seed: number; record?: 'none' | 'poses' }
@@ -96,6 +101,10 @@ interface TrialPool { run(specs: TrialSpec[], onResult?: (r: TrialResult) => voi
 - `PerturbationTemplate.visual?(values) => { force?: [number,number,number]; at?: string }`: an optional hint the UI uses to draw push arrows.
 - `TrialPool.run(specs, onResult?, opts?: { signal?: AbortSignal })`.
 - `Lexicon.episodeSeconds?` (default 10 s) and `PredicateTemplate.dims?` (golem-ears).
+- **Changed by golem-ears-hardening (defects 1 and 10):** `PerturbationTemplate.dims` is now optional and deprecated. A template declares `slots` (slot name → `SlotDimension`) and the ears compiler builds each `Dimension` from the range written in the line: kind, min, max and wrap in SI from the parse, name and severity from the declaration. `PerturbationCall.params` has one entry per slot, keyed by slot name: the Dimension name when the slot is searched, its SI value when fixed. A searched slot with no declaration is a `BAD_LEXICON` compile error. The deprecated `dims(slots, ranges)` still works: the compiler ties each returned Dimension to a slot (exact name, `.<slot>` suffix, equal kind and bounds, or the only one of its kind) and warns about any it cannot tie. `PredicateTemplate.slots?` follows the same rules. Slot names are the kind (`force`, `duration`, `direction`, `phase`), with a suffix from 2 for a repeated kind (`length2`).
+- `Lexicon.features?: string[]` (golem-ears-hardening defect 6): the feature names a WHERE clause may name. A WHERE line that names any other feature is an `UNKNOWN_PHRASE` compile error with the closest declared feature as its suggestion.
+- `PerturbationTemplate.maxOnset?: number` (golem-ears-hardening defect 11): the latest start of the effect, in seconds after `tTrigger` (for example one gait period when a push waits for a stride phase). The compiler adds it to `for` windows, `within` deadlines and horizons.
+- `CompiledRequirement.formula?: string` (golem-ears-hardening I1): the STL formula the monitor computes, such as `G[t₀, t₀+3 s] margin("stay upright") > 0 m`. golem-ears always sets it.
 - Apps may keep per-trial runtime state in a `WeakMap<SimContext, …>`.
 - `Controller.substep?(ctx: SimContext, tSim: number): void` (golem-sim-hardening): called before every `mj_step`, warm-up included, with the simulated time before that step. Use it for sim-rate PD loops (Unitree: 500 Hz PD under a 50 Hz policy). Within a step the order is: clear `xfrc_applied`, `substep`, each perturbation's `apply`, `mj_step`.
 - `PerturbationTemplate.begin?(ctx: SimContext, values: Record<string, number>): void` (golem-sim-hardening): called once per perturbation call at the trigger, in array order, before sample 0 and the first `apply`. Use it for one-off model edits (mass, friction); the runner restores the full model after every trial.

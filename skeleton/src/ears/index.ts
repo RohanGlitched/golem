@@ -2,12 +2,16 @@
 export { compileRequirement, compileRequirementsFile } from './compile.js';
 export type { CompileResult, FileCompileResult } from './compile.js';
 export { extractCriteria } from './extract.js';
+export { lintLexicon } from './lint.js';
+export type { LintCode, LintFinding, LintOptions } from './lint.js';
 export type { RawCriterion } from './extract.js';
-export { tokenize } from './tokenizer.js';
+export { kiroText, tokenize } from './tokenizer.js';
 export { parse } from './parser.js';
 export { format } from './format.js';
 export { parseQuantity, toSI, fromSI } from './units.js';
 export { tokenEditDistance } from './editDistance.js';
+export { encodeRobustness, decodeRobustness, monitorResultToJSON, monitorResultFromJSON } from './serialize.js';
+export type { EncodedNumber, EncodedMonitorResult } from './serialize.js';
 
 export type { Diagnostic, DiagnosticKind } from './diagnostics.js';
 export type { ParsedRequirement, Clause } from './ast.js';
@@ -16,4 +20,5 @@ export type {
   PerturbationCall, CompiledRequirement, SimContext,
   PredicateTemplate, PerturbationTemplate, Lexicon,
   Pattern, Token, TokenType, CompileOptions,
+  SlotDimension, SlotRange, SlotValue, LegacyDims,
 } from './types.js';

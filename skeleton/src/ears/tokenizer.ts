@@ -1,7 +1,7 @@
 // Hand-written tokenizer for one EARS line. Pure: no I/O, no clock, no randomness.
 import { makeDiagnostic, type Diagnostic } from './diagnostics.js';
 import type { Token, TokenType } from './types.js';
-import { ACCEPTED_UNITS } from './units.js';
+import { ACCEPTED_UNITS, NUMBER_SOURCE } from './units.js';
 
 export type { Token, TokenType };
 
@@ -9,7 +9,7 @@ const KEYWORD = /^(?:when|while|if|then|where|the|shall)$/i;
 // Sticky regexes, so each is anchored at lastIndex without slicing the input.
 const ID_R = /R\d+\.(?=\s|$)/y;
 const ID_NUM = /\d+\.\d*(?=\s|$)/y;
-const NUMBER = /[+-]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/y;
+const NUMBER = new RegExp(NUMBER_SOURCE, 'y');
 const WORD = /\p{L}[\p{L}\p{N}_'-]*/uy;
 const WORD_CHAR = /[\p{L}\p{N}_]/u;
 
@@ -20,6 +20,35 @@ const UNITS_LONGEST_FIRST: readonly string[] = [...ACCEPTED_UNITS].sort(
 
 function isWhitespace(c: number): boolean {
   return c === 0x20 || c === 0x09 || c === 0x0d || c === 0x0a;
+}
+
+const isMarkup = (ch: string): boolean => ch === '*' || ch === '`';
+
+/**
+ * Kiro writes acceptance criteria as Markdown: a trailing period, `**bold**`, `` `code` ``,
+ * `__bold__`. Returns the line with that markup replaced by spaces of the same length, so every
+ * offset, line and column is unchanged. Blanked: every `*` and `` ` ``; a run of `_` that does not
+ * sit between two word characters (so `pelvis_z` is kept); and the last `.` of the line when only
+ * whitespace or markup follows it and it does not follow another `.`.
+ */
+export function kiroText(line: string): string {
+  const out = line.split('');
+  const n = out.length;
+  for (let i = 0; i < n; i++) {
+    const ch = out[i]!;
+    if (isMarkup(ch)) { out[i] = ' '; continue; }
+    if (ch !== '_') continue;
+    let j = i;
+    while (j < n && line[j] === '_') j++;
+    const before = i > 0 && WORD_CHAR.test(line[i - 1]!) && line[i - 1] !== '_';
+    const after = j < n && WORD_CHAR.test(line[j]!);
+    if (!(before && after)) for (let k = i; k < j; k++) out[k] = ' ';
+    i = j - 1;
+  }
+  let last = n - 1;
+  while (last >= 0 && isWhitespace(out[last]!.charCodeAt(0))) last--;
+  if (last >= 0 && out[last] === '.' && (last === 0 || out[last - 1] !== '.')) out[last] = ' ';
+  return out.join('');
 }
 
 function matchAt(re: RegExp, input: string, pos: number): string | undefined {

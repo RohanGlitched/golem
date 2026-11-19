@@ -3,10 +3,10 @@ import { makeDiagnostic, type Diagnostic } from './diagnostics.js';
 import { closestTemplate } from './editDistance.js';
 import { duplicateRangeDiagnostic, parseRangePhrase, type RangePhrase } from './ranges.js';
 import type {
-  CompiledTemplate, Dimension, Kind, Lexicon, PerturbationTemplate, PredicateTemplate, Quantity,
-  SlotKind, Span, TemporalWrapper, Token,
+  CompiledTemplate, Kind, Lexicon, PerturbationTemplate, PredicateTemplate, Quantity,
+  SlotKind, SlotValue, Span, TemporalWrapper, Token,
 } from './types.js';
-import { quantityFromTokens } from './units.js';
+import { quantityFromTokens, UNIT_TABLE } from './units.js';
 
 /** A template slot. `rangeKind` is set for `{range:<kind>}`. */
 export interface MatcherSlot { slot: SlotKind; name: string; rangeKind?: Kind }
@@ -16,7 +16,7 @@ export interface MatcherTemplate extends CompiledTemplate {
   pattern: (string | MatcherSlot)[];
 }
 
-export type SlotValue = Quantity | [Quantity, Quantity] | string;
+export type { SlotValue };
 
 export interface BoundClause<T> {
   template: T;
@@ -30,24 +30,10 @@ export interface BoundClause<T> {
   /** SI numbers by slot name. A range or phrase slot adds `<name>.min` and `<name>.max`. */
   si: Record<string, number>;
   ranges: Record<string, RangePhrase>;
-  /** Result of the template's `dims` called with `slots`, when the template has one. */
-  dimensions?: Dimension[];
-  /**
-   * Parallel to `dimensions`: the source span each Dimension came from. A Dimension is attributed to
-   * the unused range slot whose name it ends with, else to the range slot at the same index in source
-   * order. `undefined` when neither applies (callers fall back to the clause span).
-   */
-  dimensionSources?: (Span | undefined)[];
-}
-
-function attributeDimensions(dims: readonly Dimension[], ranges: Record<string, RangePhrase>): (Span | undefined)[] {
-  const bySource = Object.entries(ranges).sort((a, b) => a[1].span.start - b[1].span.start);
-  const taken = new Set<string>();
-  return dims.map((d, i) => {
-    const hit = bySource.find(([s]) => !taken.has(s) && (d.name === s || d.name.endsWith('.' + s)));
-    if (hit) { taken.add(hit[0]); return hit[1].span; }
-    return bySource[i]?.[1].span;
-  });
+  /** Source span of every bound slot. */
+  spans: Record<string, Span>;
+  /** The compiled pattern of `template`, for slot order. */
+  compiled: MatcherTemplate;
 }
 
 export interface PerturbationMatch { bound?: BoundClause<PerturbationTemplate>; diagnostics: Diagnostic[] }
@@ -120,14 +106,34 @@ interface Binding {
   slots: Record<string, SlotValue>;
   si: Record<string, number>;
   ranges: Record<string, RangePhrase>;
+  spans: Record<string, Span>;
 }
-interface Fail { pos: number; diagnostics?: Diagnostic[] }
+interface Fail {
+  pos: number;
+  diagnostics?: Diagnostic[];
+  /** Set when the template could not start the slot at `pos`: the slot and the template's index. */
+  slot?: MatcherSlot;
+  tpl?: number;
+  /** Token count of the attempt (the clause, or the clause without its wrapper). */
+  len?: number;
+}
 type Attempt = { ok: true; binding: Binding } | { ok: false; fail: Fail };
 
 const lower = (t: Token | undefined): string => (t === undefined ? '' : t.text.toLowerCase());
 const isWordTok = (t: Token | undefined, w: string): boolean =>
   t !== undefined && t.type === 'word' && lower(t) === w;
 const posOf = (a: Token, b: Token = a) => ({ start: a.start, end: b.end, line: a.line, column: a.column });
+
+/**
+ * The source text from token `a` to token `b` as written. Clause tokens carry upper-cased
+ * keywords, so messages slice the clause's source text instead.
+ */
+export function asWritten(clause: Clause, a: Token, b: Token = a): string {
+  const from = a.start - clause.span.start;
+  const to = b.end - clause.span.start;
+  if (from >= 0 && to <= clause.text.length && to >= from) return clause.text.slice(from, to);
+  return a === b ? a.text : `${a.text} ... ${b.text}`;
+}
 
 function mismatch(expected: string, found: string, text: string, a: Token, b: Token): Diagnostic {
   return makeDiagnostic(
@@ -162,6 +168,7 @@ function quantitySlot(
   }
   b.slots[name] = r.quantity;
   b.si[name] = r.quantity.si;
+  b.spans[name] = posOf(tok, last);
   return { next: i + (unit ? 2 : 1) };
 }
 
@@ -196,6 +203,7 @@ function rangeSlot(
   b.si[`${el.name}.min`] = range.min;
   b.si[`${el.name}.max`] = range.max;
   b.ranges[el.name] = range;
+  b.spans[el.name] = range.span;
   return { next: r.next };
 }
 
@@ -212,15 +220,49 @@ function phraseSlot(
       b.si[`${el.name}.min`] = r.range.min;
       b.si[`${el.name}.max`] = r.range.max;
       b.ranges[el.name] = r.range;
+      b.spans[el.name] = r.range.span;
       return { next: r.next };
     }
   }
   if (isDir) return quantitySlot(el.name, 'angle', toks, i, nextLit, b);
+  // A fixed phase: `at 62%`, optionally followed by `of its stride` or `into its stride`.
+  const num = toks[i];
+  const pct = toks[i + 1];
+  if (isWordTok(lead, 'at') && num?.type === 'number' && pct?.type === 'unit' && pct.text === '%') {
+    const q = quantityFromTokens(num, pct, 'ratio');
+    if (!q.quantity) return { fail: { pos: i, diagnostics: q.diagnostics } };
+    let last = pct;
+    let next = i + 2;
+    const tail = toks[next];
+    if (
+      tail !== undefined && (isWordTok(tail, 'of') || isWordTok(tail, 'into')) && lower(tail) !== nextLit &&
+      isWordTok(toks[next + 1], 'its') && isWordTok(toks[next + 2], 'stride')
+    ) { last = toks[next + 2]!; next += 3; }
+    const v = q.quantity.si;
+    const text = q.quantity.text;
+    if (!(v >= 0 && v <= 1)) {
+      return {
+        fail: {
+          pos: i,
+          diagnostics: [makeDiagnostic('BAD_RANGE', `A phase must be from 0% to 100% of the stride, found '${text}'`, posOf(num, pct))],
+        },
+      };
+    }
+    const span: Span = { start: num.start, end: last.end, line: num.line, column: num.column };
+    const phaseText = text + toks.slice(i + 2, next).map((t) => ' ' + t.text).join('');
+    b.slots[el.name] = { kind: 'phase', si: v, text: phaseText };
+    b.si[el.name] = v;
+    b.si[`${el.name}.min`] = v;
+    b.si[`${el.name}.max`] = v;
+    b.ranges[el.name] = { kind: 'phase', min: v, max: v, wrap: true, fixed: true, span, text: phaseText };
+    b.spans[el.name] = span;
+    return { next };
+  }
   return { fail: { pos: i } };
 }
 
 function matchOne(t: MatcherTemplate, toks: readonly Token[]): Attempt {
-  const b: Binding = { slots: {}, si: {}, ranges: {} };
+  const b: Binding = { slots: {}, si: {}, ranges: {}, spans: {} };
   let i = 0;
   for (let p = 0; p < t.pattern.length; p++) {
     const el = t.pattern[p]!;
@@ -235,7 +277,14 @@ function matchOne(t: MatcherTemplate, toks: readonly Token[]): Attempt {
     if (el.slot === 'range') r = rangeSlot(el, toks, i, nextEl, b);
     else if (el.slot === 'direction' || el.slot === 'phase') r = phraseSlot(el, toks, i, nextLit, b);
     else r = quantitySlot(el.name, el.slot as Kind, toks, i, nextLit, b);
-    if ('fail' in r) return { ok: false, fail: r.fail };
+    if ('fail' in r) {
+      const f = r.fail;
+      // The slot could not even start here: remember which slot, for a slot-aware message.
+      if (f.pos === i && (f.diagnostics === undefined || f.diagnostics.length === 0)) {
+        return { ok: false, fail: { pos: i, slot: el, tpl: t.index, len: toks.length } };
+      }
+      return { ok: false, fail: f };
+    }
     i = r.next;
   }
   if (i < toks.length) return { ok: false, fail: { pos: i } };
@@ -283,6 +332,81 @@ function ownWrapper(t: MatcherTemplate, b: Binding): TemporalWrapper | undefined
   return undefined;
 }
 
+// ---------- slot-aware messages ----------
+
+const EXAMPLE: Readonly<Record<Kind, string>> = {
+  force: '200 N', duration: '0.2 s', length: '0.5 m', speed: '0.5 m/s', angle: '90 deg',
+  mass: '1 kg', ratio: '50%', count: '3', phase: '50%',
+};
+const unitsOf = (k: Kind): string => UNIT_TABLE.filter((u) => u.kind === k).map((u) => u.spelling).join(', ');
+
+/** How a slot is written in a phrase, its accepted forms, and the example that replaces bad words. */
+export function slotForms(el: MatcherSlot): { label: string; forms: string; example: string } {
+  if (el.slot === 'direction') {
+    return { label: '{direction}', forms: 'any direction, behind, or an angle such as 90 deg', example: 'any direction' };
+  }
+  if (el.slot === 'phase') {
+    return {
+      label: '{phase}', forms: 'any point in its stride, or a percentage of the stride such as 50%',
+      example: 'any point in its stride',
+    };
+  }
+  if (el.slot === 'range') {
+    const k = el.rangeKind!;
+    const ex = EXAMPLE[k];
+    return {
+      label: `{range:${k}}`,
+      forms: `a ${k} range such as up to ${ex} or 0 to ${ex}, or one ${k} with a unit (${unitsOf(k)})`,
+      example: `up to ${ex}`,
+    };
+  }
+  const k = el.slot as Kind;
+  if (k === 'count') return { label: '{count}', forms: 'an unsigned integer such as 3', example: '3' };
+  if (k === 'ratio') return { label: '{ratio}', forms: 'a percentage such as 50%, or a ratio from 0 to 1', example: '50%' };
+  return { label: `{${k}}`, forms: `a number with a ${k} unit (${unitsOf(k)}), such as ${EXAMPLE[k]}`, example: EXAMPLE[k] };
+}
+
+/**
+ * UNKNOWN_PHRASE for a clause that follows `tpl` up to a slot that rejects what is written. The
+ * rejected words run from the slot start to the template's next literal word (or the end). The
+ * suggestion is the clause with those words replaced by the slot's example form.
+ */
+function slotDiagnostic(clause: Clause, toks: readonly Token[], fail: Fail, tpl: MatcherTemplate): Diagnostic {
+  const el = fail.slot!;
+  const pos = fail.pos;
+  const len = fail.len ?? toks.length;
+  const p = tpl.pattern.indexOf(el);
+  const next = tpl.pattern[p + 1];
+  let j = len;
+  if (typeof next === 'string') {
+    j = pos;
+    while (j < len && lower(toks[j]) !== next) j++;
+  } else if (next !== undefined) {
+    j = Math.min(pos + 1, len);
+  }
+  const { label, forms, example } = slotForms(el);
+  const base = clause.span.start;
+  let message: string;
+  let suggestion: string;
+  let at: { start: number; end: number; line: number; column: number };
+  if (j > pos) {
+    const a = toks[pos]!;
+    const b = toks[j - 1]!;
+    message = `'${asWritten(clause, a, b)}' is not accepted by ${label} in "${tpl.phrase}". It accepts ${forms}.`;
+    suggestion = clause.text.slice(0, a.start - base) + example + clause.text.slice(b.end - base);
+    at = posOf(a, b);
+  } else {
+    const a = toks[pos];
+    const where = a !== undefined ? ` before '${asWritten(clause, a)}'` : '';
+    message = `${label} is missing in "${tpl.phrase}"${where}. It accepts ${forms}.`;
+    suggestion = a !== undefined
+      ? clause.text.slice(0, a.start - base) + example + ' ' + clause.text.slice(a.start - base)
+      : `${clause.text} ${example}`;
+    at = a !== undefined ? posOf(a) : endPosition(toks.slice(0, len), clause);
+  }
+  return makeDiagnostic('UNKNOWN_PHRASE', message, at, { suggestion });
+}
+
 // ---------- clause matching ----------
 
 type Class = 'perturbation' | 'predicate';
@@ -299,7 +423,7 @@ function endPosition(toks: readonly Token[], clause: Clause) {
   return { start: last.end, end: last.end, line: last.line, column: last.column + (last.end - last.start) };
 }
 
-function run<T extends { phrase: string; dims?: (slots: Record<string, SlotValue>) => Dimension[] }>(
+function run<T extends { phrase: string }>(
   clause: Clause, cls: Class, templates: readonly T[], compiled: readonly MatcherTemplate[], allowWrapper: boolean,
 ): Outcome<T> {
   const toks = clause.tokens.filter((t) => t.type !== 'comma');
@@ -357,11 +481,8 @@ function run<T extends { phrase: string; dims?: (slots: Record<string, SlotValue
     const template = templates[idx]!;
     const bound: BoundClause<T> = {
       template, slots: a.binding.slots, si: a.binding.si, ranges: a.binding.ranges,
+      spans: a.binding.spans, compiled: compiled[idx]!,
     };
-    if (typeof template.dims === 'function') {
-      bound.dimensions = template.dims(a.binding.slots);
-      bound.dimensionSources = attributeDimensions(bound.dimensions, bound.ranges);
-    }
     const out: Outcome<T> = { bound, diagnostics: [] };
     const w = viaWrapper ? stripped!.wrapper : allowWrapper ? ownWrapper(compiled[idx]!, a.binding) : undefined;
     if (w) out.wrapper = w;
@@ -392,12 +513,17 @@ function run<T extends { phrase: string; dims?: (slots: Record<string, SlotValue
   if (best.diagnostics && best.diagnostics.length > 0) {
     return { diagnostics: best.diagnostics.map(decorate) };
   }
+  // The clause follows the closest template up to a slot that rejects what is written there:
+  // name the slot and its forms instead of repeating the template.
+  if (best.slot !== undefined && best.tpl !== undefined && hint !== undefined && sugg.template?.index === best.tpl) {
+    return { diagnostics: [slotDiagnostic(clause, toks, best, compiled[best.tpl]!)] };
+  }
   const tok = toks[best.pos];
   const generic = tok !== undefined
-    ? makeDiagnostic('UNKNOWN_PHRASE', `'${tok.text}' does not continue any ${cls} phrase`, posOf(tok))
+    ? makeDiagnostic('UNKNOWN_PHRASE', `'${asWritten(clause, tok)}' does not continue any ${cls} phrase`, posOf(tok))
     : makeDiagnostic(
       'UNKNOWN_PHRASE',
-      `The ${cls} phrase ends early: more words are expected after '${toks[toks.length - 1]?.text ?? ''}'`,
+      `The ${cls} phrase ends early: more words are expected after '${toks.length > 0 ? asWritten(clause, toks[toks.length - 1]!) : ''}'`,
       endPosition(toks, clause),
     );
   return { diagnostics: [decorate(generic)] };

@@ -19,7 +19,8 @@ const spec = (kind: 'always' | 'eventually', threshold: number, tr: Trace): Moni
     pattern: 'ubiquitous',
     predicate: above,
     slots: { threshold },
-    wrapper: kind === 'always' ? { kind } : { kind, duration: span + 1 },
+    // within: the deadline is half way, so the hold window runs from there to the last sample.
+    wrapper: kind === 'always' ? { kind } : { kind, duration: span / 2 },
   } as MonitorSpec;
 };
 
@@ -45,18 +46,21 @@ describe('Feature: golem-ears, Property 23: Sign flips when the threshold crosse
     );
   });
 
-  it('eventually: threshold below the window maximum is positive, above it is negative', () => {
+  it('within (F then G): threshold below the hold-window minimum is positive, above it is negative', () => {
     // **Validates: Requirements 7.13, 13.5**
     fc.assert(
       fc.property(arbTrace(), arbGap, arbGap, (tr, d1, d2) => {
         const z = tr.signals.z!;
-        let max = -Infinity;
-        for (let i = 0; i < z.length; i++) if (z[i]! > max) max = z[i]!;
+        const deadline = tr.t[0]! + (tr.t[tr.t.length - 1]! - tr.t[0]!) / 2;
+        let start = 0;
+        for (let i = 0; i < z.length; i++) if (tr.t[i]! <= deadline) start = i;
+        let holdMin = Infinity;
+        for (let i = start; i < z.length; i++) if (z[i]! < holdMin) holdMin = z[i]!;
         const run = (th: number) => buildMonitor(spec('eventually', th, tr))(tr).robustness;
-        expect(run(max)).toBe(0);
-        expect(run(max - d1)).toBeGreaterThan(0);
-        expect(run(max + d2)).toBeLessThan(0);
-        expect(Math.sign(run(max - d1 + d1))).toBe(Math.sign(run(max)));
+        expect(run(holdMin)).toBe(0);
+        expect(run(holdMin - d1)).toBeGreaterThan(0);
+        expect(run(holdMin + d2)).toBeLessThan(0);
+        expect(Math.sign(run(holdMin - d1 + d1))).toBe(Math.sign(run(holdMin)));
       }),
       propConfig,
     );

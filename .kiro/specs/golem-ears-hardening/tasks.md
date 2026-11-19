@@ -1,0 +1,50 @@
+# Implementation Plan: golem-ears-hardening
+
+Conventions: sources in `skeleton/src/ears/`, tests in `skeleton/src/ears/__tests__/`. Each defect task first adds its regression test, runs it and sees it fail, then fixes the code. Commit after each task as `golem-ears-hardening: <n> <what>`, staging only `skeleton/`, `docs/reviews/` and `.kiro/`. Never weaken an assertion; when a test encoded the defect, the commit message says why it changed.
+
+- [x] 0. Write this bugfix spec (bugfix.md, design.md, tasks.md); point the probes at this worktree
+- [x] 1. Minor items (defect 14)
+  - Remove the BOM, the unused object in `reorder`, the unreachable unit branch; share the number pattern
+  - Monitor: reject a signal whose length differs from `t`; per-call signal records, frozen slot records
+  - Regression tests: `regress.d14.test.ts`
+  - _Bugfix: 14.1–14.13_
+- [x] 2. Range text with a borrowed unit (defect 3)
+  - Regression test `regress.d3.test.ts`; fix `make()`; tighten the `ranges.test.ts` and `compile.test.ts` checks to exact text
+  - _Bugfix: 3.1–3.3_
+- [x] 3. Quote source text as written (defect 12)
+  - _Bugfix: 12.1–12.3_
+- [x] 4. Multi-word robot names (defect 13)
+  - _Bugfix: 13.1–13.3_
+- [x] 5. Accept THEN before THE in WHEN, WHILE and WHERE (defect 8)
+  - _Bugfix: 8.1–8.4_
+- [x] 6. Kiro markup and trailing periods (defect 2)
+  - `kiroText` in the tokenizer module, used by `compileRequirement`; extractor start test
+  - _Bugfix: 2.1–2.9_
+- [x] 7. Compiler-built dimensions (defects 1 and 10)
+  - `SlotDimension`, `slots`, `SlotRange`, deprecated `dims(slots, ranges)`, `BAD_LEXICON`; `dimensions.ts`
+  - Update `interfaces.md` and the sim's mirrored types; fix the `toMatchObject` in `compile.test.ts`
+  - Add the G1 lexicon fixture
+  - _Bugfix: 1.1–1.8, 10.1–10.4_
+- [x] 8. Slot-aware suggestions and fixed phase (defect 9)
+  - _Bugfix: 9.1–9.5_
+- [x] 9. WHERE features and distinct serialisation (defect 6)
+  - _Bugfix: 6.1–6.6_
+- [x] 10. WHILE with a perturbation state (defect 7)
+  - _Bugfix: 7.1–7.5_
+- [x] 11. `within T` as F then G (defect 4)
+  - Update the reference monitor and the soundness property to the corrected semantics
+  - _Bugfix: 4.1–4.7_
+- [x] 12. WHILE `for T` (defect 5)
+  - _Bugfix: 5.1–5.4_
+- [x] 13. Horizons and onset (defect 11)
+  - _Bugfix: 11.1–11.7_
+- [x] 14. STL formula string (improvement 1)
+  - _Bugfix: I1.1–I1.4_
+- [x] 15. Lexicon linter (improvement 5)
+  - _Bugfix: I5.1–I5.3_
+- [x] 16. Kiro-compatibility golden corpus (improvement 3)
+  - _Bugfix: I3.1–I3.3_
+- [x] 17. Metamorphic properties (improvement 6)
+  - _Bugfix: I6.1_
+- [x] 18. Correct the golem-ears requirements and design text
+- [x] 19. Checkpoint: full suite, typecheck, probes

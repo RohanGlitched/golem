@@ -1,4 +1,4 @@
-// Monitor builder: robustness semantics for always / eventually / state.
+// Monitor builder: robustness semantics for always (G), within (F then G) and state.
 // The sample loop uses indices and scalar locals only; the scratch record and
 // the signal-array list are allocated once per buildMonitor call. Trace is never written.
 
@@ -22,26 +22,44 @@ export function buildMonitor(spec: MonitorSpec): MonitorFn {
   if (state) for (const n of state.predicate.signals) if (!names.includes(n)) names.push(n);
   const count = names.length;
 
-  const scratch: Record<string, number> = {};
-  for (const n of names) scratch[n] = 0;
+  // Signal names of each predicate, and frozen copies of the slot values, so a margin
+  // function that writes to its arguments cannot change a later sample or call.
+  const respNames = [...new Set(predicate.signals)];
+  const stateNames = state ? [...new Set(state.predicate.signals)] : [];
+  const respIdx = respNames.map((n) => names.indexOf(n));
+  const stateIdx = stateNames.map((n) => names.indexOf(n));
+  const respSlots: Record<string, number> = Object.freeze({ ...slots });
   const arrays: Float64Array[] = new Array(count);
   const stateSlots = state ? state.predicate : undefined;
-  const stateSlotValues = state ? state.slots : undefined;
+  const stateSlotValues: Record<string, number> | undefined = state ? Object.freeze({ ...state.slots }) : undefined;
   const useAnchor = pattern === 'event' || pattern === 'unwanted';
-  const isEventually = wrapper.kind === 'eventually';
+  // A WHILE state is checked at every instant; the compiler rejects `within` on it.
+  const isEventually = wrapper.kind === 'eventually' && pattern !== 'state';
   const duration = wrapper.duration;
+  const onset = spec.onset !== undefined && spec.onset > 0 ? spec.onset : 0;
   const windowed = pattern !== 'state' && duration !== undefined;
+  // WHILE ψ ... for d: G(ψ → G[t, t+d] φ). Margins go into buffers that grow with the longest
+  // trace seen; a monotone deque gives the sliding minimum of φ in O(n).
+  const holdFor = state && wrapper.kind === 'always' && duration !== undefined && duration > 0 ? duration : 0;
+  let pBuf = new Float64Array(0);
+  let sBuf = new Float64Array(0);
+  let dq = new Int32Array(0);
 
   return (trace: Trace): MonitorResult => {
     const signals = trace.signals;
-    for (let k = 0; k < count; k++) {
-      const arr = signals[names[k]!];
-      if (arr === undefined) return { robustness: NaN, worstAt: 0, unit: 'signal' };
-      arrays[k] = arr;
-    }
     const t = trace.t;
     const n = t.length;
+    for (let k = 0; k < count; k++) {
+      const arr = signals[names[k]!];
+      if (arr === undefined || arr.length !== n) return { robustness: NaN, worstAt: 0, unit: 'signal' };
+      arrays[k] = arr;
+    }
     if (n === 0) return { robustness: NaN, worstAt: 0, unit: 'trace' };
+    // One record per predicate per call (not per sample).
+    const rs: Record<string, number> = {};
+    for (const nm of respNames) rs[nm] = 0;
+    const ss: Record<string, number> = {};
+    for (const nm of stateNames) ss[nm] = 0;
 
     let a = t[0]!;
     if (useAnchor) {
@@ -52,7 +70,9 @@ export function buildMonitor(spec: MonitorSpec): MonitorFn {
       }
       if (!found) return { robustness: NaN, worstAt: 0, unit: 'trace' };
     }
-    const b = windowed ? a + (duration as number) : t[n - 1]!;
+    // F-then-G (`within T`): reach by the deadline, then hold to the last sample.
+    const deadline = isEventually ? a + onset + (duration as number) : 0;
+    const b = windowed && !isEventually ? a + onset + (duration as number) : t[n - 1]!;
 
     // First index with t[i] >= a.
     let lo = 0;
@@ -62,23 +82,72 @@ export function buildMonitor(spec: MonitorSpec): MonitorFn {
       if (t[mid]! < a) lo = mid + 1; else hi = mid;
     }
     if (lo >= n || t[lo]! > b) return { robustness: NaN, worstAt: 0, unit: 'trace' };
+    if (isEventually && t[lo]! > deadline) return { robustness: NaN, worstAt: 0, unit: 'trace' };
 
-    let best = isEventually ? -Infinity : Infinity;
+    if (stateSlots && holdFor > 0) {
+      if (pBuf.length < n) { pBuf = new Float64Array(n); sBuf = new Float64Array(n); dq = new Int32Array(n); }
+      for (let i = lo; i < n; i++) {
+        for (let k = 0; k < respNames.length; k++) rs[respNames[k]!] = arrays[respIdx[k]!]![i]!;
+        const m = predicate.margin(rs, respSlots);
+        if (m !== m) return { robustness: NaN, worstAt: t[i]!, unit };
+        for (let k = 0; k < stateNames.length; k++) ss[stateNames[k]!] = arrays[stateIdx[k]!]![i]!;
+        const sm = stateSlots.margin(ss, stateSlotValues as Record<string, number>);
+        if (sm !== sm) return { robustness: NaN, worstAt: t[i]!, unit: stateSlots.unit };
+        pBuf[i] = m;
+        sBuf[i] = sm;
+      }
+      let worst = Infinity;
+      let worstAt = t[lo]!;
+      let r = lo - 1;
+      let head = 0;
+      let tail = 0;
+      for (let i = lo; i < n; i++) {
+        const end = t[i]! + holdFor;
+        while (r + 1 < n && t[r + 1]! <= end) {
+          r++;
+          // Pop strictly larger values only, so the front is the earliest minimum.
+          while (tail > head && pBuf[dq[tail - 1]!]! > pBuf[r]!) tail--;
+          dq[tail++] = r;
+        }
+        while (dq[head]! < i) head++;
+        const j = dq[head]!;
+        const minP = pBuf[j]!;
+        const ns = -sBuf[i]!;
+        const term = ns > minP ? ns : minP;
+        if (term < worst) {
+          worst = term;
+          // A violation points at the response sample; a held implication at the state instant.
+          worstAt = ns > minP && term > 0 ? t[i]! : t[j]!;
+        }
+      }
+      return { robustness: worst, worstAt, unit };
+    }
+
+    // Always: the minimum and its first time. F-then-G: the minimum from the last sample at or
+    // before the deadline to the end, and the time of the last sample with a margin <= 0.
+    let best = Infinity;
     let bestAt = t[lo]!;
+    let lastViolation = -Infinity;
     for (let i = lo; i < n; i++) {
       const ti = t[i]!;
       if (ti > b) break;
-      for (let k = 0; k < count; k++) scratch[names[k]!] = arrays[k]![i]!;
-      let m = predicate.margin(scratch, slots);
+      for (let k = 0; k < respNames.length; k++) rs[respNames[k]!] = arrays[respIdx[k]!]![i]!;
+      let m = predicate.margin(rs, respSlots);
       if (m !== m) return { robustness: NaN, worstAt: ti, unit };
       if (stateSlots) {
-        const sm = stateSlots.margin(scratch, stateSlotValues as Record<string, number>);
+        for (let k = 0; k < stateNames.length; k++) ss[stateNames[k]!] = arrays[stateIdx[k]!]![i]!;
+        const sm = stateSlots.margin(ss, stateSlotValues as Record<string, number>);
         if (sm !== sm) return { robustness: NaN, worstAt: ti, unit: stateSlots.unit };
         const ns = -sm;
         if (ns > m) m = ns;
       }
-      if (isEventually ? m > best : m < best) { best = m; bestAt = ti; }
+      if (isEventually) {
+        if (m <= 0) lastViolation = ti;
+        // Until the deadline, each sample restarts the hold window.
+        if (ti <= deadline || m < best) { best = m; bestAt = ti; }
+      } else if (m < best) { best = m; bestAt = ti; }
     }
+    if (isEventually && lastViolation !== -Infinity) bestAt = lastViolation;
     return { robustness: best, worstAt: bestAt, unit };
   };
 }

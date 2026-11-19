@@ -12,6 +12,9 @@ const LEADING: Record<string, Pattern> = {
   THE: 'ubiquitous',
 };
 const EXPECTED_START = 'WHEN, WHILE, IF, WHERE or THE';
+/** Longest robot name, in words, that the parser looks for between THE and SHALL. */
+const MAX_NAME_WORDS = 6;
+const normaliseName = (s: string): string => s.trim().replace(/\s+/g, ' ').toLowerCase();
 const CONDITION_NAME: Record<Pattern, string> = {
   ubiquitous: 'condition',
   event: 'trigger',
@@ -116,8 +119,14 @@ export function parse(
   let condRaw: Token[] = [];
   let boundary: Token = lead; // token that ends the condition (THE, or THEN for unwanted)
 
-  const isHead = (k: number): boolean =>
-    isKw(tokens[k], 'THE') && tokens[k + 1]?.type === 'word' && isKw(tokens[k + 2], 'SHALL');
+  /** Number of robot-name words when tokens[k] starts `THE <word>+ SHALL`, else 0. */
+  const headWords = (k: number): number => {
+    if (!isKw(tokens[k], 'THE')) return 0;
+    let w = 0;
+    while (w < MAX_NAME_WORDS && tokens[k + 1 + w]?.type === 'word') w++;
+    return w > 0 && isKw(tokens[k + 1 + w], 'SHALL') ? w : 0;
+  };
+  const isHead = (k: number): boolean => headWords(k) > 0;
 
   if (pattern === 'ubiquitous') {
     theIdx = i;
@@ -128,7 +137,9 @@ export function parse(
       } else if (r.type !== 'word') {
         mismatch(`Closest pattern is ubiquitous; expected a robot name after THE but found '${r.text}'`, posOf(r));
       } else {
-        const s = tokens[i + 2];
+        let w = i + 1;
+        while (tokens[w]?.type === 'word') w++;
+        const s = tokens[w];
         if (s === undefined) {
           mismatch('Line ends early; closest pattern is ubiquitous, expected SHALL after the robot name', endPos(tokens));
         } else {
@@ -169,8 +180,12 @@ export function parse(
       for (let k = i + 1; k < tokens.length; k++) {
         if (isHead(k)) {
           found = k;
-          boundary = tokens[k]!;
-          condRaw = tokens.slice(i + 1, k);
+          // Kiro writes `WHEN x THEN the system SHALL`: drop `THEN`, `, THEN` or `THEN ,` before THE.
+          let end = k;
+          if (tokens[end - 1]?.type === 'comma' && isKw(tokens[end - 2], 'THEN') && end - 2 > i) end -= 2;
+          else if (isKw(tokens[end - 1], 'THEN') && end - 1 > i) end -= 1;
+          boundary = tokens[end]!;
+          condRaw = tokens.slice(i + 1, end);
           break;
         }
       }
@@ -196,24 +211,30 @@ export function parse(
     }
   }
 
-  // Robot name.
-  const robotTok = tokens[theIdx + 1]!;
-  const known = robotNames.some((n) => n.toLowerCase() === robotTok.text.toLowerCase());
+  // Robot name: one or more words between THE and SHALL, joined by one space.
+  const nameWords = headWords(theIdx);
+  const firstName = tokens[theIdx + 1]!;
+  const lastName = tokens[theIdx + nameWords]!;
+  const robotName = tokens.slice(theIdx + 1, theIdx + 1 + nameWords).map((t) => t.text).join(' ');
+  const robotPos: DiagnosticPosition = {
+    start: firstName.start, end: lastName.end, line: firstName.line, column: firstName.column,
+  };
+  const known = robotNames.some((n) => normaliseName(n) === normaliseName(robotName));
   if (!known) {
     const allowed = robotNames.join(', ');
     diagnostics.push(
       makeDiagnostic(
         'UNKNOWN_ROBOT',
-        `Unknown robot '${robotTok.text}'; allowed names: ${allowed.length > 0 ? allowed : '(none)'}`,
-        posOf(robotTok),
+        `Unknown robot '${robotName}'; allowed names: ${allowed.length > 0 ? allowed : '(none)'}`,
+        robotPos,
         { suggestion: allowed },
       ),
     );
   }
 
   // Response clause.
-  const shallTok = tokens[theIdx + 2]!;
-  const respTokens = tokens.slice(theIdx + 3);
+  const shallTok = tokens[theIdx + nameWords + 1]!;
+  const respTokens = tokens.slice(theIdx + nameWords + 2);
   let response: Clause | undefined;
   if (respTokens.length === 0) {
     mismatch(`Missing response clause after SHALL; closest pattern is ${pattern}`, {
@@ -232,8 +253,8 @@ export function parse(
   const ast: ParsedRequirement = {
     pattern,
     robot: {
-      name: robotTok.text,
-      span: { start: robotTok.start, end: robotTok.end, line: robotTok.line, column: robotTok.column },
+      name: robotName,
+      span: { start: robotPos.start, end: robotPos.end, line: robotPos.line, column: robotPos.column },
     },
     response,
   };
@@ -244,14 +265,13 @@ export function parse(
 
 /** Stable key order: id, pattern, condition, robot, response. */
 function reorder(a: ParsedRequirement): ParsedRequirement {
-  const out: ParsedRequirement = { pattern: a.pattern, robot: a.robot, response: a.response };
-  const ordered: ParsedRequirement = {} as ParsedRequirement;
-  if (a.id !== undefined) ordered.id = a.id;
-  ordered.pattern = out.pattern;
-  if (a.condition) ordered.condition = a.condition;
-  ordered.robot = out.robot;
-  ordered.response = out.response;
-  return ordered;
+  return {
+    ...(a.id !== undefined ? { id: a.id } : {}),
+    pattern: a.pattern,
+    ...(a.condition ? { condition: a.condition } : {}),
+    robot: a.robot,
+    response: a.response,
+  };
 }
 
 function reportNoHead(

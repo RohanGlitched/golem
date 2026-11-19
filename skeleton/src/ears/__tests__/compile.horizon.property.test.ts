@@ -36,6 +36,12 @@ const text = (pattern: string, trigger: string, resp: string): string =>
 
 const closeTo = (a: number, b: number): boolean => Math.abs(a - b) <= 1e-9 * Math.max(1, Math.abs(b));
 
+/**
+ * Horizon rules (golem-ears-hardening defect 4): `for d` needs d after the trigger plus the trigger's
+ * own duration; `within T` (F then G) needs the deadline T plus at least T of hold.
+ */
+const eventHorizon = (wrap: string, w: number, d: number): number => (wrap === 'for' ? w + d : 2 * w + d);
+
 describe('compileRequirement horizon', () => {
   // Feature: golem-ears, Property 26: Horizon follows the wrapper and trigger durations
   it('sets horizon to wrapper plus trigger duration for event and unwanted requirements', () => {
@@ -48,7 +54,7 @@ describe('compileRequirement horizon', () => {
           `stay upright ${wrap} ${wMs} ms`,
         );
         const r = compileRequirement(line, lexicon());
-        return r.requirement !== undefined && closeTo(r.requirement.horizon, (wMs + dMs) / 1000);
+        return r.requirement !== undefined && closeTo(r.requirement.horizon, eventHorizon(wrap, wMs / 1000, dMs / 1000));
       }),
       propConfig,
     );
@@ -61,14 +67,14 @@ describe('compileRequirement horizon', () => {
       fc.property(arbEvent, arbWrapper, arbMs, (pattern, wrap, wMs) => {
         const line = text(pattern, 'the pelvis is nudged with up to 200 N', `stay upright ${wrap} ${wMs} ms`);
         const r = compileRequirement(line, lexicon());
-        return r.requirement !== undefined && closeTo(r.requirement.horizon, wMs / 1000);
+        return r.requirement !== undefined && closeTo(r.requirement.horizon, eventHorizon(wrap, wMs / 1000, 0));
       }),
       propConfig,
     );
   });
 
   // Feature: golem-ears, Property 26: Horizon follows the wrapper and trigger durations
-  it('uses the episode length, not the wrapper, for ubiquitous requirements', () => {
+  it('gives a ubiquitous requirement d for `for d` and the episode, extended to 2T, for `within T`', () => {
     // **Validates: Requirements 6.9**
     fc.assert(
       fc.property(
@@ -80,7 +86,10 @@ describe('compileRequirement horizon', () => {
             `THE robot SHALL stay upright ${wrap} ${wMs} ms`, lex,
             optEp !== undefined ? { episodeSeconds: optEp } : {},
           );
-          return r.requirement !== undefined && r.requirement.horizon === (optEp ?? lexEp ?? 10);
+          const episode = optEp ?? lexEp ?? 10;
+          // golem-ears-hardening defect 11: `for d` needs d, not the whole episode.
+          const want = wrap === 'within' ? Math.max(episode, (2 * wMs) / 1000) : wMs / 1000;
+          return r.requirement !== undefined && closeTo(r.requirement.horizon, want);
         },
       ),
       propConfig,

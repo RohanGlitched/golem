@@ -2,7 +2,10 @@
 // Everything here is pure and uses only fast-check's seeded randomness.
 import * as fc from 'fast-check';
 import { UNIT_TABLE, ACCEPTED_UNITS } from '../units.js';
-import type { Kind, Lexicon, Pattern, PerturbationTemplate, PredicateTemplate, Quantity } from '../types.js';
+import { compileTemplate } from '../matcher.js';
+import type {
+  Kind, Lexicon, Pattern, PerturbationTemplate, PredicateTemplate, Quantity, SlotDimension,
+} from '../types.js';
 
 export { SEED, propConfig } from './support.js';
 
@@ -84,6 +87,17 @@ const FILLER_WORDS = [
 ];
 const ROBOT_WORDS = ['robot', 'golem', 'G1', 'walker', 'arm'];
 const FEATURE_WORDS = ['stairs', 'payload', 'camera', 'gripper', 'cooling', 'lights', 'battery'];
+/** Every feature arbFeature can write (ordered selections of 1 to 3 distinct words); arbLexicon declares them all. */
+export const ALL_FEATURES: readonly string[] = (() => {
+  const out: string[] = [];
+  const grow = (prefix: string[]): void => {
+    if (prefix.length > 0) out.push(prefix.join(' '));
+    if (prefix.length === 3) return;
+    for (const w of FEATURE_WORDS) if (!prefix.includes(w)) grow([...prefix, w]);
+  };
+  grow([]);
+  return out;
+})();
 
 const PERT_SLOTS = [
   'range:force', 'range:length', 'range:speed', 'range:mass', 'range:angle', 'range:duration',
@@ -111,11 +125,16 @@ function arbPerturbation(first: string): fc.Arbitrary<PerturbationTemplate> {
       fc.array(arbFillers(1, 2), { minLength: 3, maxLength: 3 }),
       arbFillers(0, 1),
     )
-    .map(([slots, fillers, tail]) => ({
-      phrase: buildPhrase(first, slots, fillers, tail),
-      dims: () => [],
-      apply: () => undefined,
-    }));
+    .map(([slots, fillers, tail]) => {
+      const phrase = buildPhrase(first, slots, fillers, tail);
+      // Every slot declares its Dimension (golem-ears-hardening defect 1): `<first>.<slot>`.
+      const declared: Record<string, SlotDimension> = {};
+      for (const el of compileTemplate(phrase, 0).pattern) {
+        if (typeof el === 'string') continue;
+        declared[el.name] = { dim: `${first}.${el.name}`, severity: el.slot === 'range' ? 'up' : 'none' };
+      }
+      return { phrase, slots: declared, apply: () => undefined };
+    });
 }
 
 function arbPredicate(first: string): fc.Arbitrary<PredicateTemplate> {
@@ -155,7 +174,7 @@ export const arbLexicon: fc.Arbitrary<Lexicon> = fc
     arbTemplates(PERT_FIRST_WORDS, arbPerturbation),
     arbTemplates(PRED_FIRST_WORDS, arbPredicate),
   )
-  .map(([robotNames, perturbations, predicates]) => ({ robotNames, perturbations, predicates }));
+  .map(([robotNames, perturbations, predicates]) => ({ robotNames, perturbations, predicates, features: [...ALL_FEATURES] }));
 
 // ---------- valid lines ----------
 
@@ -259,6 +278,11 @@ const arbTemporal: fc.Arbitrary<string> = fc.oneof(
   arbQuantity('duration').map((q) => ` for ${q.text}`),
   arbQuantity('duration').map((q) => ` within ${q.text}`),
 );
+/** A WHILE response takes `for` or no wrapper (golem-ears-hardening defect 5). */
+const arbStateTemporal: fc.Arbitrary<string> = fc.oneof(
+  fc.constant(''),
+  arbQuantity('duration').map((q) => ` for ${q.text}`),
+);
 
 /**
  * A valid line of any of the five patterns built from `lexicon`, with a random
@@ -294,7 +318,7 @@ export function arbValidLine(lexicon: Lexicon, pattern?: Pattern): fc.Arbitrary<
       fc.tuple(
         fc.constant(p),
         arbCondition(p),
-        fc.tuple(predicatePhrase, arbTemporal).chain(([ph, tmp]) =>
+        fc.tuple(predicatePhrase, p === 'state' ? arbStateTemporal : arbTemporal).chain(([ph, tmp]) =>
           arbFillPhrase(ph).map((c) => ({ ...c, text: c.text + tmp })),
         ),
         fc.constantFrom(...lexicon.robotNames),

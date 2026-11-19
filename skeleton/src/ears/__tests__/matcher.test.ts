@@ -1,3 +1,4 @@
+import { buildDimensions } from '../dimensions.js';
 import { describe, expect, it } from 'vitest';
 import type { Clause } from '../ast.js';
 import { compileTemplate, compiledTemplates, matchPerturbation, matchPredicate } from '../matcher.js';
@@ -158,7 +159,8 @@ describe('matchPerturbation', () => {
     expect(r.bound?.slots.direction).toBe('any direction');
     expect(r.bound?.slots.phase).toBe('any point in its stride');
     expect(r.bound?.ranges.direction!.wrap).toBe(true);
-    expect(r.bound?.dimensions).toEqual([
+    // The compiler (dimensions.ts) now calls dims(); the matcher only binds.
+    expect(buildDimensions(r.bound!, clauseOf('x'), true).dims).toEqual([
       { name: 'push.force', kind: 'force', min: 0, max: 200, severity: 'up' },
     ]);
   });

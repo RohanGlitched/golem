@@ -34,7 +34,7 @@ const lit: PredicateTemplate = {
 };
 
 const lex = (extra: Partial<Lexicon> = {}): Lexicon => ({
-  robotNames: ['robot'], predicates: [upright, lit], perturbations: [push, dup], ...extra,
+  robotNames: ['robot'], predicates: [upright, lit], perturbations: [push, dup], features: ['suction cup'], ...extra,
 });
 
 const trace = (h: number): Trace => ({
@@ -55,7 +55,8 @@ describe('compileRequirement', () => {
     expect(req.space.dims.map((d) => d.name)).toEqual(['push.force', 'push.angle']);
     expect(req.perturbations).toHaveLength(1);
     expect(req.perturbations[0]!.template).toBe(push.phrase);
-    expect(req.perturbations[0]!.params).toMatchObject({ force: 'push.force', duration: 0.2 });
+    // Exact: a partial match here hid the dropped direction (golem-ears-hardening defect 1).
+    expect(req.perturbations[0]!.params).toEqual({ force: 'push.force', duration: 0.2, direction: 'push.angle' });
     expect(req.horizon).toBeCloseTo(3.2, 12);
     expect(req.monitor(trace(1)).robustness).toBeCloseTo(0.5, 12);
     expect(req.monitor(trace(0.2)).robustness).toBeLessThan(0);
@@ -69,14 +70,14 @@ describe('compileRequirement', () => {
     expect(r.diagnostics).toEqual([]);
     expect(r.requirement!.id).toBe('4.1');
     expect(r.requirement!.pattern).toBe('unwanted');
-    expect(r.requirement!.space.dims[0]).toMatchObject({ min: 150, max: 250 });
+    expect(r.requirement!.space.dims[0]).toEqual({ name: 'push.force', kind: 'force', min: 150, max: 250, severity: 'up' });
     expect(r.requirement!.horizon).toBeCloseTo(2.1, 12);
   });
 
   it('compiles a ubiquitous requirement with an empty id and the 10 s default horizon', () => {
     const r = compileRequirement('THE robot SHALL stay upright', lex());
     expect(r.diagnostics).toEqual([]);
-    expect(r.requirement).toMatchObject({ id: '', pattern: 'ubiquitous', horizon: 10 });
+    expect([r.requirement!.id, r.requirement!.pattern, r.requirement!.horizon]).toEqual(['', 'ubiquitous', 10]);
     expect(r.requirement!.space.dims).toEqual([]);
     expect(r.requirement!.perturbations).toEqual([]);
   });

@@ -8,6 +8,8 @@ const earsDir = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FUNCTIONS = [
   'compileRequirement', 'compileRequirementsFile', 'extractCriteria', 'tokenize',
   'parse', 'format', 'parseQuantity', 'toSI', 'fromSI', 'tokenEditDistance',
+  // golem-ears-hardening
+  'kiroText', 'lintLexicon', 'encodeRobustness', 'decodeRobustness', 'monitorResultToJSON', 'monitorResultFromJSON',
 ];
 
 function sourceFiles(dir: string): string[] {

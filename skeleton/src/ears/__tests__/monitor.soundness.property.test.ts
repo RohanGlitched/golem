@@ -56,15 +56,32 @@ describe('Feature: golem-ears, Property 22: Robustness soundness', () => {
         } as MonitorSpec;
 
         const r = buildMonitor(spec)(tr).robustness;
+        if (kind === 'eventually') {
+          // F[a, a+d] G[., end]: some sample by the deadline after which every margin is positive
+          // (golem-ears-hardening defect 4), evaluated by brute force over the quantifiers.
+          const a = anchored ? tr.events[0]!.t : lo;
+          const idx = [...tr.t.keys()].filter((i) => tr.t[i]! >= a);
+          const starts = idx.filter((i) => tr.t[i]! <= a + d!);
+          if (starts.length === 0) { expect(Number.isNaN(r)).toBe(true); return; }
+          const m = (j: number) => tr.signals.z![j]! - threshold;
+          const after = (i: number) => idx.filter((j) => j >= i).map(m);
+          const holds = starts.some((i) => after(i).every((x) => x > 0));
+          const violated = starts.every((i) => after(i).some((x) => x < 0));
+          const extreme = Math.max(...starts.map((i) => Math.min(...after(i))));
+          expect(r > 0).toBe(holds);
+          expect(r < 0).toBe(violated);
+          expect(r === 0).toBe(extreme === 0);
+          return;
+        }
         const ms = windowMargins(tr, threshold, anchored, d);
         if (ms.length === 0) {
           expect(Number.isNaN(r)).toBe(true);
           return;
         }
         expect(Number.isNaN(r)).toBe(false);
-        const holds = kind === 'always' ? ms.every((m) => m > 0) : ms.some((m) => m > 0);
-        const violated = kind === 'always' ? ms.some((m) => m < 0) : ms.every((m) => m < 0);
-        const extreme = kind === 'always' ? Math.min(...ms) : Math.max(...ms);
+        const holds = ms.every((m) => m > 0);
+        const violated = ms.some((m) => m < 0);
+        const extreme = Math.min(...ms);
 
         expect(r > 0).toBe(holds);
         expect(r < 0).toBe(violated);

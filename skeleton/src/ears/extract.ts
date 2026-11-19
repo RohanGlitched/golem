@@ -34,7 +34,8 @@ const HEADING = /^#{1,4} /;
 const AC_HEADING = /^#### Acceptance Criteria\s*$/;
 const REQ_HEADING = /^### Requirement (\d+)\b/;
 const NUMBERED = /^[ \t]*(\d+)[.)][ \t]+(?=\S)/;
-const EARS_START = /^(?:WHEN|WHILE|IF|WHERE|THE)(?![\p{L}\p{N}_])/iu;
+/** EARS keyword at the start, after any Markdown emphasis (**WHEN**, ` THE `). */
+const EARS_START = /^(?:[*`]|__)*(?:WHEN|WHILE|IF|WHERE|THE)(?:(?![\p{L}\p{N}_])|(?=__(?![\p{L}\p{N}_])))/iu;
 const FOR_ALL = /^FOR[ \t]+ALL(?![\p{L}\p{N}_])/iu;
 
 interface Open {
