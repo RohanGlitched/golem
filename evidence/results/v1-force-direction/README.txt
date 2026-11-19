@@ -1,0 +1,1 @@
+Stability map v1 (Nov 19): push.angle meant the direction the FORCE pointed. The golem-tuner agent found that "from behind" therefore pushed the robot from the front. From v2 on, push.angle is the side the push comes from. Same physics, angles differ by 180 degrees.
