@@ -2,12 +2,13 @@
 // that owns them (falsify, pool) has not landed yet; TypeScript's structural typing keeps them
 // compatible with the real ones.
 import type {
-  CompiledRequirement, Diagnostic, Kind, Lexicon, PerturbationCall, PerturbationTemplate as EarsPerturbationTemplate,
-  Scenario, ScenarioSpace,
+  CompiledRequirement, Diagnostic, Dimension, Kind, Lexicon, PerturbationCall, PerturbationTemplate as EarsPerturbationTemplate,
+  Quantity, Scenario, ScenarioSpace,
 } from '../ears/index.js';
 import type { RobotApp, SimContext, TrialResult, TrialSpec } from '../sim/types.js';
 
-export type { CompiledRequirement, Diagnostic, Kind, Lexicon, PerturbationCall, Scenario, ScenarioSpace };
+export type { CompiledRequirement, Diagnostic, Dimension, Kind, Lexicon, PerturbationCall, Quantity, Scenario, ScenarioSpace };
+export type PerturbationTemplate = EarsPerturbationTemplate;
 export type { RobotApp, SimContext, TrialResult, TrialSpec };
 
 // ---- contract shapes owned by falsify and pool (interfaces.md) ----

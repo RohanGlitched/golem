@@ -132,35 +132,35 @@ Conventions for every task:
     - Example tests: several updates in one frame notify once, unsubscribe stops notifications.
     - _Requirements: 19.7, 23.9_
 
-- [ ] 3. Aura data and summary
-  - [ ] 3.1 Implement `aura/aura-model.ts`
+- [x] 3. Aura data and summary
+  - [x] 3.1 Implement `aura/aura-model.ts`
     - `AuraModel` with 36 bins, `add` (held at least zero, broke below zero, `NaN` ignored and counted), tick list (lowest 512, order independent), `reset`, `binOf`, `boundaryForce`, `radiusAt` (linear between bin centres), radius `1.2 · min(1, B/forceMax)`, texel encoding.
     - Read force from the first dimension of kind `force` and direction from the first of kind `angle`; no Aura when either is missing.
     - Example tests: robustness exactly 0 counts as held, `NaN` is ignored, reset on source change.
     - _Requirements: 13.1, 13.2, 13.3, 13.4, 13.5, 13.6, 13.7, 13.11, 13.12, 14.1, 14.3, 14.4_
 
-  - [ ] 3.2 Write property test for Aura bins against a reference model
+  - [x] 3.2 Write property test for Aura bins against a reference model
     - **Property 24: Aura bins match a reference model**
     - **Validates: Requirements 13.1, 13.3, 13.4, 13.5, 13.6, 13.9**
 
-  - [ ] 3.3 Write property test for Aura order independence
+  - [x] 3.3 Write property test for Aura order independence
     - **Property 25: Aura is order independent**
     - **Validates: Requirements 13.8**
 
-  - [ ] 3.4 Write property test for Aura angle wrap
+  - [x] 3.4 Write property test for Aura angle wrap
     - **Property 26: Aura angle wrap**
     - **Validates: Requirements 13.2, 13.10**
 
-  - [ ]* 3.5 Write property test for Aura radius and smoothing
+  - [x]* 3.5 Write property test for Aura radius and smoothing
     - **Property 27: Aura radius and smoothing**
     - **Validates: Requirements 14.1, 14.3, 14.4**
 
-  - [ ] 3.6 Implement `aura/aura-summary.ts`
+  - [x] 3.6 Implement `aura/aura-summary.ts`
     - `auraSummary` with the four texts from the design (no force or direction, no trials, weakest direction, no break found with trial count). Lowest bin index on ties, direction `5 + 10·i` deg.
     - Example tests: each of the four texts, tie on lowest index.
     - _Requirements: 13.11, 14.7, 14.8, 14.9, 14.12_
 
-  - [ ]* 3.7 Write property test for the Aura summary
+  - [x]* 3.7 Write property test for the Aura summary
     - **Property 28: Aura summary names the weakest direction**
     - **Validates: Requirements 14.7, 14.8, 14.9, 14.12**
 
