@@ -5,56 +5,13 @@ import { TrialScope } from './handles.js';
 import { buildContext } from './context.js';
 import { PoseRecorder } from './pose-recorder.js';
 import { readWarnings } from './helpers.js';
+import { modelSnapshot, restoreModelSnapshot } from './model-snapshot.js';
 import { mulberry32 } from './prng.js';
 import type {
   CompiledRequirement, DivergenceInfo, IntegratorName, RobotApp, RunOptions, SimContext, Trace, TrialDiagnostics,
   TrialResult, TrialSpec,
 } from './types.js';
 import { validateTrial } from './validate.js';
-
-// ------------------------------------------------------------------ model guard (D8)
-
-const GUARD_ARRAYS = [
-  'body_mass', 'body_inertia', 'geom_friction', 'geom_size', 'actuator_gainprm', 'actuator_biasprm',
-  'dof_damping', 'dof_frictionloss',
-] as const;
-const GUARD_OPT_VECTORS = ['gravity', 'wind'] as const;
-const GUARD_OPT_SCALARS = [
-  'timestep', 'density', 'viscosity', 'impratio', 'tolerance', 'iterations', 'disableflags',
-] as const;
-
-interface ModelSnapshot {
-  arrays: Array<[string, Float64Array]>;
-  vectors: Array<[string, Float64Array]>;
-  scalars: Array<[string, number]>;
-}
-
-function snapshotModel(model: any): ModelSnapshot {
-  const snap: ModelSnapshot = { arrays: [], vectors: [], scalars: [] };
-  for (const name of GUARD_ARRAYS) {
-    const a = model[name];
-    if (a && typeof a.length === 'number') snap.arrays.push([name, Float64Array.from(a)]);
-  }
-  const opt = model.opt;
-  if (opt) {
-    for (const name of GUARD_OPT_VECTORS) {
-      const a = opt[name];
-      if (a && typeof a.length === 'number') snap.vectors.push([name, Float64Array.from(a)]);
-    }
-    for (const name of GUARD_OPT_SCALARS) {
-      if (typeof opt[name] === 'number') snap.scalars.push([name, opt[name]]);
-    }
-  }
-  return snap;
-}
-
-function restoreModel(model: any, snap: ModelSnapshot): void {
-  for (const [name, copy] of snap.arrays) model[name].set(copy);
-  for (const [name, copy] of snap.vectors) model.opt[name].set(copy);
-  for (const [name, value] of snap.scalars) {
-    if (model.opt[name] !== value) model.opt[name] = value;
-  }
-}
 
 const MAXVAL = 1e10; // mjMAXVAL: the bound MuJoCo's own mj_checkPos / mj_checkVel / mj_checkAcc use
 
@@ -96,7 +53,8 @@ export async function runTrial(
   }
 
   const scope = new TrialScope();
-  const guard = snapshotModel(model);
+  // D6: the full snapshot taken when the model was compiled (every array in model.buffer, every opt field).
+  const guard = modelSnapshot(model);
   let ctx: SimContext | undefined;
   let propagating = false;
   let cleanupError: unknown;
@@ -306,7 +264,7 @@ export async function runTrial(
       cleanupError = e;
     }
     try {
-      restoreModel(model, guard);
+      restoreModelSnapshot(model, guard);
     } catch (e) {
       if (!hasCleanupError) { hasCleanupError = true; cleanupError = e; }
     }

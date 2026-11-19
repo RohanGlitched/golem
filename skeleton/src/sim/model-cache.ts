@@ -3,6 +3,7 @@ import { SimError, errorMessage } from './errors.js';
 import { registry } from './handles.js';
 import { writeRobotFiles } from './file-writer.js';
 import { loadMujoco } from './loader.js';
+import { takeModelSnapshot } from './model-snapshot.js';
 import type { Mj, RobotApp } from './types.js';
 
 export interface CachedModel { mj: Mj; model: any }
@@ -40,6 +41,7 @@ export class ModelCache {
       writeRobotFiles(mj, app, files);
       model = (mj as any).MjModel.from_xml_path(`/robot/${app.sceneFile}`);
       registry.track(model, 'MjModel');
+      takeModelSnapshot(model); // golem-sim-hardening D6: every trial restores the model to this
       if (gen !== this.generation) {
         registry.release(model);
         throw new SimError('the model cache was disposed while this model was compiling');

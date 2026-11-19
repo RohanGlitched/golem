@@ -1,4 +1,4 @@
-﻿// Runner properties (Test_App, at most 2 s simulated per trial, 25 cases each, fixed logged seed).
+// Runner properties (Test_App, at most 2 s simulated per trial, 25 cases each, fixed logged seed).
 import fc from 'fast-check';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { runTrial } from './episode.js';
@@ -13,8 +13,10 @@ import {
   withThrowingController, withThrowingSignals,
 } from './test-fixtures.js';
 import { PHYSICS_RUNS, PURE_RUNS, SEED, describeTrial } from './test-support.js';
-import { alwaysAbove, boxDropApp, kickCall } from './test-models.js';
-import type { CompiledRequirement, EarlyStopHook, RobotApp, Trace, TrialResult, TrialSpec } from './types.js';
+import { alwaysAbove, boxDropApp, kickCall, stoolApp } from './test-models.js';
+import type {
+  CompiledRequirement, EarlyStopHook, PerturbationTemplate, RobotApp, Trace, TrialResult, TrialSpec,
+} from './types.js';
 import { normaliseScenario } from './validate.js';
 
 const cache = new ModelCache();
@@ -339,19 +341,72 @@ describe('fault properties', () => {
     }), cfg);
   });
 
-  // Feature: golem-sim, Property 14: The cached model is unchanged by trials
-  it('Property 14: guarded model arrays are byte-equal before and after every trial', async () => {
-    const guarded = () => {
-      const m = model;
-      return [m.body_mass, m.body_inertia, m.geom_friction, m.geom_size, m.actuator_gainprm, m.actuator_biasprm,
-        m.dof_damping, m.dof_frictionloss, m.opt.gravity, m.opt.wind]
-        .map((a: Float64Array) => Float64Array.from(a))
-        .concat([Float64Array.of(m.opt.timestep, m.opt.density, m.opt.viscosity, m.opt.impratio, m.opt.tolerance, m.opt.iterations, m.opt.disableflags)]);
-    };
+  // Feature: golem-sim, Property 14: The cached model is unchanged by trials.
+  // golem-sim-hardening: the old version compared the same eight arrays the guard copied, so it could
+  // not see a leak anywhere else. This one edits random Float64 fields drawn from every model array of
+  // the contact-rich stool (in begin and at a random step of apply) and compares the whole model.buffer
+  // and every opt field, whatever way the trial ends.
+  it('Property 14: random edits to any model array or opt field leave model.buffer and opt byte-equal after every trial', async () => {
+    const app0 = stoolApp;
+    const { model: sm } = await cache.getModel(app0);
+    const proto = Object.getPrototypeOf(sm);
+    const bufAll = sm.buffer as Uint8Array;
+    const fields = Object.getOwnPropertyNames(proto).filter((name) => {
+      if (name === 'buffer') return false;
+      let v: unknown;
+      try { v = sm[name]; } catch { return false; }
+      return v instanceof Float64Array && v.length > 0 && v.buffer === bufAll.buffer
+        && v.byteOffset >= bufAll.byteOffset && v.byteOffset + v.byteLength <= bufAll.byteOffset + bufAll.byteLength;
+    });
+    const optNames = ['timestep', 'impratio', 'o_margin', 'density', 'viscosity', 'tolerance', 'iterations', 'integrator', 'cone'];
+    const optState = () => JSON.stringify(Object.getOwnPropertyNames(Object.getPrototypeOf(sm.opt))
+      .map((k) => { const v = sm.opt[k]; return [k, typeof v === 'number' ? v : ArrayBuffer.isView(v) ? Array.from(v as Float64Array) : null]; }));
+    expect(fields.length).toBeGreaterThan(50); // 71 non-empty Float64 arrays in the stool model
+    const arbEdit = fc.record({
+      field: fc.constantFrom(...fields), at: fc.nat(), scale: fc.double({ min: 0.5, max: 2, noNaN: true }),
+    });
+    const arbOpt = fc.record({ name: fc.constantFrom(...optNames), scale: fc.double({ min: 0.5, max: 2, noNaN: true }) });
+    await fc.assert(fc.asyncProperty(
+      fc.array(arbEdit, { minLength: 1, maxLength: 6 }), fc.option(arbOpt, { nil: undefined }), fc.nat(19),
+      fc.constantFrom('ok', 'throw', 'early'), arbSeed,
+      async (edits, optEdit, step, mode, seed) => {
+        const bytes = Uint8Array.from(sm.buffer as Uint8Array);
+        const opt0 = optState();
+        let calls = 0;
+        const doEdits = (m: any) => {
+          for (const e of edits) {
+            const a = m[e.field] as Float64Array;
+            const i = e.at % a.length;
+            a[i] = (a[i] as number) === 0 ? e.scale - 1 : (a[i] as number) * e.scale;
+          }
+          if (optEdit !== undefined) {
+            const v = m.opt[optEdit.name] as number;
+            m.opt[optEdit.name] = optEdit.name === 'iterations' || optEdit.name === 'integrator' || optEdit.name === 'cone'
+              ? (v === 0 ? 1 : 0) : v * optEdit.scale;
+          }
+        };
+        const edit: PerturbationTemplate = {
+          phrase: 'edit', name: 'edit', dims: () => [],
+          begin: (ctx) => doEdits(ctx.model),
+          apply: (ctx) => {
+            if (calls++ === step * 10) doEdits(ctx.model);
+            if (mode === 'throw' && calls === 150) throw new Error('template failed');
+          },
+        };
+        const app: RobotApp = { ...app0, lexicon: { ...app0.lexicon, perturbations: [edit] } };
+        const req = alwaysAbove({ signal: 'torso.z', bound: 0, horizon: 0.4, perturbations: [{ template: 'edit', params: {} }] });
+        await runTrial(app, req, { app: app0.id, reqId: 'R1', scenario: { f: 0, a: 0 }, seed },
+          { cache, ...(mode === 'early' ? { earlyStop: (_t: Trace, n: number) => (n === 5 ? 1 : undefined) } : {}) })
+          .catch(() => undefined);
+        return Buffer.compare(Buffer.from(sm.buffer as Uint8Array), Buffer.from(bytes)) === 0 && optState() === opt0;
+      }), cfg);
+  });
+
+  it('Property 14 (every fault mode, pendulum): the whole model.buffer is byte-equal after each trial', async () => {
     await fc.assert(fc.asyncProperty(
       fc.array(fc.tuple(arbMode, arbScenario, arbSeed, arbSteps(20), fc.nat(40), fc.boolean()), { minLength: 1, maxLength: 3 }),
       async (items) => {
-        const before = guarded();
+        const bytes = Uint8Array.from(model.buffer as Uint8Array);
         for (const [mode, sc, seed, steps, j, alter] of items) {
           const p = plan(mode, sc, seed, steps, j);
           let app = p.app;
@@ -361,8 +416,7 @@ describe('fault properties', () => {
             req = { ...req, perturbations: [...req.perturbations, { template: 'alter', params: {} }] };
           }
           await runTrial(app, req, p.spec, { cache, ...(p.hook ? { earlyStop: p.hook } : {}) }).catch(() => undefined);
-          const after = guarded();
-          if (!after.every((a, i) => bytesEq(a, before[i]!))) return false;
+          if (Buffer.compare(Buffer.from(model.buffer as Uint8Array), Buffer.from(bytes)) !== 0) return false;
         }
         return true;
       }), cfg);

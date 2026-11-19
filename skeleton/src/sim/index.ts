@@ -7,6 +7,7 @@ export { liveHandleCount } from './handles.js';
 export { withDoubleBuffer, geomDistance, forEachContact, readWarnings, createSaturationMeter } from './helpers.js';
 export { mulberry32 } from './prng.js';
 export { runTrial } from './episode.js';
+export { changedModelFields } from './model-snapshot.js';
 export { PoseRecorder } from './pose-recorder.js';
 export { testApp, makeTestRequirement } from './test-app.js';
 export { SimError } from './errors.js';

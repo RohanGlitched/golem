@@ -16,7 +16,7 @@ const AUTORESET = 65536;
 export interface Captured { result: TrialResult; trace: Trace }
 async function run(
   app: RobotApp, req: CompiledRequirement, scenario: Record<string, number> = { f: 0, a: 0 }, seed = 1,
-  extra: { earlyStop?: EarlyStopHook; record?: 'poses' } = {},
+  extra: { earlyStop?: EarlyStopHook; record?: 'poses'; cache?: ModelCache } = {},
 ): Promise<Captured> {
   let trace: Trace | undefined;
   const wrapped: CompiledRequirement = {
@@ -30,7 +30,7 @@ async function run(
     },
   };
   const spec: TrialSpec = { app: app.id, reqId: req.id, scenario, seed, ...(extra.record ? { record: extra.record } : {}) };
-  const result = await runTrial(app, wrapped, spec, { cache, ...(extra.earlyStop ? { earlyStop: extra.earlyStop } : {}) });
+  const result = await runTrial(app, wrapped, spec, { cache: extra.cache ?? cache, ...(extra.earlyStop ? { earlyStop: extra.earlyStop } : {}) });
   return { result, trace: trace ?? { t: new Float64Array(0), signals: {}, events: [] } };
 }
 
@@ -236,6 +236,64 @@ describe('defect 7: PerturbationTemplate.begin runs once at the trigger', () => 
     expect(log).toEqual(['begin:A:true:1', 'begin:B:true:2', 'sample0', 'apply:A', 'apply:B']);
     expect(masses.every((m) => m === mass0 * 4)).toBe(true);
     expect(model.body_mass[box]).toBe(mass0);
+  });
+});
+
+describe('defect 6 and improvement 5: full model snapshot and restore', () => {
+  /** Fields the old allow-list guard did not cover. */
+  const scramble = {
+    phrase: 'scramble', name: 'scramble', dims: () => [],
+    begin: (ctx: any) => {
+      const m = ctx.model;
+      m.body_pos[3 * (ctx.ids['body:crate'] as number) + 2] = 3;
+      m.actuator_ctrlrange[1] = 1;
+      m.jnt_stiffness[2] = 7;
+      m.geom_solref[0] = 0.05;
+      m.dof_armature[6] = 0.5;
+      m.eq_data[0] = 0.25;
+      m.opt.o_margin = 0.01;
+      m.opt.impratio = 3;
+    },
+    apply: () => {},
+  };
+  const app: RobotApp = { ...stoolApp, lexicon: { ...stoolApp.lexicon, perturbations: [scramble] } };
+  const read = (m: any) => ({
+    bodyPos: m.body_pos[3 * 2 + 2], ctrlrange: m.actuator_ctrlrange[1], stiffness: m.jnt_stiffness[2],
+    solref: m.geom_solref[0], armature: m.dof_armature[6], eq: m.eq_data[0], margin: m.opt.o_margin, impratio: m.opt.impratio,
+  });
+
+  it('restores fields outside the old allow-list (body_pos, ctrlrange, stiffness, solref, armature, eq_data, opt)', async () => {
+    const { model } = await cache.getModel(app);
+    const before = read(model);
+    const bytes = Uint8Array.from(model.buffer as Uint8Array);
+    await run(app, alwaysAbove({ signal: 'torso.z', bound: 0, horizon: 0.2, perturbations: [{ template: 'scramble', params: {} }] }));
+    expect(read(model)).toEqual(before);
+    expect(Buffer.compare(Buffer.from(model.buffer as Uint8Array), Buffer.from(bytes))).toBe(0);
+  });
+
+  it('isolates trials: a scrambled trial leaves no trace in the next one', async () => {
+    const plain = alwaysAbove({ signal: 'torso.z', bound: 0.25, horizon: 0.6 });
+    // Reference from a freshly compiled model, so an earlier leak in the shared cache cannot hide one here.
+    const fresh = new ModelCache();
+    const a = await run(stoolApp, plain, { f: 0, a: 0 }, 9, { cache: fresh });
+    fresh.dispose();
+    await run(app, alwaysAbove({ signal: 'torso.z', bound: 0, horizon: 0.2, perturbations: [{ template: 'scramble', params: {} }] }));
+    const b = await run(stoolApp, plain, { f: 0, a: 0 }, 9);
+    expect(Object.is(a.result.robustness, b.result.robustness)).toBe(true);
+    expect(Array.from(b.trace.signals['torso.z']!)).toEqual(Array.from(a.trace.signals['torso.z']!));
+  });
+
+  it('names every changed field with changedModelFields, and none after a restore', async () => {
+    const snapMod = await import('./model-snapshot.js');
+    const { model } = await cache.getModel(app);
+    expect(snapMod.changedModelFields(model)).toEqual([]);
+    const ctx = { model, ids: { 'body:crate': 2 } };
+    scramble.begin(ctx);
+    expect(snapMod.changedModelFields(model).sort()).toEqual(
+      ['actuator_ctrlrange', 'body_pos', 'dof_armature', 'eq_data', 'geom_solref', 'jnt_stiffness', 'opt.impratio', 'opt.o_margin'],
+    );
+    snapMod.restoreModelSnapshot(model);
+    expect(snapMod.changedModelFields(model)).toEqual([]);
   });
 });
 
