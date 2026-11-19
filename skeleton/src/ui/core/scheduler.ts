@@ -21,7 +21,9 @@ export class RenderScheduler {
     this.tick(ts);
     this.frames++;
     this.dirty = false;
-    if (this.visible && this.mask !== 0) this.id = this.deps.raf(this.frame);
+    // A tick that asked for another frame (requestOnce, acquire) already holds one pending callback: never queue a
+    // second, or the callbacks per vsync double every frame.
+    if (this.visible && this.mask !== 0 && this.id === 0) this.id = this.deps.raf(this.frame);
   };
 
   private schedule(): void {

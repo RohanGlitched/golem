@@ -145,7 +145,7 @@ export class RunController {
     this.d.store.update((s) => ({
       selectedId: lineId,
       run: { runId, lineId, trials: 0, generation: 0 },
-      lines: s.lines.map((l) => (l.id === lineId ? { ...l, status: 'running', progress: { trials: 0 }, stale: !!l.verdict } : l)),
+      lines: s.lines.map((l) => (l.id === lineId ? { ...l, status: 'running', progress: { trials: 0 }, stale: !!l.verdict, fracture: undefined } : l)),
     }));
     this.refreshAura();
     const rec = new RecordingPool(pool, { ingest: (r) => this.guard(runId, () => this.ingest(a, req, r, aura)) }, this.d.appId);

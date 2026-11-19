@@ -12,13 +12,17 @@ afterEach(cleanup);
 
 describe('studio CSS', () => {
   const css = studioCss('/fonts/');
-  it('has no gradient outside the stage vignette, no box-shadow and no Gloock', () => {
+  it('has no gradient outside the stage vignette, no box-shadow, and Gloock only on the selected response clause', () => {
     // The only gradient is the stage's lighting vignette (design-language.md, Layout).
     const withoutVignette = css.replace(/\.golem-stage::after\{[^}]*\}/g, '');
     expect(withoutVignette).not.toMatch(/gradient/i);
     expect(css).toMatch(/\.golem-stage::after\{[^}]*radial-gradient/);
     expect(css).not.toMatch(/box-shadow/i);
-    expect(css).not.toMatch(/Gloock/i);
+    // experience.md 1 (binding) supersedes "Gloock for headlines only": the response clause of the selected
+    // requirement is set in Gloock at 39 to 61 px. No other rule uses it.
+    const rules = css.split('}').filter((r) => /Gloock/.test(r)).map((r) => r.trim().split('{')[0]);
+    expect(rules).toEqual(['@font-face', '.golem-line-selected .golem-response']);
+    expect(css).toMatch(/\.golem-line-selected \.golem-response\{[^}]*font-size:clamp\(39px,[^,]+,61px\)/);
   });
   it('makes the stage 56vh in the narrow layout and the tablet 380 px wide otherwise', () => {
     const narrow = css.slice(css.indexOf('@media (max-width:1023.98px)'));

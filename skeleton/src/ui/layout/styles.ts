@@ -21,6 +21,7 @@ export function studioCss(fontBaseUrl = './fonts/'): string {
 @font-face{font-family:'B612';src:url('${f}B612-Regular.ttf') format('truetype');font-weight:400;font-display:swap}
 @font-face{font-family:'B612';src:url('${f}B612-Bold.ttf') format('truetype');font-weight:700;font-display:swap}
 @font-face{font-family:'B612 Mono';src:url('${f}B612Mono-Regular.ttf') format('truetype');font-weight:400;font-display:swap}
+@font-face{font-family:'Gloock';src:url('${f}Gloock-Regular.ttf') format('truetype');font-weight:400;font-display:swap}
 .golem-studio[data-golem-theme='dark']{${tokenBlock(TOKENS.dark)};color-scheme:dark}
 .golem-studio[data-golem-theme='light']{${tokenBlock(TOKENS.light)};color-scheme:light}
 .golem-studio{box-sizing:border-box;background:var(--ground);color:var(--ink);font-family:'B612',system-ui,sans-serif;font-size:${s16}px;line-height:1.55;
@@ -59,6 +60,18 @@ export function studioCss(fontBaseUrl = './fonts/'): string {
 .golem-q-input{font:inherit;color:var(--ink);background:var(--ground);border:1px solid var(--clay);border-radius:2px;padding:0 3px}
 .golem-q-msg{display:block;color:var(--break-text);font-size:${s13}px}
 .golem-fracture{position:absolute;left:-4px;right:8%;top:52%;height:1px;background:var(--break);transform:rotate(-1.2deg);transform-origin:left;pointer-events:none}
+.golem-line-selected .golem-response{display:block;margin-top:2px;font-family:'Gloock',Georgia,serif;font-size:clamp(39px,3.4vw,61px);line-height:1.12;letter-spacing:0}
+.golem-line-selected .golem-response .golem-q{min-height:0;text-underline-offset:8px}
+.golem-w.golem-bind-tilt{display:inline-block;transform:rotate(calc(var(--golem-tilt,0) * 1deg));transform-origin:50% 85%}
+.golem-bind{position:relative;display:inline-block}
+.golem-bind::after{content:'';position:absolute;left:3px;right:3px;bottom:0;height:2px;transform-origin:left center;pointer-events:none}
+.golem-bind-fuse::after{background:var(--ghost);transform:scaleX(var(--golem-fuse,0))}
+.golem-bind-force::after{background:var(--ink);transform:scaleX(var(--golem-force,0))}
+.golem-fracture-word{position:relative}
+.golem-w.golem-fracture-word:not(.golem-bind-tilt){display:inline-block}
+.golem-fracture.golem-fracture-at{left:-3px;right:-3px;top:56%;transform:rotate(-5deg);transform-origin:center}
+.golem-fracture-margin{color:var(--break-text);font-size:${s13}px;vertical-align:middle;white-space:nowrap}
+.golem-line-selected .golem-fracture-margin{font-size:${s16}px}
 .golem-status{margin:4px 0 0;font-size:${s13}px;color:var(--ink-2)}
 .golem-status-held .golem-status{color:var(--hold-text)}
 .golem-status-broken .golem-status,.golem-status-error .golem-status{color:var(--break-text)}

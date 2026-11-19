@@ -32,6 +32,10 @@ export interface StudioActions {
   loadReplay(lineId: string, signal: AbortSignal): Promise<ReelData>;
   /** Renders the eight filmstrip frames, one per animation frame. Returns an abort function. */
   renderFilmstrip(data: ReelData, canvases: (HTMLCanvasElement | null)[]): () => void;
+  /** A quantity is being dragged or stepped: `text` is the line as it would read. Draws the push on the stage. */
+  previewQuantity?(lineId: string, text: string): void;
+  /** Words of a Response_Clause that tilt with the lean (StudioOptions.tiltWords added to the defaults). */
+  tiltWords?: readonly string[];
 }
 
 export interface ReelData {

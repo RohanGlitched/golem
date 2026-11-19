@@ -13,7 +13,7 @@ import { StudioStore } from './core/store.js';
 import { TOKENS } from './core/theme-tokens.js';
 import { syntheticTrialFields } from './core/trial-fields.js';
 import { GhostSwarm } from './ghosts/ghost-swarm.js';
-import { findTemplate, resolveArrow } from './ghosts/push-arrow.js';
+import { DEFAULT_PUSH_S, arrowLength, findTemplate, resolveArrow, resolveValues } from './ghosts/push-arrow.js';
 import { HeroSim, DIVERGED_TEXT, SLEEP_TEXT } from './hero/hero-sim.js';
 import { loadHero } from './hero/load-hero.js';
 import type { HeroModel } from './hero/load-hero.js';
@@ -41,6 +41,12 @@ import { NO_WEBGL_TEXT, Stage } from './stage/stage.js';
 import type { Renderer } from './stage/stage.js';
 import type { ReelData, StudioActions } from './tablet/actions.js';
 import { Tablet } from './tablet/tablet.js';
+import {
+  DEFAULT_TILT_WORDS, boundValues, forceFraction, fractureSignal, fractureWord, fuseFill, harshestScenario, leanDeg, livingSegments,
+} from './tablet/living.js';
+import { LiveSentence } from './signature/live-sentence.js';
+import { instantMargins, traceTrial } from './signature/trace-trial.js';
+import type { TraceTrialResult } from './signature/trace-trial.js';
 import { VerdictPanel } from './verdict/verdict-panel.js';
 import type {
   CompiledRequirement, Counterexample, LineModel, RobotApp, Scenario, ShareState, StudioHandle, StudioOptions, StudioState,
@@ -49,6 +55,8 @@ import type {
 
 export const NOT_ELEMENT = 'mountStudio needs an HTMLElement as its first argument';
 const STYLE_ID = 'golem-studio-css';
+/** The drag preview of a push stays this long after the last change of a quantity. */
+export const PREVIEW_MS = 800;
 
 const errText = (e: unknown): string => (e instanceof Error ? e.message : String(e));
 
@@ -92,6 +100,7 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
   const reducedMq = matchMedia?.('(prefers-reduced-motion: reduce)');
   const reduced = (): boolean => !!reducedMq?.matches;
   const lexicon = app.lexicon;
+  const tiltWords: readonly string[] = [...DEFAULT_TILT_WORDS, ...(options.tiltWords ?? [])];
   let disposed = false;
   const cleanups: (() => void)[] = [];
 
@@ -220,6 +229,7 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
     },
   });
   let replayLine = '';
+  let replayPush = { forceN: 0, durS: 0 };
 
   const tick = (ts: number): void => {
     const dt = lastTs > 0 ? Math.max(0, Math.min(0.25, (ts - lastTs) / 1000)) : 0;
@@ -231,6 +241,7 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
     }
     shove?.update();
     swarm?.update(now() / 1000);
+    updateLive();
     if (pendingAura !== null && aura) { aura.write(pendingAura); pendingAura = null; }
     if (stage && parts) {
       const groups = parts.bodyGroups;
@@ -429,7 +440,7 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
       store.update((s) => ({
         lines: s.lines.map((l) => {
           if (l.id !== id) return l;
-          const { compiled: _c, ...rest } = l;
+          const { compiled: _c, fracture: _f, ...rest } = l;
           return {
             ...rest, text, diagnostics: r.diagnostics, ...(r.requirement ? { compiled: r.requirement } : {}),
             status: hasError ? 'error' : l.verdict ? statusOfVerdict(l.verdict) : 'untested', stale: !!l.verdict,
@@ -448,6 +459,7 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
       const data = ce ? reelCache.get(ceKey(id, ce)) : undefined;
       if (!data || !parts) return;
       replayLine = id;
+      replayPush = line?.compiled && ce ? pushOf(line.compiled, ce.scenario as Scenario) : { forceN: 0, durS: 0 };
       replay.load(data.poses, data.worstTau);
       replay.enter();
     },
@@ -502,7 +514,114 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
       return d;
     },
     renderFilmstrip: (data, canvases) => (film ? film.start(data.poses.frames, data.poses.nbody, data.entries, canvases) : () => {}),
+    tiltWords,
+    previewQuantity: (id, text) => previewPush(id, text),
   };
+
+  // ---------------------------------------------------------------- living sentence (golem-signature 1)
+  /** Force (N) and window (s) of the first perturbation's push in a scenario, from its `visual` hint. */
+  function pushOf(req: CompiledRequirement, scenario: Scenario): { forceN: number; durS: number } {
+    const call = req.perturbations[0];
+    const tpl = call ? findTemplate(lexicon, call) : undefined;
+    if (!call || !tpl || typeof tpl.visual !== 'function') return { forceN: 0, durS: 0 };
+    const values = resolveValues(call, scenario);
+    try {
+      const f = tpl.visual(values)?.force;
+      const dur = values['duration'];
+      return { forceN: f ? Math.hypot(f[0], f[1], f[2]) : 0, durS: typeof dur === 'number' && dur >= 0 ? dur : DEFAULT_PUSH_S };
+    } catch { return { forceN: 0, durS: 0 }; }
+  }
+  function previewPush(id: string, text: string): void {
+    if (!shove || !heroModel) return;
+    const req = compileLine(id, text).requirement;
+    const call = req?.perturbations[0];
+    const tpl = call ? findTemplate(lexicon, call) : undefined;
+    if (!req || !call || !tpl || typeof tpl.visual !== 'function') return;
+    let v: ReturnType<NonNullable<typeof tpl.visual>> | undefined;
+    try { v = tpl.visual(resolveValues(call, harshestScenario(req.space))); } catch { v = undefined; }
+    const f = v?.force;
+    const lookup = (heroModel.ctx as { lookup?: { body(n: string): number } }).lookup;
+    let body = -1;
+    try { body = v?.at !== undefined && lookup ? lookup.body(v.at) : -1; } catch { body = -1; }
+    if (!f || !(body >= 0)) return;
+    shove.preview(body, f[0], f[1], f[2], arrowLength(Math.hypot(f[0], f[1], f[2])));
+    if (previewTimer !== undefined) clearTimeout(previewTimer);
+    previewTimer = setTimeout(() => { previewTimer = undefined; shove?.clearPreview(); }, PREVIEW_MS);
+  }
+  let previewTimer: ReturnType<typeof setTimeout> | undefined;
+  cleanups.push(() => { if (previewTimer !== undefined) clearTimeout(previewTimer); });
+
+  const liveSentence = new LiveSentence(root);
+  let boundKey = '';
+  let bound = { fuseS: Number.NaN, forceN: Number.NaN };
+  let lastSelected: string | undefined;
+  let heroFuseStart = -1;
+  let wasShoving = false;
+  const boundOf = (l: LineModel): { fuseS: number; forceN: number } => {
+    const k = `${l.id}\n${l.text}`;
+    if (k !== boundKey) { boundKey = k; bound = boundValues(livingSegments(l.text, tiltWords)); }
+    return bound;
+  };
+  const leanOf = (g: THREE.Object3D | undefined): number => {
+    if (!g || !stage) return 0;
+    const e = stage.camera.matrixWorld.elements;
+    const q = g.quaternion;
+    return leanDeg(q.w, q.x, q.y, q.z, e[0] as number, e[1] as number, e[2] as number);
+  };
+  /** Per frame: the bound words move only while a trial plays (a replay of this line, or the hero being shoved). */
+  function updateLive(): void {
+    const s = store.getState();
+    if (s.selectedId !== lastSelected) { lastSelected = s.selectedId; liveSentence.invalidate(); }
+    const line = s.selectedId ? s.lines.find((l) => l.id === s.selectedId) : undefined;
+    if (!line || !parts) { liveSentence.rest(); return; }
+    const b = boundOf(line);
+    const g = parts.bodyGroups[primaryBody];
+    if (replay.active) {
+      if (replayLine !== line.id) { liveSentence.rest(); return; }
+      const t = replay.t;
+      liveSentence.write(leanOf(g), fuseFill(t, b.fuseS), t <= replayPush.durS ? forceFraction(replayPush.forceN, b.forceN) : 0);
+      return;
+    }
+    const shoving = !!shove?.active;
+    if (hero && (hero.sleeping || hero.paused)) { heroFuseStart = -1; wasShoving = false; liveSentence.rest(); return; }
+    if (shoving && !wasShoving && hero) heroFuseStart = hero.simTime;
+    wasShoving = shoving;
+    const fuse = heroFuseStart >= 0 && hero ? fuseFill(hero.simTime - heroFuseStart, b.fuseS) : 0;
+    if (!shoving && !(heroFuseStart >= 0 && b.fuseS > 0 && fuse < 1)) { heroFuseStart = -1; liveSentence.rest(); return; }
+    liveSentence.write(leanOf(g), fuse, forceFraction(shove?.liveForce ?? 0, b.forceN));
+  }
+
+  // ---------------------------------------------------------------- fracture (golem-signature 1)
+  const traced = new Map<string, TraceTrialResult & { inst: Float64Array }>();
+  const traceRequested = new Set<string>();
+  let traceChain: Promise<void> = Promise.resolve();
+  const requestTrace = (id: string, ce: Counterexample, req: CompiledRequirement): void => {
+    const key = ceKey(id, ce);
+    if (traceRequested.has(key)) return;
+    traceRequested.add(key);
+    traceChain = traceChain.then(() => new Promise<void>((resolve) => {
+      // After the verdict has drawn: the trial blocks this thread for one trial's CPU time.
+      setTimeout(() => {
+        if (disposed || !heroModel) { resolve(); return; }
+        traceTrial(heroModel.mj, heroModel.model, app, req, ce).then((r) => {
+          if (disposed) return;
+          traced.set(key, { ...r, inst: instantMargins(req, r.trace) });
+          const line = store.getState().lines.find((l) => l.id === id);
+          if (!line?.counterexample || ceKey(id, line.counterexample) !== key) return;
+          const signal = fractureSignal(r.margins, r.marginsAt);
+          const w = fractureWord(livingSegments(line.text, tiltWords), signal, options.signalWords);
+          if (!w) return;
+          const margin = signal !== undefined ? (r.margins?.[signal] as number) : line.counterexample.robustness;
+          store.setLine(id, { fracture: { start: w.start, end: w.end, margin, unit: line.unit ?? r.result.unit, ...(signal !== undefined ? { signal } : {}) } });
+        }, () => { /* the fracture falls back to the first response word */ }).finally(resolve);
+      }, 30);
+    }));
+  };
+  cleanups.push(store.subscribe(() => {
+    for (const l of store.getState().lines) {
+      if (l.status === 'broken' && l.counterexample && l.compiled && !l.fracture && heroModel) requestTrace(l.id, l.counterexample, l.compiled);
+    }
+  }));
 
   // ---------------------------------------------------------------- theme
   const theme = new ThemeController({
