@@ -103,91 +103,91 @@ This revision follows the current requirements and design:
     - fast-check, at least 100 runs, file `skeleton/src/cli/__tests__/prop-08-replay-target.test.ts`.
     - **Validates: Requirements 6.1, 6.2, 6.8, 13.1, 13.7**
 
-- [ ] 3. Gate logic, exit codes, formatting and storage
-  - [ ] 3.1 Implement exit-code functions
+- [x] 3. Gate logic, exit codes, formatting and storage
+  - [x] 3.1 Implement exit-code functions
     - Create `skeleton/src/cli/exit.ts` with `HookExit`, `testExitCode` and `gateExitCode(verdicts, kiro, startError)` as in the design: without `--kiro` a non-empty all-held list gives 0, anything else 2 (an `error` status counts as red), a start error gives 1; with `--kiro` every outcome gives 0 except a usage or Config_File error, which gives 1.
     - Test with examples for each status mix, the empty list and both modes.
     - _Requirements: 4.11, 4.12, 5.5, 7.3, 7.4, 7.5, 7.7, 7.11, 8.9, 8.22_
 
-  - [ ] 3.2 Write property test for the gate exit code
+  - [x] 3.2 Write property test for the gate exit code
     - **Property 16: Gate exit code**
     - Generate status lists, the `kiro` flag and start errors; assert without `--kiro` 0 if and only if the list is non-empty and every status is `held`, otherwise 2, and with `--kiro` 0 for every list and 1 only for a start error.
     - fast-check, at least 100 runs, file `skeleton/src/cli/__tests__/prop-16-gate-exit.test.ts`.
     - **Validates: Requirements 7.3, 7.4, 7.5, 7.7, 7.11, 8.9, 8.22, 28.15**
 
-  - [ ] 3.3 Write property test for the test exit code
+  - [x] 3.3 Write property test for the test exit code
     - **Property 17: Test exit code**
     - Generate status lists; assert 2 if any is `broken`, else 1 if any is `error`, else 0.
     - fast-check, at least 100 runs, file `skeleton/src/cli/__tests__/prop-17-test-exit.test.ts`.
     - **Validates: Requirements 4.11, 4.12, 5.5**
 
-  - [ ] 3.4 Implement output formatters and reason truncation
+  - [x] 3.4 Implement output formatters and reason truncation
     - Create `skeleton/src/cli/format.ts` with `formatQuantity`, `formatScenario`, `formatMargin`, `requirementLine`, `progressLine`, `gateBlock`, `buildReason`, `diagnosticsReason`, `sortDiagnostics` and `diagnosticText`.
     - Voice follows `product.md`: units on every physical number, a held line says "no counterexample found in N trials". `diagnosticsReason` builds the block text that lists Diagnostics for a compile error under `--kiro`.
     - Test with examples: each line shape, the four-line gate block, an error-status block, a Diagnostics reason, `buildReason` under and over 4000 characters.
     - _Requirements: 3.3, 4.8, 4.9, 5.2, 7.6, 7.8, 8.2, 8.7, 8.9_
 
-  - [ ] 3.5 Write property test for the bounded reason string
+  - [x] 3.5 Write property test for the bounded reason string
     - **Property 20: Kiro reason is bounded and a faithful prefix**
     - Generate block lists of any line count and length; assert at most 4000 characters, unchanged when it fits, otherwise a line-boundary prefix followed by a final line with the report path.
     - fast-check, at least 100 runs, file `skeleton/src/cli/__tests__/prop-20-reason.test.ts`.
     - **Validates: Requirements 8.2, 8.7**
 
-  - [ ] 3.6 Write property test for printed lines
+  - [x] 3.6 Write property test for printed lines
     - **Property 24: Printed lines carry units and ids**
     - Generate outcomes; assert `requirementLine` has id, status, trial count and unit-bearing scenario values for broken, the exact held phrase with the real N, and `gateBlock` has the EARS line, scenario with units, margin with unit and `golem replay <id>`.
     - fast-check, at least 100 runs, file `skeleton/src/cli/__tests__/prop-24-lines.test.ts`.
     - **Validates: Requirements 4.8, 4.9, 7.6, 7.8**
 
-  - [ ] 3.7 Write property test for diagnostic order and format
+  - [x] 3.7 Write property test for diagnostic order and format
     - **Property 25: Diagnostics are ordered and formatted**
     - Generate diagnostics across files; assert order by file order, line, column and the `file:line:col: severity: message` format with a suggestion line when present, and `ok` false exactly when an error exists.
     - fast-check, at least 100 runs, file `skeleton/src/cli/__tests__/prop-25-diagnostics.test.ts`.
     - **Validates: Requirements 3.3, 3.6, 3.7**
 
-  - [ ] 3.8 Implement the gate counter, dedupe and Stop payload parsing
+  - [x] 3.8 Implement the gate counter, dedupe and Stop payload parsing
     - Create `skeleton/src/cli/gate-counter.ts` with `BLOCK_LIMIT`, `DEDUPE_WINDOW_S`, `gateCounter(state, sessionId, gateGreen, nowIso?, elapsedS?)`, `elapsedSeconds`, `pruneState` and `parseStopPayload`.
     - `gateCounter` is pure (no clock, file or random access, no mutation). Green deletes the key. A red call below the limit increments and blocks. A red call at count 5 allows the stop and stores count 0 with a fresh `updatedAt` (no latch, so the next red call blocks again). A red call with `elapsedS` below 2 returns `nextState` equal to its input and allows only when the stored count is 0.
     - Test with examples: five blocks then allow, count reset to 0 and the seventh call blocks, a green run deletes the key, two sessions are independent, the `default` session, a deduped call changes nothing, entries older than 7 days and invalid `updatedAt` are pruned.
     - _Requirements: 8.5, 8.6, 8.11, 8.12, 8.13, 8.14, 8.15, 8.18, 8.23, 8.24, 8.25_
 
-  - [ ] 3.9 Write property test for the gate counter cycle
+  - [x] 3.9 Write property test for the gate counter cycle
     - **Property 11: Gate counter cycles through five blocks and one allow, without a latch**
     - Generate call sequences of (session id, green or red) from an empty state with `elapsedS` outside the window; assert at most five consecutive blocks per session, the sixth red call allows and stores count 0, the seventh to eleventh block again, and the count is never latched at 5.
     - fast-check, at least 100 runs, file `skeleton/src/cli/__tests__/prop-11-gate-cycle.test.ts`.
     - **Validates: Requirements 8.12, 8.13, 28.17**
 
-  - [ ] 3.10 Write property test for green deleting the key
+  - [x] 3.10 Write property test for green deleting the key
     - **Property 12: A green gate deletes the key and restarts the count**
     - Generate states and sessions; assert a green call returns `allowStop` true, removes exactly that session key and leaves every other key unchanged, and the next five red calls of that session block.
     - fast-check, at least 100 runs, file `skeleton/src/cli/__tests__/prop-12-gate-green.test.ts`.
     - **Validates: Requirements 8.11, 8.23, 28.17**
 
-  - [ ] 3.11 Write property test for gate counter purity and independence
+  - [x] 3.11 Write property test for gate counter purity and independence
     - **Property 13: Gate counter is pure and sessions are independent**
     - Generate states, session ids, flags and times; assert no input mutation, equal outputs on equal inputs, and no key other than the given session changes.
     - fast-check, at least 100 runs, file `skeleton/src/cli/__tests__/prop-13-gate-pure.test.ts`.
     - **Validates: Requirements 8.14, 8.15, 28.17**
 
-  - [ ] 3.12 Write property test for gate counter dedupe
+  - [x] 3.12 Write property test for gate counter dedupe
     - **Property 14: Gate counter dedupes two red calls within the window**
     - Generate states, sessions and red results; assert that a second red call with `elapsedS` below 2 s, fed the `nextState` of the first, gives the same `allowStop` and `nextState` as the first call alone, and that a deduped call returns its input state with `allowStop` true only at count 0.
     - fast-check, at least 100 runs, file `skeleton/src/cli/__tests__/prop-14-gate-dedupe.test.ts`.
     - **Validates: Requirements 8.24, 8.25, 28.17**
 
-  - [ ] 3.13 Write property test for session id, state and pruning
+  - [x] 3.13 Write property test for session id, state and pruning
     - **Property 15: Session id, stored state and pruning**
     - Generate stdin texts and states with valid and invalid `updatedAt` of any age; assert `parseStopPayload` returns the non-empty string `session_id` or `default`, and `pruneState` keeps exactly entries at most 7 days old.
     - fast-check, at least 100 runs, file `skeleton/src/cli/__tests__/prop-15-session-prune.test.ts`.
     - **Validates: Requirements 8.5, 8.6, 8.17, 8.18**
 
-  - [ ] 3.14 Implement atomic write, stable JSON, report storage and gate-state storage
+  - [x] 3.14 Implement atomic write, stable JSON, report storage and gate-state storage
     - Create `skeleton/src/cli/store.ts` with `atomicWriteFile` (temp file in the same directory, rename, remove temp on failure, error names the path, caller-owned counter for temp names, no `Math.random`), `stableJson` (sorted keys, 2 spaces, non-finite numbers as `null`, trailing newline), `ReportFile`, `ReportMeta` (including `lastGateExitCode`), `readReport`, `mergeReport`, `readGateState` and `writeGateState`.
     - A missing gate-state file is silent. An unreadable or invalid one gives an empty state and a warning naming the path. A write failure warns, removes the temp file and does not abort the decision.
     - Test with examples on the memory `KitFs`: a failing rename leaves the old file and removes the temp file, the directory is created when missing, scope `all` and scope `{ reqId }`, gate overrides kept, an unreadable report returned as `unreadable`.
     - _Requirements: 4.2, 4.10, 5.4, 7.9, 8.10, 8.16, 8.17, 8.19, 9.7, 9.14, 14.8, 27.1_
 
-  - [ ] 3.15 Write property test for report merging
+  - [x] 3.15 Write property test for report merging
     - **Property 21: Report merge keeps unrelated entries**
     - Generate reports and one new verdict; assert only that entry changes, other entries stay byte-identical, and `gateOverrides` is always kept.
     - fast-check, at least 100 runs, file `skeleton/src/cli/__tests__/prop-21-report-merge.test.ts`.
