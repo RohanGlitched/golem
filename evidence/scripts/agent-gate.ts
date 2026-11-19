@@ -138,6 +138,16 @@ export async function prepareWorkspace(appDir: string, arm: Arm, l: Layout, exec
   const dir = join(root, 'ws');
   cpSync(appDir, dir, { recursive: true, filter: (s) => !/[\\/](node_modules|\.golem|dist)([\\/]|$)/.test(s) });
   restoreSeeds(appDir, dir); // the pinned seeds are part of the test oracle: the gate starts red as it does in the repo
+  // PREREG deviation 3: the subject is the controller as it was when the plan was registered. The reflex golem-tuner
+  // wrote afterwards (controller/kiro-reflex.ts, selectable with GOLEM_REFLEX=kiro) becomes the identity reflex here.
+  const kiroReflex = join(dir, 'controller', 'kiro-reflex.ts');
+  if (existsSync(kiroReflex)) {
+    writeFileSync(kiroReflex, [
+      "// Not part of this experiment's subject (PREREG deviation 3): the identity reflex stands in.",
+      "export { Reflex as KiroReflex } from './reflex.js';",
+      '',
+    ].join('\n'));
+  }
   rmSync(join(dir, '.kiro', 'hooks'), { recursive: true, force: true });
   const nm = join(l.repoRoot, 'node_modules');
   symlinkSync(nm, join(dir, 'node_modules'), 'junction');
