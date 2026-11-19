@@ -29,3 +29,7 @@ Line 8.1 uses the template `the hand tracker lags by {range:duration} and a hand
 ## P7. Tip site position (record)
 
 The first draft of the candy-app design put the `tip` site 8 mm inside the cup, which leaves a candy at rest against the cup face 10 mm to 20 mm from the site, outside the 0.01 m engage radius. The site sits 8 mm beyond the cup face, on the candy side, so a resting candy is 0 mm to 4 mm from it. The design file records the correction.
+
+## P8. A hand from behind passes through the Panda base (open)
+
+The hand path runs in a straight line from the Table edge to the nearest bowl. For rom behind (135 deg to 225 deg) the edge point is on the back edge of the Table, and the line to the purple bowl at (0.72, 0) passes through the base column of the Panda at a height of 0.05 m to 0.25 m. A probe at 180 deg, 0.8 m/s, height 0.15 m gave a signed link-hand distance of -19 mm on link1 while SSM_v1 read a tip separation of 429 mm. Line 1.1 is therefore broken by any direction that crosses the base, with no need for an elbow or wrist subtlety. The candy-app design fixes this path model (Requirement 9.2), so it stays until a decision: keep it (the counterexample is real: a hand cannot be there without touching the base), route the hand around the base, or limit hand.angle to the front half-plane.

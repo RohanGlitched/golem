@@ -342,6 +342,7 @@ Conventions for every task:
     - **Validates: Requirements 15.7**
 
 - [ ] 15. Studio page
+  - **Skipped for now** (decision for this branch: the web/ studio page tasks 15.1 to 15.5 come later; only web/vite.config.ts from task 1.1 exists). The app exposes setRobotBase (app.ts) and the hand perturbation pply that the page needs.
   - [ ] 15.1 Implement `web/hand-drag.ts`
     - Pure helpers: pick-ray to plane `z = h` intersection, clamp to a 1.5 m disc about (0.40, 0), per-frame step limit of `3 m/s * dt`, keyboard step of 0.05 m, height slider range 0.05 m to 0.25 m with Page Up and Page Down steps of 0.05 m
     - Write `test/web.test.ts` (examples): clamp, speed limit, keyboard step, release leaves the hand in place
@@ -384,7 +385,7 @@ Conventions for every task:
     - File `test/p37-hygiene.test.ts` (scan generated and mutated import lines; the scan flags exactly the forbidden ones)
     - **Validates: Requirements 5.14, 5.15, 10.9, 10.10, 13.3, 13.4, 15.13**
 
-- [ ] 18. Final checkpoint - Ensure all tests pass
+- [x] 18. Final checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes
