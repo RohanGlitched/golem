@@ -6,7 +6,7 @@ Before the run, `apps/stagger/.golem` was deleted, so the pinned seeds in `.gole
 
 The spec's Expectation table marks 1.2, 4.2 and 6.2 as Expected_Break and every other line as Expected_Hold. 1.3 was Expected_Break until the team decided it is a real requirement now that Kiro's reflex exists (see the notes at the end of the requirements file).
 
-A held line means no counterexample found within the stated budget. It is not a proof. The failure-rate bound on a held line comes from the uniformly random trials only, and the line says how many those are. The runs were recorded before that wording; the held lines are re-worded to the current format, with the random-trial count taken from the recorded bound (3 / bound, the rule of three).
+A held line means no counterexample found within the stated budget. It is not a proof. The failure-rate bound on a held line comes from the uniformly random trials only, and the line says how many those are. Steps 5 and 6 were re-run on 2026-11-20 with the current wording. Steps 2 to 4 and 7 were recorded before it; their held lines are re-worded to the current format, with the random-trial count taken from the recorded bound (3 / bound, the rule of three).
 ### 1. golem check
 
 ```text
@@ -64,7 +64,7 @@ studio: apps/stagger/web/index.html#r=1.3&seed=1291121316&d.push.angle=1.5384007
 ```
 
 The robot is pushed from its left at 28 % of its stride and falls: the pelvis reaches the floor with 87.7 deg of tilt and 0.061 m of height at t = 4.84 s, 2.8 s after the push at t = 2 s. The trace is written to `.golem/replays/1.3.csv` (git-ignored).
-### 5. golem gate  (exit 2, 43 s)
+### 5. golem gate  (exit 2, 24 s)
 
 ```text
 $ golem gate
@@ -79,8 +79,8 @@ Expected_Hold (8 lines: must hold)
   ok    6.1  HELD  closest margin +0.227 m  no counterexample in 24 trials; from the 4 uniformly random ones, failure rate below 75 % (95 % confidence)
 
 Expected_Break (3 lines: must break)
-  ok    1.2  BROKEN  margin -0.318 m  19 trials  push.force = 216 N, push.angle = 220 deg, push.phase = 0.0715 (stride phase)  (shrunk, seed 2205968643)
-  ok    4.2  BROKEN  margin -0.41 m  19 trials  payload.mass = 15 kg  (shrunk, seed 3160059130)
+  ok    1.2  BROKEN  margin -0.318 m  20 trials  push.force = 216 N, push.angle = 220 deg, push.phase = 0.0715 (stride phase)  (shrunk, seed 2205968643)
+  ok    4.2  BROKEN  margin -0.41 m  17 trials  payload.mass = 15 kg  (not shrunk, seed 3160059130)
   ok    6.2  BROKEN  margin -0.445 m  15 trials  latency.duration = 0.05 s  (not shrunk, seed 229287175)
 
 1.3: WHEN the pelvis is pushed with up to 100 N for 0.2 s from any direction at any point in its stride THE robot SHALL stay upright for 3 s
@@ -91,8 +91,8 @@ Expected_Break (3 lines: must break)
 gate RED: 1 of 11 requirements do not meet their expectation
 ```
 
-Default configuration: Unitree's policy alone. Exit code 2. The gate prints the two groups of the Expectation table. 1.2, 4.2 and 6.2 broke as the spec expects (ok). 1.3 is Expected_Hold and broke (FAIL), so it gets a block with the scenario, the margin and the reproduction command, and the gate is RED. The gate re-runs the pinned seeds first and then 24 trials per line. 1.3 is red because its pinned seed fails: 24 trials alone do not find it (see step 2). 6.2 says `not shrunk` because its pinned seed is already shrunk to 0.05 s and the re-shrink found nothing milder; the seed file holds the shrunk entry.
-### 6. GOLEM_REFLEX=kiro golem gate  (exit 0, 45 s)
+Default configuration: Unitree's policy alone. Exit code 2. The gate prints the two groups of the Expectation table. 1.2, 4.2 and 6.2 broke as the spec expects (ok). 1.3 is Expected_Hold and broke (FAIL), so it gets a block with the scenario, the margin and the reproduction command, and the gate is RED. The gate re-runs the pinned seeds first and then 24 trials per line. 1.3 is red because its pinned seed fails: 24 trials alone do not find it (see step 2). 4.2 and 6.2 say `not shrunk` because their pinned seeds are already shrunk (15 kg, 0.05 s) and the re-shrink found nothing milder; the seed files hold the shrunk entries.
+### 6. GOLEM_REFLEX=kiro golem gate  (exit 0, 25 s)
 
 ```text
 $ GOLEM_REFLEX=kiro golem gate
@@ -107,14 +107,14 @@ Expected_Hold (8 lines: must hold)
   ok    6.1  HELD  closest margin +0.228 m  no counterexample in 24 trials; from the 4 uniformly random ones, failure rate below 75 % (95 % confidence)
 
 Expected_Break (3 lines: must break)
-  ok    1.2  BROKEN  margin -0.439 m  44 trials  push.force = 201 N, push.angle = 179 deg, push.phase = 0.56 (stride phase)  (shrunk, seed 3844575921)
-  ok    4.2  BROKEN  margin -0.43 m  20 trials  payload.mass = 15.2 kg  (shrunk, seed 3160059130)
+  ok    1.2  BROKEN  margin -0.439 m  16 trials  push.force = 201 N, push.angle = 179 deg, push.phase = 0.56 (stride phase)  (not shrunk, seed 3844575921)
+  ok    4.2  BROKEN  margin -0.43 m  16 trials  payload.mass = 15.2 kg  (not shrunk, seed 3160059130)
   ok    6.2  BROKEN  margin -0.441 m  15 trials  latency.duration = 0.05 s  (not shrunk, seed 229287175)
 
-gate GREEN: every requirement meets its expectation (8 held as expected, 3 broke as expected; 233 trials, pinned seeds first, then the quick budget)
+gate GREEN: every requirement meets its expectation (8 held as expected, 3 broke as expected; 201 trials, pinned seeds first, then the quick budget)
 ```
 
-The same spec and the same pinned seeds, with the balance reflex that Kiro's `golem-tuner` agent wrote (`GOLEM_REFLEX=kiro`). Exit code 0. The pinned 1.3 seed from step 5 now holds (closest margin +0.216 m), so 1.3 meets its Expected_Hold. 1.2, 4.2 and 6.2 still break, which is what their Expected_Break rows ask for, so every line meets its expectation. 1.2 breaks with a new counterexample (201 N from 179 deg at 56 % of the stride): its two older pinned seeds no longer fail with the reflex, and the search found another. That entry is now pinned in `.golem/seeds/stagger/1.2.json`.
+The same spec and the same pinned seeds, with the balance reflex that Kiro's `golem-tuner` agent wrote (`GOLEM_REFLEX=kiro`). Exit code 0. The pinned 1.3 seed from step 5 now holds (closest margin +0.216 m), so 1.3 meets its Expected_Hold. 1.2, 4.2 and 6.2 still break, which is what their Expected_Break rows ask for, so every line meets its expectation. 1.2 breaks on a counterexample that only exists with the reflex (201 N from 179 deg at 56 % of the stride): its two older pinned seeds no longer fail with the reflex, so an earlier run of this step searched, found this one and pinned it in `.golem/seeds/stagger/1.2.json`, and this run replays it first.
 ### 7. golem mcp, over stdio
 
 A client from `@modelcontextprotocol/sdk` starts `golem mcp` as a child process in `apps/stagger`, lists the tools and calls them. Each call prints the one-line summary and then the JSON block. A line that has a row in the Expectation table carries it: `[Expected_Hold: NOT met]` in the summary, and `expectation` and `meetsExpectation` in the JSON.
