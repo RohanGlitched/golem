@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { AuraModel, auraDims, binOf, boundaryForce, binRadius, encodeTexels, radiusAt } from '../aura/aura-model.js';
+import { AURA_RMAX, AuraModel, auraDims, binOf, boundaryForce, binRadius, encodeTexels, radiusAt } from '../aura/aura-model.js';
 import { NO_AURA_TEXT, NO_TRIALS_TEXT, auraSummary } from '../aura/aura-summary.js';
 
 const deg = (d: number) => (d * Math.PI) / 180;
@@ -50,14 +50,14 @@ describe('AuraModel', () => {
     expect(m.ticks).toHaveLength(0);
   });
 
-  it('prefers the broken force as the boundary and scales the radius to 1.2 m', () => {
+  it('prefers the broken force as the boundary and scales the radius to AURA_RMAX', () => {
     const m = new AuraModel(200);
     m.add(deg(5), 180, 1);
     m.add(deg(5), 100, -1);
     expect(boundaryForce(m, 0)).toBe(100);
-    expect(binRadius(m, 0)).toBeCloseTo(0.6, 12);
+    expect(binRadius(m, 0)).toBeCloseTo(AURA_RMAX / 2, 12);
     m.add(deg(25), 400, 1);
-    expect(binRadius(m, 2)).toBe(1.2);
+    expect(binRadius(m, 2)).toBe(AURA_RMAX);
     expect(binRadius(m, 3)).toBe(0);
   });
 
@@ -65,9 +65,9 @@ describe('AuraModel', () => {
     const m = new AuraModel(100);
     m.add(deg(5), 50, 1);
     m.add(deg(15), 100, 1);
-    expect(radiusAt(m, deg(5))).toBeCloseTo(0.6, 12);
-    expect(radiusAt(m, deg(10))).toBeCloseTo(0.9, 12);
-    expect(radiusAt(m, deg(15))).toBeCloseTo(1.2, 12);
+    expect(radiusAt(m, deg(5))).toBeCloseTo(AURA_RMAX / 2, 12);
+    expect(radiusAt(m, deg(10))).toBeCloseTo(0.75 * AURA_RMAX, 12);
+    expect(radiusAt(m, deg(15))).toBeCloseTo(AURA_RMAX, 12);
   });
 
   it('writes G = 255 for a bin with a break', () => {

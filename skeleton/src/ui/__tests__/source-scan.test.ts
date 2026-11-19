@@ -22,7 +22,7 @@ const importsOf = (src: string): string[] => [...src.matchAll(/(?:^|\n)\s*(?:imp
 /** Module dependency order from the design. Files may import from their own layer or a layer above. */
 const LAYER: Record<string, number> = {
   'types.ts': 0,
-  'stage/stage-builder.ts': 2, 'stage/clay-material.ts': 2, 'stage/floor.ts': 2, 'ghosts/ghost-state.ts': 2,
+  'stage/stage-builder.ts': 2, 'stage/clay-material.ts': 2, 'stage/floor.ts': 2, 'ghosts/ghost-state.ts': 2, 'ghosts/ghost-lod.ts': 2,
   'aura/aura-model.ts': 2, 'aura/aura-summary.ts': 2, 'run/status.ts': 2, 'run/req-key.ts': 2, 'run/pins.ts': 2, 'run/share-hash.ts': 2, 'run/seed-json.ts': 2,
   'ghosts/ghost-shader.ts': 3, 'ghosts/push-arrow.ts': 3, 'aura/aura-view.ts': 3, 'stage/orbit.ts': 3,
   'stage/stage.ts': 4, 'hero/hero-sim.ts': 4, 'hero/load-hero.ts': 4, 'ghosts/ghost-swarm.ts': 4,

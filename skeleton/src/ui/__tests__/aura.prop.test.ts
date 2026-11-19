@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import fc from 'fast-check';
-import { AURA_BINS, AuraModel, binOf, binRadius, boundaryForce, encodeTexels, radiusAt } from '../aura/aura-model.js';
+import { AURA_BINS, AURA_RMAX, AuraModel, binOf, binRadius, boundaryForce, encodeTexels, radiusAt } from '../aura/aura-model.js';
 import { auraSummary } from '../aura/aura-summary.js';
 import { formatSig } from '../core/format.js';
 import { arbAuraTrials } from './generators/aura.js';
@@ -81,7 +81,7 @@ describe('aura properties', () => {
   });
 
   // Feature: golem-studio-ui, Property 27: Aura radius and smoothing
-  it('scales radii to 1.2 min(1, B/forceMax), never overshoots between bins and encodes within 1.2/510 m', () => {
+  it('scales radii to AURA_RMAX min(1, B/forceMax), never overshoots between bins and encodes within AURA_RMAX/510 m', () => {
     fc.assert(fc.property(arbAuraTrials, fc.double({ min: 1, max: 400, noNaN: true }), fc.double({ min: -10, max: 10, noNaN: true }), (trials, fmax, ang) => {
       const m = build(trials, fmax);
       const tex = new Uint8Array(36 * 4);
@@ -89,8 +89,8 @@ describe('aura properties', () => {
       for (let i = 0; i < 36; i++) {
         const B = boundaryForce(m, i);
         const r = binRadius(m, i);
-        expect(r).toBe(B === undefined ? 0 : 1.2 * Math.min(1, B / fmax));
-        expect(Math.abs((tex[4 * i]! / 255) * 1.2 - r)).toBeLessThanOrEqual(1.2 / 510 + 1e-12);
+        expect(r).toBe(B === undefined ? 0 : AURA_RMAX * Math.min(1, B / fmax));
+        expect(Math.abs((tex[4 * i]! / 255) * AURA_RMAX - r)).toBeLessThanOrEqual(AURA_RMAX / 510 + 1e-12);
       }
       const u = (((ang / TAU) % 1) + 1) % 1 * 36 - 0.5;
       const i0 = ((Math.floor(u) % 36) + 36) % 36, i1 = (i0 + 1) % 36;

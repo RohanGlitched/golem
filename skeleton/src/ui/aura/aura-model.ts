@@ -3,7 +3,7 @@
 import type { Dimension, ScenarioSpace } from '../types.js';
 
 export const AURA_BINS = 36;
-export const AURA_RMAX = 1.2;
+export const AURA_RMAX = 0.85;
 export const TICK_CAPACITY = 512;
 const TAU = 2 * Math.PI;
 
@@ -79,7 +79,7 @@ export function boundaryForce(m: AuraModel, i: number): number | undefined {
   return undefined;
 }
 
-/** Boundary radius of bin i in metres: 1.2 * min(1, B / forceMax), 0 when unknown. */
+/** Boundary radius of bin i in metres: AURA_RMAX (0.85) * min(1, B / forceMax), 0 when unknown. */
 export function binRadius(m: AuraModel, i: number): number {
   const B = boundaryForce(m, i);
   if (B === undefined || !(m.forceMax > 0)) return 0;
@@ -98,7 +98,7 @@ export function radiusAt(m: AuraModel, angle: number): number {
   return (1 - w) * binRadius(m, a) + w * binRadius(m, b);
 }
 
-/** Writes the 36 RGBA texels: R = round(255 R_i / 1.2), G = 255 when the bin has a break. */
+/** Writes the 36 RGBA texels: R = round(255 R_i / AURA_RMAX), G = 255 when the bin has a break. */
 export function encodeTexels(m: AuraModel, out: Uint8Array): void {
   for (let i = 0; i < AURA_BINS; i++) {
     const o = 4 * i;

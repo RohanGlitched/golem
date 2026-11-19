@@ -127,7 +127,7 @@ export class AuraView {
       transparent: true, depthWrite: false, blending: T.NormalBlending,
       polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1,
     });
-    this.decal = new T.Mesh(new T.PlaneGeometry(2 * 1.26, 2 * 1.26), this.decalMat);
+    this.decal = new T.Mesh(new T.PlaneGeometry(2 * (AURA_RMAX + 0.06), 2 * (AURA_RMAX + 0.06)), this.decalMat);
     this.decal.position.z = 0.002;
     this.decal.renderOrder = 1;
     this.tickGeo = new T.InstancedBufferGeometry();

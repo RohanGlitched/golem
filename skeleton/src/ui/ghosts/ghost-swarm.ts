@@ -1,6 +1,7 @@
 // Ghost_Swarm: up to 64 translucent copies of the robot, one InstancedMesh per drawn geom plus one
 // for the push arrows. Slot data is struct-of-arrays; update() writes preallocated arrays only.
 import type * as THREE_NS from 'three';
+import { clusterSimplify, ghostCell } from './ghost-lod.js';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { nlerp, writeMatrixTRS } from '../core/pose-math.js';
 import type { ThemeName, TokenSet, TrialResult, V3 } from '../types.js';
@@ -47,6 +48,29 @@ function mul4(out: Float32Array, o: number, a: Float32Array, ao: number, b: Floa
       out[o + 4 * c + r] = (a[ao + r] as number) * b0 + (a[ao + 4 + r] as number) * b1 + (a[ao + 8 + r] as number) * b2 + (a[ao + 12 + r] as number) * b3;
     }
   }
+}
+
+
+/** Triangle count above which a ghost gets a clustered low-detail copy of the hero mesh. */
+export const GHOST_LOD_MIN_TRIS = 600;
+
+/** The hero geometry for small meshes; a vertex-clustered copy for big ones (ghosts are rim-lit outlines). */
+export function ghostGeometry(T: typeof THREE_NS, src: THREE_NS.BufferGeometry): THREE_NS.BufferGeometry {
+  const pos = src.getAttribute('position');
+  if (!pos) return src;
+  const tris = src.index ? src.index.count / 3 : pos.count / 3;
+  if (tris <= GHOST_LOD_MIN_TRIS) return src;
+  src.computeBoundingBox();
+  const bb = src.boundingBox!;
+  const diag = Math.hypot(bb.max.x - bb.min.x, bb.max.y - bb.min.y, bb.max.z - bb.min.z);
+  const out = clusterSimplify(pos.array as ArrayLike<number>, src.index ? (src.index.array as ArrayLike<number>) : null, ghostCell(diag));
+  if (out.index.length < 12) return src;
+  const g = new T.BufferGeometry();
+  g.setAttribute('position', new T.BufferAttribute(out.positions, 3));
+  g.setIndex(new T.BufferAttribute(out.index, 1));
+  g.computeVertexNormals();
+  g.userData['ghostLod'] = true;
+  return g;
 }
 
 export class GhostSwarm {
@@ -117,7 +141,7 @@ export class GhostSwarm {
     parts.geomInfo.forEach((gi, i) => {
       this.geomBody[i] = gi.body;
       this.geomLocal.set(gi.local, 16 * i);
-      const geometry = gi.mesh.geometry;
+      const geometry = ghostGeometry(T, gi.mesh.geometry);
       geometry.setAttribute('aState', this.state);
       const im = new T.InstancedMesh(geometry, this.material, cap);
       im.instanceMatrix.setUsage(T.DynamicDrawUsage);
@@ -391,7 +415,7 @@ export class GhostSwarm {
     if (this.disposed) return;
     this.disposed = true;
     this.clear();
-    for (const m of this.meshes) { m.geometry.deleteAttribute('aState'); m.dispose(); }
+    for (const m of this.meshes) { if (m.geometry.userData['ghostLod']) m.geometry.dispose(); else m.geometry.deleteAttribute('aState'); m.dispose(); }
     this.arrowMesh.dispose();
     this.arrowGeometry.dispose();
     this.material.dispose();
