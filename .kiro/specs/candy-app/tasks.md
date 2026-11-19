@@ -30,12 +30,14 @@ Conventions for every task:
 
 - [ ] 2. Cross-spec additions (additive only)
   - [ ] 2.1 Add optional `Controller.substep` and `Controller.dispose` to the skeleton
+    - **Skipped (superseded).** `Controller.substep` already exists (golem-sim-hardening) and is used as is. `Controller.dispose` is not added: the skeleton is out of scope for this branch, and the Episode_Runner already calls `RobotApp.endTrial(ctx)` in its `finally` block, so the app disposes its controller there (task 13.1). A `dispose` hook in the skeleton can replace that later.
     - Add `substep?(ctx, t): void` and `dispose?(): void` to the `Controller` type in `skeleton/src`, and list both under "Approved additions" in `.kiro/steering/interfaces.md`
     - Make the Episode_Runner call `substep` once per Sim_Step after it clears `xfrc_applied` and before `mj_step` (also during warm-up), and call `dispose` once at Trial end, also on error paths
     - Write `skeleton/test/controller-hooks.test.ts` (examples): call order per step, `substep` runs in warm-up, `dispose` runs once on normal end and once when `apply` throws, apps without the fields behave as before
     - _Requirements: 3.13, 14.4, 10.13_
 
   - [ ] 2.2 Pass the hidden `horizon` slot to `PerturbationTemplate.dims`
+    - **Skipped (skeleton change, out of scope for this branch).** `hand.entry` uses the 3.0 s fallback (`HAND_ENTRY_FALLBACK`) until golem-ears passes `horizon`. See `apps/candy/proposals.md`.
     - In the golem-ears compiler, pass the requirement Horizon to `dims` as the hidden slot `horizon` (a `Quantity`), and record it under "Approved additions" in `interfaces.md`
     - Write `skeleton/test/horizon-slot.test.ts` (examples): a perturbation `dims` sees `horizon`, an absent slot is tolerated, existing lexicons are unaffected
     - _Requirements: 9.3_
