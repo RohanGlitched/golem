@@ -37,7 +37,7 @@ Conventions for every task:
     - **Property 5: Unit conversion is the identity**
     - **Validates: Requirements 2.11, 13.4**
 
-- [ ] 3. Token edit distance
+- [x] 3. Token edit distance
   - [x] 3.1 Implement `tokenEditDistance` in `editDistance.ts`
     - Levenshtein over `WildToken` and string sequences. Words compare case-folded. Equal-kind wildcards cost 0, different-kind wildcards cost 1. Use two rolling `Int32Array` rows.
     - Write example tests: identical sequences, one insertion, one substitution, case folding, wildcard kinds.
@@ -46,24 +46,24 @@ Conventions for every task:
     - Create `__tests__/refEditDistance.ts` (full-matrix reference) and `arbTokenSeq` over a small alphabet in `__tests__/generators.tokens.ts`.
     - **Property 16: Token edit distance obeys the metric laws**
     - **Validates: Requirements 9.10, 9.11, 13.8**
-  - [-] 3.3 Write property test for edit distance against the reference
+  - [x] 3.3 Write property test for edit distance against the reference
     - **Property 17: Edit distance matches a reference and handles wildcards** (sequence-level: words and wildcards)
     - **Validates: Requirements 9.1, 9.3, 9.4**
 
-- [ ] 4. Tokenizer
+- [x] 4. Tokenizer
   - [x] 4.1 Implement `tokenizer.ts`
     - Scan order from the design: whitespace, requirement ID at start, number, unit by longest match after a number (word boundary required), word or keyword (whole word, case-insensitive, original spelling kept), comma, otherwise one error diagnostic (`PATTERN_MISMATCH` naming the character) and continue.
     - Track line and column incrementally. `\r\n` is one break. Count UTF-16 units.
     - Write example tests: `THENCE` and `IFFY` are words, `m/s` beats `m`, `5 mx` gives a word, empty input gives no tokens, an illegal character gives one diagnostic and scanning continues, ID forms `R3.`, `2.` and `2.1`.
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 1.11_
-  - [-] 4.2 Write reference line and column calculator and property test
+  - [x] 4.2 Write reference line and column calculator and property test
     - Create `__tests__/refTokenize.ts` (independent line and column from the input prefix).
     - **Property 2: Tokenizer line and column agree with an independent calculation**
     - **Validates: Requirements 1.8, 8.9**
-  - [~] 4.3 Write property test for tokenizer coverage and offsets
+  - [x] 4.3 Write property test for tokenizer coverage and offsets
     - **Property 1: Tokenizer coverage and offsets**
     - **Validates: Requirements 1.1, 1.2, 1.4, 1.5, 1.10, 13.9**
-  - [~] 4.4 Write property test for keyword recognition
+  - [x] 4.4 Write property test for keyword recognition
     - **Property 3: Keyword recognition ignores case and whole-word only**
     - **Validates: Requirements 1.6, 1.7**
 
@@ -78,27 +78,27 @@ Conventions for every task:
     - _Requirements: 13.1, 13.2, 13.12_
 
 - [ ] 6. Quantity parsing
-  - [-] 6.1 Implement `parseQuantity` and `quantityFromTokens` in `units.ts`
+  - [x] 6.1 Implement `parseQuantity` and `quantityFromTokens` in `units.ts`
     - Quantity `text` is the exact source substring. `{count}` accepts an unsigned integer. `{ratio}` accepts `%` or a bare number in [0, 1], otherwise `BAD_RANGE` stating the interval. Other bare numbers give `MISSING_UNIT`. An unknown word after a number gives `UNKNOWN_PHRASE` listing accepted units. Kind mismatch is reported by the matcher.
     - Write example tests: `rejects a force without a unit` (`MISSING_UNIT` with line and column), `0.20 s` keeps its spelling, ratio 1.5 gives `BAD_RANGE`, count `3`.
     - _Requirements: 2.1, 2.5, 2.6, 2.7, 2.8, 2.9, 2.12_
-  - [~] 6.2 Write property test for quantity SI conversion
+  - [x] 6.2 Write property test for quantity SI conversion
     - **Property 4: Quantities convert to SI with the table kind and preserve text**
     - **Validates: Requirements 2.1, 2.2, 2.3, 2.12**
-  - [~] 6.3 Write property test for quantity text round trip
+  - [-] 6.3 Write property test for quantity text round trip
     - **Property 6: Quantity text round trip**
     - **Validates: Requirements 2.12**
-  - [~] 6.4 Write property test for bare numbers
+  - [-] 6.4 Write property test for bare numbers
     - **Property 7: Bare numbers are accepted only for count and in-range ratio**
     - **Validates: Requirements 2.5, 2.6, 2.7, 2.8**
 
 - [ ] 7. Range phrases
-  - [~] 7.1 Implement `ranges.ts`
+  - [x] 7.1 Implement `ranges.ts`
     - `parseRangePhrase` for `up to <q>`, `<q> to <q>`, `from any direction` (0 to 2π, wrap), `from behind` (3π/4 to 5π/4, wrap), `at any point in its stride` (phase 0 to 1, wrap) and a lone fixed quantity. `rangeToDimension(name, range, severity)`.
     - `BAD_RANGE` at the second quantity for min > max and mixed kinds, at the quantity for a negative force, duration, length, speed or mass, and at the second range when a slot gets two ranges.
     - Write example tests: the constants for `from behind` and `at any point in its stride`, `up to 0 N` is a valid fixed range, a `BAD_RANGE` example with line and column.
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 4.10, 4.11, 4.12_
-  - [~] 7.2 Write property test for range phrases
+  - [-] 7.2 Write property test for range phrases
     - **Property 12: Range phrases produce the right interval and Dimension**
     - **Validates: Requirements 4.1, 4.2, 4.6, 4.11, 4.12, 5.8**
   - [~] 7.3 Write property test for invalid ranges
@@ -106,19 +106,19 @@ Conventions for every task:
     - **Validates: Requirements 4.7, 4.8, 4.9**
 
 - [ ] 8. Parser
-  - [-] 8.1 Implement `parser.ts`
+  - [x] 8.1 Implement `parser.ts`
     - Single pass for the five patterns, ID stripped of its trailing period, optional comma before THE and after THEN, clause boundary at the next `THE <robot> SHALL`, keywords stored in upper case, robot name as written, clause spans from first to last token.
     - Diagnostics: `PATTERN_MISMATCH` (naming the closest pattern and the expected keyword or clause, second SHALL, empty clause) and `UNKNOWN_ROBOT` with allowed names in `suggestion`. No AST when any error is found.
     - Write example tests: one example per pattern, `WHEN x, THE robot SHALL y` equals the line without the comma, empty clause, second SHALL, unknown robot.
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 3.10, 3.11, 3.12, 3.13, 3.14, 3.15, 3.16_
-  - [~] 8.2 Write property test for generated valid lines
+  - [x] 8.2 Write property test for generated valid lines
     - **Property 9: Generated valid lines parse to the expected pattern, ID and clauses**
     - **Validates: Requirements 3.1, 3.2, 3.3, 3.4, 3.5, 3.8, 3.9, 3.12, 3.14**
-  - [~] 8.3 Write property test for unknown robot names
+  - [-] 8.3 Write property test for unknown robot names
     - **Property 11: Unknown robot names are rejected and listed**
     - **Validates: Requirements 3.11, 8.6**
 
-- [ ] 9. Monitor builder
+- [x] 9. Monitor builder
   - [x] 9.1 Implement `monitor.ts`
     - `buildMonitor(spec)` as in the design: `+Infinity` for a disabled feature, `NaN` with unit `signal` for a missing signal, `NaN` with unit `trace` for no trigger or an empty window, anchor at the first `trigger` event, binary search for the window start, closed window, no interpolation, always as min and eventually as max with the earliest time on ties, `NaN` margin returns immediately, state pattern as `max(-stateMargin, responseMargin)`.
     - Allocate the scratch record and signal-array list once in `buildMonitor`. The sample loop uses indices and scalar locals only. Never write to `Trace`.
@@ -128,37 +128,37 @@ Conventions for every task:
     - Create `__tests__/refMonitor.ts` (naive loop filtering `a <= t <= b`) and `__tests__/generators.trace.ts` with `arbTrace` (strictly increasing `t`, 1 to 1000 samples, repeated values for ties, optional trigger events).
     - Write example tests that `arbTrace` output satisfies the trace conventions.
     - _Requirements: 13.12_
-  - [~] 9.3 Write property test for the trigger anchor
+  - [x] 9.3 Write property test for the trigger anchor
     - **Property 19: First trigger anchors the window**
     - **Validates: Requirements 6.6, 6.13**
-  - [~] 9.4 Write property test for unmeasurable cases
+  - [x] 9.4 Write property test for unmeasurable cases
     - **Property 20: A trace with no trigger, no window sample or a missing signal is never reported as satisfied**
     - **Validates: Requirements 6.7, 6.11, 7.5, 7.9, 7.10**
-  - [~] 9.5 Write property test against the naive reference
+  - [x] 9.5 Write property test against the naive reference
     - **Property 21: The monitor equals a naive reference over the closed window**
     - **Validates: Requirements 6.1, 6.2, 6.3, 6.4, 6.5, 6.10, 6.12, 7.2, 7.3, 7.4, 7.6, 7.7**
-  - [~] 9.6 Write property test for robustness soundness
+  - [x] 9.6 Write property test for robustness soundness
     - **Property 22: Robustness soundness**
     - **Validates: Requirements 7.11, 7.12, 13.5**
-  - [~] 9.7 Write property test for the threshold sign flip
+  - [x] 9.7 Write property test for the threshold sign flip
     - **Property 23: Sign flips when the threshold crosses the signal**
     - **Validates: Requirements 7.13, 13.5**
-  - [~] 9.8 Write property test for threshold monotonicity
+  - [x] 9.8 Write property test for threshold monotonicity
     - **Property 24: Raising an above threshold never raises robustness**
     - **Validates: Requirements 7.14, 13.6**
-  - [~] 9.9 Write property test for a disabled optional feature
+  - [x] 9.9 Write property test for a disabled optional feature
     - **Property 25: A disabled optional feature is vacuously satisfied**
     - **Validates: Requirements 6.8**
-  - [~] 9.10 Write property test for monitor purity
+  - [x] 9.10 Write property test for monitor purity
     - **Property 27: Monitors are pure and read-only** (deep-frozen trace, bit-identical results with `Object.is`)
     - **Validates: Requirements 7.1, 7.8, 7.15, 7.16**
 
 - [ ] 10. Lexicon matcher and suggestions
-  - [-] 10.1 Add `toWildcardSequence` and `closestTemplate` to `editDistance.ts`
+  - [x] 10.1 Add `toWildcardSequence` and `closestTemplate` to `editDistance.ts`
     - A number with its unit, or a bare count or ratio, collapses to one wildcard of its kind. Templates compare only within their class. Ties go to the earlier template. `tooFar` is true when `distance > max(lenA, lenB) / 2`.
     - Write example tests: a quantity counts as one token, a tie picks the first template, `tooFar` omits the suggestion, an empty class gives no template.
     - _Requirements: 9.2, 9.5, 9.6, 9.7, 9.8, 9.9_
-  - [~] 10.2 Write property test for wildcard edit distance from clauses
+  - [-] 10.2 Write property test for wildcard edit distance from clauses
     - **Property 17: Edit distance matches a reference and handles wildcards** (clause-level: quantities collapse to one wildcard)
     - **Validates: Requirements 9.1, 9.2, 9.3, 9.4**
   - [~] 10.3 Implement `matcher.ts`

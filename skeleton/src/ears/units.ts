@@ -1,4 +1,5 @@
-import type { Kind } from './types.js';
+import { makeDiagnostic, type Diagnostic } from './diagnostics.js';
+import type { Kind, Quantity, SlotKind, Token } from './types.js';
 
 export interface UnitSpec { spelling: string; kind: Kind; factor: number }
 
@@ -48,4 +49,157 @@ export function fromSI(si: number, unit: string): number {
   const spec = need(unit);
   if (si === 0) return 0;
   return si / spec.factor;
+}
+
+export interface QuantityResult { quantity?: Quantity; diagnostics: Diagnostic[] }
+
+function posOf(t: Token) {
+  return { start: t.start, end: t.end, line: t.line, column: t.column };
+}
+
+/**
+ * Builds a Quantity from a number token and the token after it (if any).
+ * `unit` of type 'unit' gives a quantity of the unit's kind. A 'word' unit gives UNKNOWN_PHRASE.
+ * Any other token, or undefined, means no unit follows: bare-number rules for `slot` apply.
+ * Kind mismatch against the slot is the matcher's job, not reported here.
+ * `text` is rebuilt as number + the gap between the tokens + unit.
+ */
+export function quantityFromTokens(
+  num: Token,
+  unit: Token | undefined,
+  slot: SlotKind,
+): QuantityResult {
+  const value = Number(num.text);
+  if (!Number.isFinite(value)) {
+    return {
+      diagnostics: [
+        makeDiagnostic('BAD_RANGE', `Number '${num.text}' is not a finite value`, posOf(num)),
+      ],
+    };
+  }
+
+  if (unit !== undefined && unit.type === 'word') {
+    return {
+      diagnostics: [
+        makeDiagnostic(
+          'UNKNOWN_PHRASE',
+          `Unknown unit '${unit.text}'. Accepted units: ${ACCEPTED_UNITS.join(', ')}`,
+          posOf(unit),
+        ),
+      ],
+    };
+  }
+
+  if (unit !== undefined && unit.type === 'unit') {
+    const spec = BY_SPELLING.get(unit.text);
+    if (!spec) {
+      return {
+        diagnostics: [
+          makeDiagnostic(
+            'UNKNOWN_PHRASE',
+            `Unknown unit '${unit.text}'. Accepted units: ${ACCEPTED_UNITS.join(', ')}`,
+            posOf(unit),
+          ),
+        ],
+      };
+    }
+    const gap = Math.max(0, unit.start - num.end);
+    return {
+      quantity: {
+        kind: spec.kind,
+        si: value * spec.factor,
+        text: num.text + ' '.repeat(gap) + unit.text,
+      },
+      diagnostics: [],
+    };
+  }
+
+  // Bare number.
+  if (slot === 'count') {
+    if (/^\d+$/.test(num.text)) {
+      return { quantity: { kind: 'count', si: value, text: num.text }, diagnostics: [] };
+    }
+    return {
+      diagnostics: [
+        makeDiagnostic(
+          'BAD_RANGE',
+          `A count must be an unsigned integer, found '${num.text}'`,
+          posOf(num),
+        ),
+      ],
+    };
+  }
+  if (slot === 'ratio') {
+    if (value >= 0 && value <= 1) {
+      return { quantity: { kind: 'ratio', si: value, text: num.text }, diagnostics: [] };
+    }
+    return {
+      diagnostics: [
+        makeDiagnostic(
+          'BAD_RANGE',
+          `A bare ratio must be in the interval [0, 1], found '${num.text}'. Use % for percentages`,
+          posOf(num),
+        ),
+      ],
+    };
+  }
+  return {
+    diagnostics: [
+      makeDiagnostic(
+        'MISSING_UNIT',
+        `Number '${num.text}' has no unit. Accepted units: ${ACCEPTED_UNITS.join(', ')}`,
+        posOf(num),
+      ),
+    ],
+  };
+}
+
+const QUANTITY_TEXT = /^(\s*)([+-]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)( ?)(\S.*?)?(\s*)$/s;
+
+/**
+ * Parses text such as `200 N` or `0.20s` into a Quantity. `slot` selects the
+ * bare-number rules ('count', 'ratio'); without it a bare number is MISSING_UNIT.
+ * Positions are relative to `text` (line 1, column 1 is its first character).
+ */
+export function parseQuantity(text: string, slot?: SlotKind): QuantityResult {
+  const m = QUANTITY_TEXT.exec(text);
+  const s: SlotKind = slot ?? 'length';
+  if (!m) {
+    return {
+      diagnostics: [
+        makeDiagnostic(
+          'PATTERN_MISMATCH',
+          `Expected a number followed by a unit, found '${text}'`,
+          { start: 0, end: text.length, line: 1, column: 1 },
+        ),
+      ],
+    };
+  }
+  const lead = m[1]!.length;
+  const numText = m[2]!;
+  const space = m[3]!;
+  const rest = m[4];
+  const numStart = lead;
+  const num: Token = {
+    type: 'number',
+    text: numText,
+    start: numStart,
+    end: numStart + numText.length,
+    line: 1,
+    column: numStart + 1,
+  };
+  if (rest === undefined) return quantityFromTokens(num, undefined, s);
+  // A unit directly after a number may be glued to it only if the number ended the match
+  // (regex is greedy on the number), so `rest` starts right after `space`.
+  const rStart = num.end + space.length;
+  const isUnit = BY_SPELLING.has(rest);
+  const tok: Token = {
+    type: isUnit ? 'unit' : 'word',
+    text: rest,
+    start: rStart,
+    end: rStart + rest.length,
+    line: 1,
+    column: rStart + 1,
+  };
+  return quantityFromTokens(num, tok, s);
 }

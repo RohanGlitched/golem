@@ -7,6 +7,54 @@
     "2.2 Write property test for unit conversion identity": {
       "status": "passed",
       "lastRunTimestamp": 1795077170676
+    },
+    "3.3 Write property test for edit distance against the reference": {
+      "status": "passed",
+      "lastRunTimestamp": 1795077271421
+    },
+    "4.2 Write reference line and column calculator and property test": {
+      "status": "passed",
+      "lastRunTimestamp": 1795077281592
+    },
+    "4.4 Write property test for keyword recognition": {
+      "status": "passed",
+      "lastRunTimestamp": 1795077504250
+    },
+    "9.4 Write property test for unmeasurable cases": {
+      "status": "passed",
+      "lastRunTimestamp": 1795077526785
+    },
+    "4.3 Write property test for tokenizer coverage and offsets": {
+      "status": "passed",
+      "lastRunTimestamp": 1795077554527
+    },
+    "9.8 Write property test for threshold monotonicity": {
+      "status": "passed",
+      "lastRunTimestamp": 1795077661743
+    },
+    "9.5 Write property test against the naive reference": {
+      "status": "passed",
+      "lastRunTimestamp": 1795077668107
+    },
+    "9.6 Write property test for robustness soundness": {
+      "status": "passed",
+      "lastRunTimestamp": 1795077677040
+    },
+    "9.9 Write property test for a disabled optional feature": {
+      "status": "passed",
+      "lastRunTimestamp": 1795077853691
+    },
+    "8.2 Write property test for generated valid lines": {
+      "status": "passed",
+      "lastRunTimestamp": 1795077871544
+    },
+    "6.2 Write property test for quantity SI conversion": {
+      "status": "passed",
+      "lastRunTimestamp": 1795077919301
+    },
+    "9.10 Write property test for monitor purity": {
+      "status": "passed",
+      "lastRunTimestamp": 1795077955453
     }
   },
   "executionHistory": {
@@ -122,6 +170,11 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795077200736
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795077423586
       }
     ],
     "4.1 Implement `tokenizer.ts`": [
@@ -151,6 +204,11 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795077200792
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795077423714
       }
     ],
     "4.3 Write property test for tokenizer coverage and offsets": [
@@ -158,6 +216,16 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795076112239
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795077431750
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795077576287
       }
     ],
     "4.4 Write property test for keyword recognition": [
@@ -165,6 +233,16 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795076112296
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795077431806
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795077575641
       }
     ],
     "5.1 Implement `ast.ts`": [
@@ -211,6 +289,11 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795077200561
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795077423411
       }
     ],
     "6.2 Write property test for quantity SI conversion": [
@@ -218,6 +301,16 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795076112529
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795077796279
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795078081290
       }
     ],
     "6.3 Write property test for quantity text round trip": [
@@ -225,6 +318,11 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795076112596
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795078085997
       }
     ],
     "6.4 Write property test for bare numbers": [
@@ -232,6 +330,11 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795076112649
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795078087717
       }
     ],
     "7.1 Implement `ranges.ts`": [
@@ -239,6 +342,16 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795076112708
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795077796415
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795078080511
       }
     ],
     "7.2 Write property test for range phrases": [
@@ -246,6 +359,11 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795076112768
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795078088157
       }
     ],
     "7.3 Write property test for invalid ranges": [
@@ -265,6 +383,11 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795077200623
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795077789987
       }
     ],
     "8.2 Write property test for generated valid lines": [
@@ -272,6 +395,16 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795076112931
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795077796624
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795078080319
       }
     ],
     "8.3 Write property test for unknown robot names": [
@@ -279,6 +412,11 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795076112990
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795078087778
       }
     ],
     "9.1 Implement `monitor.ts`": [
@@ -320,6 +458,16 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795076113164
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795077431865
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795077574639
       }
     ],
     "9.4 Write property test for unmeasurable cases": [
@@ -327,6 +475,16 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795076113235
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795077431923
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795077575301
       }
     ],
     "9.5 Write property test against the naive reference": [
@@ -334,6 +492,16 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795076113296
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795077580836
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795077788996
       }
     ],
     "9.6 Write property test for robustness soundness": [
@@ -341,6 +509,16 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795076113357
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795077581157
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795077788328
       }
     ],
     "9.7 Write property test for the threshold sign flip": [
@@ -348,6 +526,16 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795076113414
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795077581812
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795077789325
       }
     ],
     "9.8 Write property test for threshold monotonicity": [
@@ -355,6 +543,16 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795076113498
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795077582361
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795077790240
       }
     ],
     "9.9 Write property test for a disabled optional feature": [
@@ -362,6 +560,16 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795076113552
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795077796171
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795078080389
       }
     ],
     "9.10 Write property test for monitor purity": [
@@ -369,6 +577,16 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795076113610
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795077796221
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795078081017
       }
     ],
     "10.1 Add `toWildcardSequence` and `closestTemplate` to `editDistance.ts`": [
@@ -381,6 +599,11 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795077200681
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795077423505
       }
     ],
     "10.2 Write property test for wildcard edit distance from clauses": [
@@ -388,6 +611,11 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795076113724
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795078087821
       }
     ],
     "10.3 Implement `matcher.ts`": [
@@ -591,6 +819,27 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795077191696
+      }
+    ],
+    "3. Token edit distance": [
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795077423639
+      }
+    ],
+    "4. Tokenizer": [
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795077576329
+      }
+    ],
+    "9. Monitor builder": [
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795078081068
       }
     ]
   }
