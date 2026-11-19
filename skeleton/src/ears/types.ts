@@ -34,6 +34,8 @@ export interface CompiledRequirement {
   space: ScenarioSpace;
   perturbations: PerturbationCall[];
   horizon: number;
+  /** The STL formula the monitor computes, e.g. `G[t₀, t₀+3 s] margin("stay upright") > 0 m`. */
+  formula: string;
   monitor(trace: Trace): { robustness: number; worstAt: number; unit: string };
 }
 

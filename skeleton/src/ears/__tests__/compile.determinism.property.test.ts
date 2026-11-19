@@ -68,6 +68,7 @@ describe('Feature: golem-ears, Property 29: Compiling is deterministic and does 
         expect(y.space).toEqual(x.space);
         expect(y.perturbations).toEqual(x.perturbations);
         expect(Object.is(y.horizon, x.horizon)).toBe(true);
+        expect(y.formula).toBe(x.formula);
         const r1 = x.monitor(trace);
         expect(same(r1, y.monitor(trace))).toBe(true);
         expect(same(r1, x.monitor(trace))).toBe(true);

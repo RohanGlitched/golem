@@ -38,7 +38,7 @@ Conventions: sources in `skeleton/src/ears/`, tests in `skeleton/src/ears/__test
   - _Bugfix: 5.1–5.4_
 - [x] 13. Horizons and onset (defect 11)
   - _Bugfix: 11.1–11.7_
-- [ ] 14. STL formula string (improvement 1)
+- [x] 14. STL formula string (improvement 1)
   - _Bugfix: I1.1–I1.4_
 - [ ] 15. Lexicon linter (improvement 5)
   - _Bugfix: I5.1–I5.3_

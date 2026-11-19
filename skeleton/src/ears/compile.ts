@@ -6,6 +6,7 @@ import { extractCriteria, type RawCriterion } from './extract.js';
 import { matchPerturbation, matchPredicate, type BoundClause } from './matcher.js';
 import { buildDimensions } from './dimensions.js';
 import { tokenEditDistance } from './editDistance.js';
+import { formulaOf, type FormulaInput } from './formula.js';
 import { buildMonitor } from './monitor.js';
 import { parse } from './parser.js';
 import { kiroText, tokenize } from './tokenizer.js';
@@ -296,6 +297,11 @@ export function compileRequirement(
   if (disabledFeature) spec.disabledFeature = true;
   if (onset > 0 && !stateBound) spec.onset = onset;
 
+  const fin: FormulaInput = { timed, response: resp.bound, wrapper, onset };
+  if (stateBound) fin.state = stateBound;
+  if (stateTrigger && condition) fin.appliedState = condition.text;
+  if (disabledFeature && condition) fin.disabledFeature = condition.text;
+
   return finish({
     id: ast.id ?? options.id ?? '',
     source: line,
@@ -303,6 +309,7 @@ export function compileRequirement(
     space: { dims },
     perturbations,
     horizon,
+    formula: formulaOf(fin),
     monitor: buildMonitor(spec),
   });
 }
