@@ -12,6 +12,7 @@ import { LatencyBuffer } from './latency.js';
 import { DEFAULT_POSE, buildObservation } from './observation.js';
 import { ACT_DIM, OBS_DIM, type Policy } from './policy.js';
 import { actionToTarget } from './pd.js';
+import { REFLEX_LIMITS, Reflex } from './reflex.js';
 
 export class Walker implements Controller {
   readonly target = new Float64Array(ACT_DIM);
@@ -21,10 +22,14 @@ export class Walker implements Controller {
   private readonly delayedObs = new Float64Array(OBS_DIM);
   private readonly latency = new LatencyBuffer(OBS_DIM);
   private calls = 0;
+  readonly reflex = new Reflex();
+  private readonly cmd = new Float64Array(3);
+  private readonly rstate = { qpos: [] as ArrayLike<number>, qvel: [] as ArrayLike<number>, t: 0 };
 
   constructor(_ctx: SimContext, private readonly policy: Policy, private readonly rt: StaggerRuntime) {
     policy.reset();
     this.latency.reset();
+    this.reflex.reset();
     this.target.set(DEFAULT_POSE);
   }
 
@@ -34,7 +39,14 @@ export class Walker implements Controller {
   step(ctx: SimContext, t: number): void {
     const data = ctx.data;
     if (this.calls > 0) {
-      buildObservation(data.qpos, data.qvel, this.rt.command, this.previousAction, t, this.obs);
+      const rs = this.rstate; rs.qpos = data.qpos; rs.qvel = data.qvel; rs.t = t;
+      this.reflex.command(rs, this.rt.command, this.cmd);
+      const L = REFLEX_LIMITS, c = this.cmd;
+      for (let k = 0; k < 3; k++) {
+        const lim = k === 2 ? L.yaw : L.v, v = c[k] as number;
+        c[k] = Number.isFinite(v) ? Math.max(-lim, Math.min(lim, v)) : (this.rt.command[k] as number);
+      }
+      buildObservation(data.qpos, data.qvel, c, this.previousAction, t, this.obs);
       this.latency.push(this.obs);
       this.latency.delayed(this.rt.delaySteps, this.delayedObs);
       this.policy.step(this.delayedObs, this.action);
