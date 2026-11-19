@@ -370,39 +370,39 @@ Conventions for every task:
     - Example tests: restart with a new direction, end announces the direction, Escape cancels and clears the arrow.
     - _Requirements: 8.2, 8.3, 8.4, 8.5, 8.6, 8.7, 8.8, 8.9_
 
-- [ ] 11. Ghost swarm
-  - [ ] 11.1 Implement `ghosts/ghost-shader.ts`
+- [x] 11. Ghost swarm
+  - [x] 11.1 Implement `ghosts/ghost-shader.ts`
     - `GHOST_VERT`, `GHOST_FRAG`, `createGhostMaterial(theme)`: fresnel rim, per-instance `aState` (colour mix, opacity, rise), `transparent`, `depthWrite: false`, additive blending in the dark theme and normal blending in the light theme, `renderOrder` 10, no time uniform.
     - Example tests: material flags per theme, source has no time uniform, a zero opacity discards.
     - _Requirements: 9.3, 9.4, 9.11_
 
-  - [ ] 11.2 Implement the core of `ghosts/ghost-swarm.ts`
+  - [x] 11.2 Implement the core of `ghosts/ghost-swarm.ts`
     - `GhostSwarm` with one `InstancedMesh` of capacity 64 per drawn geom sharing the hero geometry, one shared `aState` `InstancedBufferAttribute`, one arrow `InstancedMesh`, struct-of-arrays slot data, `beginGeneration`, `accept` (first 64 of a Generation, `nbody` and length validation with the warning text from the design, `validFrames` for non-finite frames, result without poses creates no ghost), `clear`, `shown`, `count` as highest slot plus one, `setTheme`, `dispose` of every `InstancedMesh`, geometry and material it created.
     - Example tests: more than 64 results keep the first 64, `nbody` mismatch warns with both numbers, clear hides every slot, dispose counts.
     - _Requirements: 9.1, 9.2, 9.5, 9.6, 9.7, 9.8, 9.9, 9.11, 9.12, 10.2, 10.12, 10.13, 29.5, 29.6_
 
-  - [ ] 11.3 Add playback, break fade, summoning and arrows to `ghosts/ghost-swarm.ts`
+  - [x] 11.3 Add playback, break fade, summoning and arrows to `ghosts/ghost-swarm.ts`
     - `commitGeneration(clockStart)` with the shared clock, leftover slots retire over 300 ms, `timeOf`, `update(now)` writing instance matrices as body matrix times geom-local matrix with `nlerp` into preallocated arrays, `evalGhost` state per slot, Push_Arrows between trigger and the end of the perturbation window with the ghost's colour state and fade, `ghosts-running` reason held while anything animates.
     - Example tests: the staged ghost is visible within 100 ms of the first result, arrows hide after the perturbation window, `update` returns false when everything has ended.
     - _Requirements: 9.10, 10.3, 10.4, 10.5, 10.6, 10.7, 10.8, 10.9, 10.10, 11.1, 11.2, 11.3, 11.4, 11.5, 11.6, 11.7, 11.8, 11.10, 12.4, 12.5, 12.6, 27.3, 27.4_
 
-  - [ ]* 11.4 Write property test for ghost matrices
+  - [x]* 11.4 Write property test for ghost matrices
     - **Property 5: Ghost matrices compose and are deterministic**
     - **Validates: Requirements 9.10, 28.10**
 
-  - [ ]* 11.5 Write property test for ghost frame selection and interpolation
+  - [x]* 11.5 Write property test for ghost frame selection and interpolation
     - **Property 13: Ghost frame selection and interpolation**
     - **Validates: Requirements 10.4, 10.5, 10.6, 10.7**
 
-  - [ ]* 11.6 Write property test for generation sync
+  - [x]* 11.6 Write property test for generation sync
     - **Property 14: Ghosts of one Generation are in sync**
     - **Validates: Requirements 10.14**
 
-  - [ ]* 11.7 Write property test for generation capacity
+  - [x]* 11.7 Write property test for generation capacity
     - **Property 17: Generation capacity**
     - **Validates: Requirements 9.1, 9.5, 9.6, 9.8**
 
-  - [ ]* 11.8 Write property test for pose frame validation
+  - [x]* 11.8 Write property test for pose frame validation
     - **Property 22: Pose frame validation**
     - **Validates: Requirements 10.12, 10.13, 29.5, 29.6**
 

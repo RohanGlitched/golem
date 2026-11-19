@@ -47,9 +47,13 @@ export function breakTime(g: GhostRecord): number {
   return Number.isFinite(tb) ? clamp(tb, 0, T) : (tb > 0 ? T : 0);
 }
 
-/** Writes the state of ghost g at ghost time tau into out. No allocation. */
-export function evalGhost(g: GhostRecord, tau: number, reduced: boolean, out: GhostEval): GhostEval {
+/**
+ * Writes the state of ghost g at ghost time tau into out. No allocation. iseTau is the time since the
+ * ghost was summoned (a staged ghost rises while it holds the trigger frame); it defaults to tau.
+ */
+export function evalGhost(g: GhostRecord, tau: number, reduced: boolean, out: GhostEval, riseTau = tau): GhostEval {
   if (!(tau > 0)) tau = 0;
+  if (!(riseTau > 0)) riseTau = 0;
   const T = recordingSeconds(g);
   const t = tau < T ? tau : T;
   const last = Math.max(0, Math.min(g.frameCount, g.validFrames) - 1);
@@ -63,7 +67,7 @@ export function evalGhost(g: GhostRecord, tau: number, reduced: boolean, out: Gh
 
   const broke = g.robustness < 0;
   const tBreak = breakTime(g);
-  const rise = reduced ? 0 : 1 - easeOutCubic(clamp(tau / SUMMON_S, 0, 1));
+  const rise = reduced ? 0 : 1 - easeOutCubic(clamp(riseTau / SUMMON_S, 0, 1));
   out.rise = rise;
   out.hidden = false;
   let opacity: number;
