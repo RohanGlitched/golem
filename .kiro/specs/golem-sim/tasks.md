@@ -44,8 +44,8 @@ Rules that apply to every task:
     - **Property 19: Handle registry counts live handles**
     - **Validates: Requirements 10.12, 10.13, 10.16**
 
-- [ ] 3. Fake MuJoCo for fast tests
-  - [~] 3.1 Create `test-fixtures.ts` with `withFakeMj()`
+- [x] 3. Fake MuJoCo for fast tests
+  - [x] 3.1 Create `test-fixtures.ts` with `withFakeMj()`
     - In-memory fake `Mj` with `FS` (`mkdirTree`, `writeFile`, `readFile`, directory listing), `MjModel.from_xml_path`, `MjData`, `DoubleBuffer`, `mj_name2id`, `mj_geomDistance`, and per-handle delete counters.
     - Fault injection: make `mkdirTree`, `writeFile`, `from_xml_path` or the buffer callback throw on demand.
     - The file is test-only and is not exported from `index.ts`.
