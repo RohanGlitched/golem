@@ -124,30 +124,33 @@ describe.skipIf(specFiles.length === 0)('repository specs', () => {
   });
 
   it('never reports a trailing period or Markdown markup as an error', () => {
+    const bad: string[] = [];
     for (const r of results) {
-      for (const c of r.ex.criteria) {
-        const lastSeg = c.segments[c.segments.length - 1]!;
-        const end = lastSeg.offset + lastSeg.length;
-        for (const d of r.out.diagnostics) {
-          if (!d.message.startsWith('Unexpected character')) continue;
-          const ch = r.text.slice(d.start, d.end);
-          expect(['*', '`'], `${r.file}:${d.line}:${d.column}`).not.toContain(ch);
-          if (ch === '.') expect(d.end, `${r.file}:${d.line}:${d.column} trailing period`).not.toBe(end);
-        }
+      const ends = new Set(r.ex.criteria.map((c) => {
+        const s = c.segments[c.segments.length - 1]!;
+        return s.offset + s.length;
+      }));
+      for (const d of r.out.diagnostics) {
+        if (!d.message.startsWith('Unexpected character')) continue;
+        const ch = r.text.slice(d.start, d.end);
+        if (ch === '*' || ch === '`' || (ch === '.' && ends.has(d.end))) bad.push(`${r.file}:${d.line}:${d.column} ${d.message}`);
       }
     }
+    expect(bad).toEqual([]);
   });
 
   it('either compiles each criterion or reports an error inside it', () => {
+    const silent: string[] = [];
     for (const r of results) {
       const compiled = new Set(r.out.requirements.map((q) => q.id));
+      const errors = r.out.diagnostics.filter((d) => d.severity === 'error');
       for (const c of r.ex.criteria) {
         if (compiled.has(c.id)) continue;
         const lastSeg = c.segments[c.segments.length - 1]!;
-        const inside = r.out.diagnostics.some((d) => d.severity === 'error' && d.start >= c.offset && d.start <= lastSeg.offset + lastSeg.length);
-        expect(inside, `${r.file} ${c.id}`).toBe(true);
+        if (!errors.some((d) => d.start >= c.offset && d.start <= lastSeg.offset + lastSeg.length)) silent.push(`${r.file} ${c.id}`);
       }
     }
+    expect(silent).toEqual([]);
   });
 
   it('matches the golden summary', async () => {

@@ -8,12 +8,12 @@ import { g1Lexicon } from './g1Lexicon.js';
 const lex = g1Lexicon();
 const LINE = 'IF the pelvis is pushed with up to 300 N for 0.1 s from behind at any point in its stride, THEN THE robot SHALL keep its pelvis above 50 cm within 6 s';
 
-/** pelvis_z sampled at 100 Hz from t = 2 s (the trigger) for `seconds`, from a height profile. */
+/** pelvis_z sampled at 50 Hz from t = 2 s (the trigger) for `seconds`, from a height profile (at most 1000 samples). */
 function trace(seconds: number, z: (t: number) => number): Trace {
-  const n = Math.round(seconds * 100) + 1;
+  const n = Math.round(seconds * 50) + 1;
   const t = new Float64Array(n);
   const pz = new Float64Array(n);
-  for (let i = 0; i < n; i++) { t[i] = 2 + i / 100; pz[i] = z(t[i]!); }
+  for (let i = 0; i < n; i++) { t[i] = 2 + i / 50; pz[i] = z(t[i]!); }
   return { t, signals: { pelvis_z: pz }, events: [{ name: 'trigger', t: 2 }] };
 }
 
@@ -30,13 +30,13 @@ describe('defect 4: within T means reach by T, then hold to the end', () => {
   it('passes a robot that falls, gets up within 6 s and stays up', () => {
     const r = q.monitor(trace(12.1, (t) => (t >= 2.5 && t < 5 ? 0.1 : 0.78)));
     expect(r.robustness).toBeCloseTo(0.28, 12);
-    expect(r.worstAt).toBeCloseTo(4.99, 9); // recovered after its last violation at 4.99 s
+    expect(r.worstAt).toBeCloseTo(4.98, 9); // recovered after its last violation at 4.98 s
   });
 
   it('fails a robot that gets up too late', () => {
     const r = q.monitor(trace(12.1, (t) => (t >= 2.5 && t < 9 ? 0.1 : 0.78)));
     expect(r.robustness).toBeCloseTo(-0.4, 12);
-    expect(r.worstAt).toBeCloseTo(8.99, 9);
+    expect(r.worstAt).toBeCloseTo(8.98, 9);
   });
 
   it('fails a robot that recovers and falls again after the deadline', () => {

@@ -11,8 +11,37 @@ The module is a small compiler front end plus a monitor generator:
 3. **Parser** builds an AST for the five EARS patterns, with an optional comma before THE.
 4. **Range parser** reads `up to`, `A to B`, `from any direction`, `from behind` and `at any point in its stride`.
 5. **Lexicon matcher** matches clauses to `PerturbationTemplate` and `PredicateTemplate` phrases token for token. On failure it suggests the closest template by token edit distance.
-6. **Monitor builder** produces `monitor(trace)` with always, eventually and state semantics anchored at the `trigger` event.
+6. **Monitor builder** produces `monitor(trace)` with always (`G`), within (`F` then `G`) and state semantics anchored at the `trigger` event. See "Corrections (golem-ears-hardening)" below.
 7. **Compiler** assembles the `CompiledRequirement`. The **Formatter** prints an AST back to canonical text. The **Extractor** reads criteria from `requirements.md`.
+
+### Corrections (golem-ears-hardening)
+
+An independent audit (`docs/reviews/ears-audit.md`) showed that parts of this design were wrong. The spec `.kiro/specs/golem-ears-hardening/` fixes them; the text below and the requirements now say:
+
+- **Dimensions come from the line.** A template declares `slots` (slot name → dimension name and severity). `dimensions.ts` builds each `Dimension` from the parsed range and gives every slot a `PerturbationCall` param keyed by slot name. The template's `dims()` is deprecated: it is called only without `slots`, gets the parsed SI ranges as a second argument, and its Dimensions are tied back to slots. The matcher no longer calls it.
+- **Kiro markup.** `compileRequirement` tokenizes `kiroText(line)`: the line with `*`, `` ` ``, word-boundary `_` runs and one trailing `.` replaced by spaces of the same length.
+- **Parser.** A robot name is one to six words between THE and SHALL. `WHEN x THEN THE robot SHALL` (and WHILE, WHERE) drop the THEN.
+- **Matcher.** A failure inside a slot of the closest template names the slot and its forms and suggests a rewrite. `{phase}` accepts `at 62%` as a fixed phase. Messages quote source text as written.
+- **WHILE** matches predicates and perturbations; a perturbation state is applied for the whole episode and its response is monitored as ubiquitous.
+- **WHERE** features must be in `Lexicon.features`.
+- **Windows and horizons** (`onset` = the trigger template's `maxOnset`, `dur` = trigger duration):
+
+| Pattern | Wrapper | Monitor | Horizon |
+|---|---|---|---|
+| event/unwanted | none | `G[t₀, t_end]` | episode |
+| event/unwanted | for d | `G[t₀, t₀+onset+d]` | onset+dur+d |
+| event/unwanted | within T | `F[t₀, t₀+onset+T] G[·, t_end]` | onset+dur+2T |
+| ubiquitous/optional/perturbation state | none | `G[t_start, t_end]` | episode |
+| same | for d | `G[t_start, t_start+onset+d]` | onset+d |
+| same | within T | `F[t_start, t_start+onset+T] G[·, t_end]` | max(episode, onset+2T) |
+| predicate state | none | `G[t_start, t_end](ψ → φ)` | episode |
+| predicate state | for d | `G[t_start, t_end](ψ → G[t, t+d] φ)` | episode |
+| predicate state | within T | rejected | — |
+
+- `worstAt` for within is the last sample with a margin ≤ 0, else the closest approach in the hold window.
+- `CompiledRequirement.formula` prints the monitor column of the table.
+- The monitor rejects a signal whose length differs from `t`, and gives margin functions per-call signal records and frozen slot records.
+- `lintLexicon` checks a lexicon before use; `encodeRobustness` keeps `NaN` and `±Infinity` distinct in JSON.
 
 ### Design decisions
 
@@ -39,7 +68,7 @@ The module is a small compiler front end plus a monitor generator:
 ### Research summary
 
 - EARS has five patterns (ubiquitous, event-driven, state-driven, unwanted behaviour, optional feature). Kiro writes `WHEN ... THEN the system SHALL ...`, and the GOLEM dialect accepts the `THE <robot> SHALL` form with an optional comma. Source: [EARS overview, Alistair Mavin et al.](https://alistairmavin.com/ears/).
-- Robustness semantics for signal temporal logic: the robustness of `always φ` over a window is the minimum of the robustness of `φ` over the window. For `eventually φ` it is the maximum. Positive means satisfied and negative means violated, with the magnitude in the unit of the predicate. Source: [Donzé and Maler, "Robust satisfaction of temporal logic over real-valued signals"](https://link.springer.com/chapter/10.1007/978-3-642-15297-9_9). Content was rephrased for compliance with licensing restrictions.
+- Robustness semantics for signal temporal logic: the robustness of `always φ` over a window is the minimum of the robustness of `φ` over the window, and that of `eventually φ` is the maximum. GOLEM's `within T` is the nested formula `F[t₀, t₀+T] G[·, t_end] φ`, whose robustness reduces to the minimum of `φ` from the last sample at or before the deadline to the end of the trace. Positive means satisfied and negative means violated, with the magnitude in the unit of the predicate. Source: [Donzé and Maler, "Robust satisfaction of temporal logic over real-valued signals"](https://link.springer.com/chapter/10.1007/978-3-642-15297-9_9). Content was rephrased for compliance with licensing restrictions.
 - Levenshtein distance over token sequences is a metric (identity, symmetry, triangle inequality) when substitution cost is itself a metric. The cost here is 0 for equal tokens and 1 otherwise, so the metric laws hold. The wildcard rule in Requirement 9.3 keeps this true because wildcard equality is an equivalence on `Kind`.
 
 ## Architecture
@@ -321,7 +350,7 @@ Monitor algorithm (per call):
 3. Anchor `t0`: for `event` and `unwanted`, the `t` of the first event named `trigger`. If none, return `{ NaN, 0, 'trace' }`. For other patterns, `t0 = t[0]`.
 4. Window `[a, b]`: `a = t0`. `b = t0 + duration` when the wrapper has a duration, else `t[n-1]`. Find the first index `i0` with `t[i] >= a` by binary search, and iterate while `t[i] <= b` and `i < n`. This reads only the samples inside the window and never interpolates.
 5. If no sample is inside the window, return `{ NaN, 0, 'trace' }`.
-6. For each index, fill a preallocated scratch record `s` with `signals[name][i]` for each name in `predicate.signals`, call `predicate.margin(s, slots)`, and keep the running min (always) or max (eventually). Strict comparison keeps the earliest time on ties. If a margin is `NaN`, return `{ NaN, t[i], predicate.unit }` immediately for the first such sample.
+6. For each index, fill a signal record `s` (one per predicate, created once per monitor call) with `signals[name][i]` for each name in `predicate.signals`, call `predicate.margin(s, slots)` with a frozen copy of the slot values, and keep the running min (always), or, for within, restart the minimum at every sample up to the deadline and keep it afterwards, tracking the last sample with a margin ≤ 0 for `worstAt`. Strict comparison keeps the earliest time on ties. If a margin is `NaN`, return `{ NaN, t[i], predicate.unit }` immediately for the first such sample. A predicate state with `for d` fills two reusable margin buffers and takes the sliding minimum of the response over `[t_i, t_i + d]` with a monotone deque.
 7. For `state`, each sample contributes `max(-stateMargin, responseMargin)` and the monitor takes the minimum over `[t[0], t[n-1]]`. `stateMargin` is evaluated with the same scratch record, using the union of both templates' signal names.
 
 The scratch record and the signal-array list are created once in `buildMonitor`, not per call and not per sample. The monitor never writes to `Trace`.
@@ -348,7 +377,7 @@ Assembly:
 - `source`: the input line unchanged.
 - `space.dims`: for `event` and `unwanted`, the Dimensions from the trigger template's `dims` in source order. For `ubiquitous`, `state` and `optional`, the dims declared by the matched response or state template (`PredicateTemplate` has no `dims` today, so this is an empty list until a template adds an optional `dims`, which is an additive field). Duplicate names produce an error at the second occurrence.
 - `perturbations`: one `PerturbationCall` per matched perturbation template. A searched value (`min < max`) is the Dimension name (string). A fixed value is the SI number.
-- `horizon`: for `event` and `unwanted` with `for` or `within`, wrapper duration plus trigger duration, or the wrapper duration alone when the trigger has none. For `ubiquitous` and `state`, `options.episodeSeconds` if given, else the lexicon default below.
+- `horizon`: see the table in "Corrections (golem-ears-hardening)": `onset + dur + d` for an event `for d`, `onset + dur + 2T` for an event `within T`, `onset + d` for a ubiquitous, optional or perturbation-state `for d`, `max(episode, onset + 2T)` for their `within T`, and the episode otherwise.
 
 The lexicon has no field for episode length in `interfaces.md`. Requirement 6.9 says the Lexicon defines it. The design adds an optional `episodeSeconds?: number` to `Lexicon` (an additive field), with a documented default of 10 s when absent. `CompileOptions.episodeSeconds` overrides it.
 
@@ -545,7 +574,7 @@ For any trace, anchor and wrapper (always or eventually, with or without a durat
 
 ### Property 22: Robustness soundness
 
-For any trace with non-NaN margins and any compiled requirement, `robustness > 0` if and only if the margin is greater than 0 at every sample in the window (always) or at one or more samples (eventually). `robustness < 0` if and only if direct evaluation shows a violation, and `robustness === 0` only when the extreme margin equals 0.
+For any trace with non-NaN margins and any compiled requirement, `robustness > 0` if and only if the margin is greater than 0 at every sample in the window (always), or, for within, there is a sample at or before the deadline from which every margin to the end is greater than 0 (checked by brute force over the two quantifiers). `robustness < 0` if and only if direct evaluation shows a violation, and `robustness === 0` only when the extreme margin equals 0.
 
 **Validates: Requirements 7.11, 7.12**
 
@@ -569,7 +598,7 @@ For any trace, including one with no `trigger` event, the monitor of a `WHERE` r
 
 ### Property 26: Horizon follows the wrapper and trigger durations
 
-For any generated wrapper duration `w` and fixed trigger duration `d`, the horizon of an `event` or `unwanted` requirement with `for` or `within` equals `w + d`, or `w` when the trigger has no duration.
+For any generated wrapper duration `w` and fixed trigger duration `d`, the horizon of an `event` or `unwanted` requirement equals `w + d` with `for` and `2w + d` with `within` (`d` is 0 when the trigger has no duration); a ubiquitous requirement gets `w` with `for` and `max(episode, 2w)` with `within`.
 
 **Validates: Requirements 6.9**
 

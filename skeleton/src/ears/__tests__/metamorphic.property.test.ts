@@ -104,15 +104,15 @@ function expectSame(a: CompiledRequirement, b: CompiledRequirement, traces: Trac
   }
 }
 
-/** Traces from 2 s at 100 Hz with a trigger at 2 s; heights drawn from a small pool. */
+/** 12 s traces from 2 s at 50 Hz (601 samples) with a trigger at 2 s; heights from a small pool. */
 const arbTraces: fc.Arbitrary<Trace[]> = fc.array(
   fc.array(fc.constantFrom(0.1, 0.3, 0.5, 0.78), { minLength: 1, maxLength: 40 }).map((zs): Trace => {
-    const n = 1201;
+    const n = 601;
     const t = new Float64Array(n);
     const z = new Float64Array(n);
     const tilt = new Float64Array(n);
     for (let i = 0; i < n; i++) {
-      t[i] = 2 + i / 100;
+      t[i] = 2 + i / 50;
       z[i] = zs[Math.floor((i * zs.length) / n)]!;
       tilt[i] = z[i]! < 0.5 ? 70 : 5;
     }

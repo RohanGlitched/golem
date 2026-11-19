@@ -1232,856 +1232,898 @@
     "first": "UNKNOWN_ROBOT 77:9 Unknown robot 'Tokenizer'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
-    "id": "2.1",
-    "line": 85,
+    "id": "1.12",
+    "line": 78,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 85:26 Unexpected character '(' (U+0028)"
+    "first": "PATTERN_MISMATCH 78:136 Unexpected character ':' (U+003A)"
+   },
+   {
+    "id": "2.1",
+    "line": 86,
+    "compiled": false,
+    "first": "PATTERN_MISMATCH 86:26 Unexpected character '(' (U+0028)"
    },
    {
     "id": "2.2",
-    "line": 86,
-    "compiled": false,
-    "first": "UNKNOWN_ROBOT 86:8 Unknown robot 'Unit_Table'; allowed names: golem, G1, robot, Unitree G1"
-   },
-   {
-    "id": "2.3",
     "line": 87,
     "compiled": false,
     "first": "UNKNOWN_ROBOT 87:8 Unknown robot 'Unit_Table'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
-    "id": "2.4",
+    "id": "2.3",
     "line": 88,
     "compiled": false,
     "first": "UNKNOWN_ROBOT 88:8 Unknown robot 'Unit_Table'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
-    "id": "2.5",
+    "id": "2.4",
     "line": 89,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 89:198 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
+    "first": "UNKNOWN_ROBOT 89:8 Unknown robot 'Unit_Table'; allowed names: golem, G1, robot, Unitree G1"
+   },
+   {
+    "id": "2.5",
+    "line": 90,
+    "compiled": false,
+    "first": "PATTERN_MISMATCH 90:198 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
    },
    {
     "id": "2.6",
-    "line": 90,
-    "compiled": false,
-    "first": "PATTERN_MISMATCH 90:30 Unexpected character '{' (U+007B)"
-   },
-   {
-    "id": "2.7",
     "line": 91,
     "compiled": false,
     "first": "PATTERN_MISMATCH 91:30 Unexpected character '{' (U+007B)"
    },
    {
-    "id": "2.8",
+    "id": "2.7",
     "line": 92,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 92:29 Unexpected character '[' (U+005B)"
+    "first": "PATTERN_MISMATCH 92:30 Unexpected character '{' (U+007B)"
+   },
+   {
+    "id": "2.8",
+    "line": 93,
+    "compiled": false,
+    "first": "PATTERN_MISMATCH 93:29 Unexpected character '[' (U+005B)"
    },
    {
     "id": "2.9",
-    "line": 93,
+    "line": 94,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 93:169 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
+    "first": "PATTERN_MISMATCH 94:169 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
    },
    {
     "id": "2.10",
-    "line": 94,
+    "line": 95,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 94:217 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
+    "first": "PATTERN_MISMATCH 95:217 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
    },
    {
     "id": "3.1",
-    "line": 104,
+    "line": 105,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 104:34 Unexpected character '<' (U+003C)"
+    "first": "PATTERN_MISMATCH 105:34 Unexpected character '<' (U+003C)"
    },
    {
     "id": "3.2",
-    "line": 105,
+    "line": 106,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 105:35 Unexpected character '<' (U+003C)"
+    "first": "PATTERN_MISMATCH 106:35 Unexpected character '<' (U+003C)"
    },
    {
     "id": "3.3",
-    "line": 106,
+    "line": 107,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 106:36 Unexpected character '<' (U+003C)"
+    "first": "PATTERN_MISMATCH 107:36 Unexpected character '<' (U+003C)"
    },
    {
     "id": "3.4",
-    "line": 107,
+    "line": 108,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 107:33 Unexpected character '<' (U+003C)"
+    "first": "PATTERN_MISMATCH 108:33 Unexpected character '<' (U+003C)"
    },
    {
     "id": "3.5",
-    "line": 108,
+    "line": 109,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 108:36 Unexpected character '<' (U+003C)"
+    "first": "PATTERN_MISMATCH 109:36 Unexpected character '<' (U+003C)"
    },
    {
     "id": "3.6",
-    "line": 109,
+    "line": 110,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 109:149 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
+    "first": "PATTERN_MISMATCH 110:149 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
    },
    {
     "id": "3.7",
-    "line": 110,
+    "line": 111,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 110:125 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
+    "first": "PATTERN_MISMATCH 111:125 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
    },
    {
     "id": "3.8",
-    "line": 111,
+    "line": 112,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 111:59 Unexpected character '<' (U+003C)"
+    "first": "PATTERN_MISMATCH 112:59 Unexpected character '<' (U+003C)"
    },
    {
     "id": "3.9",
-    "line": 112,
+    "line": 113,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 112:94 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
+    "first": "PATTERN_MISMATCH 113:94 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
    },
    {
     "id": "3.10",
-    "line": 113,
+    "line": 114,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 113:241 Unexpected character '.' (U+002E)"
+    "first": "PATTERN_MISMATCH 114:241 Unexpected character '.' (U+002E)"
    },
    {
     "id": "3.11",
-    "line": 114,
+    "line": 115,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 114:144 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
+    "first": "PATTERN_MISMATCH 115:104 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
    },
    {
     "id": "3.12",
-    "line": 115,
+    "line": 116,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 115:92 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
+    "first": "PATTERN_MISMATCH 116:92 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
    },
    {
     "id": "3.13",
-    "line": 116,
+    "line": 117,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 116:69 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
+    "first": "PATTERN_MISMATCH 117:69 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
    },
    {
     "id": "3.14",
-    "line": 117,
+    "line": 118,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 117:9 Unknown robot 'Parser'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 118:9 Unknown robot 'Parser'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "3.15",
-    "line": 118,
+    "line": 119,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 118:92 Unexpected character '(' (U+0028)"
+    "first": "PATTERN_MISMATCH 119:92 Unexpected character '(' (U+0028)"
    },
    {
     "id": "3.16",
-    "line": 119,
+    "line": 120,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 119:70 Unexpected character ':' (U+003A)"
+    "first": "PATTERN_MISMATCH 120:97 Unexpected character '<' (U+003C)"
+   },
+   {
+    "id": "3.16",
+    "line": 121,
+    "compiled": false,
+    "first": "NON_EARS_LINE 121:5 Requirement ID 3.16 is used more than once; both criteria are kept."
    },
    {
     "id": "4.1",
-    "line": 127,
+    "line": 129,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 127:35 Unexpected character '<' (U+003C)"
+    "first": "PATTERN_MISMATCH 129:35 Unexpected character '<' (U+003C)"
    },
    {
     "id": "4.2",
-    "line": 128,
+    "line": 130,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 128:29 Unexpected character '<' (U+003C)"
+    "first": "PATTERN_MISMATCH 130:29 Unexpected character '<' (U+003C)"
    },
    {
     "id": "4.3",
-    "line": 129,
+    "line": 131,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 129:54 Unknown robot 'Parser'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 131:54 Unknown robot 'Parser'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "4.4",
-    "line": 130,
+    "line": 132,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 130:47 Unknown robot 'Parser'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 132:47 Unknown robot 'Parser'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "4.5",
-    "line": 131,
+    "line": 133,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 131:62 Unknown robot 'Parser'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 133:62 Unknown robot 'Parser'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "4.6",
-    "line": 132,
+    "line": 134,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 132:213 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
+    "first": "PATTERN_MISMATCH 134:213 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
    },
    {
     "id": "4.7",
-    "line": 133,
+    "line": 135,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 133:81 Unknown robot 'Parser'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 135:81 Unknown robot 'Parser'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "4.8",
-    "line": 134,
+    "line": 136,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 134:75 Unknown robot 'Parser'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 136:75 Unknown robot 'Parser'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "4.9",
-    "line": 135,
+    "line": 137,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 135:133 Unknown robot 'Parser'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 137:133 Unknown robot 'Parser'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "4.10",
-    "line": 136,
+    "line": 138,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 136:212 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
+    "first": "PATTERN_MISMATCH 138:212 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
    },
    {
     "id": "4.11",
-    "line": 137,
+    "line": 139,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 137:9 Unknown robot 'Compiler'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 139:9 Unknown robot 'Compiler'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "4.12",
-    "line": 138,
+    "line": 140,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 138:121 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
+    "first": "PATTERN_MISMATCH 140:80 Unexpected character '<' (U+003C)"
+   },
+   {
+    "id": "4.13",
+    "line": 141,
+    "compiled": false,
+    "first": "PATTERN_MISMATCH 141:13 Unexpected character '{' (U+007B)"
    },
    {
     "id": "5.1",
-    "line": 146,
+    "line": 149,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 146:166 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
+    "first": "PATTERN_MISMATCH 149:166 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
    },
    {
     "id": "5.2",
-    "line": 147,
+    "line": 150,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 147:218 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
+    "first": "PATTERN_MISMATCH 150:218 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
    },
    {
     "id": "5.3",
-    "line": 148,
+    "line": 151,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 148:82 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
+    "first": "PATTERN_MISMATCH 151:82 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
    },
    {
     "id": "5.4",
-    "line": 149,
+    "line": 152,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 149:145 Unexpected character '.' (U+002E)"
+    "first": "PATTERN_MISMATCH 152:145 Unexpected character '.' (U+002E)"
    },
    {
     "id": "5.5",
-    "line": 150,
+    "line": 153,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 150:176 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
+    "first": "PATTERN_MISMATCH 153:176 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
    },
    {
     "id": "5.6",
-    "line": 151,
+    "line": 154,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 151:62 Unexpected character ':' (U+003A)"
+    "first": "PATTERN_MISMATCH 154:62 Unexpected character ':' (U+003A)"
    },
    {
     "id": "5.7",
-    "line": 152,
+    "line": 155,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 152:29 Unexpected character '{' (U+007B)"
+    "first": "PATTERN_MISMATCH 155:29 Unexpected character '{' (U+007B)"
    },
    {
     "id": "5.8",
-    "line": 153,
+    "line": 156,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 153:8 Unknown robot 'Compiler'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 156:8 Unknown robot 'Compiler'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "5.9",
-    "line": 154,
+    "line": 157,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 154:58 Unexpected character '(' (U+0028)"
+    "first": "PATTERN_MISMATCH 157:58 Unexpected character '(' (U+0028)"
    },
    {
     "id": "6.1",
-    "line": 164,
+    "line": 167,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 164:35 Unexpected character '<' (U+003C)"
+    "first": "PATTERN_MISMATCH 167:35 Unexpected character '<' (U+003C)"
    },
    {
     "id": "6.2",
-    "line": 165,
+    "line": 168,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 165:38 Unexpected character '<' (U+003C)"
+    "first": "PATTERN_MISMATCH 168:38 Unexpected character '<' (U+003C)"
    },
    {
     "id": "6.3",
-    "line": 166,
+    "line": 169,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 166:90 Unknown robot 'Monitor_Builder'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 169:90 Unknown robot 'Monitor_Builder'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "6.4",
-    "line": 167,
+    "line": 170,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 167:81 Unknown robot 'Monitor_Builder'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 170:81 Unknown robot 'Monitor_Builder'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "6.5",
-    "line": 168,
+    "line": 171,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 168:96 Unexpected character '[' (U+005B)"
+    "first": "PATTERN_MISMATCH 171:125 Unexpected character '[' (U+005B)"
    },
    {
     "id": "6.6",
-    "line": 169,
+    "line": 172,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 169:56 Unexpected character '.' (U+002E)"
+    "first": "PATTERN_MISMATCH 172:56 Unexpected character '.' (U+002E)"
    },
    {
     "id": "6.7",
-    "line": 170,
+    "line": 173,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 170:54 Unexpected character '.' (U+002E)"
+    "first": "PATTERN_MISMATCH 173:54 Unexpected character '.' (U+002E)"
    },
    {
     "id": "6.8",
-    "line": 171,
+    "line": 174,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 171:107 Unknown robot 'Monitor_Builder'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "PATTERN_MISMATCH 174:172 Unexpected character '+' (U+002B)"
    },
    {
     "id": "6.9",
-    "line": 172,
+    "line": 175,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 172:8 Unknown robot 'Compiler'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 175:8 Unknown robot 'Compiler'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "6.10",
-    "line": 173,
+    "line": 176,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 173:22 Unexpected character '[' (U+005B)"
+    "first": "PATTERN_MISMATCH 176:22 Unexpected character '[' (U+005B)"
    },
    {
     "id": "6.11",
-    "line": 174,
+    "line": 177,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 174:20 Unexpected character '[' (U+005B)"
+    "first": "PATTERN_MISMATCH 177:20 Unexpected character '[' (U+005B)"
    },
    {
     "id": "6.12",
-    "line": 175,
+    "line": 178,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 175:65 Unexpected character '[' (U+005B)"
+    "first": "PATTERN_MISMATCH 178:65 Unexpected character '[' (U+005B)"
    },
    {
     "id": "7.1",
-    "line": 184,
+    "line": 187,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 184:196 Unexpected character '.' (U+002E)"
+    "first": "PATTERN_MISMATCH 187:196 Unexpected character '.' (U+002E)"
    },
    {
     "id": "7.2",
-    "line": 185,
+    "line": 188,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 185:114 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
+    "first": "PATTERN_MISMATCH 188:114 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
    },
    {
     "id": "7.3",
-    "line": 186,
+    "line": 189,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 186:118 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
+    "first": "PATTERN_MISMATCH 189:107 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
    },
    {
     "id": "7.4",
-    "line": 187,
+    "line": 190,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 187:61 Unknown robot 'monitor'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 190:85 Unknown robot 'monitor'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "7.5",
-    "line": 188,
+    "line": 191,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 188:39 Unexpected character '(' (U+0028)"
+    "first": "PATTERN_MISMATCH 191:39 Unexpected character '(' (U+0028)"
    },
    {
     "id": "7.6",
-    "line": 189,
+    "line": 192,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 189:8 Unknown robot 'monitor'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 192:8 Unknown robot 'monitor'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "7.7",
-    "line": 190,
+    "line": 193,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 190:8 Unknown robot 'monitor'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 193:8 Unknown robot 'monitor'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "7.8",
-    "line": 191,
+    "line": 194,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 191:58 Unexpected character '.' (U+002E)"
+    "first": "PATTERN_MISMATCH 194:58 Unexpected character '.' (U+002E)"
    },
    {
     "id": "7.9",
-    "line": 192,
+    "line": 195,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 192:69 Unexpected character '.' (U+002E)"
+    "first": "PATTERN_MISMATCH 195:69 Unexpected character '.' (U+002E)"
    },
    {
     "id": "7.10",
-    "line": 193,
+    "line": 196,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 193:83 Unknown robot 'monitor'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 196:83 Unknown robot 'monitor'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "7.15",
-    "line": 198,
+    "line": 201,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 198:65 Unexpected character ':' (U+003A)"
+    "first": "PATTERN_MISMATCH 201:65 Unexpected character ':' (U+003A)"
    },
    {
     "id": "7.16",
-    "line": 199,
+    "line": 202,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 199:93 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
+    "first": "PATTERN_MISMATCH 202:93 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
    },
    {
     "id": "8.1",
-    "line": 207,
+    "line": 210,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 207:8 Unknown robot 'Diagnostic'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 210:8 Unknown robot 'Diagnostic'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "8.2",
-    "line": 208,
+    "line": 211,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 208:59 Unknown robot 'EARS_Compiler'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 211:59 Unknown robot 'EARS_Compiler'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "8.3",
-    "line": 209,
+    "line": 212,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 209:50 Unknown robot 'EARS_Compiler'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 212:50 Unknown robot 'EARS_Compiler'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "8.4",
-    "line": 210,
+    "line": 213,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 210:93 Unknown robot 'EARS_Compiler'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 213:93 Unknown robot 'EARS_Compiler'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "8.5",
-    "line": 211,
+    "line": 214,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 211:153 Unknown robot 'EARS_Compiler'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 214:153 Unknown robot 'EARS_Compiler'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "8.6",
-    "line": 212,
+    "line": 215,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 212:64 Unknown robot 'EARS_Compiler'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 215:64 Unknown robot 'EARS_Compiler'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "8.7",
-    "line": 213,
+    "line": 216,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 213:148 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
+    "first": "PATTERN_MISMATCH 216:148 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
    },
    {
     "id": "8.8",
-    "line": 214,
+    "line": 217,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 214:220 Unexpected character '.' (U+002E)"
+    "first": "PATTERN_MISMATCH 217:220 Unexpected character '.' (U+002E)"
    },
    {
     "id": "8.9",
-    "line": 215,
+    "line": 218,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 215:80 Unexpected character '\\' (U+005C)"
+    "first": "PATTERN_MISMATCH 218:80 Unexpected character '\\' (U+005C)"
    },
    {
     "id": "8.10",
-    "line": 216,
+    "line": 219,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 216:73 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
+    "first": "PATTERN_MISMATCH 219:73 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
    },
    {
     "id": "8.11",
-    "line": 217,
+    "line": 220,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 217:132 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
+    "first": "PATTERN_MISMATCH 220:132 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
    },
    {
     "id": "8.12",
-    "line": 218,
+    "line": 221,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 218:70 Unknown robot 'EARS_Compiler'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 221:70 Unknown robot 'EARS_Compiler'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "8.13",
-    "line": 219,
+    "line": 222,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 219:90 Unknown robot 'EARS_Compiler'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 222:90 Unknown robot 'EARS_Compiler'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "8.14",
-    "line": 220,
+    "line": 223,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 220:91 Unknown robot 'EARS_Compiler'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 223:91 Unknown robot 'EARS_Compiler'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "9.1",
-    "line": 228,
+    "line": 231,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 228:8 Unknown robot 'Edit_Distance function'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 231:8 Unknown robot 'Edit_Distance function'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "9.2",
-    "line": 229,
+    "line": 232,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 229:145 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
+    "first": "PATTERN_MISMATCH 232:145 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
    },
    {
     "id": "9.3",
-    "line": 230,
+    "line": 233,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 230:58 Unknown robot 'Lexicon_Matcher'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 233:58 Unknown robot 'Lexicon_Matcher'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "9.4",
-    "line": 231,
+    "line": 234,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 231:58 Unknown robot 'Lexicon_Matcher'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 234:58 Unknown robot 'Lexicon_Matcher'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "9.5",
-    "line": 232,
+    "line": 235,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 232:154 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
+    "first": "PATTERN_MISMATCH 235:154 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
    },
    {
     "id": "9.6",
-    "line": 233,
+    "line": 236,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 233:62 Unknown robot 'Lexicon_Matcher'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 236:62 Unknown robot 'Lexicon_Matcher'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "9.7",
-    "line": 234,
+    "line": 237,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 234:187 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
+    "first": "PATTERN_MISMATCH 237:187 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
    },
    {
     "id": "9.8",
-    "line": 235,
+    "line": 238,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 235:61 Unexpected character '(' (U+0028)"
+    "first": "PATTERN_MISMATCH 238:61 Unexpected character '(' (U+0028)"
    },
    {
     "id": "9.9",
-    "line": 236,
+    "line": 239,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 236:101 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
+    "first": "PATTERN_MISMATCH 239:101 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
    },
    {
     "id": "10.1",
-    "line": 247,
+    "line": 250,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 247:67 Unknown robot 'Formatter'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 250:67 Unknown robot 'Formatter'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "10.2",
-    "line": 248,
+    "line": 251,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 248:81 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
+    "first": "PATTERN_MISMATCH 251:81 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
    },
    {
     "id": "10.3",
-    "line": 249,
+    "line": 252,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 249:67 Unexpected character '<' (U+003C)"
+    "first": "PATTERN_MISMATCH 252:67 Unexpected character '<' (U+003C)"
    },
    {
     "id": "10.4",
-    "line": 250,
+    "line": 253,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 250:208 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
+    "first": "PATTERN_MISMATCH 253:208 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
    },
    {
     "id": "10.5",
-    "line": 251,
+    "line": 254,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 251:8 Unknown robot 'Formatter'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 254:8 Unknown robot 'Formatter'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "10.6",
-    "line": 252,
+    "line": 255,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 252:8 Unknown robot 'Formatter'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 255:8 Unknown robot 'Formatter'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "10.7",
-    "line": 253,
+    "line": 256,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 253:53 Unexpected character ':' (U+003A)"
+    "first": "PATTERN_MISMATCH 256:53 Unexpected character ':' (U+003A)"
    },
    {
     "id": "10.11",
-    "line": 257,
+    "line": 260,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 257:164 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
+    "first": "PATTERN_MISMATCH 260:164 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
    },
    {
     "id": "11.1",
-    "line": 265,
+    "line": 268,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 265:63 Unknown robot 'Extractor'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 268:63 Unknown robot 'Extractor'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "11.2",
-    "line": 266,
+    "line": 269,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 266:80 Unexpected character '#' (U+0023)"
+    "first": "PATTERN_MISMATCH 269:80 Unexpected character '#' (U+0023)"
    },
    {
     "id": "11.3",
-    "line": 267,
+    "line": 270,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 267:8 Unknown robot 'Extractor'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 270:8 Unknown robot 'Extractor'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "11.4",
-    "line": 268,
+    "line": 271,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 268:8 Unknown robot 'Extractor'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 271:8 Unknown robot 'Extractor'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "11.5",
-    "line": 269,
+    "line": 272,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 269:30 Unexpected character '#' (U+0023)"
+    "first": "PATTERN_MISMATCH 272:30 Unexpected character '#' (U+0023)"
    },
    {
     "id": "11.6",
-    "line": 270,
+    "line": 273,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 270:92 Unknown robot 'Extractor'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 273:92 Unknown robot 'Extractor'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "11.7",
-    "line": 271,
+    "line": 274,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 271:38 Unexpected character '#' (U+0023)"
+    "first": "PATTERN_MISMATCH 274:38 Unexpected character '#' (U+0023)"
    },
    {
     "id": "11.8",
-    "line": 272,
+    "line": 275,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 272:61 Unexpected character '<' (U+003C)"
+    "first": "PATTERN_MISMATCH 275:61 Unexpected character '<' (U+003C)"
    },
    {
     "id": "11.9",
-    "line": 273,
+    "line": 276,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 273:251 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
+    "first": "PATTERN_MISMATCH 276:251 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
    },
    {
     "id": "11.10",
-    "line": 274,
+    "line": 277,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 274:33 Unexpected character '\\' (U+005C)"
+    "first": "PATTERN_MISMATCH 277:33 Unexpected character '\\' (U+005C)"
    },
    {
     "id": "11.11",
-    "line": 275,
+    "line": 278,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 275:33 Unexpected character '#' (U+0023)"
+    "first": "PATTERN_MISMATCH 278:33 Unexpected character '#' (U+0023)"
    },
    {
     "id": "11.12",
-    "line": 276,
+    "line": 279,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 276:30 Unexpected character '#' (U+0023)"
+    "first": "PATTERN_MISMATCH 279:30 Unexpected character '#' (U+0023)"
    },
    {
     "id": "12.1",
-    "line": 285,
+    "line": 288,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 285:50 Unknown robot 'EARS_Compiler'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "PATTERN_MISMATCH 288:243 Unexpected character '.' (U+002E)"
    },
    {
     "id": "12.2",
-    "line": 286,
+    "line": 289,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 286:119 Unexpected character '.' (U+002E)"
+    "first": "PATTERN_MISMATCH 289:119 Unexpected character '.' (U+002E)"
    },
    {
     "id": "12.3",
-    "line": 287,
+    "line": 290,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 287:8 Unknown robot 'EARS_Compiler'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 290:8 Unknown robot 'EARS_Compiler'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "12.4",
-    "line": 288,
+    "line": 291,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 288:8 Unknown robot 'EARS_Compiler'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 291:8 Unknown robot 'EARS_Compiler'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "12.5",
-    "line": 289,
+    "line": 292,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 289:81 Unexpected character '.' (U+002E)"
+    "first": "PATTERN_MISMATCH 292:81 Unexpected character '.' (U+002E)"
    },
    {
     "id": "12.6",
-    "line": 290,
+    "line": 293,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 290:65 Unknown robot 'EARS_Compiler'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "PATTERN_MISMATCH 293:95 Unexpected character '.' (U+002E)"
    },
    {
     "id": "12.7",
-    "line": 291,
+    "line": 294,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 291:35 Unexpected character '.' (U+002E)"
+    "first": "PATTERN_MISMATCH 294:35 Unexpected character '.' (U+002E)"
    },
    {
     "id": "12.8",
-    "line": 292,
+    "line": 295,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 292:8 Unknown robot 'EARS_Compiler'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 295:8 Unknown robot 'EARS_Compiler'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "12.9",
-    "line": 293,
+    "line": 296,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 293:129 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
+    "first": "PATTERN_MISMATCH 296:129 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
    },
    {
     "id": "12.10",
-    "line": 294,
+    "line": 297,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 294:181 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
+    "first": "PATTERN_MISMATCH 297:181 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
    },
    {
     "id": "12.11",
-    "line": 295,
+    "line": 298,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 295:96 Unexpected character '.' (U+002E)"
+    "first": "PATTERN_MISMATCH 298:96 Unexpected character '.' (U+002E)"
    },
    {
     "id": "12.12",
-    "line": 296,
+    "line": 299,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 296:9 Unknown robot 'EARS_Compiler'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 299:9 Unknown robot 'EARS_Compiler'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "12.13",
-    "line": 297,
+    "line": 300,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 297:9 Unknown robot 'EARS_Compiler'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 300:9 Unknown robot 'EARS_Compiler'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "12.14",
-    "line": 298,
+    "line": 301,
     "compiled": false,
-    "first": "PATTERN_MISMATCH 298:99 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
+    "first": "PATTERN_MISMATCH 301:99 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
    },
    {
     "id": "13.1",
-    "line": 306,
-    "compiled": false,
-    "first": "UNKNOWN_ROBOT 306:8 Unknown robot 'test suite'; allowed names: golem, G1, robot, Unitree G1"
-   },
-   {
-    "id": "13.2",
-    "line": 307,
-    "compiled": false,
-    "first": "UNKNOWN_ROBOT 307:8 Unknown robot 'test suite'; allowed names: golem, G1, robot, Unitree G1"
-   },
-   {
-    "id": "13.3",
-    "line": 308,
-    "compiled": false,
-    "first": "UNKNOWN_ROBOT 308:8 Unknown robot 'test suite'; allowed names: golem, G1, robot, Unitree G1"
-   },
-   {
-    "id": "13.4",
     "line": 309,
     "compiled": false,
     "first": "UNKNOWN_ROBOT 309:8 Unknown robot 'test suite'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
-    "id": "13.5",
+    "id": "13.2",
     "line": 310,
     "compiled": false,
     "first": "UNKNOWN_ROBOT 310:8 Unknown robot 'test suite'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
-    "id": "13.6",
+    "id": "13.3",
     "line": 311,
     "compiled": false,
     "first": "UNKNOWN_ROBOT 311:8 Unknown robot 'test suite'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
-    "id": "13.7",
+    "id": "13.4",
     "line": 312,
     "compiled": false,
     "first": "UNKNOWN_ROBOT 312:8 Unknown robot 'test suite'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
-    "id": "13.8",
+    "id": "13.5",
     "line": 313,
     "compiled": false,
     "first": "UNKNOWN_ROBOT 313:8 Unknown robot 'test suite'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
-    "id": "13.9",
+    "id": "13.6",
     "line": 314,
     "compiled": false,
     "first": "UNKNOWN_ROBOT 314:8 Unknown robot 'test suite'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
-    "id": "13.10",
+    "id": "13.7",
     "line": 315,
     "compiled": false,
-    "first": "UNKNOWN_ROBOT 315:9 Unknown robot 'test suite'; allowed names: golem, G1, robot, Unitree G1"
+    "first": "UNKNOWN_ROBOT 315:8 Unknown robot 'test suite'; allowed names: golem, G1, robot, Unitree G1"
+   },
+   {
+    "id": "13.8",
+    "line": 316,
+    "compiled": false,
+    "first": "UNKNOWN_ROBOT 316:8 Unknown robot 'test suite'; allowed names: golem, G1, robot, Unitree G1"
+   },
+   {
+    "id": "13.9",
+    "line": 317,
+    "compiled": false,
+    "first": "UNKNOWN_ROBOT 317:8 Unknown robot 'test suite'; allowed names: golem, G1, robot, Unitree G1"
+   },
+   {
+    "id": "13.10",
+    "line": 318,
+    "compiled": false,
+    "first": "UNKNOWN_ROBOT 318:9 Unknown robot 'test suite'; allowed names: golem, G1, robot, Unitree G1"
    },
    {
     "id": "13.11",
-    "line": 316,
-    "compiled": false,
-    "first": "UNKNOWN_ROBOT 316:9 Unknown robot 'test suite'; allowed names: golem, G1, robot, Unitree G1"
-   },
-   {
-    "id": "13.12",
-    "line": 317,
-    "compiled": false,
-    "first": "PATTERN_MISMATCH 317:77 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
-   },
-   {
-    "id": "13.13",
-    "line": 318,
-    "compiled": false,
-    "first": "PATTERN_MISMATCH 318:86 Unexpected character '.' (U+002E)"
-   },
-   {
-    "id": "13.14",
     "line": 319,
     "compiled": false,
     "first": "UNKNOWN_ROBOT 319:9 Unknown robot 'test suite'; allowed names: golem, G1, robot, Unitree G1"
+   },
+   {
+    "id": "13.12",
+    "line": 320,
+    "compiled": false,
+    "first": "PATTERN_MISMATCH 320:77 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
+   },
+   {
+    "id": "13.13",
+    "line": 321,
+    "compiled": false,
+    "first": "PATTERN_MISMATCH 321:86 Unexpected character '.' (U+002E)"
+   },
+   {
+    "id": "13.14",
+    "line": 322,
+    "compiled": false,
+    "first": "UNKNOWN_ROBOT 322:9 Unknown robot 'test suite'; allowed names: golem, G1, robot, Unitree G1"
+   },
+   {
+    "id": "13.15",
+    "line": 323,
+    "compiled": false,
+    "first": "PATTERN_MISMATCH 323:101 Unexpected character '(' (U+0028)"
+   },
+   {
+    "id": "13.16",
+    "line": 324,
+    "compiled": false,
+    "first": "UNKNOWN_ROBOT 324:9 Unknown robot 'test suite'; allowed names: golem, G1, robot, Unitree G1"
+   },
+   {
+    "id": "13.17",
+    "line": 325,
+    "compiled": false,
+    "first": "PATTERN_MISMATCH 325:56 Unexpected character ':' (U+003A)"
+   },
+   {
+    "id": "13.18",
+    "line": 326,
+    "compiled": false,
+    "first": "PATTERN_MISMATCH 326:68 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
    }
   ]
  },
