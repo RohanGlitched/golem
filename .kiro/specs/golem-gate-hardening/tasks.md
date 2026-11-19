@@ -54,11 +54,11 @@ Rules for every task:
   - [x] 7.1 Property test: over random marks and statuses, the retry set is exactly the lines marked `Expected_Break` whose first verdict is `held`, and the verdicts of every other line are unchanged.
   - _Bugfix: 8.1 to 8.5_
 
-- [ ] 8. Markdown structure: fences, indentation, header aliases (defect 6)
+- [x] 8. Markdown structure: fences, indentation, header aliases (defect 6)
   - Fenced and indented code skipped; aliases `Criterion`, `Criteria`, `ID`, `#`; `Expect*` column; the two warnings.
   - Tests: probe 1 and probe 6 cases, nested fence lengths, `~~~`, an unclosed fence, a tab-indented table.
-  - [ ] 8.1 Property test (T.3.7): wrapping a valid table in a fence, or indenting each line 4 spaces, gives no rows and no error; the same table unwrapped gives the same rows as before.
-  - [ ] 8.2 Property test: for any header spelling from the alias set in any case, the rows are read; for any header with an `Expect*` cell and no id cell, one warning and no rows.
+  - [x] 8.1 Property test (T.3.7): wrapping a valid table in a fence, or indenting each line 4 spaces, gives no rows and no error; the same table unwrapped gives the same rows as before.
+  - [x] 8.2 Property test: for any header spelling from the alias set in any case, the rows are read; for any header with an `Expect*` cell and no id cell, one warning and no rows.
   - _Bugfix: 6.1 to 6.6_
 
 - [ ] 9. Conflicting duplicates fail closed (defect 7)

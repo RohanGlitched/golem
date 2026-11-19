@@ -61,7 +61,24 @@ const cells = (row: string): string[] => {
 
 const isSeparator = (row: string): boolean => /^\s*\|?[\s:|-]+\|?\s*$/.test(row) && row.includes('-');
 
-/** Reads every table whose header has a `Criterion` and an `Expectation` column. */
+/** Width of the leading white space, a tab counting 4. */
+const indentOf = (s: string): number => {
+  let n = 0;
+  for (const ch of s) {
+    if (ch === ' ') n += 1;
+    else if (ch === '\t') n += 4;
+    else break;
+  }
+  return n;
+};
+
+const ID_HEADER = /^(?:criterion|criteria|id|#)$/i;
+const EXP_HEADER = /^expect/i;
+/** A fence opens with 3 or more backticks (none after them on the line) or tildes, indented by at most 3 spaces. */
+const FENCE_OPEN = /^ {0,3}(`{3,})[^`]*$|^ {0,3}(~{3,})/;
+const FENCE_CLOSE = /^ {0,3}(`{3,}|~{3,})\s*$/;
+
+/** Reads every table whose header has an id column and an `Expectation` column, outside code. */
 export function parseExpectations(text: string, file?: string): ParsedExpectations {
   const byId = new Map<string, Expectation>();
   const rows: ExpectationRow[] = [];
@@ -73,16 +90,36 @@ export function parseExpectations(text: string, file?: string): ParsedExpectatio
   };
   let idCol = -1;
   let expCol = -1;
+  let fence: { ch: string; len: number } | undefined;
   for (let i = 0; i < lines.length; i++) {
     const s = lines[i] as string;
+    // Code is not data: a table in a fenced block is an example (defect 6).
+    if (fence !== undefined) {
+      const close = FENCE_CLOSE.exec(s)?.[1];
+      if (close !== undefined && close[0] === fence.ch && close.length >= fence.len) fence = undefined;
+      continue;
+    }
+    const open = FENCE_OPEN.exec(s);
+    if (open !== null) {
+      const run = (open[1] ?? open[2]) as string;
+      fence = { ch: run[0] as string, len: run.length };
+      idCol = -1; expCol = -1;
+      continue;
+    }
     if (!s.trim().startsWith('|')) { idCol = -1; expCol = -1; continue; }
     const c = cells(s);
     if (idCol < 0) {
-      const a = c.findIndex((x) => /^criterion$/i.test(x));
-      const b = c.findIndex((x) => /^expectation$/i.test(x));
-      if (a >= 0 && b >= 0) { idCol = a; expCol = b; tables++; }
+      const a = c.findIndex((x) => ID_HEADER.test(x));
+      const b = c.findIndex((x) => EXP_HEADER.test(x));
+      if (a >= 0 && b >= 0) {
+        if (indentOf(s) >= 4) issue('warning', i + 1, `the table at line ${i + 1} is indented 4 spaces, which Markdown shows as code; its rows are ignored`);
+        else { idCol = a; expCol = b; tables++; }
+      } else if (b >= 0 && isSeparator(lines[i + 1] ?? '')) {
+        issue('warning', i + 1, `the table at line ${i + 1} has an Expectation column but no Criterion column; its rows are ignored`);
+      }
       continue;
     }
+    if (indentOf(s) >= 4) { idCol = -1; expCol = -1; continue; }
     if (isSeparator(s)) continue;
     const id = c[idCol] ?? '';
     const value = c[expCol] ?? '';
