@@ -1,0 +1,28 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Typecheck gate",
+      "description": "Blocks a Kiro agent from stopping while the skeleton typecheck is red; the errors come back as the agent's next message.",
+      "trigger": "Stop",
+      "action": { "type": "command", "command": "node scripts/kiro-stop-typecheck.mjs" },
+      "timeout": 180
+    },
+    {
+      "name": "Unit tests for the saved engine file",
+      "description": "After a skeleton source file is saved, runs the Vitest files related to it.",
+      "trigger": "PostFileSave",
+      "matcher": "skeleton[\\/]src[\\/].*\.tsx?$",
+      "action": { "type": "command", "command": "npx vitest related --run --root skeleton --passWithNoTests" },
+      "timeout": 300
+    },
+    {
+      "name": "Compile robot requirements",
+      "description": "When a robot's requirements file is saved, golem check compiles every EARS line (GOLEM dogfooding itself).",
+      "trigger": "PostFileSave",
+      "matcher": "apps[\\/][a-z]+[\\/]\.kiro[\\/]specs[\\/].*requirements\.md$",
+      "action": { "type": "command", "command": "node skeleton/dist/cli/main.js check --app apps/stagger && node skeleton/dist/cli/main.js check --app apps/candy" },
+      "timeout": 60
+    }
+  ]
+}

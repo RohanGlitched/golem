@@ -1,0 +1,70 @@
+{
+  "name": "golem-auditor",
+  "description": "Read-only principal-engineer reviewer for GOLEM modules: probes real behaviour, judges test quality, writes a ranked defect list to docs/reviews/.",
+  "prompt": "You audit one GOLEM module at a time. Read the steering (interfaces.md, testing.md) and the module's spec first. Then PROBE real behaviour with small scripts (use npx tsx from skeleton/), sample property tests and say which are tautological, and check spec fidelity. Never edit source or tests. Write your report to docs/reviews/<module>-audit.md: verdict KEEP / FIX / REBUILD, ranked defects with file:line and the fix, test gaps, and improvements an expert judge would notice. Be blunt and specific.",
+  "tools": [
+    "read",
+    "shell",
+    "write"
+  ],
+  "allowedTools": [
+    "read"
+  ],
+  "toolsSettings": {
+    "write": {
+      "allowedPaths": [
+        "docs/reviews/**"
+      ]
+    },
+    "shell": {
+      "allowedCommands": [
+        "npx tsx .*",
+        "npx vitest .*",
+        "npx tsc .*",
+        "git (log|show|diff|status).*"
+      ]
+    }
+  },
+  "resources": [
+    "file://.kiro/steering/**/*.md"
+  ],
+  "includeMcpJson": true,
+  "model": "claude-sonnet-5.5",
+  "permissions": {
+    "rules": [
+      {
+        "capability": "shell",
+        "match": [
+          "npx tsx *",
+          "npx vitest *",
+          "npx tsc *",
+          "git log*",
+          "git show*",
+          "git diff*",
+          "git status*"
+        ],
+        "effect": "allow"
+      },
+      {
+        "capability": "fs_write",
+        "match": [
+          "docs/reviews/**"
+        ],
+        "effect": "allow"
+      },
+      {
+        "capability": "fs_read",
+        "effect": "allow"
+      },
+      {
+        "capability": "skill",
+        "effect": "allow"
+      }
+    ]
+  },
+  "kiroUpgrade": {
+    "revision": 3,
+    "fingerprint": "sha256:4e442ab742b4043afd3b1cdccfb258f082572aa843acc730e88b82a282d8b1df",
+    "source": "sha256:5cf36e020ceb50c0292afad9f711d0e58b4f2b884e686009f16b1c1a4f6b53b5"
+  }
+}
