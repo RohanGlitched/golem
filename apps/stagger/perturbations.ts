@@ -96,6 +96,19 @@ function phaseDim(v: Slots[string] | undefined): Dimension {
 
 // ---------------------------------------------------------------- model save / restore
 
+/**
+ * The runtime that last saved values of each model. A trial aborted before endTrial leaves its entry
+ * here, so the next initState (with a new ctx and runtime) can still undo the change.
+ */
+export const pendingRestore = new WeakMap<object, StaggerRuntime>();
+
+/** Undoes the model changes of any earlier trial on this model whose endTrial did not run. */
+export function restoreLeftovers(ctx: SimContext): void {
+  const prev = pendingRestore.get(ctx.model);
+  if (prev !== undefined) restoreModel(ctx, prev);
+  pendingRestore.delete(ctx.model);
+}
+
 /** Restores every model field this trial changed, then clears the saved flags. Safe to call twice. */
 export function restoreModel(ctx: SimContext, rt: StaggerRuntime): void {
   const s = rt.saved;
@@ -197,7 +210,7 @@ export const slope: PerturbationTemplate = {
     if (s.gravityHas) return;
     const g: Float64Array = ctx.model.opt.gravity;
     s.gravity[0] = g[0] as number; s.gravity[1] = g[1] as number; s.gravity[2] = g[2] as number;
-    s.gravityHas = true; s.has = true;
+    s.gravityHas = true; s.has = true; pendingRestore.set(ctx.model, rt);
     slopeGravity(s.gravity, values['angle'] as number, rt.scratch);
     g[0] = rt.scratch[0] as number; g[1] = rt.scratch[1] as number; g[2] = rt.scratch[2] as number;
   },
@@ -224,7 +237,7 @@ export const payload: PerturbationTemplate = {
     s.torsoInertia[0] = inertia[3 * b] as number;
     s.torsoInertia[1] = inertia[3 * b + 1] as number;
     s.torsoInertia[2] = inertia[3 * b + 2] as number;
-    s.massHas = true; s.has = true;
+    s.massHas = true; s.has = true; pendingRestore.set(model, rt);
     const add = values['mass'] as number;
     if (add === 0) return;
     const k = (m0 + add) / m0;
@@ -253,7 +266,7 @@ export const friction: PerturbationTemplate = {
     s.floorFriction[0] = f[3 * g] as number;
     s.floorFriction[1] = f[3 * g + 1] as number;
     s.floorFriction[2] = f[3 * g + 2] as number;
-    s.frictionHas = true; s.has = true;
+    s.frictionHas = true; s.has = true; pendingRestore.set(ctx.model, rt);
     f[3 * g] = (s.floorFriction[0] as number) * (values['ratio'] as number);
   },
 };

@@ -183,8 +183,8 @@ Conventions for every task:
 - [x] 6. Checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 7. App definition
-  - [ ] 7.1 Implement `app.ts` (`stagger` RobotApp with `endTrial`)
+- [x] 7. App definition
+  - [x] 7.1 Implement `app.ts` (`stagger` RobotApp with `endTrial`)
     - Fields `id`, `name`, `sceneFile`, `simDt`, `controlDt`, `warmup`, `lexicon`
     - `files()`: Node reads every file listed in `SOURCE.json` plus the generated files, browser fetches from the page origin; rejects naming a missing file; returns equal bytes on every call
     - `makeController` loads `policy.bin` and builds the Walker without drawing from `rng`; `initState` restores leftovers, resets the runtime, sets the standing pose and adds `0.01 * normal(rng)` to the 12 leg joints in joint order (Box-Muller, fixed draw order); `signals` calls `writeSignals`; `endTrial` restores gravity, torso mass and inertia, floor friction and calls `mj_setConst` if mass changed
@@ -192,14 +192,14 @@ Conventions for every task:
     - Write `test/app.test.ts` (examples): field values, `files()` contents and repeatability, missing-file error names the file, `initState` draws exactly 12 values in a fixed order
     - _Requirements: 14.3, 14.6, 14.8, 16.1, 16.2, 16.3, 16.4, 16.5, 16.6, 16.7, 16.8, 16.9, 16.10, 16.11, 16.12, 21.4_
 
-  - [ ]* 7.2 Write property tests for app determinism and model restoration
+  - [x]* 7.2 Write property tests for app determinism and model restoration
     - **Property 30: Trials leave the cached model unchanged**
     - **Property 33: initState noise is deterministic and in fixed order**
     - **Property 34: A trial is a deterministic function of scenario and seed**
     - Use `test/app.property.test.ts`; pure parts at 100 runs against a stub `SimContext`, physics parts at 5 to 10 runs with horizon of at most 2 s
     - **Validates: Requirements 9.8, 14.3, 14.6, 14.8, 14.9, 16.7, 16.8, 16.9, 16.13, 21.1, 21.2, 21.8**
 
-  - [ ] 7.3 Add the parity fixture, parity test and smoke trial
+  - [x] 7.3 Add the parity fixture, parity test and smoke trial
     - Write `test/fixtures/parity.json` with the 12 initial noise values, command `(0.5, 0, 0)`, duration 2 s, reference pelvis `(0.79987, -0.02247, 0.76789) m` and tolerance 1e-3 m; never edit these values
     - Write `test/parity.test.ts`: runs in Node from the committed `robot/`, prints observed, reference and difference for x, y, z in metres on failure, bit-identical on a second run, under 10 s
     - Write `test/smoke.test.ts`: 2 s after warm-up with a 0 N push, fixed seed, finite robustness, expected trace length, handle counter returns to prior value plus the cached model, under 15 s; also checks that model compile gives 12 actuators and `nq` 19 within 5 s

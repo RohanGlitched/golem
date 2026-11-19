@@ -16,6 +16,8 @@ export interface StaggerRuntime {
   speedRing: { buf: Float64Array; n: number; head: number; sum: number };
   /** Scratch for per-call vector math (heading, push force), so hot paths allocate nothing. */
   scratch: Float64Array;
+  /** The 12 initial joint-noise values of this trial (rad). */
+  noise: Float64Array;
 }
 
 export const DEFAULT_COMMAND: readonly [number, number, number] = [0.5, 0, 0];
@@ -37,6 +39,7 @@ function create(): StaggerRuntime {
     },
     speedRing: { buf: new Float64Array(SPEED_WINDOW), n: 0, head: 0, sum: 0 },
     scratch: new Float64Array(4),
+    noise: new Float64Array(12),
   };
   resetRuntime(rt);
   return rt;
