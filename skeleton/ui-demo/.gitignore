@@ -1,0 +1,5 @@
+shots/
+public/fonts/
+dist/
+test-results/
+playwright-report/
