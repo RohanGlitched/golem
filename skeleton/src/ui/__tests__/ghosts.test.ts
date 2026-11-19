@@ -54,6 +54,12 @@ describe('evalGhost', () => {
     expect(evalGhost(g, 0.5, false, newGhostEval()).breakMix).toBe(1);
   });
 
+  it('holds the last frame at tau = T even when T * fps rounds below N - 1', () => {
+    const g = rec({ fps: 49, frameCount: 2, validFrames: 2 });
+    expect(evalGhost(g, 1 / 49, false, newGhostEval()).frame).toBe(1);
+    expect(evalGhost(g, 0.020408163265306124, false, newGhostEval()).frame).toBe(1);
+  });
+
   it('holds the last frame after the recording ends and the last finite frame', () => {
     expect(evalGhost(rec(), 10, false, newGhostEval()).frame).toBe(60);
     const e = evalGhost(rec({ validFrames: 20 }), 1.5, false, newGhostEval());

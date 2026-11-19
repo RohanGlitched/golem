@@ -46,11 +46,13 @@ export function studioCss(fontBaseUrl = './fonts/'): string {
 .golem-line{position:relative;padding:12px 0 12px 12px;border-left:2px solid transparent;border-bottom:1px solid var(--rule);max-width:72ch}
 .golem-line-selected{border-left-color:var(--clay)}
 .golem-line-head{display:flex;gap:8px;align-items:baseline}
-.golem-line-id{font-size:${s13}px;color:var(--ink-2)}
+.golem-line-id{font-family:inherit;font-variant-numeric:tabular-nums;font-size:${s13}px;color:var(--ink-2);background:transparent;border:0;border-radius:2px;padding:0 2px;cursor:pointer}
+.golem-line-id:hover{color:var(--ink)}
+.golem-narrow-only{display:none!important}
 .golem-sentence{position:relative;margin:4px 0;font-size:${s16}px}
 .golem-kw{font-size:.85em;letter-spacing:.04em}
 .golem-num{font-family:'B612 Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
-.golem-q{display:inline-block;min-height:24px;padding:0 3px;border-bottom:1px dashed var(--clay);border-radius:2px;cursor:ew-resize;user-select:none}
+.golem-q{display:inline-block;min-height:24px;padding:0 3px;text-decoration:underline dashed var(--clay);text-decoration-thickness:1px;text-underline-offset:4px;border-radius:2px;cursor:ew-resize;user-select:none;font-variant-numeric:tabular-nums}
 .golem-q:hover{background:color-mix(in srgb, var(--clay) 18%, transparent)}
 .golem-q-drag{background:color-mix(in srgb, var(--clay) 25%, transparent)}
 .golem-q-input{font:inherit;color:var(--ink);background:var(--ground);border:1px solid var(--clay);border-radius:2px;padding:0 3px}
@@ -104,7 +106,9 @@ export function studioCss(fontBaseUrl = './fonts/'): string {
   .golem-tablet{overflow:visible}
   .golem-verdict{max-height:none}
   .golem-btn,.golem-line-id{min-height:44px;min-width:44px}
-  .golem-q{min-height:44px;line-height:44px}
+  .golem-narrow-only{display:inline-block!important}
+  .golem-wide-only{display:none!important}
+  .golem-q{padding:10px 4px;margin:-10px 0;line-height:24px}
   .golem-sentence{font-size:${s16}px}
   .golem-h{font-size:${s20}px}
 }

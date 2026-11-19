@@ -20,7 +20,7 @@ function groupsOf(lines: LineModel[]): { group: string | undefined; lines: LineM
   return out;
 }
 
-export function SummonAllButton({ store, actions }: { store: StoreLike; actions: StudioActions }) {
+export function SummonAllButton({ store, actions, className = '' }: { store: StoreLike; actions: StudioActions; className?: string }) {
   const run = useStudio(store, (s) => s.run);
   const pool = useStudio(store, (s) => s.poolConfigured);
   const hero = useStudio(store, (s) => s.hero);
@@ -30,7 +30,7 @@ export function SummonAllButton({ store, actions }: { store: StoreLike; actions:
   return (
     <button
       type="button"
-      className="golem-btn golem-btn-primary"
+      className={`golem-btn golem-btn-primary ${className}`.trim()}
       disabled={!run && (!canSummon || !any)}
       onClick={() => (run ? actions.stop() : actions.summonAll())}
     >{run ? STOP_LABEL : SUMMON_ALL_LABEL}</button>
@@ -49,7 +49,7 @@ export function Tablet({ store, actions, fileMessages = [] }: TabletProps) {
       <h2 className="golem-h">Requirements</h2>
       {lines.length === 0 ? <p className="golem-empty">{EMPTY_TEXT}</p> : (
         <>
-          <div className="golem-tablet-actions"><SummonAllButton store={store} actions={actions} /></div>
+          <div className="golem-tablet-actions golem-wide-only"><SummonAllButton store={store} actions={actions} /></div>
           {!pool ? <p className="golem-note">{NO_POOL_TEXT}</p> : null}
           {groupsOf(lines).map((g, gi) => (
             <section key={gi} className="golem-group" aria-label={g.group ?? 'Requirements'}>

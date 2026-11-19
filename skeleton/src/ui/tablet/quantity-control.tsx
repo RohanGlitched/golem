@@ -115,7 +115,7 @@ export function QuantityControl({ info, label, limits, onCommit, onPreview, disa
       <span
         role="spinbutton"
         tabIndex={disabled ? -1 : 0}
-        className={`golem-q golem-num${dragging ? ' golem-q-drag' : ''}`}
+        className={`golem-q${dragging ? ' golem-q-drag' : ''}`}
         aria-label={label}
         aria-valuenow={num}
         aria-valuemin={range.min}

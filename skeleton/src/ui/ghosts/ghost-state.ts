@@ -58,7 +58,7 @@ export function evalGhost(g: GhostRecord, tau: number, reduced: boolean, out: Gh
   const t = tau < T ? tau : T;
   const last = Math.max(0, Math.min(g.frameCount, g.validFrames) - 1);
   const x = t * g.fps;
-  let f = Math.floor(x);
+  let f = tau >= T ? last : Math.floor(x); // past the end: hold the last frame exactly, whatever the rounding of T * fps
   let alpha = reduced ? 0 : x - f;
   if (f >= last) { f = last; alpha = 0; }
   out.frame = f;

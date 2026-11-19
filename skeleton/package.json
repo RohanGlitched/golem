@@ -28,7 +28,11 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "vitest run --passWithNoTests",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "demo": "node ui-demo/fetch-fonts.mjs && vite --config ui-demo/vite.config.ts",
+    "demo:shots": "node ui-demo/fetch-fonts.mjs && node ui-demo/shots.mjs",
+    "e2e": "playwright test -c ui-demo/playwright.config.ts",
+    "e2e:perf": "playwright test -c ui-demo/playwright.config.ts --grep @perf"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",

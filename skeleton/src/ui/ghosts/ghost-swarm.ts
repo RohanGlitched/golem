@@ -259,7 +259,9 @@ export class GhostSwarm {
       }
       if (ev.hidden) { this.free(s); continue; }
       high = s;
-      any = true;
+      // A survivor holding its last frame is static: it stays visible but needs no more frames.
+      const T = rec.frameCount > 1 ? (rec.frameCount - 1) / rec.fps : 0;
+      if (stage !== PLAYING || tau < T || ev.rise > 0 || (rec.robustness < 0 && opacity > 0)) any = true;
       for (let b = 0; b < nb; b++) {
         nlerp(frames, nb, ev.frame, ev.next, b, ev.alpha, this.pose);
         const p = this.pose;

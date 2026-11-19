@@ -59,7 +59,7 @@ export function RequirementLine({ line, selected, running, canSummon, actions }:
       <div className="golem-line-head">
         <button
           type="button"
-          className="golem-line-id golem-num"
+          className="golem-line-id"
           aria-label={`Select line ${line.id}`}
           aria-describedby={statusId}
           onClick={() => actions.select(line.id)}

@@ -47,7 +47,7 @@ export function ActionsBar({ store, actions }: { store: StoreLike; actions: Stud
   const hero = useStudio(store, (s) => s.hero);
   return (
     <section className="golem-actions" aria-label="Studio actions">
-      <SummonAllButton store={store} actions={actions} />
+      <SummonAllButton store={store} actions={actions} className="golem-narrow-only" />
       <button type="button" className="golem-btn" onClick={() => actions.reset()} disabled={hero === 'loading' || hero === 'failed' || hero === 'no-webgl'}>
         Reset the robot
       </button>

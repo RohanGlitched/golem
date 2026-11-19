@@ -68,8 +68,10 @@ function safeStorage(win: Window | null): Storage | undefined {
   try { const s = win?.localStorage; if (!s) return undefined; const k = '__golem_probe__'; s.setItem(k, '1'); s.removeItem(k); return s; } catch { return undefined; }
 }
 
+/** Checks for WebGL without creating a context (the Stage renderer is the studio's only context). */
 function probeWebGL(doc: Document): boolean {
-  try { const c = doc.createElement('canvas'); return !!(c.getContext('webgl2') ?? c.getContext('webgl')); } catch { return false; }
+  const w = doc.defaultView as (Window & { WebGL2RenderingContext?: unknown; WebGLRenderingContext?: unknown }) | null;
+  return !!(w && (w.WebGL2RenderingContext || w.WebGLRenderingContext));
 }
 
 export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown: string, options: StudioOptions = {}): StudioHandle {
@@ -191,6 +193,7 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
   let pendingAura: Parameters<AuraView['write']>[0] | null = null;
   let primaryBody = 1;
   let primaryName = 'body';
+  let recentreAura = (): void => {};
   const scratch = new Float64Array(7);
 
   const replay = new ReplayController({
@@ -312,7 +315,12 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
     });
     stage.scene.add(swarm.group);
     aura = new AuraView(THREE, tokens, scheduler);
-    aura.setCentre(stage.baseXY[0], stage.baseXY[1]);
+    const auraCentre = (): void => {
+      const v = hero!.views;
+      aura!.setCentre(v.xpos[3 * primaryBody] ?? stage!.baseXY[0], v.xpos[3 * primaryBody + 1] ?? stage!.baseXY[1]);
+    };
+    auraCentre();
+    recentreAura = auraCentre;
     stage.scene.add(aura.group);
     film = new FilmstripRenderer({
       THREE, renderer: stage.renderer, scene: stage.scene, mainCamera: stage.camera, bodyGroups: parts.bodyGroups,
@@ -408,7 +416,7 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
       updateShare();
       if (!hasError && r.requirement && pool) void rc.start(id);
     },
-    reset: () => { if (replay.active) replay.exit(); hero?.reset(); if (stage && aura) aura.setCentre(stage.baseXY[0], stage.baseXY[1]); scheduler.requestOnce(); },
+    reset: () => { if (replay.active) replay.exit(); hero?.reset(); recentreAura(); scheduler.requestOnce(); },
     toggleTheme: () => { theme.toggle(); },
     replay: (id) => {
       const line = store.getState().lines.find((l) => l.id === id);
@@ -556,6 +564,7 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
       scheduler.requestOnce();
     };
     handle.renderCalls = () => (stage?.renderer.info?.render.calls ?? 0);
+    (handle as { reasons?: () => string[] }).reasons = () => [...scheduler.active()];
   }
   return handle;
 }

@@ -68,7 +68,8 @@ export const standInFalsify: FalsifyFn = async (req, pool, budget, searchSeed, o
     if (r.robustness < closest.robustness || trials === 1) closest = { robustness: r.robustness, scenario: r.spec.scenario, seed: r.spec.seed };
     if (r.robustness < 0) {
       if (random) failures++;
-      if (!ce || r.robustness < ce.robustness) {
+      // The stand-in does not shrink; it keeps the mildest failure it saw (robustness closest to 0).
+      if (!ce || r.robustness > ce.robustness) {
         ce = { reqId: req.id, scenario: r.spec.scenario, seed: r.spec.seed, robustness: r.robustness, shrunk: false, foundAfter: trials };
       }
     }

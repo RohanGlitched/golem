@@ -522,28 +522,28 @@ Conventions for every task:
     - Source scans in Vitest: no `Math.random`, no `react` import in `core/`, `stage/`, `hero/`, `ghosts/`, `aura/` or `run/`, the module dependency order from the design, no `fetch` or `XMLHttpRequest` except for static assets, no `react-three-fiber`, no analytics or tracker import, exports equal the documented API only.
     - _Requirements: 28.1, 28.2, 28.3, 28.4, 28.7, 28.8, 28.9_
 
-- [ ] 20. Playwright browser tests
-  - [ ] 20.1 Build the Playwright harness and the test app
+- [x] 20. Playwright browser tests
+  - [x] 20.1 Build the Playwright harness and the test app
     - Add `playwright.config.ts` for `skeleton/src/ui/e2e/`, a Vite page that mounts the studio with the `golem-sim` Test_App MJCF and a fake pool through `testHooks` with a `summonSynthetic(n)` hook feeding `n` pose results at a 2 s horizon, a stage frame counter exposed through `studio.getState()`, and the `@perf` tag convention (not run in default CI).
     - _Requirements: 30.11, 30.12_
 
-  - [ ] 20.2 Write the Frame_Probe test with 64 ghosts
+  - [x] 20.2 Write the Frame_Probe test with 64 ghosts
     - `@perf`: summon 64 synthetic ghosts with the hero running, record `requestAnimationFrame` intervals for 5 s, assert median at most 17 ms and 95th percentile at most 25 ms.
     - _Requirements: 27.1, 30.11_
 
-  - [ ] 20.3 Write first-frame, idle, draw-call and WebGL-context tests
+  - [x] 20.3 Write first-frame, idle, draw-call and WebGL-context tests
     - First meaningful frame: `golem:first-frame` mark below 4000 ms from navigation with the Tablet text visible. Idle: zero stage frames for 1 s after the verdict, the hero sleep and the ghost fade. Draw calls: `renderer.info.render.calls` at most one per geom for ghosts plus one for arrows plus the hero, floor, aura and tick calls. One WebGL context through a wrapped `getContext`.
     - _Requirements: 5.11, 20.4, 27.2, 27.3, 27.6, 30.11_
 
-  - [ ] 20.4 Write the 375 px layout test
+  - [x] 20.4 Write the 375 px layout test
     - Viewport 375 px wide in both themes: `document.documentElement.scrollWidth` at most 375 and no element's `getBoundingClientRect().right` beyond 375, with the Reel strip scrolling inside its own container.
     - _Requirements: 20.13, 24.5, 30.11_
 
-  - [ ] 20.5 Write the accessibility and keyboard tests
+  - [x] 20.5 Write the accessibility and keyboard tests
     - `@axe-core/playwright` scan with no serious or critical violation in both themes. Keyboard path: Tab order (primary actions, Tablet lines, Reel), arrow Key_Push shows and clears the label, spinbutton stepping, Escape cancels, pointer shove label rises while dragging and clears within one frame of release.
     - _Requirements: 7.5, 7.6, 8.2, 8.9, 16.3, 26.1, 26.12, 30.11_
 
-- [ ] 21. Final checkpoint - Ensure all tests pass
+- [x] 21. Final checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes

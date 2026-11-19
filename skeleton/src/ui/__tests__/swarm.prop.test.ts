@@ -51,7 +51,8 @@ describe('swarm properties', () => {
       const N = frames.length / 7;
       const e = evalGhost({ robustness: 1, worstAt: 0, warmup: 0, fps, frameCount: N, validFrames: N }, tau, reduced, newGhostEval());
       const T = (N - 1) / fps;
-      expect(e.frame).toBe(Math.min(N - 1, Math.floor(Math.min(tau, T) * fps)));
+      // At or past the end the last frame is held exactly (T * fps may round to just below N - 1).
+      expect(e.frame).toBe(tau >= T ? N - 1 : Math.min(N - 1, Math.floor(tau * fps)));
       expect(e.frame).toBeGreaterThanOrEqual(0);
       if (tau > T) expect(e.frame).toBe(N - 1);
       const out = new Float64Array(7);

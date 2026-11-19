@@ -68,6 +68,16 @@ export class Stage {
   radius = 1;
   lost = false;
 
+  private bound: { radius: number; target: THREE_NS.Vector3 } | undefined;
+
+  /** 2.6 R on a wide stage; farther on a narrow one so the robot fits the horizontal field of view. */
+  private fitDistance(): number {
+    const R = this.bound?.radius ?? 1;
+    const vfov = (this.camera.fov * Math.PI) / 180;
+    const hfov = 2 * Math.atan(Math.tan(vfov / 2) * this.camera.aspect);
+    return Math.max(2.6 * R, (1.15 * R) / Math.sin(Math.min(vfov, hfov) / 2));
+  }
+
   constructor(host: HTMLElement, private readonly deps: StageDeps) {
     const T = deps.THREE;
     const doc = host.ownerDocument;
@@ -159,7 +169,8 @@ export class Stage {
     this.radius = bound.radius;
     this.baseXY = [bound.centre.x, bound.centre.y];
     const target = new T.Vector3(bound.centre.x, bound.centre.y, 0.55 * bound.height);
-    const d = 2.6 * bound.radius;
+    this.bound = { radius: bound.radius, target };
+    const d = this.fitDistance();
     const az = (-60 * Math.PI) / 180, el = (18 * Math.PI) / 180;
     this.camera.position.set(target.x + d * Math.cos(el) * Math.cos(az), target.y + d * Math.cos(el) * Math.sin(az), target.z + d * Math.sin(el));
     this.camera.near = Math.max(0.01, bound.radius / 50);
@@ -179,6 +190,11 @@ export class Stage {
     this.renderer.setSize(w, h, false);
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
+    if (this.bound) {
+      const off = this.camera.position.clone().sub(this.orbit.controls.target);
+      const want = this.fitDistance();
+      if (off.length() < want - 1e-6) { this.camera.position.copy(this.orbit.controls.target).addScaledVector(off.normalize(), want); this.orbit.controls.update(); }
+    }
     this.deps.scheduler.requestOnce();
   }
 
