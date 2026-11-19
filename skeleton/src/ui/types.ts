@@ -124,8 +124,23 @@ export interface StudioTestHooks {
   createAudio?: () => unknown;
 }
 
+/**
+ * A mocap body the pointer carries on the stage, such as a hand that reaches into the workspace. The body keeps the height
+ * it had when it was grabbed. The shove ignores it, because a force does not move a mocap body.
+ */
+export interface DragBodyOption {
+  /** Name of the mocap body in the model. A name that is not a mocap body turns the drag off. */
+  body: string;
+  /** Word for announcements, such as "hand". Default: "body". */
+  noun?: string;
+  /** Where the body may go: receives the point under the pointer (metres) and returns the position to use. Default: any point. */
+  constrain?(p: V3): V3;
+}
+
 export interface StudioOptions {
   pool?: TrialPool;
+  /** A mocap body the user drags with the pointer (see `DragBodyOption`). */
+  dragBody?: DragBodyOption;
   /**
    * URL of the module the trial workers import. It exports `app` and `requirements`; build `requirements` with
    * `studioRequirements` from `golem-spec/ui/worker`. Used to build a Web Worker pool when `pool` is absent.

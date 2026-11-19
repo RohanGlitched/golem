@@ -1,6 +1,6 @@
 // Pure geometry helpers shared by the controller, the signals and the lexicon: no MuJoCo, no clock, no random draw.
 import {
-  BOWL, BOWLS, CANDY_COUNT, D_OV, DROPPED_Z, HAND_START, OVERLAP_STEP, RESTING_SPEED, TABLE, TRAY, WORKSPACE, WORKSPACE_CENTRE,
+  BASE_KEEP_OUT, BOWL, BOWLS, CANDY_COUNT, D_OV, DOORSTEP, DROPPED_Z, HAND_DRAG_AREA, HAND_HEIGHT_RANGE, HAND_START, OVERLAP_STEP, RESTING_SPEED, TABLE, TRAY, WORKSPACE,
 } from './constants';
 
 // ---------------------------------------------------------------- candy classification
@@ -63,17 +63,35 @@ export function inWorkspace(x: number, y: number, z: number): boolean {
 }
 
 // ---------------------------------------------------------------- hand path
+//
+// The doorstep rule. Trick-or-treaters stand on the doorstep side of the Table, beyond the edge that faces away from the
+// Panda base (x = TABLE.xMax). A hand enters only through that edge, across an arc of 120 degrees, and reaches toward the
+// bowl nearest to where it came in, so it never crosses the base column. In this app `from any direction` means that whole
+// arc. `hand.angle` is the position across it, not a compass bearing: see `doorstepAzimuth`.
 
 export interface HandValues { angle: number; speed: number; entry: number; height: number }
 
-/** Where the ray from the workspace centre at azimuth `theta` leaves the Table (x, y into out[0], out[1]). */
-export function tableEdgePoint(theta: number, out: Float64Array): void {
-  const dx = Math.cos(theta), dy = Math.sin(theta);
-  const tx = dx > 0 ? (TABLE.xMax - WORKSPACE_CENTRE.x) / dx : dx < 0 ? (TABLE.xMin - WORKSPACE_CENTRE.x) / dx : Infinity;
-  const ty = dy > 0 ? (TABLE.yMax - WORKSPACE_CENTRE.y) / dy : dy < 0 ? (TABLE.yMin - WORKSPACE_CENTRE.y) / dy : Infinity;
-  const t = tx < ty ? tx : ty;
-  out[0] = WORKSPACE_CENTRE.x + t * dx;
-  out[1] = WORKSPACE_CENTRE.y + t * dy;
+const TWO_PI = 2 * Math.PI;
+
+/**
+ * Azimuth of a doorstep entry (rad, 0 = straight out from the base along +x, positive toward +y) for a scenario
+ * `hand.angle`. `from any direction` gives hand.angle in [0, 2 pi), which sweeps the doorstep arc out and back: 0 is the
+ * -60 degree end (toward the orange bowl), pi is the +60 degree end (toward the green bowl), 2 pi is the -60 degree end
+ * again, so the map is continuous across the wrap and every azimuth of the arc is reachable. Any other angle (a fixed
+ * `from 90 deg`, or `from behind`) is folded the same way. A non-finite angle counts as 0.
+ */
+export function doorstepAzimuth(angle: number): number {
+  const a = Number.isFinite(angle) ? angle : 0;
+  const u = ((a % TWO_PI) + TWO_PI) % TWO_PI;
+  const s = u <= Math.PI ? u : TWO_PI - u;
+  return -DOORSTEP.halfAngle + 2 * DOORSTEP.halfAngle * (s / Math.PI);
+}
+
+/** Where a hand with azimuth `az` crosses the doorstep edge: x = TABLE.xMax, y on the edge (into out[0], out[1]). */
+export function doorstepEntryPoint(az: number, out: Float64Array): void {
+  const y = (TABLE.xMax - DOORSTEP.originX) * Math.tan(az);
+  out[0] = TABLE.xMax;
+  out[1] = y > TABLE.yMax ? TABLE.yMax : y < TABLE.yMin ? TABLE.yMin : y;
 }
 
 /** Index of the bowl centre nearest to (x, y); the lower index wins a tie. */
@@ -91,9 +109,10 @@ const edge = new Float64Array(2);
 
 /**
  * Pose of the Hand (x, y, z, yaw) into `out`. Before the entry (`t - tTrigger < entry`) the Hand is at its start
- * pose. At the entry it appears at the Table edge E on the ray at azimuth `angle`, at `height`, and moves in a
- * straight line toward the centre of the nearest bowl at `speed`, holding there on arrival. Its yaw is `angle`, so
- * the forearm points back toward the edge it came from. The result depends only on the arguments.
+ * pose. At the entry it appears on the doorstep edge at the point given by `angle` (see `doorstepAzimuth`), at `height`,
+ * and moves in a straight line toward the centre of the bowl nearest to that point at `speed`, holding there on arrival.
+ * Its yaw points from the bowl back to the entry point, so the forearm trails behind the palm, outside the Table. The
+ * result depends only on the arguments.
  */
 export function handPose(out: Float64Array, t: number, tTrigger: number, v: HandValues): void {
   const tau = t - tTrigger - v.entry;
@@ -101,16 +120,35 @@ export function handPose(out: Float64Array, t: number, tTrigger: number, v: Hand
     out[0] = HAND_START.x; out[1] = HAND_START.y; out[2] = HAND_START.z; out[3] = HAND_START.yaw;
     return;
   }
-  tableEdgePoint(v.angle, edge);
+  doorstepEntryPoint(doorstepAzimuth(v.angle), edge);
   const ex = edge[0] as number, ey = edge[1] as number;
   const bowl = BOWLS[nearestBowl(ex, ey)]!;
   const dx = bowl.x - ex, dy = bowl.y - ey;
   const len = Math.sqrt(dx * dx + dy * dy);
   const travelled = Math.min(v.speed * tau, len);
   const k = len > 0 ? travelled / len : 0;
-  out[0] = ex + dx * k; out[1] = ey + dy * k; out[2] = v.height; out[3] = v.angle;
+  out[0] = ex + dx * k; out[1] = ey + dy * k; out[2] = v.height; out[3] = Math.atan2(-dy, -dx);
 }
+// ---------------------------------------------------------------- hand in the studio
 
+/**
+ * Where the studio lets the pointer carry the Hand: `p` (x, y, z in m) with z held in the 0.05 m to 0.25 m band that the
+ * trials use, x and y held in HAND_DRAG_AREA, and the Hand pushed out of the base column (a disc of BASE_KEEP_OUT about the
+ * base axis) along the radius. It never crosses the column, because the column is not in the area it may stand in.
+ * A non-finite coordinate counts as the Hand's start value.
+ */
+export function constrainDraggedHand(p: readonly [number, number, number]): [number, number, number] {
+  const fin = (v: number, d: number): number => (Number.isFinite(v) ? v : d);
+  const A = HAND_DRAG_AREA;
+  let x = Math.min(A.xMax, Math.max(A.xMin, fin(p[0], HAND_START.x)));
+  let y = Math.min(A.yMax, Math.max(A.yMin, fin(p[1], HAND_START.y)));
+  const z = Math.min(HAND_HEIGHT_RANGE.max, Math.max(HAND_HEIGHT_RANGE.min, fin(p[2], HAND_HEIGHT_RANGE.max)));
+  const r = Math.sqrt(x * x + y * y);
+  if (r < BASE_KEEP_OUT) {
+    if (r > 1e-9) { x *= BASE_KEEP_OUT / r; y *= BASE_KEEP_OUT / r; } else { x = BASE_KEEP_OUT; y = 0; }
+  }
+  return [x, y, z];
+}
 // ---------------------------------------------------------------- candy placement
 
 /**

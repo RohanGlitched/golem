@@ -1,0 +1,16 @@
+{
+  "app": "./app.ts",
+  "requirements": [".kiro/specs/candy-sorter/requirements.md"],
+  "robot": "candy-sorter",
+  "signalUnits": {
+    "min_link_hand_distance": "m",
+    "fastest_link_speed": "m/s",
+    "tip_speed": "m/s",
+    "candies_sorted": "candies",
+    "candies_misplaced": "candies",
+    "candies_dropped_outside": "candies",
+    "candies_active": "candies",
+    "table_force": "N",
+    "hand_in_workspace": "flag"
+  }
+}

@@ -11,7 +11,7 @@ export const BOWLS = [
   { name: 'bowl_purple', x: 0.720, y: 0.000 },
   { name: 'bowl_green', x: 0.611, y: 0.382 },
 ];
-export const BOWL = { innerHalf: 0.07, wallThickness: 0.01, wallHeight: 0.05, floorRadius: 0.10, floorHalfHeight: 0.005 };
+export const BOWL = { innerHalf: 0.07, wallThickness: 0.01, wallHeight: 0.05, floorRadius: 0.10, floorHalfHeight: 0.005, floorSink: 0.02 };
 
 /** Halloween colours, one per bowl index. */
 export const COLOURS = [
@@ -29,6 +29,7 @@ export const CANDY_HALF_HEIGHT = [0.010, 0.012, 0.008, 0.010, 0.012, 0.008];
 
 export const CONTYPE = { world: 1, arm: 2, candy: 4, cup: 8 };
 export const CONAFFINITY = { world: 14, arm: 1, candy: 9, cup: 5 };
+export const BOWL_CONTACT = { timeConstant: 0.02, dampRatio: 4 };
 export const CUP = { radius: 0.02, length: 0.100 };
 export const SUCTION = { tipInset: 0.008 };
 

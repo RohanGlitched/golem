@@ -33,93 +33,93 @@
     <light name="lantern" pos="0.95 -0.95 1.60" dir="-0.40 0.45 -0.80" cutoff="52" exponent="8" diffuse="1.0 0.72 0.40" specular="0.55 0.45 0.30" castshadow="true"/>
     <light name="moon" pos="-0.6 1.3 1.8" dir="0.35 -0.75 -0.55" directional="true" diffuse="0.17 0.15 0.34" specular="0.08 0.08 0.16" castshadow="false"/>
     <camera name="studio" pos="1.65 -1.3 0.95" xyaxes="0.75473 0.656035 0 -0.290314 0.33399 0.896755" fovy="38"/>
-    <geom name="floor" type="plane" size="4 4 0.05" pos="0 0 -0.4" material="floor" contype="1" conaffinity="14"/>
-    <geom name="table" type="box" size="0.6 0.6 0.02" pos="0.4 0 -0.02" rgba="0.17 0.1 0.055 1" material="wood_dark" contype="1" conaffinity="14"/>
-    <geom name="plank_0" type="box" size="0.6 0.0485 0.0005" pos="0.4 -0.55 -0.0001" rgba="0.46 0.29 0.15 1" material="wood_a" contype="0" conaffinity="0"/>
-    <geom name="plank_1" type="box" size="0.6 0.0485 0.0005" pos="0.4 -0.45 -0.0001" rgba="0.4 0.25 0.13 1" material="wood_b" contype="0" conaffinity="0"/>
-    <geom name="plank_2" type="box" size="0.6 0.0485 0.0005" pos="0.4 -0.35 -0.0001" rgba="0.52 0.33 0.18 1" material="wood_c" contype="0" conaffinity="0"/>
-    <geom name="plank_3" type="box" size="0.6 0.0485 0.0005" pos="0.4 -0.25 -0.0001" rgba="0.46 0.29 0.15 1" material="wood_a" contype="0" conaffinity="0"/>
-    <geom name="plank_4" type="box" size="0.6 0.0485 0.0005" pos="0.4 -0.15 -0.0001" rgba="0.4 0.25 0.13 1" material="wood_b" contype="0" conaffinity="0"/>
-    <geom name="plank_5" type="box" size="0.6 0.0485 0.0005" pos="0.4 -0.05 -0.0001" rgba="0.52 0.33 0.18 1" material="wood_c" contype="0" conaffinity="0"/>
-    <geom name="plank_6" type="box" size="0.6 0.0485 0.0005" pos="0.4 0.05 -0.0001" rgba="0.46 0.29 0.15 1" material="wood_a" contype="0" conaffinity="0"/>
-    <geom name="plank_7" type="box" size="0.6 0.0485 0.0005" pos="0.4 0.15 -0.0001" rgba="0.4 0.25 0.13 1" material="wood_b" contype="0" conaffinity="0"/>
-    <geom name="plank_8" type="box" size="0.6 0.0485 0.0005" pos="0.4 0.25 -0.0001" rgba="0.52 0.33 0.18 1" material="wood_c" contype="0" conaffinity="0"/>
-    <geom name="plank_9" type="box" size="0.6 0.0485 0.0005" pos="0.4 0.35 -0.0001" rgba="0.46 0.29 0.15 1" material="wood_a" contype="0" conaffinity="0"/>
-    <geom name="plank_10" type="box" size="0.6 0.0485 0.0005" pos="0.4 0.45 -0.0001" rgba="0.4 0.25 0.13 1" material="wood_b" contype="0" conaffinity="0"/>
-    <geom name="plank_11" type="box" size="0.6 0.0485 0.0005" pos="0.4 0.55 -0.0001" rgba="0.52 0.33 0.18 1" material="wood_c" contype="0" conaffinity="0"/>
-    <geom name="apron_front" type="box" size="0.012 0.58 0.04" pos="0.968 0 -0.08" rgba="0.17 0.1 0.055 1" material="wood_dark" contype="0" conaffinity="0"/>
-    <geom name="apron_back" type="box" size="0.012 0.58 0.04" pos="-0.168 0 -0.08" rgba="0.17 0.1 0.055 1" material="wood_dark" contype="0" conaffinity="0"/>
-    <geom name="apron_left" type="box" size="0.58 0.012 0.04" pos="0.4 -0.568 -0.08" rgba="0.17 0.1 0.055 1" material="wood_dark" contype="0" conaffinity="0"/>
-    <geom name="apron_right" type="box" size="0.58 0.012 0.04" pos="0.4 0.568 -0.08" rgba="0.17 0.1 0.055 1" material="wood_dark" contype="0" conaffinity="0"/>
-    <geom name="leg_0" type="box" size="0.03 0.03 0.18" pos="-0.16 -0.56 -0.22" rgba="0.17 0.1 0.055 1" material="wood_dark" contype="0" conaffinity="0"/>
-    <geom name="leg_1" type="box" size="0.03 0.03 0.18" pos="-0.16 0.56 -0.22" rgba="0.17 0.1 0.055 1" material="wood_dark" contype="0" conaffinity="0"/>
-    <geom name="leg_2" type="box" size="0.03 0.03 0.18" pos="0.96 -0.56 -0.22" rgba="0.17 0.1 0.055 1" material="wood_dark" contype="0" conaffinity="0"/>
-    <geom name="leg_3" type="box" size="0.03 0.03 0.18" pos="0.96 0.56 -0.22" rgba="0.17 0.1 0.055 1" material="wood_dark" contype="0" conaffinity="0"/>
-    <geom name="doorstep" type="box" size="0.2 0.65 0.1" pos="1.24 0 -0.3" rgba="0.30 0.29 0.31 1" material="stone" contype="0" conaffinity="0"/>
-    <geom name="tray" type="box" size="0.14 0.16 0.0003" pos="0.48 0 0.0005" rgba="0.09 0.07 0.11 1" material="felt" contype="0" conaffinity="0"/>
-    <geom name="tray_edge_near" type="box" size="0.002 0.16 0.0004" pos="0.342 0 0.0007" rgba="0.90 0.40 0.05 1" contype="0" conaffinity="0"/>
-    <geom name="tray_edge_far" type="box" size="0.002 0.16 0.0004" pos="0.618 0 0.0007" rgba="0.90 0.40 0.05 1" contype="0" conaffinity="0"/>
-    <geom name="tray_edge_left" type="box" size="0.14 0.002 0.0004" pos="0.48 -0.158 0.0007" rgba="0.90 0.40 0.05 1" contype="0" conaffinity="0"/>
-    <geom name="tray_edge_right" type="box" size="0.14 0.002 0.0004" pos="0.48 0.158 0.0007" rgba="0.90 0.40 0.05 1" contype="0" conaffinity="0"/>
-    <geom name="pumpkin_body" type="ellipsoid" size="0.075 0.075 0.060" pos="-0.1 0.44 0.06" rgba="0.95 0.42 0.05 1" material="candy_orange" contype="0" conaffinity="0"/>
-    <geom name="pumpkin_stem" type="cylinder" size="0.011 0.016" pos="-0.1 0.44 0.126" rgba="0.30 0.38 0.12 1" contype="0" conaffinity="0"/>
-    <geom name="pumpkin_eye_l" type="box" size="0.012 0.004 0.012" pos="-0.032 0.41 0.075" rgba="0.08 0.04 0.01 1" contype="0" conaffinity="0"/>
-    <geom name="pumpkin_eye_r" type="box" size="0.012 0.004 0.012" pos="-0.032 0.47 0.075" rgba="0.08 0.04 0.01 1" contype="0" conaffinity="0"/>
-    <geom name="pumpkin_mouth" type="box" size="0.010 0.026 0.007" pos="-0.028 0.44 0.04" rgba="0.08 0.04 0.01 1" contype="0" conaffinity="0"/>
+    <geom name="floor" type="plane" size="4 4 0.05" pos="0 0 -0.4" material="floor" group="2" contype="1" conaffinity="14"/>
+    <geom name="table" type="box" size="0.6 0.6 0.02" pos="0.4 0 -0.02" rgba="0.17 0.1 0.055 1" material="wood_dark" group="2" contype="1" conaffinity="14"/>
+    <geom name="plank_0" type="box" size="0.6 0.0485 0.0005" pos="0.4 -0.55 -0.0001" rgba="0.46 0.29 0.15 1" material="wood_a" group="2" contype="0" conaffinity="0"/>
+    <geom name="plank_1" type="box" size="0.6 0.0485 0.0005" pos="0.4 -0.45 -0.0001" rgba="0.4 0.25 0.13 1" material="wood_b" group="2" contype="0" conaffinity="0"/>
+    <geom name="plank_2" type="box" size="0.6 0.0485 0.0005" pos="0.4 -0.35 -0.0001" rgba="0.52 0.33 0.18 1" material="wood_c" group="2" contype="0" conaffinity="0"/>
+    <geom name="plank_3" type="box" size="0.6 0.0485 0.0005" pos="0.4 -0.25 -0.0001" rgba="0.46 0.29 0.15 1" material="wood_a" group="2" contype="0" conaffinity="0"/>
+    <geom name="plank_4" type="box" size="0.6 0.0485 0.0005" pos="0.4 -0.15 -0.0001" rgba="0.4 0.25 0.13 1" material="wood_b" group="2" contype="0" conaffinity="0"/>
+    <geom name="plank_5" type="box" size="0.6 0.0485 0.0005" pos="0.4 -0.05 -0.0001" rgba="0.52 0.33 0.18 1" material="wood_c" group="2" contype="0" conaffinity="0"/>
+    <geom name="plank_6" type="box" size="0.6 0.0485 0.0005" pos="0.4 0.05 -0.0001" rgba="0.46 0.29 0.15 1" material="wood_a" group="2" contype="0" conaffinity="0"/>
+    <geom name="plank_7" type="box" size="0.6 0.0485 0.0005" pos="0.4 0.15 -0.0001" rgba="0.4 0.25 0.13 1" material="wood_b" group="2" contype="0" conaffinity="0"/>
+    <geom name="plank_8" type="box" size="0.6 0.0485 0.0005" pos="0.4 0.25 -0.0001" rgba="0.52 0.33 0.18 1" material="wood_c" group="2" contype="0" conaffinity="0"/>
+    <geom name="plank_9" type="box" size="0.6 0.0485 0.0005" pos="0.4 0.35 -0.0001" rgba="0.46 0.29 0.15 1" material="wood_a" group="2" contype="0" conaffinity="0"/>
+    <geom name="plank_10" type="box" size="0.6 0.0485 0.0005" pos="0.4 0.45 -0.0001" rgba="0.4 0.25 0.13 1" material="wood_b" group="2" contype="0" conaffinity="0"/>
+    <geom name="plank_11" type="box" size="0.6 0.0485 0.0005" pos="0.4 0.55 -0.0001" rgba="0.52 0.33 0.18 1" material="wood_c" group="2" contype="0" conaffinity="0"/>
+    <geom name="apron_front" type="box" size="0.012 0.58 0.04" pos="0.968 0 -0.08" rgba="0.17 0.1 0.055 1" material="wood_dark" group="2" contype="0" conaffinity="0"/>
+    <geom name="apron_back" type="box" size="0.012 0.58 0.04" pos="-0.168 0 -0.08" rgba="0.17 0.1 0.055 1" material="wood_dark" group="2" contype="0" conaffinity="0"/>
+    <geom name="apron_left" type="box" size="0.58 0.012 0.04" pos="0.4 -0.568 -0.08" rgba="0.17 0.1 0.055 1" material="wood_dark" group="2" contype="0" conaffinity="0"/>
+    <geom name="apron_right" type="box" size="0.58 0.012 0.04" pos="0.4 0.568 -0.08" rgba="0.17 0.1 0.055 1" material="wood_dark" group="2" contype="0" conaffinity="0"/>
+    <geom name="leg_0" type="box" size="0.03 0.03 0.18" pos="-0.16 -0.56 -0.22" rgba="0.17 0.1 0.055 1" material="wood_dark" group="2" contype="0" conaffinity="0"/>
+    <geom name="leg_1" type="box" size="0.03 0.03 0.18" pos="-0.16 0.56 -0.22" rgba="0.17 0.1 0.055 1" material="wood_dark" group="2" contype="0" conaffinity="0"/>
+    <geom name="leg_2" type="box" size="0.03 0.03 0.18" pos="0.96 -0.56 -0.22" rgba="0.17 0.1 0.055 1" material="wood_dark" group="2" contype="0" conaffinity="0"/>
+    <geom name="leg_3" type="box" size="0.03 0.03 0.18" pos="0.96 0.56 -0.22" rgba="0.17 0.1 0.055 1" material="wood_dark" group="2" contype="0" conaffinity="0"/>
+    <geom name="doorstep" type="box" size="0.2 0.65 0.1" pos="1.24 0 -0.3" rgba="0.30 0.29 0.31 1" material="stone" group="2" contype="0" conaffinity="0"/>
+    <geom name="tray" type="box" size="0.14 0.16 0.0003" pos="0.48 0 0.0005" rgba="0.09 0.07 0.11 1" material="felt" group="2" contype="0" conaffinity="0"/>
+    <geom name="tray_edge_near" type="box" size="0.002 0.16 0.0004" pos="0.342 0 0.0007" rgba="0.90 0.40 0.05 1" group="2" contype="0" conaffinity="0"/>
+    <geom name="tray_edge_far" type="box" size="0.002 0.16 0.0004" pos="0.618 0 0.0007" rgba="0.90 0.40 0.05 1" group="2" contype="0" conaffinity="0"/>
+    <geom name="tray_edge_left" type="box" size="0.14 0.002 0.0004" pos="0.48 -0.158 0.0007" rgba="0.90 0.40 0.05 1" group="2" contype="0" conaffinity="0"/>
+    <geom name="tray_edge_right" type="box" size="0.14 0.002 0.0004" pos="0.48 0.158 0.0007" rgba="0.90 0.40 0.05 1" group="2" contype="0" conaffinity="0"/>
+    <geom name="pumpkin_body" type="ellipsoid" size="0.075 0.075 0.060" pos="-0.1 0.44 0.06" rgba="0.95 0.42 0.05 1" material="candy_orange" group="2" contype="0" conaffinity="0"/>
+    <geom name="pumpkin_stem" type="cylinder" size="0.011 0.016" pos="-0.1 0.44 0.126" rgba="0.30 0.38 0.12 1" group="2" contype="0" conaffinity="0"/>
+    <geom name="pumpkin_eye_l" type="box" size="0.012 0.004 0.012" pos="-0.032 0.41 0.075" rgba="0.08 0.04 0.01 1" group="2" contype="0" conaffinity="0"/>
+    <geom name="pumpkin_eye_r" type="box" size="0.012 0.004 0.012" pos="-0.032 0.47 0.075" rgba="0.08 0.04 0.01 1" group="2" contype="0" conaffinity="0"/>
+    <geom name="pumpkin_mouth" type="box" size="0.010 0.026 0.007" pos="-0.028 0.44 0.04" rgba="0.08 0.04 0.01 1" group="2" contype="0" conaffinity="0"/>
     <body name="bowl_orange" pos="0.611 -0.382 0">
-      <geom name="bowl_orange_floor" type="cylinder" size="0.1 0.005" pos="0 0 0.005" rgba="1 0.45 0.04 1" material="candy_orange" contype="1" conaffinity="14"/>
-      <geom name="bowl_orange_wall_px" type="box" size="0.005 0.08 0.025" pos="0.075 0 0.025" rgba="1 0.45 0.04 1" material="candy_orange" contype="1" conaffinity="14"/>
-      <geom name="bowl_orange_wall_nx" type="box" size="0.005 0.08 0.025" pos="-0.075 0 0.025" rgba="1 0.45 0.04 1" material="candy_orange" contype="1" conaffinity="14"/>
-      <geom name="bowl_orange_wall_py" type="box" size="0.07 0.005 0.025" pos="0 0.075 0.025" rgba="1 0.45 0.04 1" material="candy_orange" contype="1" conaffinity="14"/>
-      <geom name="bowl_orange_wall_ny" type="box" size="0.07 0.005 0.025" pos="0 -0.075 0.025" rgba="1 0.45 0.04 1" material="candy_orange" contype="1" conaffinity="14"/>
+      <geom name="bowl_orange_floor" type="cylinder" size="0.1 0.015" pos="0 0 -0.005" rgba="1 0.45 0.04 1" material="candy_orange" group="2" contype="1" conaffinity="14" solref="0.02 4"/>
+      <geom name="bowl_orange_wall_px" type="box" size="0.005 0.08 0.025" pos="0.075 0 0.025" rgba="1 0.45 0.04 1" material="candy_orange" group="2" contype="1" conaffinity="14" solref="0.02 4"/>
+      <geom name="bowl_orange_wall_nx" type="box" size="0.005 0.08 0.025" pos="-0.075 0 0.025" rgba="1 0.45 0.04 1" material="candy_orange" group="2" contype="1" conaffinity="14" solref="0.02 4"/>
+      <geom name="bowl_orange_wall_py" type="box" size="0.07 0.005 0.025" pos="0 0.075 0.025" rgba="1 0.45 0.04 1" material="candy_orange" group="2" contype="1" conaffinity="14" solref="0.02 4"/>
+      <geom name="bowl_orange_wall_ny" type="box" size="0.07 0.005 0.025" pos="0 -0.075 0.025" rgba="1 0.45 0.04 1" material="candy_orange" group="2" contype="1" conaffinity="14" solref="0.02 4"/>
     </body>
     <body name="bowl_purple" pos="0.72 0 0">
-      <geom name="bowl_purple_floor" type="cylinder" size="0.1 0.005" pos="0 0 0.005" rgba="0.55 0.22 0.85 1" material="candy_purple" contype="1" conaffinity="14"/>
-      <geom name="bowl_purple_wall_px" type="box" size="0.005 0.08 0.025" pos="0.075 0 0.025" rgba="0.55 0.22 0.85 1" material="candy_purple" contype="1" conaffinity="14"/>
-      <geom name="bowl_purple_wall_nx" type="box" size="0.005 0.08 0.025" pos="-0.075 0 0.025" rgba="0.55 0.22 0.85 1" material="candy_purple" contype="1" conaffinity="14"/>
-      <geom name="bowl_purple_wall_py" type="box" size="0.07 0.005 0.025" pos="0 0.075 0.025" rgba="0.55 0.22 0.85 1" material="candy_purple" contype="1" conaffinity="14"/>
-      <geom name="bowl_purple_wall_ny" type="box" size="0.07 0.005 0.025" pos="0 -0.075 0.025" rgba="0.55 0.22 0.85 1" material="candy_purple" contype="1" conaffinity="14"/>
+      <geom name="bowl_purple_floor" type="cylinder" size="0.1 0.015" pos="0 0 -0.005" rgba="0.55 0.22 0.85 1" material="candy_purple" group="2" contype="1" conaffinity="14" solref="0.02 4"/>
+      <geom name="bowl_purple_wall_px" type="box" size="0.005 0.08 0.025" pos="0.075 0 0.025" rgba="0.55 0.22 0.85 1" material="candy_purple" group="2" contype="1" conaffinity="14" solref="0.02 4"/>
+      <geom name="bowl_purple_wall_nx" type="box" size="0.005 0.08 0.025" pos="-0.075 0 0.025" rgba="0.55 0.22 0.85 1" material="candy_purple" group="2" contype="1" conaffinity="14" solref="0.02 4"/>
+      <geom name="bowl_purple_wall_py" type="box" size="0.07 0.005 0.025" pos="0 0.075 0.025" rgba="0.55 0.22 0.85 1" material="candy_purple" group="2" contype="1" conaffinity="14" solref="0.02 4"/>
+      <geom name="bowl_purple_wall_ny" type="box" size="0.07 0.005 0.025" pos="0 -0.075 0.025" rgba="0.55 0.22 0.85 1" material="candy_purple" group="2" contype="1" conaffinity="14" solref="0.02 4"/>
     </body>
     <body name="bowl_green" pos="0.611 0.382 0">
-      <geom name="bowl_green_floor" type="cylinder" size="0.1 0.005" pos="0 0 0.005" rgba="0.38 0.82 0.18 1" material="candy_green" contype="1" conaffinity="14"/>
-      <geom name="bowl_green_wall_px" type="box" size="0.005 0.08 0.025" pos="0.075 0 0.025" rgba="0.38 0.82 0.18 1" material="candy_green" contype="1" conaffinity="14"/>
-      <geom name="bowl_green_wall_nx" type="box" size="0.005 0.08 0.025" pos="-0.075 0 0.025" rgba="0.38 0.82 0.18 1" material="candy_green" contype="1" conaffinity="14"/>
-      <geom name="bowl_green_wall_py" type="box" size="0.07 0.005 0.025" pos="0 0.075 0.025" rgba="0.38 0.82 0.18 1" material="candy_green" contype="1" conaffinity="14"/>
-      <geom name="bowl_green_wall_ny" type="box" size="0.07 0.005 0.025" pos="0 -0.075 0.025" rgba="0.38 0.82 0.18 1" material="candy_green" contype="1" conaffinity="14"/>
+      <geom name="bowl_green_floor" type="cylinder" size="0.1 0.015" pos="0 0 -0.005" rgba="0.38 0.82 0.18 1" material="candy_green" group="2" contype="1" conaffinity="14" solref="0.02 4"/>
+      <geom name="bowl_green_wall_px" type="box" size="0.005 0.08 0.025" pos="0.075 0 0.025" rgba="0.38 0.82 0.18 1" material="candy_green" group="2" contype="1" conaffinity="14" solref="0.02 4"/>
+      <geom name="bowl_green_wall_nx" type="box" size="0.005 0.08 0.025" pos="-0.075 0 0.025" rgba="0.38 0.82 0.18 1" material="candy_green" group="2" contype="1" conaffinity="14" solref="0.02 4"/>
+      <geom name="bowl_green_wall_py" type="box" size="0.07 0.005 0.025" pos="0 0.075 0.025" rgba="0.38 0.82 0.18 1" material="candy_green" group="2" contype="1" conaffinity="14" solref="0.02 4"/>
+      <geom name="bowl_green_wall_ny" type="box" size="0.07 0.005 0.025" pos="0 -0.075 0.025" rgba="0.38 0.82 0.18 1" material="candy_green" group="2" contype="1" conaffinity="14" solref="0.02 4"/>
     </body>
     <body name="candy_0" pos="0.36 -0.1 0.01">
       <freejoint name="candy_0_free"/>
-      <geom name="candy_0_geom" type="box" size="0.01 0.01 0.01" mass="0.02" rgba="1 0.45 0.04 1" material="candy_orange" friction="1 0.005 0.0001" contype="4" conaffinity="9"/>
+      <geom name="candy_0_geom" type="box" size="0.01 0.01 0.01" mass="0.02" rgba="1 0.45 0.04 1" material="candy_orange" friction="1 0.005 0.0001" group="2" contype="4" conaffinity="9"/>
     </body>
     <body name="candy_1" pos="0.36 -0.06 0.012">
       <freejoint name="candy_1_free"/>
-      <geom name="candy_1_geom" type="sphere" size="0.012" mass="0.02" rgba="0.55 0.22 0.85 1" material="candy_purple" friction="1 0.005 0.0001" contype="4" conaffinity="9"/>
+      <geom name="candy_1_geom" type="sphere" size="0.012" mass="0.02" rgba="0.55 0.22 0.85 1" material="candy_purple" friction="1 0.005 0.0001" group="2" contype="4" conaffinity="9"/>
     </body>
     <body name="candy_2" pos="0.36 -0.02 0.008">
       <freejoint name="candy_2_free"/>
-      <geom name="candy_2_geom" type="capsule" fromto="-0.008 0 0 0.008 0 0" size="0.008" mass="0.02" rgba="0.38 0.82 0.18 1" material="candy_green" friction="1 0.005 0.0001" contype="4" conaffinity="9"/>
+      <geom name="candy_2_geom" type="capsule" fromto="-0.008 0 0 0.008 0 0" size="0.008" mass="0.02" rgba="0.38 0.82 0.18 1" material="candy_green" friction="1 0.005 0.0001" group="2" contype="4" conaffinity="9"/>
     </body>
     <body name="candy_3" pos="0.36 0.02 0.01">
       <freejoint name="candy_3_free"/>
-      <geom name="candy_3_geom" type="box" size="0.01 0.01 0.01" mass="0.02" rgba="1 0.45 0.04 1" material="candy_orange" friction="1 0.005 0.0001" contype="4" conaffinity="9"/>
+      <geom name="candy_3_geom" type="box" size="0.01 0.01 0.01" mass="0.02" rgba="1 0.45 0.04 1" material="candy_orange" friction="1 0.005 0.0001" group="2" contype="4" conaffinity="9"/>
     </body>
     <body name="candy_4" pos="0.36 0.06 0.012">
       <freejoint name="candy_4_free"/>
-      <geom name="candy_4_geom" type="sphere" size="0.012" mass="0.02" rgba="0.55 0.22 0.85 1" material="candy_purple" friction="1 0.005 0.0001" contype="4" conaffinity="9"/>
+      <geom name="candy_4_geom" type="sphere" size="0.012" mass="0.02" rgba="0.55 0.22 0.85 1" material="candy_purple" friction="1 0.005 0.0001" group="2" contype="4" conaffinity="9"/>
     </body>
     <body name="candy_5" pos="0.36 0.1 0.008">
       <freejoint name="candy_5_free"/>
-      <geom name="candy_5_geom" type="capsule" fromto="-0.008 0 0 0.008 0 0" size="0.008" mass="0.02" rgba="0.38 0.82 0.18 1" material="candy_green" friction="1 0.005 0.0001" contype="4" conaffinity="9"/>
+      <geom name="candy_5_geom" type="capsule" fromto="-0.008 0 0 0.008 0 0" size="0.008" mass="0.02" rgba="0.38 0.82 0.18 1" material="candy_green" friction="1 0.005 0.0001" group="2" contype="4" conaffinity="9"/>
     </body>
     <body name="hand" mocap="true" pos="0.55 1.1 0.3" quat="0.707107 0 0 0.707107">
-      <geom name="hand_palm" type="sphere" size="0.05" rgba="0.87 0.67 0.53 1" contype="0" conaffinity="0"/>
-      <geom name="hand_forearm" type="capsule" fromto="0 0 0 0.3 0 0" size="0.04" rgba="0.87 0.67 0.53 1" contype="0" conaffinity="0"/>
-      <geom name="hand_sleeve" type="capsule" fromto="0.17 0 0 0.3 0 0" size="0.046" rgba="0.16 0.08 0.24 1" contype="0" conaffinity="0"/>
-      <geom name="hand_thumb" type="capsule" fromto="-0.02 0.05 0 -0.07 0.075 0" size="0.011" rgba="0.87 0.67 0.53 1" contype="0" conaffinity="0"/>
-      <geom name="hand_finger_0" type="capsule" fromto="-0.04 -0.03 0 -0.115 -0.03 0" size="0.009" rgba="0.87 0.67 0.53 1" contype="0" conaffinity="0"/>
-      <geom name="hand_finger_1" type="capsule" fromto="-0.04 -0.01 0 -0.11 -0.01 0" size="0.009" rgba="0.87 0.67 0.53 1" contype="0" conaffinity="0"/>
-      <geom name="hand_finger_2" type="capsule" fromto="-0.04 0.01 0 -0.115 0.01 0" size="0.009" rgba="0.87 0.67 0.53 1" contype="0" conaffinity="0"/>
-      <geom name="hand_finger_3" type="capsule" fromto="-0.04 0.03 0 -0.11 0.03 0" size="0.009" rgba="0.87 0.67 0.53 1" contype="0" conaffinity="0"/>
+      <geom name="hand_palm" type="sphere" size="0.05" rgba="0.87 0.67 0.53 1" group="2" contype="0" conaffinity="0"/>
+      <geom name="hand_forearm" type="capsule" fromto="0 0 0 0.3 0 0" size="0.04" rgba="0.87 0.67 0.53 1" group="2" contype="0" conaffinity="0"/>
+      <geom name="hand_sleeve" type="capsule" fromto="0.17 0 0 0.3 0 0" size="0.046" rgba="0.16 0.08 0.24 1" group="2" contype="0" conaffinity="0"/>
+      <geom name="hand_thumb" type="capsule" fromto="-0.02 0.05 0 -0.07 0.075 0" size="0.011" rgba="0.87 0.67 0.53 1" group="2" contype="0" conaffinity="0"/>
+      <geom name="hand_finger_0" type="capsule" fromto="-0.04 -0.03 0 -0.115 -0.03 0" size="0.009" rgba="0.87 0.67 0.53 1" group="2" contype="0" conaffinity="0"/>
+      <geom name="hand_finger_1" type="capsule" fromto="-0.04 -0.01 0 -0.11 -0.01 0" size="0.009" rgba="0.87 0.67 0.53 1" group="2" contype="0" conaffinity="0"/>
+      <geom name="hand_finger_2" type="capsule" fromto="-0.04 0.01 0 -0.115 0.01 0" size="0.009" rgba="0.87 0.67 0.53 1" group="2" contype="0" conaffinity="0"/>
+      <geom name="hand_finger_3" type="capsule" fromto="-0.04 0.03 0 -0.11 0.03 0" size="0.009" rgba="0.87 0.67 0.53 1" group="2" contype="0" conaffinity="0"/>
     </body>
   </worldbody>
 </mujoco>

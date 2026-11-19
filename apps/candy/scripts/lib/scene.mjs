@@ -1,7 +1,7 @@
 // Writes robot/scene.xml: a wooden doorstep table with a felt tray, three bowls, six candies, a mocap hand,
 // lights and a night backdrop. The output depends only on the numbers in consts.mjs: no clock, no randomness.
 import {
-  BOWL, BOWLS, CANDY_COUNT, CANDY_HALF_HEIGHT, CANDY_MASS, COLOURS, CONAFFINITY, CONTYPE, FLOOR_Z, HAND, HAND_START,
+  BOWL, BOWLS, BOWL_CONTACT, CANDY_COUNT, CANDY_HALF_HEIGHT, CANDY_MASS, COLOURS, CONAFFINITY, CONTYPE, FLOOR_Z, HAND, HAND_START,
   NUSERDATA, SIM_DT, TABLE, TRAY,
 } from './consts.mjs';
 
@@ -19,6 +19,8 @@ const WOOD_DARK = [0.17, 0.10, 0.055, 1];
 const SKIN = [0.87, 0.67, 0.53, 1];
 const SLEEVE = [0.16, 0.08, 0.24, 1];
 const COLOUR_NAMES = ['orange', 'purple', 'green'];
+/** solref of the bowl geoms: overdamped, so that a candy landing in a bowl does not bounce out. The table and the candies keep the MuJoCo default. */
+const BOWL_SOLREF = `${f(BOWL_CONTACT.timeConstant)} ${f(BOWL_CONTACT.dampRatio)}`;
 
 /** Orthonormal camera axes (`xyaxes`) for a camera at `eye` looking at `target` with +z up. */
 export function lookAtXyAxes(eye, target) {
@@ -34,7 +36,7 @@ export function lookAtXyAxes(eye, target) {
 /** @returns {string} the geom lines of a decorative jack-o'-lantern in the back-left corner (visual only) */
 function pumpkin() {
   const x = -0.10, y = 0.44;
-  const vis = 'contype="0" conaffinity="0"';
+  const vis = 'group="2" contype="0" conaffinity="0"';
   return [
     `<geom name="pumpkin_body" type="ellipsoid" size="0.075 0.075 0.060" pos="${vec([x, y, 0.060])}" rgba="0.95 0.42 0.05 1" material="candy_orange" ${vis}/>`,
     `<geom name="pumpkin_stem" type="cylinder" size="0.011 0.016" pos="${vec([x, y, 0.126])}" rgba="0.30 0.38 0.12 1" ${vis}/>`,
@@ -48,9 +50,9 @@ function pumpkin() {
 function tableXml() {
   const cx = (TABLE.xMin + TABLE.xMax) / 2, hx = (TABLE.xMax - TABLE.xMin) / 2;
   const hy = (TABLE.yMax - TABLE.yMin) / 2, ht = TABLE.thickness / 2;
-  const vis = 'contype="0" conaffinity="0"';
+  const vis = 'group="2" contype="0" conaffinity="0"';
   const lines = [];
-  lines.push(`<geom name="table" type="box" size="${vec([hx, hy, ht])}" pos="${vec([cx, 0, -ht])}" rgba="${vec(WOOD_DARK)}" material="wood_dark" contype="${CONTYPE.world}" conaffinity="${CONAFFINITY.world}"/>`);
+  lines.push(`<geom name="table" type="box" size="${vec([hx, hy, ht])}" pos="${vec([cx, 0, -ht])}" rgba="${vec(WOOD_DARK)}" material="wood_dark" group="2" contype="${CONTYPE.world}" conaffinity="${CONAFFINITY.world}"/>`);
   // Planks run along x. A 3 mm gap between boards shows the dark base.
   const planks = 12;
   const w = (TABLE.yMax - TABLE.yMin) / planks;
@@ -79,7 +81,7 @@ function tableXml() {
 function trayXml() {
   const cx = (TRAY.xMin + TRAY.xMax) / 2, cy = (TRAY.yMin + TRAY.yMax) / 2;
   const hx = (TRAY.xMax - TRAY.xMin) / 2, hy = (TRAY.yMax - TRAY.yMin) / 2;
-  const vis = 'contype="0" conaffinity="0"';
+  const vis = 'group="2" contype="0" conaffinity="0"';
   const t = 0.004;
   const z = 0.0005;
   return [
@@ -96,12 +98,12 @@ function bowlXml(i) {
   const b = /** @type {{ name: string, x: number, y: number }} */ (BOWLS[i]);
   const rgba = vec(/** @type {number[]} */ (COLOURS[i]));
   const mat = `candy_${COLOUR_NAMES[i]}`;
-  const { innerHalf: ih, wallThickness: wt, wallHeight: wh, floorRadius: fr, floorHalfHeight: fh } = BOWL;
-  const attrs = `rgba="${rgba}" material="${mat}" contype="${CONTYPE.world}" conaffinity="${CONAFFINITY.world}"`;
+  const { innerHalf: ih, wallThickness: wt, wallHeight: wh, floorRadius: fr, floorHalfHeight: fh, floorSink: fs } = BOWL;
+  const attrs = `rgba="${rgba}" material="${mat}" group="2" contype="${CONTYPE.world}" conaffinity="${CONAFFINITY.world}" solref="${BOWL_SOLREF}"`;
   const mid = ih + wt / 2;
   const half = ih + wt;
   return `<body name="${b.name}" pos="${vec([b.x, b.y, 0])}">
-      <geom name="${b.name}_floor" type="cylinder" size="${vec([fr, fh])}" pos="0 0 ${f(fh)}" ${attrs}/>
+      <geom name="${b.name}_floor" type="cylinder" size="${vec([fr, fh + fs / 2])}" pos="0 0 ${f(fh - fs / 2)}" ${attrs}/>
       <geom name="${b.name}_wall_px" type="box" size="${vec([wt / 2, half, wh / 2])}" pos="${vec([mid, 0, wh / 2])}" ${attrs}/>
       <geom name="${b.name}_wall_nx" type="box" size="${vec([wt / 2, half, wh / 2])}" pos="${vec([-mid, 0, wh / 2])}" ${attrs}/>
       <geom name="${b.name}_wall_py" type="box" size="${vec([ih, wt / 2, wh / 2])}" pos="${vec([0, mid, wh / 2])}" ${attrs}/>
@@ -120,14 +122,14 @@ function candyXml(i) {
   const x = 0.36, y = -0.10 + 0.04 * i;
   return `<body name="candy_${i}" pos="${vec([x, y, h])}">
       <freejoint name="candy_${i}_free"/>
-      <geom name="candy_${i}_geom" ${shape} mass="${f(CANDY_MASS)}" rgba="${rgba}" material="candy_${COLOUR_NAMES[colour]}" friction="1 0.005 0.0001" contype="${CONTYPE.candy}" conaffinity="${CONAFFINITY.candy}"/>
+      <geom name="candy_${i}_geom" ${shape} mass="${f(CANDY_MASS)}" rgba="${rgba}" material="candy_${COLOUR_NAMES[colour]}" friction="1 0.005 0.0001" group="2" contype="${CONTYPE.candy}" conaffinity="${CONAFFINITY.candy}"/>
     </body>`;
 }
 
 /** @returns {string} the mocap hand: collision-free palm and forearm, plus visual fingers and a sleeve */
 function handXml() {
   const q = [Math.cos(HAND_START.yaw / 2), 0, 0, Math.sin(HAND_START.yaw / 2)];
-  const vis = 'contype="0" conaffinity="0"';
+  const vis = 'group="2" contype="0" conaffinity="0"';
   const skin = vec(SKIN);
   const fingers = [-0.03, -0.01, 0.01, 0.03].map((y, i) =>
     `<geom name="hand_finger_${i}" type="capsule" fromto="${vec([-0.04, y, 0, -0.115 - 0.005 * (i % 2 === 0 ? 0 : -1), y, 0])}" size="0.009" rgba="${skin}" ${vis}/>`);
@@ -180,7 +182,7 @@ export function writeScene(pandaFile = 'panda.xml') {
     <light name="lantern" pos="0.95 -0.95 1.60" dir="-0.40 0.45 -0.80" cutoff="52" exponent="8" diffuse="1.0 0.72 0.40" specular="0.55 0.45 0.30" castshadow="true"/>
     <light name="moon" pos="-0.6 1.3 1.8" dir="0.35 -0.75 -0.55" directional="true" diffuse="0.17 0.15 0.34" specular="0.08 0.08 0.16" castshadow="false"/>
     <camera name="studio" pos="${vec(eye)}" xyaxes="${vec(lookAtXyAxes(eye, target))}" fovy="38"/>
-    <geom name="floor" type="plane" size="4 4 0.05" pos="0 0 ${f(FLOOR_Z)}" material="floor" contype="${CONTYPE.world}" conaffinity="${CONAFFINITY.world}"/>
+    <geom name="floor" type="plane" size="4 4 0.05" pos="0 0 ${f(FLOOR_Z)}" material="floor" group="2" contype="${CONTYPE.world}" conaffinity="${CONAFFINITY.world}"/>
     ${tableXml()}
     ${trayXml()}
     ${pumpkin()}

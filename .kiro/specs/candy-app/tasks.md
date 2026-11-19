@@ -342,7 +342,7 @@ Conventions for every task:
     - **Validates: Requirements 15.7**
 
 - [ ] 15. Studio page
-  - **Skipped for now** (decision for this branch: the web/ studio page tasks 15.1 to 15.5 come later; only web/vite.config.ts from task 1.1 exists). The app exposes setRobotBase (app.ts) and the hand perturbation pply that the page needs.
+  - **Done differently** (branch build/candy2): the page is GOLEM's own studio (`mountStudio`), not a bespoke one, so 15.1 to 15.5 are replaced by `web/index.html`, `web/main.ts`, `web/worker.ts`, `web/vite.config.ts` (serves `robot/` at `/robot/`), and the skeleton option `dragBody` (`skeleton/src/ui/hero/drag.ts`) with `constrainDraggedHand` in `geometry.ts`. Tests: `test/p38-drag-hand.test.ts`, `test/p39-studio-page.test.ts`, `skeleton/src/ui/__tests__/drag.test.ts`. Not built: a separate HUD, a live worker and a candy tint from userdata (the studio draws the scene in clay).
   - [ ] 15.1 Implement `web/hand-drag.ts`
     - Pure helpers: pick-ray to plane `z = h` intersection, clamp to a 1.5 m disc about (0.40, 0), per-frame step limit of `3 m/s * dt`, keyboard step of 0.05 m, height slider range 0.05 m to 0.25 m with Page Up and Page Down steps of 0.05 m
     - Write `test/web.test.ts` (examples): clamp, speed limit, keyboard step, release leaves the hand in place

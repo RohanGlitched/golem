@@ -14,7 +14,8 @@ export function importSpecifiers(source: string): string[] {
   return out;
 }
 
-export const PUBLIC_ENTRIES = ['golem-spec', 'golem-spec/ui', 'golem-spec/node'];
+/** The entries of skeleton/package.json exports that an app may import. golem-spec/ui/worker is the worker side of the studio pool. */
+export const PUBLIC_ENTRIES = ['golem-spec', 'golem-spec/ui', 'golem-spec/ui/worker', 'golem-spec/node'];
 
 /** The specifiers that contain `skeleton/src`. */
 export function deepImports(source: string): string[] {

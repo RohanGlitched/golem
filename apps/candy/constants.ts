@@ -7,8 +7,12 @@ export const TRAY = { xMin: 0.34, xMax: 0.62, yMin: -0.16, yMax: 0.16 } as const
 export const WORKSPACE = { xMin: 0.15, xMax: 0.90, yMin: -0.55, yMax: 0.55, zMin: 0, zMax: 0.50 } as const;
 /** Floor height below the Table surface. */
 export const FLOOR_Z = -0.40;
-/** Origin of the hand-entry rays. */
-export const WORKSPACE_CENTRE = { x: 0.55, y: 0 } as const;
+/**
+ * The doorstep side. Trick-or-treaters stand beyond the Table edge that faces away from the Panda base (x = xMax), so a hand
+ * enters only there. halfAngle is half of the 120 degree arc of entry directions, measured at originX on the base axis:
+ * the arc ends at the two corners of that edge, so every entry point lies on it.
+ */
+export const DOORSTEP = { halfAngle: Math.PI / 3, originX: TABLE.xMax - TABLE.yMax / Math.tan(Math.PI / 3) } as const;
 
 /** Bowls in colour order: index 0 orange, 1 purple, 2 green. */
 export const BOWLS: readonly { name: string; x: number; y: number }[] = [
@@ -23,6 +27,8 @@ export const BOWL = {
   wallHeight: 0.05,
   floorRadius: 0.10,
   floorHalfHeight: 0.005,
+  /** The floor cylinder reaches this far below the Table surface, into the Table, so a candy cannot sink through it (proposal P9). */
+  floorSink: 0.02,
   /** Height above the Table at which a resting candy centre can lie inside the bowl. */
   zMax: 0.06,
 } as const;
@@ -71,6 +77,8 @@ export const PARK = { x: -0.60, dx: -0.05, y: 0.90, z: -0.38 } as const;
 
 export const CONTYPE = { world: 1, arm: 2, candy: 4, cup: 8 } as const;
 export const CONAFFINITY = { world: 14, arm: 1, candy: 9, cup: 5 } as const;
+/** solref of the bowl geoms (time constant in s, damping ratio). A damping ratio of 4 makes the landing in a bowl inelastic: a 20 g candy that lands at 1.2 m/s with spin no longer bounces out (proposal P9). */
+export const BOWL_CONTACT = { timeConstant: 0.02, dampRatio: 4 } as const;
 
 // ---------------------------------------------------------------- suction
 
@@ -130,3 +138,10 @@ export const NUSERDATA = 24;
 export const UD = {
   vacuum: 0, lag: 1, count: 2, switch: 3, target: 4, warnCount: 5, warnValue: 6, colour: 8,
 } as const;
+
+// ---------------------------------------------------------------- studio hand
+
+/** Radius (m) of the base column around the base axis that a dragged Hand keeps out of: the Panda base plus the palm radius and a margin. */
+export const BASE_KEEP_OUT = 0.22;
+/** Where the studio lets the pointer carry the Hand (m): beside and beyond the Table, never far from it and never behind the base (xMin 0 also keeps the push out of the base column inside the area). */
+export const HAND_DRAG_AREA = { xMin: 0, xMax: 1.45, yMin: -1.20, yMax: 1.20 } as const;

@@ -1,6 +1,6 @@
 {
   "commit": "370c43965323c0944b433b202aac5058b5f907a9",
-  "scriptVersion": 3,
+  "scriptVersion": 8,
   "sources": {
     "panda_nohand.xml": "f05c9674dbc6081c8f096133d8537bdd977f87ec8eeb6264a77a9295ae88af09",
     "LICENSE": "a6cba85bc92e0cff7a450b1d873c0eaa2e9fc96bf472df0247a26bec77bf3ff9",
@@ -126,6 +126,6 @@
     "assets/link7_6.obj": "26a69c160d0df22d5cd6a5df5abc0827733b0297421811464379998e435a7397",
     "assets/link7_7.obj": "771a1bcac8e26cae3842b4cbd11ea1ef6b793bb59da6b376cada0cf059d4be6d",
     "panda.xml": "f7a2e4e8f25bfc35b668133f7dcbf676f43623f8f25661653b641b1361612484",
-    "scene.xml": "5ed29345c4583c416df2a9cec9afb2659736486c25c23527ecad9965fb856ff0"
+    "scene.xml": "f0e5285ee242bbe64c7e275c611dbac6505f14870e4b5f16d278fba87bd754b5"
   }
 }
