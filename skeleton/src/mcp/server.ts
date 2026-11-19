@@ -6,8 +6,8 @@ import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprot
 import type { ParsedCommand } from '../cli/args.js';
 import { ConfigError, locateApp } from '../cli/config.js';
 import type { CliIo, KitDeps } from '../cli/deps.js';
-import type { TrialPool } from '../cli/sibling-types.js';
-import { MissingFileError, compileAll } from '../cli/service.js';
+import type { RobotApp, TrialPool } from '../cli/sibling-types.js';
+import { MissingFileError, compileAll, loadExpectations } from '../cli/service.js';
 import { withTimeCap } from './cap.js';
 import { FifoQueue, WriteQueue } from './queue.js';
 import { makeToolResult, type ToolResult } from './result.js';
@@ -81,6 +81,32 @@ export async function createGolemServer(o: GolemServerOptions): Promise<GolemSer
     try { await p?.close(); } catch (e) { log(`golem mcp: closing the pool failed: ${(e as Error).message}`); }
   };
 
+  /**
+   * The app and its pool are loaded once, so after an edit to the controller they would answer with the old code. When a file
+   * under the app directory is newer than the load, wait for the run in progress (the queue), load the module again and drop
+   * the pool; the next call that needs trials starts workers on the new code. Returns an error text when the reload fails,
+   * which stays true until the files compile again.
+   */
+  const refreshApp = async (signal: AbortSignal): Promise<string | undefined> => {
+    const app = o.app;
+    if (o.deps.appChanged === undefined || app.robotApp === undefined || 'error' in app.located) return undefined;
+    if (!(await o.deps.appChanged(app.robotApp))) return undefined;
+    const located = app.located;
+    return runQueue.run(async () => {
+      // Another call may have reloaded while this one waited.
+      if (app.robotApp === undefined || !(await o.deps.appChanged?.(app.robotApp))) return undefined;
+      try {
+        const next = await o.deps.loadApp(located.config.app, located.appDir);
+        await dropPool();
+        app.robotApp = next;
+        log('golem mcp: the app changed on disk; reloaded it and dropped the pool');
+        return undefined;
+      } catch (e) {
+        return `the app changed on disk but could not be reloaded: ${(e as Error).message}. Fix it and call again; results would come from the old code`;
+      }
+    }, signal);
+  };
+
   const server = new Server({ name: 'golem', version: '0.1.0' }, { capabilities: { tools: {} } });
 
   server.setRequestHandler(ListToolsRequestSchema, async () => ({
@@ -96,14 +122,17 @@ export async function createGolemServer(o: GolemServerOptions): Promise<GolemSer
     const valid = validateInput(def.inputSchema, req.params.arguments);
     if (!valid.ok) return errorResult(`invalid input: ${valid.message}`, { field: valid.field });
     const located = o.app.located;
-    const robotApp = o.app.robotApp;
     let usedPool = false;
     try {
-      const capped = await withTimeCap(o.app.toolTimeCapS, extra.signal, (signal, capFired) => {
+      const capped = await withTimeCap(o.app.toolTimeCapS, extra.signal, async (signal, capFired) => {
+        const stale = await refreshApp(signal);
+        if (stale !== undefined) return errorResult(stale);
+        const robotApp = o.app.robotApp as RobotApp;
         const ctx: ToolCtx = {
           signal, capFired, deps: o.deps, app: o.app, located, robotApp,
           getPool: async () => { usedPool = true; return getPool(); },
           compile: () => compileAll(located, robotApp, o.deps),
+          expectations: () => loadExpectations(located, o.deps),
           runQueue, writeQueue,
         };
         const running = def.handler(valid.value, ctx);
@@ -139,7 +168,7 @@ export async function runStdioServer(p: ParsedCommand, io: CliIo, deps: KitDeps,
   try {
     const located = await locateApp(io.cwd, appFlag, deps.fs);
     try {
-      ctx = { located, robotApp: await deps.loadApp(located.config.app), toolTimeCapS: located.config.toolTimeCapS ?? 60 };
+      ctx = { located, robotApp: await deps.loadApp(located.config.app, located.appDir), toolTimeCapS: located.config.toolTimeCapS ?? 60 };
     } catch (e) {
       ctx = { located: { error: `cannot load the app ${located.config.app}: ${(e as Error).message}` }, toolTimeCapS: located.config.toolTimeCapS ?? 60 };
     }

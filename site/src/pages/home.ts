@@ -155,7 +155,7 @@ ${ringsSection(d)}
 <h2 id="problem">Agents ship demos, not evidence</h2>
 <p class="lede">An AI coding agent can write a walking controller in an afternoon. What it hands back is a video of the robot walking.</p>
 <p>The spec says the robot must stay upright after a push of up to 250 N. The video shows one push. Nothing ties the claim to the sentence, and nothing says what happens at ${fmt(h.weakN)} N from the wrong side.</p>
-<p>GOLEM ties them together. On the G1 controller in this repository, <code>golem gate</code> exits with code ${gate.exit} and names ${gate.broken} of the ${gate.total} lines as not held. Kiro’s claim of “done” has to survive that.</p>
+<p>GOLEM ties them together. On the G1 controller in this repository, <code>golem gate</code> exits with code ${gate.exit} and names ${gate.broken} of the ${gate.total} lines as not meeting their expectation (a line marked Expected_Break passes when it breaks). Kiro’s claim of “done” has to survive that.</p>
 
 <section class="bleed" aria-labelledby="how"><div class="bleed-in">
 <h2 id="how">How it works</h2>

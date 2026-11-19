@@ -3,7 +3,8 @@
 import { readFileSync } from 'node:fs';
 import type { TrialPool, TrialSpec } from 'golem-spec';
 import { appendJsonl, readJsonl } from './core/jsonl.js';
-import { bisectCell, cellKey, cellScenario, planCells, sortRows, summarizeMap, type Cell, type MapParams, type MapRow, type MapSummary } from './core/map.js';
+import { intFlag, numFlag } from './lib/args.js';
+import { BASE_SEED, bisectCell, cellKey, cellScenario, planCells, sortRows, summarizeMap, type Cell, type MapParams, type MapRow, type MapSummary } from './core/map.js';
 
 export const MAP_REQUIREMENTS_FILE = new URL('../requirements/map-g1.md', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1');
 
@@ -14,6 +15,27 @@ export function mapLine(): string {
 }
 
 export const DEFAULT_PARAMS = { dirs: 36, phases: 5, seeds: 3, steps: 8, fmax: 400 } as const;
+
+/**
+ * The map parameters from the command line. `--dir-offset <deg>` shifts every direction and `--seed-base <n>` sets the first seed,
+ * to re-run the map on held-out directions and seeds. A run that sets neither has exactly the default parameters.
+ */
+export function mapParamsFromFlags(flags: Record<string, string | true>, line: string): MapParams {
+  const dirOffset = numFlag(flags, 'dir-offset');
+  const seedBase = flags['seed-base'] !== undefined ? intFlag(flags, 'seed-base', BASE_SEED) : undefined;
+  if (flags['verify'] === true && (dirOffset !== undefined || seedBase !== undefined)) {
+    throw new Error('--verify compares with the committed map, which uses the default directions and seeds; drop --dir-offset and --seed-base');
+  }
+  return {
+    line,
+    dirs: intFlag(flags, 'dirs', DEFAULT_PARAMS.dirs), phases: intFlag(flags, 'phases', DEFAULT_PARAMS.phases),
+    seeds: intFlag(flags, 'seeds', DEFAULT_PARAMS.seeds), steps: intFlag(flags, 'steps', DEFAULT_PARAMS.steps),
+    fmax: intFlag(flags, 'fmax', DEFAULT_PARAMS.fmax),
+    // Only a run that sets them records them, so a default run keeps the committed summary shape.
+    ...(dirOffset !== undefined ? { dirOffset } : {}),
+    ...(seedBase !== undefined ? { seedBase } : {}),
+  };
+}
 
 export interface MapRunOptions {
   params: MapParams;

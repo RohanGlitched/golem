@@ -17,7 +17,7 @@
     },
     {
       "rel": "hooks/golem-guard-requirements.mjs",
-      "sha256": "fb3e98e7670f3569c31839f9e7eeab6de390bf0bc5ebfd8a1ddfeb0a613daf27",
+      "sha256": "742ff25a44ba874c701230f964d208fc7ceb2777b6788c84369a723135732a60",
       "kind": "copy"
     },
     {

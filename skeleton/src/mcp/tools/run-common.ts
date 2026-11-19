@@ -1,5 +1,6 @@
 // Shared by `run_requirement` and `falsify`: one falsification at a time, pin and report before returning,
 // and a partial verdict built from the trial stream when the time cap ends the run (assumption A12).
+import { expectationMiss, expectationTag, type Expectation } from '../../cli/expectation.js';
 import { formatMargin, formatScenario } from '../../cli/format.js';
 import { writeRunReport } from '../../cli/service.js';
 import type { RequirementOutcome, RunOptions } from '../../cli/types.js';
@@ -10,7 +11,20 @@ import { errorResult, findRequirement } from './util.js';
 
 interface Seen { trials: number; lowest: number; scenario: Record<string, number>; seed: number; unit: string | undefined }
 
-export function verdictSummary(o: RequirementOutcome): string {
+/**
+ * The verdict sentence. With a row in the Expectation table the tag follows the status word (`1.3 broken [Expected_Hold: NOT met]: ...`),
+ * so the 200-character summary limit cannot cut it off; a held line that was meant to break also says why at the end.
+ */
+export function verdictSummary(o: RequirementOutcome, expectation?: Expectation): string {
+  const base = verdictSentence(o);
+  if (expectation === undefined) return base;
+  const at = base.indexOf(':');
+  const tagged = `${base.slice(0, at)} ${expectationTag(o.verdict.status, expectation)}${base.slice(at)}`;
+  const miss = expectationMiss(o.verdict.status, expectation, o.verdict.trials);
+  return o.verdict.status === 'held' && miss !== '' ? `${tagged}; ${miss}` : tagged;
+}
+
+function verdictSentence(o: RequirementOutcome): string {
   const v = o.verdict;
   const id = v.reqId;
   if (v.status === 'error') return `${id} error: ${o.meta.errors[0]?.message ?? 'the run failed without a message'}`;
@@ -23,9 +37,10 @@ export function verdictSummary(o: RequirementOutcome): string {
   return `${id} held: no counterexample found in ${v.trials} trials (closest margin ${formatMargin(v.closest.robustness, o.unit)})`;
 }
 
-export function verdictJson(o: RequirementOutcome): Record<string, unknown> {
+export function verdictJson(o: RequirementOutcome, expectation?: Expectation): Record<string, unknown> {
   const v = o.verdict;
   return {
+    ...(expectation !== undefined ? { expectation, meetsExpectation: expectationMiss(v.status, expectation, v.trials) === '' } : {}),
     reqId: v.reqId, status: v.status, trials: v.trials, randomTrials: v.randomTrials, guidedTrials: v.guidedTrials,
     closest: { ...v.closest, unit: o.unit ?? null },
     ...(v.counterexample !== undefined ? { counterexample: { ...v.counterexample, unit: o.unit ?? null } } : {}),
@@ -63,7 +78,9 @@ export async function runTool(args: Record<string, unknown>, ctx: ToolCtx, mode:
     const outcome = outcomes[0];
     if (outcome === undefined) return errorResult(`no result for ${reqId}`);
     await writeRunReport(ctx.deps, ctx.located, [outcome], { reqId }, (ctx.deps.clock() - t0) / 1000, () => undefined);
-    return makeToolResult(verdictSummary(outcome), verdictJson(outcome), outcome.verdict.status === 'error');
+    const { byId } = await ctx.expectations();
+    const expectation = byId.get(reqId);
+    return makeToolResult(verdictSummary(outcome, expectation), verdictJson(outcome, expectation), outcome.verdict.status === 'error');
   }, ctx.signal);
 }
 

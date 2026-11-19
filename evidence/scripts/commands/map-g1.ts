@@ -2,7 +2,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { performance } from 'node:perf_hooks';
 import { compareRows, type MapRow } from '../core/map.js';
 import { readJsonl, stableStringify } from '../core/jsonl.js';
-import { DEFAULT_PARAMS, MAP_REQUIREMENTS_FILE, mapLine, mapSummary, runMap } from '../map-g1.js';
+import { MAP_REQUIREMENTS_FILE, mapLine, mapParamsFromFlags, mapSummary, runMap } from '../map-g1.js';
 import { openEngine } from '../lib/engine.js';
 import { intFlag, listFlag } from '../lib/args.js';
 import { defaultResultsDir, gitCommit, gitDirty, repoRoot } from '../lib/meta.js';
@@ -13,12 +13,7 @@ export async function run(flags: Flags): Promise<void> {
   const out = typeof flags['out'] === 'string' ? (flags['out'] as string) : defaultResultsDir;
   const size = flags['size'] !== undefined ? intFlag(flags, 'size', 1) : undefined;
   const dirIndices = listFlag(flags, 'dir-indices')?.map(Number);
-  const params = {
-    line: mapLine(),
-    dirs: intFlag(flags, 'dirs', DEFAULT_PARAMS.dirs), phases: intFlag(flags, 'phases', DEFAULT_PARAMS.phases),
-    seeds: intFlag(flags, 'seeds', DEFAULT_PARAMS.seeds), steps: intFlag(flags, 'steps', DEFAULT_PARAMS.steps),
-    fmax: intFlag(flags, 'fmax', DEFAULT_PARAMS.fmax),
-  };
+  const params = mapParamsFromFlags(flags, mapLine());
   mkdirSync(out, { recursive: true });
   const outPath = `${out}/g1-map.jsonl`;
   const t0 = performance.now();

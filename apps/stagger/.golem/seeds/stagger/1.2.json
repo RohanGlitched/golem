@@ -1,21 +1,69 @@
 [
   {
-    "boundarySensitive": true,
-    "classification": "seed-sensitive",
-    "foundAfter": 44,
+    "boundarySensitive": false,
+    "classification": "robust",
+    "foundAfter": 10,
     "reqId": "1.2",
-    "robustness": -0.15092292194139256,
+    "robustness": -0.3389967172856131,
     "scenario": {
-      "push.angle": 3.8424259129234306,
-      "push.force": 219.58227781415692,
-      "push.phase": 0.5350791343573453
+      "push.angle": 3.832664750122226,
+      "push.force": 222.66150839847398,
+      "push.phase": 0.07149233932432253
     },
-    "seed": 1076273446,
-    "shrunk": false,
+    "seed": 2205968643,
+    "shrunk": true,
     "verificationRobustness": [
-      0.1240048420169041,
-      -0.15788180366889015,
-      0.12384149648910003
+      -0.41699489562616865,
+      -0.3633821314099184,
+      -0.3628992402041412
+    ],
+    "verificationSeeds": [
+      1448352424,
+      3254842707,
+      1536383744
+    ]
+  },
+  {
+    "boundarySensitive": true,
+    "classification": "robust",
+    "foundAfter": 1,
+    "reqId": "1.2",
+    "robustness": -0.3182571254843644,
+    "scenario": {
+      "push.angle": 3.832664750122226,
+      "push.force": 215.70333626102166,
+      "push.phase": 0.07149233932432253
+    },
+    "seed": 2205968643,
+    "shrunk": true,
+    "verificationRobustness": [
+      -0.4473958351805292,
+      -0.4470862787145983,
+      -0.38602260157982554
+    ],
+    "verificationSeeds": [
+      1448352424,
+      3254842707,
+      1536383744
+    ]
+  },
+  {
+    "boundarySensitive": true,
+    "classification": "robust",
+    "foundAfter": 15,
+    "reqId": "1.2",
+    "robustness": -0.4386339233006149,
+    "scenario": {
+      "push.angle": 3.1288854751943016,
+      "push.force": 201.4121552385221,
+      "push.phase": 0.5598107410287306
+    },
+    "seed": 3844575921,
+    "shrunk": true,
+    "verificationRobustness": [
+      -0.43825714277017624,
+      -0.3403312149709713,
+      -0.3344420692725636
     ],
     "verificationSeeds": [
       1448352424,

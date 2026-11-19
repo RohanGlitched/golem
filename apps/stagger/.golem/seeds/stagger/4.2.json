@@ -1,19 +1,19 @@
 [
   {
-    "boundarySensitive": true,
+    "boundarySensitive": false,
     "classification": "robust",
     "foundAfter": 6,
     "reqId": "4.2",
-    "robustness": -0.026535794649089006,
+    "robustness": -0.37604317035220197,
     "scenario": {
-      "payload.mass": 15.019522691763996
+      "payload.mass": 15.473945329495109
     },
-    "seed": 4080057767,
+    "seed": 3160059130,
     "shrunk": true,
     "verificationRobustness": [
-      -0.047408267736910925,
-      -0.03203541321136705,
-      -0.02810553172461322
+      -0.5427682900902424,
+      -0.5769761279945951,
+      -0.5888567179167861
     ],
     "verificationSeeds": [
       1448352424,
@@ -23,19 +23,41 @@
   },
   {
     "boundarySensitive": true,
-    "classification": "seed-sensitive",
+    "classification": "robust",
     "foundAfter": 1,
     "reqId": "4.2",
-    "robustness": -0.06060503764135344,
+    "robustness": -0.40963216410018505,
     "scenario": {
-      "payload.mass": 14.90218267073459
+      "payload.mass": 14.990384537948387
     },
-    "seed": 4080057767,
+    "seed": 3160059130,
     "shrunk": true,
     "verificationRobustness": [
-      0.13954851804695034,
-      0.14191676998754565,
-      0.14030016188335948
+      -0.3427613331592086,
+      -0.4397562962651049,
+      -0.439473982662172
+    ],
+    "verificationSeeds": [
+      1448352424,
+      3254842707,
+      1536383744
+    ]
+  },
+  {
+    "boundarySensitive": true,
+    "classification": "robust",
+    "foundAfter": 2,
+    "reqId": "4.2",
+    "robustness": -0.42985414568500435,
+    "scenario": {
+      "payload.mass": 15.232164933721748
+    },
+    "seed": 3160059130,
+    "shrunk": true,
+    "verificationRobustness": [
+      -0.40635158858665366,
+      -0.43856039440696093,
+      -0.3884230355461652
     ],
     "verificationSeeds": [
       1448352424,

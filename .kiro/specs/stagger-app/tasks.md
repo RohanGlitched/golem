@@ -219,17 +219,21 @@ Conventions for every task:
     - **Validates: Requirements 18.12, 18.13**
 
 - [ ] 9. Studio page
+  - **Status:** the studio is live at `/stagger/` but was built differently from this plan, so 9.3 is ticked and 9.1 and 9.2 stay open. `apps/stagger/web/` holds only `.gitkeep`: the page is `site/stagger/index.html` with `site/src/studio/stagger.ts`, which mounts GOLEM's own studio (`mountSiteStudio` over `golem-spec/ui`) on this app and its requirements file. There is no `web/copy.ts`, so there is no `STUDIO_COPY`, no `formatCounterexample` and no `test/copy.test.ts` yet. This parent stays open until they exist or the tasks are rewritten.
   - [ ] 9.1 Implement `web/copy.ts`
+    - **Open: not built.** Nothing in the repository defines `STUDIO_COPY` or `formatCounterexample`.
     - `STUDIO_COPY` (sentence case, at most 72 characters per line, units on every number, no safety or certification claim) covering robot description, Unitree policy with links to the repo and Pinned_Commit, BSD-3-Clause with a link to `robot/LICENSE`, shove instructions, and the "no counterexample found within N trials, not a proof" statement
     - `formatCounterexample(scenario)` returns `falls from <force> N at <angle> deg, <phase>% into the stride`
     - Write `test/copy.test.ts` (examples): required statements and links present, every line within 72 characters, no forbidden claims, example counterexample sentence
     - _Requirements: 20.1, 20.2, 20.3, 20.4, 20.5, 20.6, 20.7, 20.8, 20.9, 20.10_
 
   - [ ]* 9.2 Write property test for the counterexample sentence
+    - **Open: depends on 9.1.**
     - **Property 36: Counterexample sentence is complete and fits the measure**
     - **Validates: Requirements 20.8, 20.9**
 
-  - [ ] 9.3 Implement the studio page (`web/index.html`, `main.ts`, `worker.ts`, `vite.config.ts`)
+  - [x] 9.3 Implement the studio page (`web/index.html`, `main.ts`, `worker.ts`, `vite.config.ts`)
+    - **Done differently:** served from `site/stagger/index.html` and `site/src/studio/stagger.ts`, built by the site's Vite config, not from `apps/stagger/web/`. `test/web.test.ts` was not written; `site/tests/site.test.ts` renders the page.
     - Vite multi-page entry with `optimizeDeps.exclude: ['@mujoco/mujoco']`; page built from `golem-spec/ui` stage, ghosts, aura, tablet and reel
     - Buttons `Shove`, `Summon 64 ghosts`, `Replay the fall`, `Pin this seed`; tablet shows each requirement line with editable quantities and recompiles on edit; render on demand with pixel ratio capped at 1.5; reduced-motion handling; one MuJoCo instance per worker speaking the `TrialPool` message protocol; load failure shows `Could not load <file>. Reload the page.`; no network except own-origin static assets and no analytics
     - Write `test/web.test.ts` (examples with DOM stubs): button labels, `optimizeDeps.exclude`, load-failure message names the file, reduced-motion branch, no analytics script, no `skeleton/src` import
@@ -246,7 +250,8 @@ Conventions for every task:
     - **Property 37: The import scan flags exactly the forbidden imports**
     - **Validates: Requirements 10.2, 10.3, 10.8**
 
-- [ ] 11. Final checkpoint - Ensure all tests pass
+- [x] 11. Final checkpoint - Ensure all tests pass
+  - Run on this branch: `npx vitest run` in `apps/stagger` (32 files, 210 tests) and `tsc --noEmit` pass. Tasks 9.1 and 9.2 are still open, so the tests that would cover them do not exist.
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes

@@ -49,7 +49,13 @@ export interface KitDeps {
   packRoot: string;
   /** Absolute path of `skeleton/starter`, the cart-pole robot `golem init` writes into an empty project. Without it init writes none. */
   starterRoot?: string;
-  loadApp(modulePath: string): Promise<RobotApp>;
+  /** `appDir` is the directory whose files `appChanged` watches (default: the folder of the module). */
+  loadApp(modulePath: string, appDir?: string): Promise<RobotApp>;
+  /**
+   * True when a source or model file under the app directory is newer than it was when `app` was loaded, so a long-lived
+   * process (the MCP server) must call loadApp again and recreate its pool. Absent in test deps: nothing ever changes.
+   */
+  appChanged?(app: RobotApp): Promise<boolean>;
   compileFile: typeof compileRequirementsFile;
   compileLine: typeof compileRequirement;
   falsify: typeof falsify;
@@ -74,7 +80,7 @@ export class TraceUnavailableError extends Error {
 
 /** Real Node dependencies. Every heavy module (sim, pool, MuJoCo, esbuild) is loaded by `await import()` inside a function. */
 export function createDefaultDeps(): KitDeps {
-  const modulesOfApp = new WeakMap<RobotApp, { moduleUrl: string; modulePath: string }>();
+  const modulesOfApp = new WeakMap<RobotApp, { moduleUrl: string; modulePath: string; appDir: string; stamp: number }>();
   let runner: ReturnType<typeof import('./adapters/trace.js').createTraceRunner> | undefined;
   const slash = (p: string): string => p.replace(/\\/g, '/');
 
@@ -96,11 +102,20 @@ export function createDefaultDeps(): KitDeps {
     clock: () => performance.now(),
     packRoot: slash(fileURLToPath(new URL('../../kiro-pack', import.meta.url))),
     starterRoot: slash(fileURLToPath(new URL('../../starter', import.meta.url))),
-    async loadApp(modulePath) {
-      const { prepareApp } = await import('./adapters/app-loader.js');
-      const { moduleUrl, app } = await prepareApp(modulePath);
-      modulesOfApp.set(app, { moduleUrl, modulePath });
+    async loadApp(modulePath, appDir) {
+      const { prepareApp, newestSourceMtime } = await import('./adapters/app-loader.js');
+      const dir = appDir ?? (await import('node:path')).dirname(modulePath);
+      // The stamp is taken before the import, so an edit made while the module loads is seen as a change by the next call.
+      const stamp = await newestSourceMtime(dir);
+      const { moduleUrl, app } = await prepareApp(modulePath, stamp);
+      modulesOfApp.set(app, { moduleUrl, modulePath, appDir: dir, stamp });
       return app;
+    },
+    async appChanged(app) {
+      const known = modulesOfApp.get(app);
+      if (known === undefined) return false;
+      const { newestSourceMtime } = await import('./adapters/app-loader.js');
+      return (await newestSourceMtime(known.appDir)) > known.stamp;
     },
     compileFile: compileRequirementsFile,
     compileLine: compileRequirement,

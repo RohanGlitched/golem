@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // GOLEM requirements guard: a PreToolUse hook for the golem-tuner agent.
-// It exits with code 2 when a write target is a requirements.md file, and with 0 otherwise.
+// It exits with code 2 when a write target is a requirements.md file, or when it cannot read the payload at all (it fails closed),
+// and with 0 when the call clearly touches no requirements.md file.
 // It decides only from the JSON payload on stdin. It reads no environment variable and no agent name,
 // uses no module except node:url, and makes no network request.
 import { pathToFileURL } from 'node:url';
@@ -39,19 +40,37 @@ export function isRequirementsPath(p) {
   return n.slice(n.lastIndexOf('/') + 1) === 'requirements.md';
 }
 
+export const UNREADABLE_MESSAGE = 'golem guard: cannot read the tool call (the payload is not a JSON object), so it is blocked in case it edits requirements. Retry the call; if it keeps failing, report it to the user.';
+
+/** True when any key or string value, at any depth, names a file called requirements.md (not my-requirements.md or requirements.md.bak). */
+export function mentionsRequirements(value, depth = 0) {
+  if (depth > 20) return false;
+  if (typeof value === 'string') return /(^|[^A-Za-z0-9_.-])requirements\.md(?![A-Za-z0-9_.-])/i.test(value);
+  if (Array.isArray(value)) return value.some((x) => mentionsRequirements(x, depth + 1));
+  if (typeof value === 'object' && value !== null) return Object.entries(value).some(([k, v]) => mentionsRequirements(k, depth + 1) || mentionsRequirements(v, depth + 1));
+  return false;
+}
+
 export function decide(stdin) {
   let payload;
   try {
     payload = JSON.parse(stdin);
   } catch (e) {
-    return { code: 0, stderr: `golem guard: the payload is not valid JSON (${e.message}); allowing the call` };
+    return { code: 2, stderr: `${UNREADABLE_MESSAGE} (invalid JSON: ${e.message})` };
+  }
+  if (typeof payload !== 'object' || payload === null || Array.isArray(payload)) {
+    return { code: 2, stderr: `${UNREADABLE_MESSAGE} (the JSON value is not an object)` };
   }
   const targets = targetsOf(payload);
-  if (targets.length === 0) return { code: 0, stderr: 'golem guard: the payload has no path, file_path or paths; allowing the call' };
+  if (targets.length === 0) {
+    if (mentionsRequirements(payload)) {
+      return { code: 2, stderr: `${BLOCK_MESSAGE} (the call names requirements.md but no path field that the guard understands)` };
+    }
+    return { code: 0, stderr: 'golem guard: the payload has no path, file_path or paths and does not mention requirements.md; allowing the call' };
+  }
   if (targets.some(isRequirementsPath)) return { code: 2, stderr: BLOCK_MESSAGE };
   return { code: 0 };
 }
-
 async function readStdin() {
   const chunks = [];
   let size = 0;

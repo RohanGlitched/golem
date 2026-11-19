@@ -137,10 +137,40 @@ async function esmCopy(appPath: string): Promise<string | undefined> {
   return file;
 }
 
-/** Imports the app module (building it first when it is TypeScript) and returns its RobotApp. */
-export async function prepareApp(modulePath: string): Promise<PreparedApp> {
-  const file = TS.test(modulePath) ? await bundleApp(modulePath) : ((await esmCopy(modulePath)) ?? modulePath);
-  const moduleUrl = pathToFileURL(file).href;
+/** Folders whose files never belong to the app's simulation: dependencies, caches, build output, tests, the studio page and tooling. */
+const SKIP_DIRS = new Set(['node_modules', '.git', '.golem', '.kiro', '.cache', 'dist', 'web', 'test', 'tests', 'scripts', 'evidence']);
+const SOURCE_FILE = /\.(c|m)?(t|j)sx?$|\.json$|\.xml$/i;
+
+/** The newest modification time (ms) of any source or model file under `dir`, 0 when there is none. Used to notice an edited controller. */
+export async function newestSourceMtime(dir: string): Promise<number> {
+  let newest = 0;
+  const walk = async (d: string, depth: number): Promise<void> => {
+    let entries;
+    try { entries = await readdir(d, { withFileTypes: true }); } catch { return; }
+    for (const e of entries) {
+      const p = join(d, e.name);
+      if (e.isDirectory()) {
+        if (depth < 8 && !SKIP_DIRS.has(e.name)) await walk(p, depth + 1);
+      } else if (e.isFile() && SOURCE_FILE.test(e.name)) {
+        try { newest = Math.max(newest, (await stat(p)).mtimeMs); } catch { /* removed while walking */ }
+      }
+    }
+  };
+  await walk(dir, 0);
+  return newest;
+}
+
+/**
+ * Imports the app module (building it first when it is TypeScript) and returns its RobotApp. A TypeScript app is bundled to
+ * a file named by its content, and an ES-module `.js` app in a CommonJS package is copied to a file named by its content, so
+ * an edited controller is a new module URL and imports fresh. Any other JavaScript app is imported with `?v=<stamp>`, which
+ * refreshes the entry file only: Node cannot drop the files it imports, so edits to those need a restart.
+ */
+export async function prepareApp(modulePath: string, stamp = 0): Promise<PreparedApp> {
+  const copy = TS.test(modulePath) ? undefined : await esmCopy(modulePath);
+  const file = TS.test(modulePath) ? await bundleApp(modulePath) : (copy ?? modulePath);
+  const named = TS.test(modulePath) || copy !== undefined;
+  const moduleUrl = named || stamp === 0 ? pathToFileURL(file).href : `${pathToFileURL(file).href}?v=${stamp}`;
   const mod = (await import(/* @vite-ignore */ moduleUrl)) as { default?: RobotApp; app?: RobotApp };
   const app = mod.default ?? mod.app;
   if (app === undefined || typeof app.id !== 'string' || app.lexicon === undefined) {
@@ -148,7 +178,6 @@ export async function prepareApp(modulePath: string): Promise<PreparedApp> {
   }
   return { moduleUrl, app };
 }
-
 /** The module the pool workers import: it exports `app` and a `requirements(id)` lookup that compiles the files. */
 export async function writeWorkerModule(appModuleUrl: string, requirementFiles: readonly string[], appPath: string): Promise<string> {
   const dir = await cacheDir(appPath);

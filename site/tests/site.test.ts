@@ -4,7 +4,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { REPO_ROOT, SITE_DIR, SiteDataError, loadSiteData, parseJsonl, validateMapCells } from '../src/build/data';
 import { earsHtml, esc, slug } from '../src/build/html';
-import { clip, excerpt, parseTranscript } from '../src/build/transcript';
+import { clip, excerpt, mcpCallBlock, parseTranscript } from '../src/build/transcript';
 import { DEFAULT_SPEC, fromPolar, polarPoint, radiusOf } from '../src/figures/polar';
 import { headlineNumbers } from '../src/pages/home';
 import { parseNeedle, reportBullets } from '../src/pages/evidence';
@@ -52,7 +52,27 @@ describe('transcript and excerpts', () => {
   it('finds the recorded commands in the transcript', () => {
     expect(sections.map((s) => s.command)).toEqual(expect.arrayContaining(['golem check', 'golem gate']));
   });
-  it('never cuts a line and counts what it left out', () => {
+  it('records both gate runs, the default one red and the reflex one green', () => {
+    const red = sections.find((s) => s.command === 'golem gate');
+    const green = sections.find((s) => s.command === 'GOLEM_REFLEX=kiro golem gate');
+    expect(red?.title).toMatch(/\(exit 2, \d+ s\)/);
+    expect(red?.code).toMatch(/gate RED: \d+ of \d+/);
+    expect(green?.title).toMatch(/\(exit 0, \d+ s\)/);
+    expect(green?.code).toContain('gate GREEN');
+  });
+  it('has a golem mcp section whose falsify call has a summary and a JSON line', () => {
+    const mcp = sections.find((s) => s.command === 'golem mcp');
+    const call = mcpCallBlock(mcp?.code ?? '', 'falsify', 400).split('\n');
+    expect(call).toHaveLength(3);
+    expect(call[0]).toMatch(/^> tools\/call falsify /);
+    expect(call[2]).toMatch(/^\{/);
+  });
+  it('mcpCallBlock is empty for a tool that was not called and never longer than 3 lines', () => {
+    expect(mcpCallBlock('> tools/list\n  a: b', 'falsify', 100)).toBe('');
+    fc.assert(fc.property(fc.array(fc.string({ maxLength: 30 }).filter((l) => !l.includes('\n')), { maxLength: 8 }), (lines) => {
+      expect(mcpCallBlock(['> tools/call falsify {}', ...lines].join('\n'), 'falsify', 20).split('\n').length).toBeLessThanOrEqual(3);
+    }));
+  });  it('never cuts a line and counts what it left out', () => {
     fc.assert(fc.property(fc.array(fc.string({ maxLength: 20 }).filter((l) => !l.includes('\n')), { minLength: 1, maxLength: 30 }), fc.integer({ min: 1, max: 40 }), (lines, max) => {
       const ex = excerpt(lines.join('\n'), max);
       expect(ex.text.split('\n').length + ex.omitted).toBe(lines.length);
@@ -88,6 +108,12 @@ describe('evidence data', () => {
 });
 
 describe('pages', () => {
+  it('shows a real MCP call on the kit page', () => {
+    const html = renderPage('kit', data).body;
+    const after = html.slice(html.indexOf('A call, as recorded in the transcript'));
+    expect(after).toContain('tools/call falsify');
+    expect(after).toMatch(/Expected_(Hold|Break)/);
+  });
   const ids = ['home', 'kit', 'evidence', 'how-kiro', 'notfound', 'stagger', 'candy'];
   it.each(ids)('renders %s with one h1 and no stray placeholder', (id) => {
     const html = renderPage(id, data).body;

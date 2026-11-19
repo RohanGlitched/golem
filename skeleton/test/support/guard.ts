@@ -9,7 +9,9 @@ export interface Guard {
   normalise(p: string): string;
   isRequirementsPath(p: string): boolean;
   targetsOf(payload: unknown): string[];
+  mentionsRequirements(value: unknown): boolean;
   BLOCK_MESSAGE: string;
+  UNREADABLE_MESSAGE: string;
 }
 
 export const loadGuard = async (): Promise<Guard> => (await import(/* @vite-ignore */ pathToFileURL(GUARD_PATH).href)) as Guard;

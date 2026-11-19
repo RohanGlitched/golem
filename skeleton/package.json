@@ -29,7 +29,8 @@
   "author": "Rohan Borade",
   "type": "module",
   "bin": {
-    "golem": "dist/cli/main.js"
+    "golem": "dist/cli/main.js",
+    "golem-spec": "dist/cli/main.js"
   },
   "files": [
     "dist",

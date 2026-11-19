@@ -21,6 +21,14 @@ export function intFlag(flags: Record<string, string | true>, name: string, dflt
   return n;
 }
 
+export function numFlag(flags: Record<string, string | true>, name: string): number | undefined {
+  const v = flags[name];
+  if (v === undefined) return undefined;
+  const n = typeof v === 'string' ? Number(v) : NaN;
+  if (!Number.isFinite(n)) throw new Error(`--${name} needs a number`);
+  return n;
+}
+
 export function listFlag(flags: Record<string, string | true>, name: string): string[] | undefined {
   const v = flags[name];
   return typeof v === 'string' ? v.split(',').map((s) => s.trim()).filter(Boolean) : undefined;

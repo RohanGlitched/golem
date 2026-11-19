@@ -42,7 +42,7 @@ export interface CandyData {
 }
 export interface KiroSpec {
   name: string; path: string; type: string; requirements: number; earsCriteria: number; properties: number;
-  tasksDone: number; tasksOpen: number; waves: boolean;
+  tasksDone: number; tasksOpen: number; waves: boolean; status: string;
 }
 export interface KiroWorkspace {
   path: string; specs: KiroSpec[]; steering: string[];

@@ -4,16 +4,16 @@
     "classification": "robust",
     "foundAfter": 1,
     "reqId": "6.2",
-    "robustness": -0.01,
+    "robustness": -0.4449513394929417,
     "scenario": {
-      "latency.duration": 0.05003299688513607
+      "latency.duration": 0.050048744587775224
     },
-    "seed": 2916678175,
+    "seed": 229287175,
     "shrunk": true,
     "verificationRobustness": [
-      -0.01,
-      -0.01,
-      -0.01
+      -0.4404221797479386,
+      -0.4406945030352404,
+      -0.44195029159865123
     ],
     "verificationSeeds": [
       1448352424,

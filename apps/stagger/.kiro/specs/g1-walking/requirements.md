@@ -23,7 +23,7 @@ Lines are never edited to make a failing run pass. Discussion about a line goes 
 |---|---|---|
 | 1.1 | Push recovery | Expected_Hold |
 | 1.2 | Push recovery | Expected_Break |
-| 1.3 | Push recovery | Expected_Break |
+| 1.3 | Push recovery | Expected_Hold |
 | 2.1 | Speed tracking | Expected_Hold |
 | 2.2 | Speed tracking | Expected_Hold |
 | 3.1 | Slopes | Expected_Hold |
@@ -87,3 +87,9 @@ Lines are never edited to make a failing run pass. Discussion about a line goes 
 
 1. WHEN the sensor latency rises to up to 40 ms THE robot SHALL stay upright for 5 s
 2. WHEN the sensor latency rises to up to 100 ms THE robot SHALL stay upright for 5 s
+
+## Notes
+
+- **1.3 is Expected_Hold (team decision).** 1.3 started as an Expected_Break line: Unitree's walking policy alone breaks it, and the falsifier found the counterexample. Kiro's balance reflex (`GOLEM_REFLEX=kiro`, written by the golem-tuner agent) now exists, so the team treats 1.3 as a real requirement the robot must meet, not a known gap. The line itself is unchanged; only its row in the Expectation table moved from Expected_Break to Expected_Hold.
+- With that row, `golem gate` on Unitree's policy alone (the default) is red because 1.3 breaks, and `GOLEM_REFLEX=kiro golem gate` is the configuration expected to be green.
+- 1.2, 4.2 and 6.2 stay Expected_Break. `golem gate` passes each of them when the falsifier finds a counterexample and fails it when the line holds within the search budget.
