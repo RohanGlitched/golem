@@ -22,21 +22,21 @@ Test rules for every task (`testing.md`):
     - Write example tests that each error class has the expected `name`, keeps `cause`, and that types compile under `tsc --noEmit` strict.
     - _Requirements: 12.1, 17.1, 20.1, 20.2_
 
-- [ ] 2. Seed derivation and PRNG
-  - [~] 2.1 Implement `fmix32`, `mulberry32`, `hashString` and `deriveSeed`
+- [x] 2. Seed derivation and PRNG
+  - [x] 2.1 Implement `fmix32`, `mulberry32`, `hashString` and `deriveSeed`
     - Implement `prng.ts` as in the design (bijective mixer, phase salts 1 to 5, verification seed rule).
     - Write example tests with fixed expected values, uint32 range, and that the same inputs give the same output.
     - _Requirements: 4.8, 7.2, 19.1, 19.6_
-  - [~] 2.2 Write property test for seed derivation
+  - [x] 2.2 Write property test for seed derivation
     - **Property 4: Seed derivation is pure, uint32 and injective per phase**
     - **Validates: Requirements 4.8, 7.2, 19.6**
 
-- [ ] 3. Normal distribution helpers
-  - [~] 3.1 Implement `erfc`, `normalCdf`, `normalQuantile` and `drawTruncatedNormal`
+- [x] 3. Normal distribution helpers
+  - [x] 3.1 Implement `erfc`, `normalCdf`, `normalQuantile` and `drawTruncatedNormal`
     - Cody erfc, Wichura AS241 quantile, mirrored lower-tail truncated draw with one uniform per draw and the negligible-mass guard.
     - Write example tests with reference values (`normalCdf(0) = 0.5`, quantile at 0.975, tails near 1e-12) and a mean 8 sigma outside the interval.
     - _Requirements: 5.3_
-  - [~] 3.2 Write property test for CDF, quantile and truncated draws
+  - [x] 3.2 Write property test for CDF, quantile and truncated draws
     - **Property 9: Normal CDF and quantile are consistent, truncated draws are monotone in `u`**
     - **Validates: Requirements 5.3**
 
