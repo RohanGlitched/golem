@@ -1,0 +1,46 @@
+[
+  {
+    "boundarySensitive": true,
+    "classification": "seed-sensitive",
+    "foundAfter": 15,
+    "reqId": "3.1",
+    "robustness": -0.4049451571353575,
+    "scenario": {
+      "slope.angle": 0.12512452587001832
+    },
+    "seed": 3733187106,
+    "shrunk": true,
+    "verificationRobustness": [
+      0.13290225752612284,
+      -0.43738735822698516,
+      0.07115681338886282
+    ],
+    "verificationSeeds": [
+      1448352424,
+      3254842707,
+      1536383744
+    ]
+  },
+  {
+    "boundarySensitive": true,
+    "classification": "seed-sensitive",
+    "foundAfter": 37,
+    "reqId": "3.1",
+    "robustness": -0.1502759097180817,
+    "scenario": {
+      "slope.angle": 0.12026852688849202
+    },
+    "seed": 2560398606,
+    "shrunk": false,
+    "verificationRobustness": [
+      0.1441673461505819,
+      0.19589168832249781,
+      0.21442445649196962
+    ],
+    "verificationSeeds": [
+      1448352424,
+      3254842707,
+      1536383744
+    ]
+  }
+]

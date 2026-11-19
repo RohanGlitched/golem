@@ -22,5 +22,77 @@
       3254842707,
       1536383744
     ]
+  },
+  {
+    "boundarySensitive": false,
+    "classification": "robust",
+    "foundAfter": 12,
+    "reqId": "1.2",
+    "robustness": -0.40968781430486556,
+    "scenario": {
+      "push.angle": 3.1484257676449925,
+      "push.force": 234.4063181415521,
+      "push.phase": 0.08803580890526064
+    },
+    "seed": 1984748471,
+    "shrunk": true,
+    "verificationRobustness": [
+      -0.4257723037636053,
+      -0.4430331847179293,
+      -0.43901188480790515
+    ],
+    "verificationSeeds": [
+      1448352424,
+      3254842707,
+      1536383744
+    ]
+  },
+  {
+    "boundarySensitive": true,
+    "classification": "robust",
+    "foundAfter": 1,
+    "reqId": "1.2",
+    "robustness": -0.4372110702619978,
+    "scenario": {
+      "push.angle": 3.1484257676449925,
+      "push.force": 223.41852197866683,
+      "push.phase": 0.08803580890526064
+    },
+    "seed": 1984748471,
+    "shrunk": true,
+    "verificationRobustness": [
+      -0.43891408227177836,
+      -0.4323696847708868,
+      -0.43383177778604304
+    ],
+    "verificationSeeds": [
+      1448352424,
+      3254842707,
+      1536383744
+    ]
+  },
+  {
+    "boundarySensitive": false,
+    "classification": "robust",
+    "foundAfter": 2,
+    "reqId": "1.2",
+    "robustness": -0.35959945673624005,
+    "scenario": {
+      "push.angle": 3.1484257676449925,
+      "push.force": 225.24982133914773,
+      "push.phase": 0.08803580890526064
+    },
+    "seed": 1984748471,
+    "shrunk": true,
+    "verificationRobustness": [
+      -0.42184898194049264,
+      -0.4228840830166888,
+      -0.4202037461876509
+    ],
+    "verificationSeeds": [
+      1448352424,
+      3254842707,
+      1536383744
+    ]
   }
 ]

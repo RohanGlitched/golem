@@ -1,0 +1,24 @@
+[
+  {
+    "boundarySensitive": true,
+    "classification": "seed-sensitive",
+    "foundAfter": 52,
+    "reqId": "6.1",
+    "robustness": -0.19836805769856966,
+    "scenario": {
+      "latency.duration": 0.030212221823331765
+    },
+    "seed": 383220774,
+    "shrunk": true,
+    "verificationRobustness": [
+      0.2286858442569384,
+      0.2210661107106986,
+      0.21877298855014882
+    ],
+    "verificationSeeds": [
+      1448352424,
+      3254842707,
+      1536383744
+    ]
+  }
+]
