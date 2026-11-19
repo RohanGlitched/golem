@@ -1,5 +1,6 @@
 // Per-signal margins for explain_margin, and the replay summary.
 import type { CompiledRequirement, MonitorResult, PredicateBinding, Trace } from '../cli/sibling-types.js';
+import { MARGINS_UNAVAILABLE, bindingsOf, marginsOf } from './predicates.js';
 
 export type { PredicateBinding };
 
@@ -7,7 +8,7 @@ export interface SignalMargin { signal: string; margin: number; at: number; unit
 
 export class MarginsUnavailableError extends Error {
   override name = 'MarginsUnavailableError';
-  constructor() { super('per-signal margins unavailable: the compiled requirement carries no predicate bindings'); }
+  constructor() { super(MARGINS_UNAVAILABLE); }
 }
 
 type WithBindings = Pick<CompiledRequirement, 'predicates'>;
@@ -17,7 +18,7 @@ type WithBindings = Pick<CompiledRequirement, 'predicates'>;
  * signal at its first-window value. Margin = minimum over the window, time = earliest sample of that minimum.
  * Signals appear in order of first appearance over the bindings. `undefined` without bindings.
  */
-export function signalMargins(req: WithBindings, trace: Trace, bindings: PredicateBinding[] | undefined = req.predicates): SignalMargin[] | undefined {
+export function signalMargins(req: WithBindings, trace: Trace, bindings: PredicateBinding[] | undefined = bindingsOf(req)): SignalMargin[] | undefined {
   if (bindings === undefined || bindings.length === 0) return undefined;
   const out = new Map<string, SignalMargin>();
   const n = trace.t.length;
@@ -63,16 +64,17 @@ export function pickLowest(ms: readonly SignalMargin[]): SignalMargin {
  * Throws MarginsUnavailableError when neither exists.
  */
 export function explain(
-  req: WithBindings, trace: Trace, monitor: MonitorResult, bindings: PredicateBinding[] | undefined = req.predicates,
+  req: WithBindings, trace: Trace, monitor: MonitorResult, bindings: PredicateBinding[] | undefined = bindingsOf(req),
 ): { lowest: SignalMargin; others: SignalMargin[]; source: 'monitor' | 'recomputed' } {
   let list: SignalMargin[];
   let source: 'monitor' | 'recomputed';
   const recomputed = signalMargins(req, trace, bindings);
-  if (monitor.margins !== undefined && Object.keys(monitor.margins).length > 0) {
+  const map = marginsOf(monitor);
+  if (map !== undefined) {
     source = 'monitor';
-    list = Object.keys(monitor.margins).map((signal) => {
+    list = Object.keys(map).map((signal) => {
       const r = recomputed?.find((x) => x.signal === signal);
-      return { signal, margin: (monitor.margins as Record<string, number>)[signal] as number, at: r?.at ?? monitor.worstAt, unit: r?.unit ?? monitor.unit };
+      return { signal, margin: map[signal] as number, at: r?.at ?? monitor.worstAt, unit: r?.unit ?? monitor.unit };
     });
   } else {
     if (recomputed === undefined) throw new MarginsUnavailableError();

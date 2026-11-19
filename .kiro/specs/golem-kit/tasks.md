@@ -280,26 +280,26 @@ This revision follows the current requirements and design:
     - fast-check, at least 100 runs, file `skeleton/test/prop-10-guard-env.test.ts`.
     - **Validates: Requirements 18.4, 18.7, 28.4**
 
-- [ ] 6. Sibling-module seams (approved optional additions)
-  - [ ] 6.1 Add the trace-access adapter with a fallback
+- [x] 6. Sibling-module seams (approved optional additions)
+  - [x] 6.1 Add the trace-access adapter with a fallback
     - Create `skeleton/src/cli/adapters/trace.ts` with the default `KitDeps.runTraced`: call `runTrial` with `recordTrace: true` and return `{ result, trace: result.trace }`.
     - When the sim does not return `TrialResult.trace`, throw `TraceUnavailableError` naming the missing `golem-sim` capability, so `replay` exits 1 with the id and cause and writes no CSV, and MCP `replay` and `explain_margin` return an error result with the same cause.
     - Test with fakes: sim with trace support, sim without it, failure message names the cause.
     - _Requirements: 6.3, 6.4, 6.14, 13.1_
 
-  - [ ] 6.2 Add the predicate-binding and monitor-margins fallbacks
+  - [x] 6.2 Add the predicate-binding and monitor-margins fallbacks
     - Create `skeleton/src/mcp/predicates.ts` reading the optional `CompiledRequirement.predicates` and the optional `margins` map of the monitor result, and wire both into `margins.ts` in the order: `margins` map, then `predicates`, then lexicon predicate signals.
     - When neither a `margins` map nor predicate bindings exist, return the error result "per-signal margins unavailable: the compiled requirement carries no predicate bindings" instead of guessing.
     - Test with examples: `margins` present, bindings present, both absent.
     - _Requirements: 13.3, 13.5, 13.8_
 
-  - [ ] 6.3 Add signal units and verdict unit capture
+  - [x] 6.3 Add signal units and verdict unit capture
     - Create `skeleton/src/cli/signal-units.ts`: read optional `RobotApp.signalUnits`, fall back to the unit of a predicate that reads the signal, then to the text `unit not declared`.
     - Capture `TrialResult.unit` through the falsify `onResult` callback and store it as the additive `unit` field on report entries.
     - Test with examples: declared unit, predicate fallback, missing unit text, unit stored on a report entry.
     - _Requirements: 6.3, 4.8, 15.2_
 
-- [ ] 7. Checkpoint - pure cores, guard and seams
+- [x] 7. Checkpoint - pure cores, guard and seams
   - Run `vitest --run` for `skeleton`. Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 8. CLI services and commands
