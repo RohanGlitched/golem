@@ -235,14 +235,14 @@ Conventions for every task:
     - Write `test/web.test.ts` (examples with DOM stubs): button labels, `optimizeDeps.exclude`, load-failure message names the file, reduced-motion branch, no analytics script, no `skeleton/src` import
     - _Requirements: 19.1, 19.4, 19.5, 19.6, 19.7, 19.10, 19.11, 19.12, 19.13, 19.14, 19.15, 19.16, 21.6_
 
-- [ ] 10. Repository hygiene and public-entry-point scan
-  - [ ] 10.1 Add the import scan, README and `proposals.md`
+- [x] 10. Repository hygiene and public-entry-point scan
+  - [x] 10.1 Add the import scan, README and `proposals.md`
     - Implement the scan helper (reports an import only when the specifier contains `skeleton/src`; accepts `golem-spec`, `golem-spec/ui`, `golem-spec/node`) in `test/helpers/importScan.ts`
     - Write `apps/stagger/README.md` with the regeneration command (`npm run assets`), licence notes and the evidence pointer; create `apps/stagger/proposals.md` with a short header
     - Write `test/layout.test.ts` (examples): scan all app sources for forbidden imports, no `Math.random()` in `controller/`, `lexicon.ts`, `app.ts`, no Python files, README contains the regeneration command, required files and folders exist
     - _Requirements: 5.6, 10.2, 10.3, 10.4, 10.5, 10.7, 10.8, 17.13, 21.5_
 
-  - [ ]* 10.2 Write property test for the import scan
+  - [x]* 10.2 Write property test for the import scan
     - **Property 37: The import scan flags exactly the forbidden imports**
     - **Validates: Requirements 10.2, 10.3, 10.8**
 
