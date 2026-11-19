@@ -121,7 +121,7 @@ export const testApp: RobotApp = {
 // ------------------------------------------------------------------ requirement fixtures
 
 export type TestKind = 'always-bob-angle' | 'eventually-bob-slow';
-export interface TestRequirement extends CompiledRequirement { kind: TestKind; bound: number }
+export interface TestRequirement extends CompiledRequirement { kind: TestKind; bound: number; formula: string }
 
 /** Robustness of the fixture requirement over the first `n` samples. */
 function evaluate(kind: TestKind, bound: number, t: Float64Array, sig: Record<string, Float64Array>, n: number) {
@@ -169,6 +169,7 @@ export function makeTestRequirement(opts: {
     },
     perturbations: opts.perturbations ?? [pushCall()],
     horizon: opts.horizon,
+    formula: `test(${kind}, ${bound})`,
     kind,
     bound,
     monitor: (trace: Trace) => evaluate(kind, bound, trace.t, trace.signals, trace.t.length),

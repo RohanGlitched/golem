@@ -34,6 +34,8 @@ export interface CompiledRequirement {
   space: ScenarioSpace;
   perturbations: PerturbationCall[];
   horizon: number;
+  /** The compiled STL formula (golem-ears-hardening); test fixtures may set a placeholder. */
+  formula?: string;
   monitor(trace: Trace): { robustness: number; worstAt: number; unit: string };
 }
 

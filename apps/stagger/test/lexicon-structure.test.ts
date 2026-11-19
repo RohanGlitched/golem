@@ -46,9 +46,8 @@ describe('lexicon structure', () => {
     expect(req.perturbations[0]!.params['direction']).toBeCloseTo(Math.PI / 2, 12);
   });
 
-  // blocked-on-ears: compile.ts maps a slot to a Dimension only by name (`direction` or `*.direction`),
-  // so the searched `push.angle` of `{direction}` never reaches apply. Expected to pass once ears maps it.
-  it.fails('wires a searched push.angle into the push parameters', () => {
+  // Fixed by golem-ears-hardening (defect 1): the searched push.angle now reaches apply.
+  it('wires a searched push.angle into the push parameters', () => {
     const req = dimsOf('WHEN the pelvis is pushed with up to 100 N for 0.2 s from any direction at any point in its stride THE robot SHALL stay upright for 3 s');
     expect(Object.values(req.perturbations[0]!.params)).toContain('push.angle');
   });
