@@ -14,8 +14,8 @@ Conventions for every task:
 
 ## Tasks
 
-- [ ] 1. Package scaffold and constants
-  - [ ] 1.1 Create the `apps/candy` package scaffold
+- [x] 1. Package scaffold and constants
+  - [x] 1.1 Create the `apps/candy` package scaffold
     - Update `package.json` (name `candy`, ES modules, Node >= 20, Apache-2.0, scripts `assets` running `scripts/fetch-assets.mjs`, `test` running `vitest --run`, `dev` running Vite for `web/`); dependencies `golem-spec`, `@mujoco/mujoco`; dev dependencies `meshoptimizer`, `vitest`, `fast-check`, `typescript`, `vite`
     - Make `tsconfig.json` strict and extend `tsconfig.base.json`; add `vitest.config.ts`
     - Add `web/vite.config.ts` with `optimizeDeps: { exclude: ['@mujoco/mujoco'] }`
@@ -23,7 +23,7 @@ Conventions for every task:
     - Write `test/package.test.ts` (examples): package fields, the `assets` script, strict TypeScript, dependency lists, `optimizeDeps.exclude` in the Vite config
     - _Requirements: 13.1, 13.2, 13.6, 13.7, 13.8, 13.9, 1.11_
 
-  - [ ] 1.2 Implement `constants.ts`
+  - [x] 1.2 Implement `constants.ts`
     - Add every number from the design constants tables: `TABLE`, `TRAY`, `WORKSPACE`, `BOWLS` (index = colour), `Q_HOME`, `HAND_START`, `SUCTION`, `SSM`, `UD` and the controller and IK parameters
     - Write `test/constants.test.ts` (examples): bowls lie on the 0.72 m arc at -32°, 0° and +32°, `Q_HOME` has 7 entries inside the Panda joint limits, `UD` indexes are distinct and below 24, the hand start is at least 1.0 m from the Home_Pose Tip estimate, every Table edge point lies outside `WORKSPACE`
     - _Requirements: 2.5, 2.14, 3.5, 6.3, 6.4, 6.5, 9.3_

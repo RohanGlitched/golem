@@ -2,17 +2,23 @@
   "name": "candy",
   "version": "0.1.0",
   "private": true,
+  "license": "Apache-2.0",
   "type": "module",
+  "engines": { "node": ">=20" },
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -p tsconfig.json --noEmit && vite build",
-    "test": "vitest run --passWithNoTests",
+    "assets": "node scripts/fetch-assets.mjs",
+    "dev": "vite --config web/vite.config.ts",
+    "build": "tsc -p tsconfig.json --noEmit && vite build --config web/vite.config.ts",
+    "test": "vitest --run --passWithNoTests",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@mujoco/mujoco": "^4.0.1",
     "golem-spec": "*"
   },
   "devDependencies": {
+    "@types/node": "^20.14.0",
+    "fast-check": "^3.22.0",
     "meshoptimizer": "^0.22.0",
     "quickhull3d": "^2.0.5",
     "typescript": "^5.6.0",
