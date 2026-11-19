@@ -2,7 +2,10 @@
 // Everything here is pure and uses only fast-check's seeded randomness.
 import * as fc from 'fast-check';
 import { UNIT_TABLE, ACCEPTED_UNITS } from '../units.js';
-import type { Kind, Lexicon, Pattern, PerturbationTemplate, PredicateTemplate, Quantity } from '../types.js';
+import { compileTemplate } from '../matcher.js';
+import type {
+  Kind, Lexicon, Pattern, PerturbationTemplate, PredicateTemplate, Quantity, SlotDimension,
+} from '../types.js';
 
 export { SEED, propConfig } from './support.js';
 
@@ -111,11 +114,16 @@ function arbPerturbation(first: string): fc.Arbitrary<PerturbationTemplate> {
       fc.array(arbFillers(1, 2), { minLength: 3, maxLength: 3 }),
       arbFillers(0, 1),
     )
-    .map(([slots, fillers, tail]) => ({
-      phrase: buildPhrase(first, slots, fillers, tail),
-      dims: () => [],
-      apply: () => undefined,
-    }));
+    .map(([slots, fillers, tail]) => {
+      const phrase = buildPhrase(first, slots, fillers, tail);
+      // Every slot declares its Dimension (golem-ears-hardening defect 1): `<first>.<slot>`.
+      const declared: Record<string, SlotDimension> = {};
+      for (const el of compileTemplate(phrase, 0).pattern) {
+        if (typeof el === 'string') continue;
+        declared[el.name] = { dim: `${first}.${el.name}`, severity: el.slot === 'range' ? 'up' : 'none' };
+      }
+      return { phrase, slots: declared, apply: () => undefined };
+    });
 }
 
 function arbPredicate(first: string): fc.Arbitrary<PredicateTemplate> {

@@ -1,3 +1,4 @@
+import { buildDimensions } from '../dimensions.js';
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
 import type { Clause } from '../ast.js';
@@ -85,7 +86,26 @@ describe('template matching binds the written values', () => {
           expect(r.diagnostics).toEqual([]);
           expect(r.bound!.template.phrase).toBe(cond.phrase);
           expectBound(cond, r.bound!);
-          expect(r.bound!.dimensions).toEqual([]);
+          // Every slot reaches the params: its Dimension name when searched, its SI value when fixed.
+          const built = buildDimensions(r.bound!, clauseOf(cond.text), true);
+          expect(built.diagnostics).toEqual([]);
+          const first = cond.phrase.split(' ')[0]!;
+          const names = compileTemplate(cond.phrase, 0).pattern
+            .filter((e): e is MatcherSlot => typeof e !== 'string').map((e) => e.name);
+          expect(built.dims.map((d) => d.name)).toEqual(names.map((n) => `${first}.${n}`));
+          expect(Object.keys(built.params).sort()).toEqual([...names].sort());
+          cond.bindings.forEach((b, i) => {
+            const dir = b.slot === 'direction'
+              ? (b.text === 'behind' ? [(3 * Math.PI) / 4, (5 * Math.PI) / 4] : [0, 2 * Math.PI])
+              : undefined;
+            const [lo, hi] = (b.range ?? dir ?? [b.si!, b.si!]) as [number, number];
+            const p = built.params[names[i]!];
+            const d = built.dims[i]!;
+            expect(d.min).toBeCloseTo(lo, 9);
+            expect(d.max).toBeCloseTo(hi, 9);
+            if (d.min < d.max) expect(p).toBe(`${first}.${names[i]}`);
+            else expect(p).toBe(d.min);
+          });
         },
       ),
       propConfig,

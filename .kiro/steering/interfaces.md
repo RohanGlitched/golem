@@ -65,12 +65,17 @@ interface PredicateTemplate {
   signals: string[];                          // signals it reads
   margin(s: Record<string, number>, slots: Record<string, number>): number; // >0 holds, physical unit
   unit: string;
+  slots?: Record<string, SlotDimension>;      // optional: Dimensions this predicate adds (same rules as below)
 }
 interface PerturbationTemplate {
   phrase: string;                             // "the pelvis is pushed with {range:force} for {duration} from {direction}"
-  dims(slots: Record<string, Quantity | [Quantity, Quantity] | string>): Dimension[];
-  apply(ctx: SimContext, t: number, tTrigger: number, values: Record<string, number>): void;
+  slots?: Record<string, SlotDimension>;      // slot name → Dimension name + severity; the compiler builds the Dimension
+  /** @deprecated declare `slots`; called only when `slots` is absent */
+  dims?(slots: Record<string, Quantity | [Quantity, Quantity] | string>, ranges: Record<string, SlotRange>): Dimension[];
+  apply(ctx: SimContext, t: number, tTrigger: number, values: Record<string, number>): void;  // values keyed by slot name
 }
+interface SlotDimension { dim: string; severity: 'up' | 'down' | 'none' }   // e.g. direction → { dim: 'push.angle', severity: 'none' }
+interface SlotRange { kind: Kind; min: number; max: number; wrap: boolean }  // a slot's parsed range in SI (min === max when fixed)
 
 // ---------- trials and verdicts (sim / falsify / pool) ----------
 interface TrialSpec { app: string; reqId: string; scenario: Scenario; seed: number; record?: 'none' | 'poses' }
@@ -96,6 +101,7 @@ interface TrialPool { run(specs: TrialSpec[], onResult?: (r: TrialResult) => voi
 - `PerturbationTemplate.visual?(values) => { force?: [number,number,number]; at?: string }`: an optional hint the UI uses to draw push arrows.
 - `TrialPool.run(specs, onResult?, opts?: { signal?: AbortSignal })`.
 - `Lexicon.episodeSeconds?` (default 10 s) and `PredicateTemplate.dims?` (golem-ears).
+- **Changed by golem-ears-hardening (defects 1 and 10):** `PerturbationTemplate.dims` is now optional and deprecated. A template declares `slots` (slot name → `SlotDimension`) and the ears compiler builds each `Dimension` from the range written in the line: kind, min, max and wrap in SI from the parse, name and severity from the declaration. `PerturbationCall.params` has one entry per slot, keyed by slot name: the Dimension name when the slot is searched, its SI value when fixed. A searched slot with no declaration is a `BAD_LEXICON` compile error. The deprecated `dims(slots, ranges)` still works: the compiler ties each returned Dimension to a slot (exact name, `.<slot>` suffix, equal kind and bounds, or the only one of its kind) and warns about any it cannot tie. `PredicateTemplate.slots?` follows the same rules. Slot names are the kind (`force`, `duration`, `direction`, `phase`), with a suffix from 2 for a repeated kind (`length2`).
 - Apps may keep per-trial runtime state in a `WeakMap<SimContext, …>`.
 - Pinned sources: unitree_rl_gym `276801e46c5d433564f24658bac64f254b7d2d4b`; mujoco_menagerie `370c43965323c0944b433b202aac5058b5f907a9`.
 

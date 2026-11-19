@@ -4,6 +4,7 @@ import type { Clause } from './ast.js';
 import { hasError, makeDiagnostic, sortDiagnostics, type Diagnostic } from './diagnostics.js';
 import { extractCriteria, type RawCriterion } from './extract.js';
 import { matchPerturbation, matchPredicate, type BoundClause } from './matcher.js';
+import { buildDimensions } from './dimensions.js';
 import { buildMonitor } from './monitor.js';
 import { parse } from './parser.js';
 import { kiroText, tokenize } from './tokenizer.js';
@@ -22,27 +23,6 @@ export const DEFAULT_EPISODE_SECONDS = 10;
 
 const normaliseFeature = (s: string): string => s.trim().replace(/\s+/g, ' ').toLowerCase();
 
-/** The Dimension a slot was turned into, if any: same name, or `<template>.<slot>`. */
-function dimensionOfSlot(dims: readonly Dimension[], slot: string): Dimension | undefined {
-  return dims.find((d) => d.name === slot) ?? dims.find((d) => d.name.endsWith('.' + slot));
-}
-
-function perturbationCall(bound: BoundClause<PerturbationTemplate>): PerturbationCall {
-  const dims = bound.dimensions ?? [];
-  const params: Record<string, string | number> = {};
-  for (const slot of Object.keys(bound.slots)) {
-    const dim = dimensionOfSlot(dims, slot);
-    if (dim) {
-      params[slot] = dim.min < dim.max ? dim.name : dim.min;
-      continue;
-    }
-    const direct = bound.si[slot];
-    if (direct !== undefined) { params[slot] = direct; continue; }
-    const lo = bound.si[`${slot}.min`];
-    if (lo !== undefined && lo === bound.si[`${slot}.max`]) params[slot] = lo;
-  }
-  return { template: bound.template.phrase, params };
-}
 
 /** Duration the trigger itself lasts (fixed value, or the top of a range), or 0. */
 function triggerDuration(bound: BoundClause<PerturbationTemplate>): number {
@@ -161,10 +141,12 @@ export function compileRequirement(
     const m = matchPerturbation(condition, lexicon);
     diagnostics.push(...m.diagnostics);
     if (m.bound) {
-      dims = m.bound.dimensions ?? [];
-      perturbations.push(perturbationCall(m.bound));
+      const built = buildDimensions(m.bound, condition, true);
+      diagnostics.push(...built.diagnostics);
+      dims = built.dims;
+      perturbations.push({ template: m.bound.template.phrase, params: built.params });
       triggerDur = triggerDuration(m.bound);
-      dimsSources = m.bound.dimensionSources ?? [];
+      dimsSources = built.sources;
       dimsClause = condition;
     }
   } else if (pattern === 'state' && condition) {
@@ -183,15 +165,12 @@ export function compileRequirement(
 
   if (pattern !== 'event' && pattern !== 'unwanted') {
     // Template dims: the response template's, then the state template's.
-    if (resp.bound?.dimensions) {
-      dims = dims.concat(resp.bound.dimensions);
-      dimsSources = dimsSources.concat(resp.bound.dimensionSources ?? []);
-    }
-    if (stateBound?.dimensions) {
-      const pad = dims.length - dimsSources.length;
-      for (let k = 0; k < pad; k++) dimsSources.push(undefined);
-      dims = dims.concat(stateBound.dimensions);
-      dimsSources = dimsSources.concat(stateBound.dimensionSources ?? []);
+    for (const [b, clause] of [[resp.bound, ast.response], [stateBound, condition]] as const) {
+      if (!b || !clause) continue;
+      const built = buildDimensions(b, clause, false);
+      diagnostics.push(...built.diagnostics);
+      dims = dims.concat(built.dims);
+      dimsSources = dimsSources.concat(built.sources);
     }
     dimsClause = ast.response;
   }

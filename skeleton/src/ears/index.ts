@@ -16,4 +16,5 @@ export type {
   PerturbationCall, CompiledRequirement, SimContext,
   PredicateTemplate, PerturbationTemplate, Lexicon,
   Pattern, Token, TokenType, CompileOptions,
+  SlotDimension, SlotRange, SlotValue, LegacyDims,
 } from './types.js';

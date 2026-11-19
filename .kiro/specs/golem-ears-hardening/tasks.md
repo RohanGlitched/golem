@@ -20,7 +20,7 @@ Conventions: sources in `skeleton/src/ears/`, tests in `skeleton/src/ears/__test
 - [x] 6. Kiro markup and trailing periods (defect 2)
   - `kiroText` in the tokenizer module, used by `compileRequirement`; extractor start test
   - _Bugfix: 2.1–2.9_
-- [ ] 7. Compiler-built dimensions (defects 1 and 10)
+- [x] 7. Compiler-built dimensions (defects 1 and 10)
   - `SlotDimension`, `slots`, `SlotRange`, deprecated `dims(slots, ranges)`, `BAD_LEXICON`; `dimensions.ts`
   - Update `interfaces.md` and the sim's mirrored types; fix the `toMatchObject` in `compile.test.ts`
   - Add the G1 lexicon fixture

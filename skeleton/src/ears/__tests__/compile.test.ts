@@ -55,7 +55,8 @@ describe('compileRequirement', () => {
     expect(req.space.dims.map((d) => d.name)).toEqual(['push.force', 'push.angle']);
     expect(req.perturbations).toHaveLength(1);
     expect(req.perturbations[0]!.template).toBe(push.phrase);
-    expect(req.perturbations[0]!.params).toMatchObject({ force: 'push.force', duration: 0.2 });
+    // Exact: a partial match here hid the dropped direction (golem-ears-hardening defect 1).
+    expect(req.perturbations[0]!.params).toEqual({ force: 'push.force', duration: 0.2, direction: 'push.angle' });
     expect(req.horizon).toBeCloseTo(3.2, 12);
     expect(req.monitor(trace(1)).robustness).toBeCloseTo(0.5, 12);
     expect(req.monitor(trace(0.2)).robustness).toBeLessThan(0);

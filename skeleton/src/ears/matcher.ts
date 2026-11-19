@@ -3,8 +3,8 @@ import { makeDiagnostic, type Diagnostic } from './diagnostics.js';
 import { closestTemplate } from './editDistance.js';
 import { duplicateRangeDiagnostic, parseRangePhrase, type RangePhrase } from './ranges.js';
 import type {
-  CompiledTemplate, Dimension, Kind, Lexicon, PerturbationTemplate, PredicateTemplate, Quantity,
-  SlotKind, Span, TemporalWrapper, Token,
+  CompiledTemplate, Kind, Lexicon, PerturbationTemplate, PredicateTemplate, Quantity,
+  SlotKind, SlotValue, Span, TemporalWrapper, Token,
 } from './types.js';
 import { quantityFromTokens } from './units.js';
 
@@ -16,7 +16,7 @@ export interface MatcherTemplate extends CompiledTemplate {
   pattern: (string | MatcherSlot)[];
 }
 
-export type SlotValue = Quantity | [Quantity, Quantity] | string;
+export type { SlotValue };
 
 export interface BoundClause<T> {
   template: T;
@@ -30,24 +30,10 @@ export interface BoundClause<T> {
   /** SI numbers by slot name. A range or phrase slot adds `<name>.min` and `<name>.max`. */
   si: Record<string, number>;
   ranges: Record<string, RangePhrase>;
-  /** Result of the template's `dims` called with `slots`, when the template has one. */
-  dimensions?: Dimension[];
-  /**
-   * Parallel to `dimensions`: the source span each Dimension came from. A Dimension is attributed to
-   * the unused range slot whose name it ends with, else to the range slot at the same index in source
-   * order. `undefined` when neither applies (callers fall back to the clause span).
-   */
-  dimensionSources?: (Span | undefined)[];
-}
-
-function attributeDimensions(dims: readonly Dimension[], ranges: Record<string, RangePhrase>): (Span | undefined)[] {
-  const bySource = Object.entries(ranges).sort((a, b) => a[1].span.start - b[1].span.start);
-  const taken = new Set<string>();
-  return dims.map((d, i) => {
-    const hit = bySource.find(([s]) => !taken.has(s) && (d.name === s || d.name.endsWith('.' + s)));
-    if (hit) { taken.add(hit[0]); return hit[1].span; }
-    return bySource[i]?.[1].span;
-  });
+  /** Source span of every bound slot. */
+  spans: Record<string, Span>;
+  /** The compiled pattern of `template`, for slot order. */
+  compiled: MatcherTemplate;
 }
 
 export interface PerturbationMatch { bound?: BoundClause<PerturbationTemplate>; diagnostics: Diagnostic[] }
@@ -120,6 +106,7 @@ interface Binding {
   slots: Record<string, SlotValue>;
   si: Record<string, number>;
   ranges: Record<string, RangePhrase>;
+  spans: Record<string, Span>;
 }
 interface Fail { pos: number; diagnostics?: Diagnostic[] }
 type Attempt = { ok: true; binding: Binding } | { ok: false; fail: Fail };
@@ -173,6 +160,7 @@ function quantitySlot(
   }
   b.slots[name] = r.quantity;
   b.si[name] = r.quantity.si;
+  b.spans[name] = posOf(tok, last);
   return { next: i + (unit ? 2 : 1) };
 }
 
@@ -207,6 +195,7 @@ function rangeSlot(
   b.si[`${el.name}.min`] = range.min;
   b.si[`${el.name}.max`] = range.max;
   b.ranges[el.name] = range;
+  b.spans[el.name] = range.span;
   return { next: r.next };
 }
 
@@ -223,6 +212,7 @@ function phraseSlot(
       b.si[`${el.name}.min`] = r.range.min;
       b.si[`${el.name}.max`] = r.range.max;
       b.ranges[el.name] = r.range;
+      b.spans[el.name] = r.range.span;
       return { next: r.next };
     }
   }
@@ -231,7 +221,7 @@ function phraseSlot(
 }
 
 function matchOne(t: MatcherTemplate, toks: readonly Token[]): Attempt {
-  const b: Binding = { slots: {}, si: {}, ranges: {} };
+  const b: Binding = { slots: {}, si: {}, ranges: {}, spans: {} };
   let i = 0;
   for (let p = 0; p < t.pattern.length; p++) {
     const el = t.pattern[p]!;
@@ -310,7 +300,7 @@ function endPosition(toks: readonly Token[], clause: Clause) {
   return { start: last.end, end: last.end, line: last.line, column: last.column + (last.end - last.start) };
 }
 
-function run<T extends { phrase: string; dims?: (slots: Record<string, SlotValue>) => Dimension[] }>(
+function run<T extends { phrase: string }>(
   clause: Clause, cls: Class, templates: readonly T[], compiled: readonly MatcherTemplate[], allowWrapper: boolean,
 ): Outcome<T> {
   const toks = clause.tokens.filter((t) => t.type !== 'comma');
@@ -368,11 +358,8 @@ function run<T extends { phrase: string; dims?: (slots: Record<string, SlotValue
     const template = templates[idx]!;
     const bound: BoundClause<T> = {
       template, slots: a.binding.slots, si: a.binding.si, ranges: a.binding.ranges,
+      spans: a.binding.spans, compiled: compiled[idx]!,
     };
-    if (typeof template.dims === 'function') {
-      bound.dimensions = template.dims(a.binding.slots);
-      bound.dimensionSources = attributeDimensions(bound.dimensions, bound.ranges);
-    }
     const out: Outcome<T> = { bound, diagnostics: [] };
     const w = viaWrapper ? stripped!.wrapper : allowWrapper ? ownWrapper(compiled[idx]!, a.binding) : undefined;
     if (w) out.wrapper = w;

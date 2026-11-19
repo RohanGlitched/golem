@@ -1,6 +1,8 @@
 export type DiagnosticKind =
   | 'PATTERN_MISMATCH' | 'MISSING_UNIT' | 'UNKNOWN_PHRASE'
-  | 'BAD_RANGE' | 'UNKNOWN_ROBOT' | 'NON_EARS_LINE';
+  | 'BAD_RANGE' | 'UNKNOWN_ROBOT' | 'NON_EARS_LINE'
+  /** A Lexicon authoring problem that this line exposes. */
+  | 'BAD_LEXICON';
 
 export interface Diagnostic {
   kind: DiagnosticKind;

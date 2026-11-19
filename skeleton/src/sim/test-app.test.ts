@@ -109,7 +109,10 @@ describe('push template', () => {
     data.delete();
   });
   it('takes its force range from the slot', () => {
-    const dims = push.dims({ force: [{ kind: 'force', si: 0, text: '0 N' }, { kind: 'force', si: 150, text: '150 N' }] });
+    const dims = push.dims!(
+      { force: [{ kind: 'force', si: 0, text: '0 N' }, { kind: 'force', si: 150, text: '150 N' }] },
+      { force: { kind: 'force', min: 0, max: 150, wrap: false } },
+    );
     expect(dims.map((d) => [d.name, d.min, d.max])).toEqual([['push.force', 0, 150], ['push.angle', 0, 2 * Math.PI]]);
   });
 });
