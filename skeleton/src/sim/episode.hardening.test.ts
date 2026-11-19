@@ -129,4 +129,21 @@ describe('defect 2 and improvement 1: bounded divergence check and numerical dia
   });
 });
 
+describe('defect 4: mj_forward after initState', () => {
+  it('lets sample 0 and the first controller step see the pose initState wrote (warm-up 0)', async () => {
+    const seen: number[][] = [];
+    const app: RobotApp = {
+      ...boxDropApp,
+      warmup: 0,
+      initState: (ctx) => { (ctx.data.qpos as Float64Array)[2] = 0.9; },
+      makeController: (ctx) => ({
+        step: () => { if (seen.length === 0) seen.push(Array.from(ctx.data.sensordata as Float64Array)); },
+      }),
+    };
+    const { trace } = await run(app, boxReq(0.1, []));
+    expect(trace.signals['box.z']![0]).toBe(0.9);
+    expect(seen[0]).toEqual([0, 0, 0.9]);
+  });
+});
+
 void makeStoolApp; void shoveCall;

@@ -108,6 +108,8 @@ export async function runTrial(
     const rng = mulberry32(spec.seed);
     ctx = buildContext(mj, model, data, app.names);
     app.initState?.(ctx, rng);
+    // D4: derived quantities (xpos, sensordata, ...) must match the state initState wrote.
+    mj.mj_forward(model, data);
     const controller = app.makeController(ctx, rng);
 
     // Live views, read once. Re-read only when WASM memory growth detaches them.
