@@ -67,11 +67,11 @@ Rules for every task:
   - [x] 9.2 Property test: with no conflicts and no unreadable rows, `byId` holds the single mark of each id (round trip of generated tables, canonical and varied spelling).
   - _Bugfix: 7.1 to 7.5_
 
-- [ ] 10. Row parsing details and JSON (defect 10)
+- [x] 10. Row parsing details and JSON (defect 10)
   - `\|`, quote prefix, pipe-less tables, lone CR, a header inside a table; `gate --json` and `test --json` verdicts carry `expectation` and `met`.
   - Tests: probe 1 cases; existing JSON assertions stay and the new fields are added.
-  - [ ] 10.1 Property test (T.3.3): LF, CRLF or CR, header case, bold and backticks, extra columns, any column order, a quote prefix and an escaped pipe in the topic give an equal `byId`.
-  - [ ] 10.2 Property test (T.3.4): permuting rows with distinct ids gives an equal `byId`.
+  - [x] 10.1 Property test (T.3.3): LF, CRLF or CR, header case, bold and backticks, extra columns, any column order, a quote prefix and an escaped pipe in the topic give an equal `byId`.
+  - [x] 10.2 Property test (T.3.4): permuting rows with distinct ids gives an equal `byId`.
   - _Bugfix: 10.1 to 10.8_
 
 - [ ] 11. Hygiene, committed-spec corpus and the remaining examples (defect 11, T.1, T.4)

@@ -94,12 +94,23 @@ export function formatIssue(i: TableIssue, show: (file: string) => string = (f) 
 
 export const tableErrors = (p: Pick<ParsedExpectations, 'issues'>): TableIssue[] => p.issues.filter((i) => i.severity === 'error');
 
+/** Splits a row into cells: a leading and a trailing pipe are optional, `\|` is a pipe inside a cell, and bold, backticks and underscores around a cell are dropped. */
 const cells = (row: string): string[] => {
   let s = row.trim();
   if (s.startsWith('|')) s = s.slice(1);
-  if (s.endsWith('|')) s = s.slice(0, -1);
-  return s.split('|').map((c) => c.trim().replace(/^[*`_]+|[*`_]+$/g, ''));
+  if (s.endsWith('|') && !s.endsWith('\\|')) s = s.slice(0, -1);
+  const out: string[] = [];
+  let cur = '';
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i] as string;
+    if (ch === '\\' && s[i + 1] === '|') { cur += '|'; i++; } else if (ch === '|') { out.push(cur); cur = ''; } else cur += ch;
+  }
+  out.push(cur);
+  return out.map((c) => c.trim().replace(/^[*`_]+|[*`_]+$/g, ''));
 };
+
+/** A line can be a table row when it has a pipe that is not escaped. */
+const hasPipe = (s: string): boolean => /(?:^|[^\\])\|/.test(s);
 
 const isSeparator = (row: string): boolean => /^\s*\|?[\s:|-]+\|?\s*$/.test(row) && row.includes('-');
 
@@ -114,6 +125,9 @@ const indentOf = (s: string): number => {
   return n;
 };
 
+/** The line without its blockquote markers (`> `, `> > `). */
+const unquote = (s: string): string => s.replace(/^ {0,3}(?:> ?)+/, '');
+
 const ID_HEADER = /^(?:criterion|criteria|id|#)$/i;
 const EXP_HEADER = /^expect/i;
 /** A fence opens with 3 or more backticks (none after them on the line) or tildes, indented by at most 3 spaces. */
@@ -125,7 +139,7 @@ export function parseExpectations(text: string, file?: string): ParsedExpectatio
   const rows: ExpectationRow[] = [];
   const scan: TableIssue[] = [];
   let tables = 0;
-  const lines = text.split(/\r?\n/);
+  const lines = text.split(/\r\n|\r|\n/);
   const issue = (severity: TableIssue['severity'], line: number, message: string): void => {
     scan.push({ severity, line, message, ...(file !== undefined ? { file } : {}) });
   };
@@ -133,7 +147,8 @@ export function parseExpectations(text: string, file?: string): ParsedExpectatio
   let expCol = -1;
   let fence: { ch: string; len: number } | undefined;
   for (let i = 0; i < lines.length; i++) {
-    const s = lines[i] as string;
+    // A table in a blockquote is a table: the quote markers are not part of the line.
+    const s = unquote(lines[i] as string);
     // Code is not data: a table in a fenced block is an example (defect 6).
     if (fence !== undefined) {
       const close = FENCE_CLOSE.exec(s)?.[1];
@@ -147,17 +162,19 @@ export function parseExpectations(text: string, file?: string): ParsedExpectatio
       idCol = -1; expCol = -1;
       continue;
     }
-    if (!s.trim().startsWith('|')) { idCol = -1; expCol = -1; continue; }
+    if (!hasPipe(s)) { idCol = -1; expCol = -1; continue; }
     const c = cells(s);
+    const a = c.findIndex((x) => ID_HEADER.test(x));
+    const b = c.findIndex((x) => EXP_HEADER.test(x));
+    const next = unquote(lines[i + 1] ?? '');
+    // A header outside a table starts one. A header inside a table (two tables with no blank line between them) needs its
+    // separator line, so that a row whose id is `ID` and whose mark starts with `Expect` is still a row.
+    if (a >= 0 && b >= 0 && (idCol < 0 || isSeparator(next))) {
+      if (indentOf(s) >= 4) { issue('warning', i + 1, `the table at line ${i + 1} is indented 4 spaces, which Markdown shows as code; its rows are ignored`); idCol = -1; expCol = -1; } else { idCol = a; expCol = b; tables++; }
+      continue;
+    }
     if (idCol < 0) {
-      const a = c.findIndex((x) => ID_HEADER.test(x));
-      const b = c.findIndex((x) => EXP_HEADER.test(x));
-      if (a >= 0 && b >= 0) {
-        if (indentOf(s) >= 4) issue('warning', i + 1, `the table at line ${i + 1} is indented 4 spaces, which Markdown shows as code; its rows are ignored`);
-        else { idCol = a; expCol = b; tables++; }
-      } else if (b >= 0 && isSeparator(lines[i + 1] ?? '')) {
-        issue('warning', i + 1, `the table at line ${i + 1} has an Expectation column but no Criterion column; its rows are ignored`);
-      }
+      if (b >= 0 && isSeparator(next)) issue('warning', i + 1, `the table at line ${i + 1} has an Expectation column but no Criterion column; its rows are ignored`);
       continue;
     }
     if (indentOf(s) >= 4) { idCol = -1; expCol = -1; continue; }

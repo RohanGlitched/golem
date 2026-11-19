@@ -33,7 +33,7 @@ export const handler: CommandHandler = async (p, io, deps) => {
   const unmet = judged.filter((j) => !j.met);
   if (p.flags['json'] === true) {
     line(io, JSON.stringify({
-      ok: code === 0, exitCode: code, verdicts: run.outcomes.map((o) => o.verdict),
+      ok: code === 0, exitCode: code, verdicts: judged.map((j) => ({ ...j.outcome.verdict, expectation: j.expectation, met: j.met })),
       expectationChanges: run.changes,
       expectations: judged.map((j) => ({ reqId: j.outcome.verdict.reqId, expectation: j.expectation, status: j.outcome.verdict.status, met: j.met })),
     }));

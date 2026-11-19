@@ -1,6 +1,6 @@
 // `golem test`: falsify every requirement, pin counterexamples, write the report.
 import { testExitCode } from '../exit.js';
-import { formatIssue, readExpectations, tableErrors } from '../expectation.js';
+import { formatIssue, judgeOutcomes, readExpectations, tableErrors } from '../expectation.js';
 import { requirementLine, testSummary } from '../format.js';
 import { bootstrap, displayPath, runRequirements, withPool, writeRunReport } from '../service.js';
 import type { CommandHandler } from '../run.js';
@@ -28,7 +28,10 @@ export const handler: CommandHandler = async (p, io, deps) => {
   const code = testExitCode(outcomes.map((x) => x.verdict));
   const report = await writeRunReport(deps, boot.app, outcomes, only !== undefined ? { reqId: only } : 'all', seconds, (m) => errLine(io, m), { expectations: expectations.byId });
   if (json) {
-    line(io, JSON.stringify({ verdicts: outcomes.map((x) => ({ ...x.verdict, ...(expectations.byId.has(x.verdict.reqId) ? { expectation: expectations.byId.get(x.verdict.reqId) } : {}) })), meta: report?.meta ?? { budget: outcomes[0]?.meta.budget ?? {}, durationS: seconds } }));
+    line(io, JSON.stringify({
+      verdicts: judgeOutcomes(outcomes, expectations.byId).map((j) => ({ ...j.outcome.verdict, expectation: j.expectation, met: j.met })),
+      meta: report?.meta ?? { budget: outcomes[0]?.meta.budget ?? {}, durationS: seconds },
+    }));
   } else {
     line(io, testSummary(outcomes, seconds));
   }

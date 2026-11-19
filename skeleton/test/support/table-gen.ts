@@ -30,7 +30,7 @@ export interface TableStyle {
   extraColumn: boolean;
   leadingPipes: boolean;
   /** Prefix of every table line, such as `> `. */
-  prefix: '' | '> ';
+  prefix: '' | '> ' | '> > ';
 }
 
 export const CANONICAL: TableStyle = {
@@ -57,6 +57,19 @@ export const arbStyle: fc.Arbitrary<TableStyle> = fc.record({
   extraColumn: fc.boolean(),
   leadingPipes: fc.constant(true),
   prefix: fc.constant('' as const),
+});
+
+/** Every spelling the parser accepts, among them a lone CR, the header aliases, pipe-less rows and a blockquote. */
+export const arbStyleWide: fc.Arbitrary<TableStyle> = fc.record({
+  eol: fc.constantFrom('\n' as const, '\r\n' as const, '\r' as const),
+  idHeader: fc.constantFrom('Criterion', 'criterion', 'CRITERION', 'Criteria', 'ID', 'id', '#'),
+  expHeader: fc.constantFrom('Expectation', 'expectation', 'EXPECTATION', 'Expectations', 'Expected'),
+  wrap: fc.constantFrom('' as const, '**' as const, '`' as const),
+  markCase: fc.constantFrom('canonical' as const, 'upper' as const, 'lower' as const, 'spaced' as const),
+  swap: fc.boolean(),
+  extraColumn: fc.boolean(),
+  leadingPipes: fc.boolean(),
+  prefix: fc.constantFrom('' as const, '> ' as const, '> > ' as const),
 });
 
 /** The lines of a table (no trailing blank line). `topic` is the content of the extra column. */
