@@ -193,69 +193,69 @@ This revision follows the current requirements and design:
     - fast-check, at least 100 runs, file `skeleton/src/cli/__tests__/prop-21-report-merge.test.ts`.
     - **Validates: Requirements 4.2, 5.4, 8.10**
 
-- [ ] 4. MCP pure cores
-  - [ ] 4.1 Implement the JSON limiter and Tool_Result builder
+- [x] 4. MCP pure cores
+  - [x] 4.1 Implement the JSON limiter and Tool_Result builder
     - Create `skeleton/src/mcp/result.ts` with `makeToolResult`, `limitJson` and `oneLine` (two text blocks, summary at most 200 characters with no line break, JSON at most 32768 UTF-8 bytes, `truncated` field).
     - Test with examples: long summary cut to one line, nested arrays halved, long strings cut when no array exists, `isError` set.
     - _Requirements: 15.1, 15.2, 15.3, 15.4_
 
-  - [ ] 4.2 Write property test for the Tool_Result shape
+  - [x] 4.2 Write property test for the Tool_Result shape
     - **Property 31: Tool_Result has one summary line and valid JSON**
     - Generate summaries (with line breaks, very long) and JSON values; assert exactly two blocks, first non-empty with at most 200 characters and no line break, second parses, `isError` kept.
     - fast-check, at least 100 runs, file `skeleton/src/mcp/__tests__/prop-31-tool-result.test.ts`.
     - **Validates: Requirements 15.1, 15.3, 28.8**
 
-  - [ ] 4.3 Write property test for the JSON limiter
+  - [x] 4.3 Write property test for the JSON limiter
     - **Property 32: JSON limiter stays valid and bounded**
     - Generate nested JSON with unicode and large strings; assert valid JSON of at most 32768 bytes, cut arrays keep leading elements in order, and `truncated` names each cut array with original and kept counts.
     - fast-check, at least 100 runs, file `skeleton/src/mcp/__tests__/prop-32-json-limit.test.ts`.
     - **Validates: Requirements 15.4, 28.16**
 
-  - [ ] 4.4 Implement the tool input validator
+  - [x] 4.4 Implement the tool input validator
     - Create `skeleton/src/mcp/schema.ts` with `JsonSchemaProp`, the `inputSchema` type, `validateInput` and `SchemaError` (no `zod`; applies defaults, rejects unknown keys, wrong types, `budget` outside 1 to 1024, text and rationale outside their limits).
     - Test with examples: each rejection names the field and, for `budget`, the range "1 to 1024"; default budget 24.
     - _Requirements: 11.9, 12.3, 12.4, 14.9, 27.4_
 
-  - [ ] 4.5 Write property test for input validation
+  - [x] 4.5 Write property test for input validation
     - **Property 30: Tool input validation names the field**
     - Generate invalid argument objects for each tool schema; assert `ok: false` naming the field, a fake handler is never called, and valid arguments receive defaults.
     - fast-check, at least 100 runs, file `skeleton/src/mcp/__tests__/prop-30-tool-input.test.ts`.
     - **Validates: Requirements 11.9, 12.3, 12.4, 14.9**
 
-  - [ ] 4.6 Implement the FIFO queue and the time cap
+  - [x] 4.6 Implement the FIFO queue and the time cap
     - Create `skeleton/src/mcp/queue.ts` (`FifoQueue`, `WriteQueue`) and `skeleton/src/mcp/cap.ts` (`withTimeCap` using `AbortSignal.any`). A job aborted while queued is skipped without blocking the rest.
     - Test with examples on fake timers: cap fires within 1 s, a parent abort propagates, queued job skip.
     - _Requirements: 12.6, 12.7, 12.8, 14.11, 15.5_
 
-  - [ ] 4.7 Write property test for queue order
+  - [x] 4.7 Write property test for queue order
     - **Property 33: Run queue is first in, first out, one at a time**
     - Generate arrival orders, durations and aborts; assert start order equals arrival order, `active` never exceeds 1, completion order equals arrival order, and aborted queued jobs are skipped.
     - fast-check, at least 100 runs, file `skeleton/src/mcp/__tests__/prop-33-queue.test.ts`.
     - **Validates: Requirements 12.8, 14.11**
 
-  - [ ] 4.8 Implement signal margins and the replay summary
+  - [x] 4.8 Implement signal margins and the replay summary
     - Create `skeleton/src/mcp/margins.ts` with `PredicateBinding`, `signalMargins`, `pickLowest` (strict `<`, first in list wins ties), `explain` (uses the `margins` map of the monitor result when present, otherwise recomputes from `predicates` along the Trace) and a replay summariser (10 Hz, at most 200 samples, earliest kept, `intervalS: 0.1`, `truncated`).
     - Test with examples: single-signal predicate equals the monitor margin, tie order, `margins` map path versus recompute path.
     - _Requirements: 13.1, 13.2, 13.3, 13.8_
 
-  - [ ] 4.9 Write property test for explain_margin
+  - [x] 4.9 Write property test for explain_margin
     - **Property 38: explain_margin picks the lowest margin and breaks ties by list order**
     - Generate traces and bindings over several signals; assert one margin per signal in first-appearance order, a minimal pick with list-order tie break, and identical results when the monitor `margins` map equals the recomputed values.
     - fast-check, at least 100 runs, file `skeleton/src/mcp/__tests__/prop-38-explain-margin.test.ts`.
     - **Validates: Requirements 13.3, 13.4, 13.8, 28.23**
 
-  - [ ] 4.10 Write property test for the replay summary limit
+  - [x] 4.10 Write property test for the replay summary limit
     - **Property 39: Replay summary respects the sample limit**
     - Generate trace lengths and sample rates; assert at most 200 samples at 0.1 s spacing, earliest kept, `truncated` set exactly when samples were dropped.
     - fast-check, at least 100 runs, file `skeleton/src/mcp/__tests__/prop-39-replay-limit.test.ts`.
     - **Validates: Requirements 13.1, 13.2**
 
-  - [ ] 4.11 Implement the proposals writer
+  - [x] 4.11 Implement the proposals writer
     - Create `skeleton/src/mcp/proposals.ts` with `ProposalEntry`, `formatEntry`, `parseEntries`, `normaliseLine`, `findDuplicate` and `appendProposal` (whole-file write through `atomicWriteFile`; creates the directory).
     - Test with examples: first proposal creates file and directory, duplicate ignoring whitespace names file and line, a failed write leaves the old file and removes the temp file.
     - _Requirements: 14.2, 14.5, 14.6, 14.7, 14.8, 14.10_
 
-  - [ ] 4.12 Write property test for the proposal entry round trip
+  - [x] 4.12 Write property test for the proposal entry round trip
     - **Property 37: Proposal entry round trip**
     - Generate timestamps, single-line EARS text and optional rationale; assert `parseEntries(formatEntry(e))` returns `e`.
     - fast-check, at least 100 runs, file `skeleton/src/mcp/__tests__/prop-37-proposal-roundtrip.test.ts`.
