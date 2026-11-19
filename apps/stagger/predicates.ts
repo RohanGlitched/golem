@@ -4,20 +4,24 @@ import type { PredicateTemplate } from './contract.js';
 
 export const UPRIGHT_HEIGHT = 0.5;      // m
 export const UPRIGHT_TILT_LIMIT = 60;   // deg
-export const FALLEN_MARGIN = -0.01;     // m
+export const FALLEN_MARGIN = -0.01;     // m (kept for older seeds' reports; no longer used by stay upright)
+/** Converts tilt headroom to metres so both parts of the upright margin share one unit: 5 mm per degree. */
+export const TILT_TO_M = 0.005;         // m/deg
 export const SETTLING_TIME = 2;         // s of episode time
 
 /**
- * `stay upright`: the margin is `pelvis_z - 0.5 m`. When the Tilt exceeds 60 deg the margin is forced
- * to -0.01 m whatever the pelvis height. Reason: a robot lying on its side can keep its pelvis above
- * 0.5 m (it can fall onto its arm or a step) while it has clearly fallen. A small fixed negative margin
- * marks that state as broken without reporting a misleading height margin.
+ * `stay upright`: the margin is the smaller of the height headroom `pelvis_z - 0.5 m` and the tilt
+ * headroom `(60 deg - tilt) x 5 mm/deg`, in metres. It is positive exactly when the pelvis is above
+ * 0.5 m and the tilt is under 60 deg, so the verdict is unchanged. Unlike a fixed "fallen" value it is
+ * graded: a robot that staggers to 45 deg and recovers scores 0.075 m, one that barely sways scores
+ * about 0.27 m. That gradient is what lets GOLEM's guided search home in on the pushes that come
+ * closest to toppling the robot, instead of searching blind until one actually falls.
  */
 export const stayUpright: PredicateTemplate = {
   phrase: 'stay upright',
   signals: ['pelvis_z', 'tilt_deg'],
   unit: 'm',
-  margin: (s) => ((s['tilt_deg'] as number) > UPRIGHT_TILT_LIMIT ? FALLEN_MARGIN : (s['pelvis_z'] as number) - UPRIGHT_HEIGHT),
+  margin: (s) => Math.min((s['pelvis_z'] as number) - UPRIGHT_HEIGHT, (UPRIGHT_TILT_LIMIT - (s['tilt_deg'] as number)) * TILT_TO_M),
 };
 
 /** `keep its pelvis above {length}`: `pelvis_z - length`, in m. */

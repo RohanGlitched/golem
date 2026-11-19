@@ -26,17 +26,25 @@ describe('predicates', () => {
     const comment = src.slice(src.lastIndexOf('/**', at), at);
     expect(comment).toContain('pelvis_z - 0.5 m');
     expect(comment).toContain('60 deg');
-    expect(comment).toContain('-0.01 m');
-    expect(comment).toMatch(/Reason:/);
+    expect(comment).toContain('5 mm/deg');
+    expect(comment).toMatch(/graded/);
   });
 
-  it('gives pelvis_z - 0.5 m for stay upright when the tilt is at most 60 deg', () => {
-    expect(stayUpright.margin({ pelvis_z: 0.78, tilt_deg: 5 }, {})).toBeCloseTo(0.28, 12);
+  it('gives the smaller of the height and tilt headrooms for stay upright, in metres', () => {
+    expect(stayUpright.margin({ pelvis_z: 0.78, tilt_deg: 5 }, {})).toBeCloseTo(0.275, 12);   // tilt headroom 55 deg x 5 mm
+    expect(stayUpright.margin({ pelvis_z: 0.7, tilt_deg: 5 }, {})).toBeCloseTo(0.2, 12);      // height headroom
     expect(stayUpright.margin({ pelvis_z: 0.4, tilt_deg: 60 }, {})).toBeCloseTo(-0.1, 12);
   });
 
-  it('forces -0.01 m for stay upright when the tilt exceeds 60 deg', () => {
-    expect(stayUpright.margin({ pelvis_z: 0.9, tilt_deg: 61 }, {})).toBe(-0.01);
+  it('is negative once the tilt exceeds 60 deg, however high the pelvis is', () => {
+    expect(stayUpright.margin({ pelvis_z: 0.9, tilt_deg: 61 }, {})).toBeCloseTo(-0.005, 12);
+  });
+
+  it('grades a stagger: a 45 deg lurch scores far lower than a 5 deg sway', () => {
+    const sway = stayUpright.margin({ pelvis_z: 0.76, tilt_deg: 5 }, {});
+    const lurch = stayUpright.margin({ pelvis_z: 0.7, tilt_deg: 45 }, {});
+    expect(lurch).toBeCloseTo(0.075, 12);
+    expect(lurch).toBeLessThan(sway / 3);
   });
 
   it('gives pelvis_z minus the length for keep its pelvis above', () => {

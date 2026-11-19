@@ -5,11 +5,21 @@ import { noSideDrift, pelvisAbove, stayUpright, trackSpeed } from '../predicates
 const d = (min: number, max: number) => fc.double({ min, max, noNaN: true, noDefaultInfinity: true });
 
 describe('Feature: stagger-app, Property 21: stay upright margin', () => {
-  it('equals pelvis_z - 0.5 at tilts up to 60 deg and exactly -0.01 above', () => {
+  it('equals min(pelvis_z - 0.5, (60 - tilt) x 0.005) and is positive exactly when upright', () => {
     fc.assert(fc.property(d(-1, 2), d(0, 180), (z, tilt) => {
       const m = stayUpright.margin({ pelvis_z: z, tilt_deg: tilt }, {});
-      if (tilt > 60) expect(m).toBe(-0.01);
-      else expect(Math.abs(m - (z - 0.5))).toBeLessThanOrEqual(1e-12);
+      expect(Math.abs(m - Math.min(z - 0.5, (60 - tilt) * 0.005))).toBeLessThanOrEqual(1e-12);
+      const upright = z > 0.5 && tilt < 60;
+      if (upright) expect(m).toBeGreaterThan(0);
+      if (z < 0.5 || tilt > 60) expect(m).toBeLessThan(0);
+    }), { numRuns: 300 });
+  });
+
+  it('never rises when the tilt grows or the pelvis drops', () => {
+    fc.assert(fc.property(d(0, 2), d(0, 180), d(0, 1), d(0, 30), (z, tilt, dz, dt) => {
+      const a = stayUpright.margin({ pelvis_z: z, tilt_deg: tilt }, {});
+      const b = stayUpright.margin({ pelvis_z: z - dz, tilt_deg: tilt + dt }, {});
+      expect(b).toBeLessThanOrEqual(a + 1e-12);
     }), { numRuns: 300 });
   });
 });
