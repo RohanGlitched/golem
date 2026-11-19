@@ -1,4 +1,4 @@
-﻿// Writes a RobotApp's files into the MuJoCo virtual file system with FS.mkdirTree + FS.writeFile.
+// Writes a RobotApp's files into the MuJoCo virtual file system with FS.mkdirTree + FS.writeFile.
 // Never MjVFS.addBuffer: it is about 600x slower for MB-sized meshes.
 import { SimError, errorMessage } from './errors.js';
 import type { Mj, RobotApp } from './types.js';
@@ -37,17 +37,32 @@ export function writeRobotFiles(
   app: AppRef,
   files: Record<string, Uint8Array>,
   root = '/robot',
-): void {
+): string[] {
   validateRobotPaths(app, files);
-  const fs = (mj as any).FS;
+  const fs = mj.FS;
+  const written: string[] = [];
   for (const path of Object.keys(files)) {
     const full = `${root}/${path}`;
     try {
       const slash = full.lastIndexOf('/');
-      fs.mkdirTree(full.slice(0, slash));
+      fs.mkdirTree(full.slice(0, slash), 0o777);
       fs.writeFile(full, files[path] as Uint8Array);
+      written.push(full);
     } catch (cause) {
       throw new SimError(`Writing ${path} for app ${app.id} failed: ${errorMessage(cause)}`, { cause });
     }
+  }
+  return written;
+}
+
+/**
+ * Unlinks files written by writeRobotFiles (golem-sim-hardening defect 11). A compiled model holds its own
+ * copy of every mesh, so the in-memory FS copies only double the memory of the worker. Errors are ignored.
+ */
+export function unlinkRobotFiles(mj: Mj, paths: readonly string[]): void {
+  const fs = mj.FS as { unlink?: (p: string) => void };
+  if (typeof fs.unlink !== 'function') return;
+  for (const p of paths) {
+    try { fs.unlink(p); } catch { /* already gone */ }
   }
 }

@@ -1,4 +1,4 @@
-﻿import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { FakeBuffer, withFakeMj } from './test-fixtures.js';
 
 describe('withFakeMj', () => {

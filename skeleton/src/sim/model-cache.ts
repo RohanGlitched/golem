@@ -1,16 +1,16 @@
 // Compiles each app's model once per worker and keeps it. One ModelCache per worker.
 import { SimError, errorMessage } from './errors.js';
 import { registry } from './handles.js';
-import { writeRobotFiles } from './file-writer.js';
+import { unlinkRobotFiles, writeRobotFiles } from './file-writer.js';
 import { loadMujoco } from './loader.js';
 import { takeModelSnapshot } from './model-snapshot.js';
-import type { Mj, RobotApp } from './types.js';
+import type { Mj, MjModel, RobotApp } from './types.js';
 
-export interface CachedModel { mj: Mj; model: any }
+export interface CachedModel { mj: Mj; model: MjModel }
 
 export class ModelCache {
   private readonly entries = new Map<string, Promise<CachedModel>>();
-  private readonly settled = new Map<string, any>();
+  private readonly settled = new Map<string, MjModel>();
   private generation = 0;
   private readonly load: () => Promise<Mj>;
 
@@ -34,12 +34,18 @@ export class ModelCache {
   }
 
   private async compile(app: RobotApp, gen: number): Promise<CachedModel> {
-    let model: any;
+    let model: MjModel | undefined;
+    let mj: Mj | undefined;
+    let written: string[] = [];
     try {
-      const mj = await this.load();
+      mj = await this.load();
       const files = await app.files();
-      writeRobotFiles(mj, app, files);
-      model = (mj as any).MjModel.from_xml_path(`/robot/${app.sceneFile}`);
+      written = writeRobotFiles(mj, app, files);
+      try {
+        model = mj.MjModel.from_xml_path(`/robot/${app.sceneFile}`);
+      } finally {
+        unlinkRobotFiles(mj, written);
+      }
       registry.track(model, 'MjModel');
       takeModelSnapshot(model); // golem-sim-hardening D6: every trial restores the model to this
       if (gen !== this.generation) {

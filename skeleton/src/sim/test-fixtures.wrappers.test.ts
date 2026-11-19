@@ -1,4 +1,4 @@
-﻿import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildContext } from './context.js';
 import { ModelCache } from './model-cache.js';
 import { mulberry32 } from './prng.js';

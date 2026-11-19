@@ -1,4 +1,4 @@
-﻿// Pure trial validation: no MuJoCo handle is touched and the model cache is not consulted.
+// Pure trial validation: no MuJoCo handle is touched and the model cache is not consulted.
 import { SimError } from './errors.js';
 import type {
   CompiledRequirement, Dimension, Kind, PerturbationTemplate, RobotApp, Scenario, TrialSpec,
@@ -17,7 +17,6 @@ export interface ValidatedTrial {
   controlSteps: number;
   /** Sim steps per control step. */
   n: number;
-  warmupSimSteps: number;
 }
 
 const UNIT: Record<Kind, string> = {
@@ -29,6 +28,15 @@ const REL_TOL = 1e-9;
 
 function isIntegerWithin(x: number): boolean {
   return Math.abs(x - Math.round(x)) <= REL_TOL * Math.max(1, Math.abs(x));
+}
+
+/**
+ * Control steps that cover the horizon (golem-sim-hardening defect 11): an exact multiple (within 1e-9
+ * relative) keeps its count; anything else is rounded up, never down, so the trial covers the horizon.
+ */
+export function horizonSteps(horizon: number, controlDt: number): number {
+  const x = horizon / controlDt;
+  return isIntegerWithin(x) ? Math.round(x) : Math.ceil(x);
 }
 
 /** Clamps within 1e-9 relative tolerance, wraps `wrap` dimensions into [min, max), rejects the rest. */
@@ -106,8 +114,7 @@ export function validateTrial(app: RobotApp, req: CompiledRequirement, spec: Tri
   return {
     scenario, calls,
     warmupControlSteps: Math.round(warmup / controlDt),
-    controlSteps: Math.round(req.horizon / controlDt),
+    controlSteps: horizonSteps(req.horizon, controlDt),
     n,
-    warmupSimSteps: Math.round(warmup / simDt),
   };
 }

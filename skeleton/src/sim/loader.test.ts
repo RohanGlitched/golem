@@ -1,4 +1,4 @@
-﻿import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { SimError } from './errors.js';
 import { __setLoadFnForTests, loadMujoco } from './loader.js';
 import type { Mj } from './types.js';

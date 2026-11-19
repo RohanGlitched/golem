@@ -1,4 +1,4 @@
-﻿import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { HandleRegistry, TrialScope, liveHandleCount, registry } from './handles.js';
 import { FakeHandle } from './test-fixtures.js';
 

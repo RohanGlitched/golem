@@ -1,4 +1,4 @@
-﻿import fc from 'fast-check';
+import fc from 'fast-check';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { SimError } from './errors.js';
 import { validateRobotPaths, writeRobotFiles } from './file-writer.js';

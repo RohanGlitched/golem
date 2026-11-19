@@ -1,5 +1,8 @@
 // Regression tests for golem-sim-hardening (one describe per defect or improvement).
 // Each test failed on the runner before its fix; see docs/reviews/sim-hardening.md.
+import { readdirSync, readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { afterAll, describe, expect, it } from 'vitest';
 import { runTrial } from './episode.js';
 import { ModelCache } from './model-cache.js';
@@ -10,6 +13,7 @@ import type { CompiledRequirement, EarlyStopHook, RobotApp, Trace, TrialResult, 
 
 const cache = new ModelCache();
 afterAll(() => cache.dispose());
+const here = dirname(fileURLToPath(import.meta.url));
 
 const AUTORESET = 65536;
 
@@ -484,6 +488,69 @@ describe('improvement 3: trajectory hash', () => {
     const { result } = await run(logging(stoolApp, states), req, { f: 0, a: 0 }, 4, { earlyStop: (_t, n) => (n === 6 ? 1 : undefined) });
     expect(states).toHaveLength(100 + 50 + 1);
     expect(result.hash).toBe(referenceHash(states, states[0]!.length));
+  });
+});
+
+describe('defect 11: low-severity defects', () => {
+  it('rounds a horizon up to whole control steps and reports the simulated horizon', async () => {
+    // 0.205 s / 0.02 s = 10.25 control steps: 11 steps cover 0.22 s (round() gave 10 steps, 0.20 s < 0.205 s).
+    const { result, trace } = await run(boxDropApp, boxReq(0.205, []));
+    expect(trace.t.length).toBe(12);
+    expect(trace.t[11]).toBe(0.2 + 11 * 0.02);
+    expect(result.diagnostics.horizon).toBeCloseTo(0.22, 12);
+  });
+
+  it('keeps an exact multiple of controlDt unchanged', async () => {
+    const { trace } = await run(boxDropApp, boxReq(0.3, []));
+    expect(trace.t.length).toBe(16);
+  });
+
+  it('records NaN, not the stale value, when the app stops writing a signal', async () => {
+    let calls = 0;
+    const app: RobotApp = {
+      ...boxDropApp,
+      signals: (ctx, out) => { boxDropApp.signals(ctx, out); if (calls++ === 0) out['flaky'] = 1; },
+    };
+    const { trace } = await run(app, boxReq(0.1, []));
+    const s = trace.signals['flaky']!;
+    expect(s[0]).toBe(1);
+    expect(Array.from(s.slice(1)).every(Number.isNaN)).toBe(true);
+  });
+
+  it('removes the robot files from the in-memory FS after compiling', async () => {
+    const fresh = new ModelCache();
+    try {
+      const { mj } = await fresh.getModel(makeStoolApp('none'));
+      expect((mj as any).FS.analyzePath('/robot/scene.xml').exists).toBe(false);
+    } finally {
+      fresh.dispose();
+    }
+  });
+});
+
+describe('defect 11: source hygiene in skeleton/src/sim', () => {
+  const files = readdirSync(here).filter((n) => n.endsWith('.ts'));
+  it('has no UTF-8 BOM in any file', () => {
+    const withBom = files.filter((n) => {
+      const b = readFileSync(join(here, n));
+      return b[0] === 0xef && b[1] === 0xbb && b[2] === 0xbf;
+    });
+    expect(withBom).toEqual([]);
+  });
+  it('uses `any` in non-test sources only for the contract SimContext fields', () => {
+    const offenders: string[] = [];
+    for (const n of files.filter((f) => !f.endsWith('.test.ts') && !f.startsWith('test-'))) {
+      readFileSync(join(here, n), 'utf8').split('\n').forEach((line, i) => {
+        const code = line.replace(/\/\/.*$/, '').replace(/\/\*.*?\*\//g, '').replace(/^\s*\*.*$/, '');
+        if (/\bany\b/.test(code) && !/mj: any; model: any; data: any;/.test(code)) offenders.push(`${n}:${i + 1}`);
+      });
+    }
+    expect(offenders).toEqual([]);
+  });
+  it('drops the unused warmupSimSteps from validateTrial', async () => {
+    const { validateTrial } = await import('./validate.js');
+    const v = validateTrial(boxDropApp, boxReq(0.2, []), { app: boxDropApp.id, reqId: 'R1', scenario: { f: 0, a: 0 }, seed: 1 });
+    expect('warmupSimSteps' in v).toBe(false);
   });
 });
 

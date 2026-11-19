@@ -5,6 +5,8 @@ import type { ModelCache } from './model-cache.js';
 
 /** The MuJoCo namespace returned by `await load()` from `@mujoco/mujoco`. */
 export type Mj = Awaited<ReturnType<typeof import('@mujoco/mujoco').default>>;
+/** Typed bindings for sim internals. The contract shape SimContext keeps `any` (interfaces.md). */
+export type { MjData, MjModel } from '@mujoco/mujoco';
 
 export type ObjType = 'body' | 'geom' | 'site' | 'joint' | 'actuator';
 

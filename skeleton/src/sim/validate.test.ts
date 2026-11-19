@@ -1,4 +1,4 @@
-﻿import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { liveHandleCount } from './handles.js';
 import { miniApp, miniReq, miniSpec } from './test-fixtures.js';
 import { validateTrial } from './validate.js';
@@ -10,7 +10,7 @@ describe('validateTrial', () => {
     const v = run();
     expect(v.n).toBe(10);
     expect(v.warmupControlSteps).toBe(10);
-    expect(v.warmupSimSteps).toBe(100);
+    expect('warmupSimSteps' in v).toBe(false); // removed: it was never used (golem-sim-hardening defect 11)
     expect(v.controlSteps).toBe(50);
     expect(v.calls).toHaveLength(1);
     expect(v.calls[0]!.values).toEqual({ force: 100, duration: 0.2, angle: 1 });

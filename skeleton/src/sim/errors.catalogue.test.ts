@@ -60,10 +60,10 @@ describe('error catalogue', () => {
 
   it('Req 4.10: an empty name is rejected without a mj_name2id call', () => {
     const f = withFakeMj();
-    expect(() => buildContext(f.mj, {}, {}, { site: [''] })).toThrow(/Empty site name/);
+    expect(() => buildContext(f.mj, {} as never, {} as never, { site: [''] })).toThrow(/Empty site name/);
     expect(f.calls.name2id).toHaveLength(0);
     f.names[FAKE_OBJ.geom] = [];
-    expect(() => buildContext(f.mj, {}, {}, { geom: ['g'] })).toThrow(/geom named "g"/);
+    expect(() => buildContext(f.mj, {} as never, {} as never, { geom: ['g'] })).toThrow(/geom named "g"/);
   });
 
   it('Req 5.12: an app id mismatch names both ids', () => {

@@ -4,7 +4,9 @@
 import type { MjModel } from '@mujoco/mujoco';
 
 /** A model as the sim sees it: the typed bindings, or a stand-in (test fakes have no buffer or opt). */
-type AnyModel = MjModel | Record<string, any>;
+type AnyModel = MjModel | object;
+/** Field-by-name access for introspection. */
+type Fields = Record<string, unknown>;
 
 export interface ModelSnapshot {
   /** Copy of `model.buffer`, or undefined when the model has none. */
@@ -29,7 +31,7 @@ function protoFields(obj: object): string[] {
 }
 
 function readOpt(model: AnyModel): Array<[string, number | Float64Array]> {
-  const opt = (model as any).opt;
+  const opt = (model as Fields)['opt'] as Fields | undefined;
   if (opt === undefined || opt === null || typeof opt !== 'object') return [];
   const out: Array<[string, number | Float64Array]> = [];
   for (const name of protoFields(opt)) {
@@ -43,7 +45,7 @@ function readOpt(model: AnyModel): Array<[string, number | Float64Array]> {
 
 /** Copies the whole model (buffer and opt) and records the copy as this model's snapshot. */
 export function takeModelSnapshot(model: AnyModel): ModelSnapshot {
-  const buf = (model as any).buffer;
+  const buf = (model as Fields)['buffer'];
   const snap: ModelSnapshot = { buffer: buf instanceof Uint8Array ? Uint8Array.from(buf) : undefined, opt: readOpt(model) };
   SNAPSHOTS.set(model as object, snap);
   return snap;
@@ -56,10 +58,10 @@ export function modelSnapshot(model: AnyModel): ModelSnapshot {
 
 /** Puts the whole model back to its snapshot: one memcpy of the buffer, then every opt field. */
 export function restoreModelSnapshot(model: AnyModel, snap: ModelSnapshot = modelSnapshot(model)): void {
-  const m = model as any;
-  if (snap.buffer !== undefined) (m.buffer as Uint8Array).set(snap.buffer);
+  const m = model as Fields;
+  if (snap.buffer !== undefined) (m['buffer'] as Uint8Array).set(snap.buffer);
   if (snap.opt.length === 0) return;
-  const opt = m.opt;
+  const opt = m['opt'] as Fields;
   for (const [name, value] of snap.opt) {
     if (typeof value === 'number') {
       if (!Object.is(opt[name], value)) opt[name] = value;
@@ -76,8 +78,8 @@ const LAYOUTS = new WeakMap<object, FieldRange[]>();
 function layoutOf(model: AnyModel): FieldRange[] {
   const cached = LAYOUTS.get(model as object);
   if (cached !== undefined) return cached;
-  const m = model as any;
-  const buf = m.buffer;
+  const m = model as Fields;
+  const buf = m['buffer'];
   const ranges: FieldRange[] = [];
   if (buf instanceof Uint8Array) {
     for (const name of protoFields(m)) {
@@ -97,10 +99,10 @@ function layoutOf(model: AnyModel): FieldRange[] {
 
 /** Names of the model arrays (and `opt.<field>`s) that differ from the snapshot, in buffer order. */
 export function changedModelFields(model: AnyModel, snap: ModelSnapshot = modelSnapshot(model)): string[] {
-  const m = model as any;
+  const m = model as Fields;
   const changed: string[] = [];
   if (snap.buffer !== undefined) {
-    const cur = m.buffer as Uint8Array;
+    const cur = m['buffer'] as Uint8Array;
     const ranges = layoutOf(model);
     const seen = new Set<string>();
     let unnamed = false;

@@ -352,7 +352,7 @@ describe('fault properties', () => {
   // and every opt field, whatever way the trial ends.
   it('Property 14: random edits to any model array or opt field leave model.buffer and opt byte-equal after every trial', async () => {
     const app0 = stoolApp;
-    const { model: sm } = await cache.getModel(app0);
+    const sm: any = (await cache.getModel(app0)).model;
     const proto = Object.getPrototypeOf(sm);
     const bufAll = sm.buffer as Uint8Array;
     const fields = Object.getOwnPropertyNames(proto).filter((name) => {

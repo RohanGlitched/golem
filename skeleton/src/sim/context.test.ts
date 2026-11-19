@@ -1,4 +1,4 @@
-﻿import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { buildContext } from './context.js';
 import { SimError } from './errors.js';
 import { FAKE_OBJ, withFakeMj } from './test-fixtures.js';
@@ -7,8 +7,9 @@ const setup = () => {
   const f = withFakeMj();
   f.names[FAKE_OBJ.body] = ['pelvis', 'torso'];
   f.names[FAKE_OBJ.joint] = ['hip'];
-  const model = {};
-  const data = {};
+  // Fakes: buildContext only passes them to the fake mj_name2id.
+  const model = {} as never;
+  const data = {} as never;
   return { f, model, data };
 };
 

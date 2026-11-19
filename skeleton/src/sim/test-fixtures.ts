@@ -100,6 +100,9 @@ export function withFakeMj(): FakeMjControl {
       if (!dirs.has(parent)) throw new Error(`ENOENT: ${parent}`);
       files.set(path, Uint8Array.from(data));
     },
+    unlink(path: string): void {
+      if (!files.delete(path)) throw new Error(`ENOENT: ${path}`);
+    },
     readFile(path: string): Uint8Array {
       const d = files.get(path);
       if (!d) throw new Error(`ENOENT: ${path}`);

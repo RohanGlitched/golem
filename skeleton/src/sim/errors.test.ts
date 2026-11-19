@@ -1,4 +1,4 @@
-﻿import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { SimError, wrapTrialError } from './errors.js';
 import { PHYSICS_RUNS, PURE_RUNS, SEED, describeTrial, reportFailure } from './test-support.js';
 

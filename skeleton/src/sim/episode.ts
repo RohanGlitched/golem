@@ -9,7 +9,7 @@ import { TrajectoryHasher } from './hash.js';
 import { modelSnapshot, restoreModelSnapshot } from './model-snapshot.js';
 import { mulberry32 } from './prng.js';
 import type {
-  CompiledRequirement, DivergenceInfo, IntegratorName, RobotApp, RunOptions, SimContext, Trace, TrialDiagnostics,
+  CompiledRequirement, DivergenceInfo, IntegratorName, Mj, MjModel, RobotApp, RunOptions, SimContext, Trace, TrialDiagnostics,
   TrialResult, TrialSpec,
 } from './types.js';
 import { validateTrial } from './validate.js';
@@ -42,8 +42,8 @@ const INTEGRATORS: readonly IntegratorName[] = ['euler', 'rk4', 'implicit', 'imp
 const BAD_WARNINGS = ['BADQPOS', 'BADQVEL', 'BADQACC'] as const;
 
 /** mjDSBL_AUTORESET (65536 in MuJoCo 4.0.1). */
-function autoresetBit(mj: any): number {
-  const v = mj?.mjtDisableBit?.mjDSBL_AUTORESET?.value;
+function autoresetBit(mj: Mj): number {
+  const v: unknown = (mj.mjtDisableBit as { mjDSBL_AUTORESET?: { value?: number } } | undefined)?.mjDSBL_AUTORESET?.value;
   return typeof v === 'number' ? v : 65536;
 }
 
@@ -57,8 +57,8 @@ export async function runTrial(
 ): Promise<TrialResult> {
   const t0 = performance.now();
   let v: ReturnType<typeof validateTrial>;
-  let mj: any;
-  let model: any;
+  let mj: Mj;
+  let model: MjModel;
   try {
     const num = opts.numerics;
     if (num?.integrator !== undefined && !INTEGRATORS.includes(num.integrator)) {
@@ -198,6 +198,8 @@ export async function runTrial(
       const trigIndex = simIndex;
 
       for (let k = 0; k <= N; k++) {
+        // D11: a signal the app stops writing shows as NaN instead of its stale value.
+        for (let i = 0; i < sigNames.length; i++) out[sigNames[i] as string] = NaN;
         app.signals(ctx, out);
         refreshIfDetached();
         if (k === 0) {
