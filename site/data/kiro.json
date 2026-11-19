@@ -1,6 +1,6 @@
 {
-  "generated": "2026-11-19T18:40:20.768Z",
-  "commit": "4b0b833",
+  "generated": "2026-11-19T18:53:27.226Z",
+  "commit": "7dfd31b",
   "workspaces": [
     {
       "path": ".kiro",
@@ -94,9 +94,9 @@
           "path": ".kiro/specs/golem-kit",
           "type": "feature",
           "requirements": 28,
-          "earsCriteria": 287,
+          "earsCriteria": 299,
           "properties": 49,
-          "tasksDone": 123,
+          "tasksDone": 125,
           "tasksOpen": 0,
           "waves": true,
           "status": "done"
@@ -232,7 +232,7 @@
         ],
         "skills": [],
         "steering": [
-          "design-language.md:44a209adc255",
+          "design-language.md:3e9b01d9aaa8",
           "ears-for-robots.md:0b727c1e6fe6",
           "experience.md:6a801099b477",
           "interfaces.md:73364196627e",
@@ -475,15 +475,17 @@
     }
   ],
   "commits": {
-    "total": 243,
+    "total": 259,
     "byPrefix": {
-      "golem-kit": 16,
+      "evidence": 8,
+      "merge": 19,
+      "other": 24,
+      "golem-kit": 20,
       "candy": 1,
+      "apps": 1,
       "stagger": 6,
-      "other": 22,
-      "site": 4,
-      "merge": 16,
-      "evidence": 5,
+      "studios": 1,
+      "site": 6,
       "docs": 1,
       "candy-app": 26,
       "studio": 2,
@@ -504,17 +506,17 @@
     }
   },
   "tests": {
-    "files": 385,
-    "propertyAsserts": 487
+    "files": 387,
+    "propertyAsserts": 490
   },
   "totals": {
     "specs": 15,
     "specsNotStarted": 1,
     "bugfixSpecs": 3,
     "requirements": 213,
-    "earsCriteria": 2129,
+    "earsCriteria": 2141,
     "properties": 273,
-    "tasksDone": 697,
+    "tasksDone": 699,
     "tasksOpen": 8,
     "steering": 10,
     "hooks": 8,
