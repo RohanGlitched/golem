@@ -34,7 +34,7 @@ export interface TrialPool {
 export type PerturbationVisual = NonNullable<EarsPerturbationTemplate['visual']>;
 
 // ---- studio-local ----
-export type Reason = 'simulating' | 'dragging' | 'replaying' | 'ghosts-running' | 'transition';
+export type Reason = 'simulating' | 'dragging' | 'replaying' | 'ghosts-running' | 'transition' | 'following';
 export type LineStatus = 'untested' | 'running' | 'held' | 'broken' | 'error';
 export type V3 = readonly [number, number, number];
 export type ThemeName = 'dark' | 'light';

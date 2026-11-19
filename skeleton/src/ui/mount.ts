@@ -275,6 +275,7 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
     },
   });
   let replayLine = '';
+  let following = false;
   let replayPush = { forceN: 0, durS: 0 };
 
   const tick = (ts: number): void => {
@@ -306,7 +307,9 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
       const c = swarm && swarm.shown > 0 ? swarm.centroid : null;
       if (c) stage.follow(c[0], c[1]);
       else if (root) stage.follow(root.position.x, root.position.y);
-      if (stage.stepFollow(now(), reduced())) scheduler.requestOnce();
+      // The camera follow holds its own render reason while it moves, so "no reason" means no more frames.
+      const moving = stage.stepFollow(now(), reduced());
+      if (moving !== following) { following = moving; if (moving) scheduler.acquire('following'); else scheduler.release('following'); }
     }
     stage?.orbit.update();
     stage?.render();

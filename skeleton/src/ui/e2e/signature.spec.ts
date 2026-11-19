@@ -168,6 +168,36 @@ test.describe('sonification', () => {
   });
 });
 
+async function frameStats(page: Page, ms: number): Promise<{ n: number; median: number; p95: number }> {
+  const xs = await page.evaluate((dur) => new Promise<number[]>((resolve) => {
+    const out: number[] = []; let last = 0; const t0 = performance.now();
+    const step = (ts: number): void => { if (last) out.push(ts - last); last = ts; if (ts - t0 < dur) requestAnimationFrame(step); else resolve(out); };
+    requestAnimationFrame(step);
+  }), ms);
+  const s = [...xs].sort((a, b) => a - b);
+  const pct = (p: number) => s[Math.min(s.length - 1, Math.floor(p * s.length))] as number;
+  return { n: xs.length, median: pct(0.5), p95: pct(0.95) };
+}
+
+// G1's hull meshes are about 118k triangles per robot, so 64 ghosts are ~7.5M triangles a frame: the absolute figure
+// depends on the GPU and the machine load. The hero alone must hold 60 fps, and turning long exposure on must add at most 25 %
+// to the frame time of the same swarm, measured in the same session.
+test('@perf G1: the hero holds 60 fps; long exposure adds at most 25 % to the 64 ghosts', async ({ page }) => {
+  await openG1(page, '?sleep=600000');
+  await page.waitForTimeout(500);
+  const hero = await frameStats(page, 3000);
+  console.log(`Frame_Probe G1, hero only: ${hero.n} frames in 3 s, median ${hero.median.toFixed(2)} ms (${(1000 / hero.median).toFixed(1)} fps), p95 ${hero.p95.toFixed(2)} ms`);
+  expect(hero.median).toBeLessThanOrEqual(17);
+  await page.evaluate(() => (window as unknown as W).studio.summonSynthetic(64, 8));
+  await page.waitForTimeout(500);
+  const plain = await frameStats(page, 4000);
+  console.log(`Frame_Probe G1, 64 ghosts: ${plain.n} frames in 4 s, median ${plain.median.toFixed(2)} ms (${(1000 / plain.median).toFixed(1)} fps), p95 ${plain.p95.toFixed(2)} ms`);
+  await page.getByRole('button', { name: 'Long exposure' }).click();
+  await page.waitForTimeout(500);
+  const trails = await frameStats(page, 4000);
+  console.log(`Frame_Probe G1, 64 trials as trails: ${trails.n} frames in 4 s, median ${trails.median.toFixed(2)} ms (${(1000 / trails.median).toFixed(1)} fps), p95 ${trails.p95.toFixed(2)} ms`);
+  expect(trails.median).toBeLessThanOrEqual(Math.max(17, plain.median * 1.25));
+});
 test.describe('the living sentence', () => {
   test('sets the selected response clause large in Gloock', async ({ page }) => {
     await openG1(page);

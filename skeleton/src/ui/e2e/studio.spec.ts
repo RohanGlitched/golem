@@ -65,9 +65,10 @@ test('uses one draw call per geom for the ghosts and one WebGL context', async (
   await page.evaluate(() => (window as unknown as W).studio.summonSynthetic(64, 4));
   await page.waitForTimeout(600);
   const calls = await page.evaluate(() => (window as unknown as W).studio.renderCalls());
-  // Test_App: 2 drawn geoms. Ghosts 2 + arrows 1, hero 2, floor 1, aura decal 1, ticks 1 = 8 at most.
+  // Test_App: 2 drawn geoms, so the count does not grow with the ghosts. Ghosts 2 + arrows 1, hero 2, floor 1,
+  // lamp pool 1, shadow 1 (stage-look), aura decal 1, ticks 1, emet decal 1 (golem-signature) = 11 at most.
   expect(calls).toBeGreaterThan(0);
-  expect(calls).toBeLessThanOrEqual(8);
+  expect(calls).toBeLessThanOrEqual(11);
   expect(await page.evaluate(() => (window as unknown as W).golemContexts.count)).toBe(1);
 });
 
@@ -135,21 +136,27 @@ test('keyboard path: tab order, key push, spinbutton stepping and Escape', async
 test('pointer shove: the label rises while dragging and clears on release', async ({ page }) => {
   await open(page);
   const box = await page.locator('canvas.golem-canvas').boundingBox();
-  // Find a pixel on a hero body by scanning the stage with the studio's own picking.
-  const hit = await page.evaluate(({ x, y, w, h }) => {
-    const c = document.querySelector('canvas.golem-canvas') as HTMLCanvasElement;
-    for (let j = 0.1; j < 0.9; j += 0.02) for (let i = 0.05; i < 0.95; i += 0.01) {
-      const ev = new PointerEvent('pointerdown', { clientX: x + i * w, clientY: y + j * h, pointerId: 77, bubbles: true });
-      c.dispatchEvent(ev);
-      const label = document.querySelector('.golem-shove-label') as HTMLElement;
-      if (!label.hidden) { c.dispatchEvent(new PointerEvent('pointerup', { pointerId: 77, bubbles: true })); return { px: x + i * w, py: y + j * h }; }
-    }
-    return undefined;
-  }, { x: box!.x, y: box!.y, w: box!.width, h: box!.height });
-  expect(hit).toBeDefined();
-  await page.mouse.move(hit!.px, hit!.py);
-  await page.mouse.down();
-  await page.mouse.move(hit!.px + 120, hit!.py, { steps: 6 });
+  // The camera follows the walking hero (stage-look), so a pixel found by scanning goes stale within a few frames:
+  // scan with the studio's own picking, press at once, and scan again if the press missed.
+  let grabbed: { px: number; py: number } | undefined;
+  for (let attempt = 0; attempt < 12 && !grabbed; attempt++) {
+    const hit = await page.evaluate(({ x, y, w, h }) => {
+      const c = document.querySelector('canvas.golem-canvas') as HTMLCanvasElement;
+      for (let j = 0.1; j < 0.9; j += 0.02) for (let i = 0.05; i < 0.95; i += 0.01) {
+        c.dispatchEvent(new PointerEvent('pointerdown', { clientX: x + i * w, clientY: y + j * h, pointerId: 77, bubbles: true }));
+        const label = document.querySelector('.golem-shove-label') as HTMLElement;
+        if (!label.hidden) { c.dispatchEvent(new PointerEvent('pointerup', { pointerId: 77, bubbles: true })); return { px: x + i * w, py: y + j * h }; }
+      }
+      return undefined;
+    }, { x: box!.x, y: box!.y, w: box!.width, h: box!.height });
+    if (!hit) continue;
+    await page.mouse.move(hit.px, hit.py);
+    await page.mouse.down();
+    if (await page.locator('.golem-shove-label').isVisible()) grabbed = hit;
+    else await page.mouse.up();
+  }
+  expect(grabbed).toBeDefined();
+  await page.mouse.move(grabbed!.px + 120, grabbed!.py, { steps: 6 });
   await page.waitForTimeout(150);
   const n = Number((await page.locator('.golem-shove-label').textContent())?.replace(' N', ''));
   expect(n).toBeGreaterThan(0);

@@ -69,14 +69,12 @@ function decal(storage = new FakeStorage()) {
 }
 
 describe('EmetDecal', () => {
-  it('faces along the normal at the spot, with the "e" left of "met" as seen from the front', () => {
+  it('faces along the normal at the spot, as one plane with the "e" left of "met" as seen from the front', () => {
     const { d } = decal();
     d.group.updateMatrixWorld(true);
-    const e = d.group.getObjectByName('golem-emet-e')!, met = d.group.getObjectByName('golem-emet-met')!;
-    const pe = new THREE.Vector3(), pm = new THREE.Vector3();
-    (e as THREE.Mesh).geometry.computeBoundingBox(); (met as THREE.Mesh).geometry.computeBoundingBox();
-    (e as THREE.Mesh).geometry.boundingBox!.getCenter(pe).applyMatrix4(d.group.matrixWorld);
-    (met as THREE.Mesh).geometry.boundingBox!.getCenter(pm).applyMatrix4(d.group.matrixWorld);
+    expect(d.group.children.filter((c) => (c as THREE.Mesh).isMesh)).toHaveLength(1);
+    const pe = new THREE.Vector3(d.eCentreX, 0, 0).applyMatrix4(d.group.matrixWorld);
+    const pm = new THREE.Vector3(d.metCentreX, 0, 0).applyMatrix4(d.group.matrixWorld);
     // Seen from +x, the viewer's right is +y.
     expect(pe.y).toBeLessThan(pm.y);
     expect(pe.x).toBeGreaterThan(0.1);
@@ -94,6 +92,7 @@ describe('EmetDecal', () => {
     while (d.update((t += 16))) { /* animating */ }
     expect(d.crumble).toBe(1);
     expect(d.animating).toBe(false);
+    expect(d.group.getObjectByProperty('type', 'Points')!.visible).toBe(false);
     d.setWord('emet', t);
     while (d.update((t += 16))) { /* animating */ }
     expect(d.crumble).toBe(0);
