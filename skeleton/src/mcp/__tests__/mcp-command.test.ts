@@ -29,7 +29,7 @@ describe('golem mcp', () => {
     const { client, done } = await connect(h, parsed());
     const r = (await client.callTool({ name: 'list_requirements', arguments: {} })) as { isError?: boolean; content: { text: string }[] };
     expect(r.isError).toBe(true);
-    expect(r.content[0]?.text).toContain('golem init');
+    expect(r.content[0]?.text).toContain('npx golem-spec init');
     const t0 = performance.now();
     await client.close();
     expect(await done).toBe(0);

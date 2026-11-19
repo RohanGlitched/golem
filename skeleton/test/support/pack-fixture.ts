@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 import type { PackManifest } from '../../src/cli/init.js';
 import type { MemoryKitFs } from './memory-fs.js';
 
-export const MCP_TEMPLATE = '{\n  "mcpServers": {\n    "golem": {\n      "command": "golem",\n      "args": ["mcp"]\n    }\n  }\n}\n';
+export const MCP_TEMPLATE = '{\n  "mcpServers": {\n    "golem": {\n      "command": "npx",\n      "args": ["--no-install", "golem-spec", "mcp"]\n    }\n  }\n}\n';
 
 export const FIXTURE_FILES: Record<string, string> = {
   'hooks/golem.json': '{ "version": "v1", "hooks": [] }\n',

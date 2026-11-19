@@ -11,7 +11,9 @@ export const ALLOWED_WRITE: Record<AgentRole, readonly string[]> = {
   scribe: ['.kiro/specs/*/proposals.md'],
 };
 export const GUARD_COMMAND = 'node .kiro/hooks/golem-guard-requirements.mjs';
-export const STOP_COMMAND = 'golem gate --kiro';
+export const CLI = 'npx --no-install golem-spec';
+export const MCP_ARGS = '["--no-install","golem-spec","mcp"]';
+export const STOP_COMMAND = `${CLI} gate --kiro`;
 const WRITE_CAPABILITIES = ['fs_write', 'filesystem', 'builtin', 'all'];
 
 const isObj = (x: unknown): x is Record<string, unknown> => typeof x === 'object' && x !== null && !Array.isArray(x);
@@ -129,7 +131,7 @@ export function checkAgent(role: AgentRole, file: unknown, form: 'source' | 'upg
   for (const k of ['prompt', 'tools', 'mcpServers']) if (file[k] === undefined) v.push(`field "${k}" is required`);
   const servers = file['mcpServers'];
   const golem = isObj(servers) ? servers['golem'] : undefined;
-  if (!isObj(golem) || golem['command'] !== 'golem' || JSON.stringify(golem['args']) !== '["mcp"]') v.push('mcpServers.golem must run `golem mcp`');
+  if (!isObj(golem) || golem['command'] !== 'npx' || JSON.stringify(golem['args']) !== MCP_ARGS) v.push('mcpServers.golem must run `npx --no-install golem-spec mcp`');
   for (const a of findAbsolutePaths(file)) v.push(`absolute path or home directory in a value: ${JSON.stringify(a)}`);
 
   const hooks = hookList(file);

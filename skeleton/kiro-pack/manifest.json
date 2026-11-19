@@ -2,17 +2,17 @@
   "files": [
     {
       "rel": "agents/golem-scribe.json",
-      "sha256": "1cc22063a408b4e4b37a4919bab20c991b7e6526b5954433824a3f337960a74a",
+      "sha256": "1adb4d1ce0287ebae7fda6a0e45d6bfe147133ad3de5ebdb70f72601b26b7b07",
       "kind": "copy"
     },
     {
       "rel": "agents/golem-skeptic.json",
-      "sha256": "340d2655cf7cb7c88c23ee2fc28f19f0f9b6d6979e4f27307f61afe77d32aad5",
+      "sha256": "287b228222102a179e82c7466499002db7a930591f6e8f6c8c8453849e0dead7",
       "kind": "copy"
     },
     {
       "rel": "agents/golem-tuner.json",
-      "sha256": "46db4eff536d6157cb80dd3ac0cec9fd6fb2c12bfd52688012a4f190fd762425",
+      "sha256": "23bfa02b86babe28b3f3952c21fbb8fb1d9c26d48217e0aebbbabaa4eae58709",
       "kind": "copy"
     },
     {
@@ -22,32 +22,32 @@
     },
     {
       "rel": "hooks/golem.json",
-      "sha256": "729d0c3b6459f69f9e6467042a59edb3d3326c5fdf1f546ffacc180c64754f3a",
+      "sha256": "738ea107f9a6445b0a7502ae2431032ff106c4132b55ee5c6f4fa98011b77873",
       "kind": "copy"
     },
     {
       "rel": "settings/mcp.json",
-      "sha256": "3bac7da964d4759c1bd42af2647e0e3425f6f9eddc30e1d55ecdfb6447762749",
+      "sha256": "43216229d14ea207129952f5a8ca261520207e1c7aff5c0a26e37be79b3f327d",
       "kind": "merge-mcp"
     },
     {
       "rel": "skills/falsify-and-fix/SKILL.md",
-      "sha256": "32e3e567dedf37baf2872a2d7e809a15b3932d426d6b45e3e6a5408d23db3127",
+      "sha256": "481a6b6842ef9955d95f74705a1755f74a6730c73614f625250c8b2fbb7c91e5",
       "kind": "copy"
     },
     {
       "rel": "skills/robot-ears/SKILL.md",
-      "sha256": "7c2bc6186fd16668d31b6ed2105c034dd9099dc92265142330ff2f9564640ae0",
+      "sha256": "d03e01ddcc8c9808d06bc1f8ff1ef5ea8af77d851e9f6efb283eefc3bb0f685f",
       "kind": "copy"
     },
     {
       "rel": "steering/golem-ears.md",
-      "sha256": "ad2ac02df5060093cb7499715169614d569b782011d9ed3b99e2aca26f2875f5",
+      "sha256": "3bcf91be53cfffc2b70befbb97307ab0aba1d44cec334be1b36e5cf999ca0169",
       "kind": "copy"
     },
     {
       "rel": "workflows/falsify-and-fix.workflow.json",
-      "sha256": "17d613f228c4f8b488a9465e93c4ca9125816a7ce00bbcfb88b322afd6ad8e90",
+      "sha256": "c536a3659165b5fd0158ee89adf22458ba0cc816eac083d3779c34e0870039f5",
       "kind": "copy"
     }
   ]

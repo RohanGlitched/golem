@@ -49,7 +49,7 @@ describe('kiro formats', () => {
     const h = createHarness({ requirements: RED_REQUIREMENTS });
     h.io.setStdin(stopPayload('s'));
     expect(await h.run('gate', '--kiro', '--budget', '12')).toBe(0);
-    expect(JSON.parse(h.io.stdoutText())).toEqual({ decision: 'block', reason: expect.stringContaining('golem replay 1.2') });
+    expect(JSON.parse(h.io.stdoutText())).toEqual({ decision: 'block', reason: expect.stringContaining('npx golem-spec replay 1.2') });
     h.clearOutput();
     expect(await h.run('gate', '--budget', '12')).toBe(2);
   });

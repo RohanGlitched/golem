@@ -14,11 +14,11 @@ describe('hooks/golem.json', () => {
 
   it('carries the five hooks of the design with exact names, triggers, commands and timeouts', () => {
     expect(file.hooks.map((h) => [h['name'], h['trigger'], h['action'].command, h['timeout']])).toEqual([
-      ['Check requirements on save', 'PostFileSave', 'golem check', 30],
-      ['Falsify controller on save', 'PostFileSave', 'golem test --budget 24', 300],
-      ['Gate the agent', 'Stop', 'golem gate --kiro', 300],
-      ['Test after spec task', 'PostTaskExec', 'golem test', 300],
-      ['Summon the ghosts', 'Manual', 'golem test --budget 256', 1800],
+      ['Check requirements on save', 'PostFileSave', 'npx --no-install golem-spec check', 30],
+      ['Falsify controller on save', 'PostFileSave', 'npx --no-install golem-spec test --budget 24', 300],
+      ['Gate the agent', 'Stop', 'npx --no-install golem-spec gate --kiro', 300],
+      ['Test after spec task', 'PostTaskExec', 'npx --no-install golem-spec test', 300],
+      ['Summon the ghosts', 'Manual', 'npx --no-install golem-spec test --budget 256', 1800],
     ]);
     for (const h of file.hooks) expect(h['action'].type).toBe('command');
   });
@@ -68,7 +68,7 @@ describe('checkHookFile reports each violation once', () => {
     ['a duplicate name ignoring case', (f: ReturnType<typeof clone>) => { (f.hooks[1] as Record<string, unknown>)['name'] = 'CHECK REQUIREMENTS ON SAVE'; }, /repeats/],
     ['a lower-case trigger', (f: ReturnType<typeof clone>) => { (f.hooks[2] as Record<string, unknown>)['trigger'] = 'stop'; }, /exact casing/],
     ['an empty command', (f: ReturnType<typeof clone>) => { (f.hooks[0] as Record<string, any>)['action'].command = ''; }, /action/],
-    ['a string action', (f: ReturnType<typeof clone>) => { (f.hooks[0] as Record<string, unknown>)['action'] = 'golem check'; }, /action/],
+    ['a string action', (f: ReturnType<typeof clone>) => { (f.hooks[0] as Record<string, unknown>)['action'] = 'npx --no-install golem-spec check'; }, /action/],
     ['a missing matcher', (f: ReturnType<typeof clone>) => { delete (f.hooks[0] as Record<string, unknown>)['matcher']; }, /matcher/],
     ['an invalid matcher', (f: ReturnType<typeof clone>) => { (f.hooks[0] as Record<string, unknown>)['matcher'] = '(['; }, /not a valid regular expression/],
     ['a low timeout', (f: ReturnType<typeof clone>) => { (f.hooks[0] as Record<string, unknown>)['timeout'] = 0; }, /below the measured/],

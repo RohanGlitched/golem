@@ -19,7 +19,7 @@ describe('source templates', () => {
 
   it('gives the tuner the loop in order, the rules and the held-is-not-a-proof statement', () => {
     const p = agentSource('tuner')['prompt'] as string;
-    const order = ['Falsify', 'Read the counterexample', 'Explain the margin', 'Fix the controller', 'Re-run', 'Repeat until `golem gate` exits with code 0'].map((s) => p.indexOf(s));
+    const order = ['Falsify', 'Read the counterexample', 'Explain the margin', 'Fix the controller', 'Re-run', 'Repeat until `npx --no-install golem-spec gate` exits with code 0'].map((s) => p.indexOf(s));
     expect(order.every((i) => i >= 0)).toBe(true);
     expect([...order].sort((a, b) => a - b)).toEqual(order);
     expect(p).toContain('Requirements are never edited');

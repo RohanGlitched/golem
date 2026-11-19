@@ -102,7 +102,7 @@ export function gateBlock(o: RequirementOutcome, earsLine: string): string {
     lines.push(`  scenario: ${formatScenario(o.req.space, sc)}${ce !== undefined ? ` (seed ${ce.seed})` : ''}`);
     lines.push(`  margin: ${formatMargin(ce?.robustness ?? o.verdict.closest.robustness, o.unit)}`);
   }
-  lines.push(`  reproduce: golem replay ${id}`);
+  lines.push(`  reproduce: npx golem-spec replay ${id}`);
   return lines.join('\n');
 }
 
@@ -137,7 +137,7 @@ export function diagnosticText(d: FileDiagnostic): string {
 /** Block text for a compile error under `--kiro` (a Red_Gate): the Diagnostics that must be fixed. */
 export function diagnosticsReason(d: readonly FileDiagnostic[]): string {
   const errors = d.filter((x) => x.severity === 'error');
-  return [`The requirements do not compile, so the gate cannot run. Fix these ${errors.length} error(s) with golem check:`,
+  return [`The requirements do not compile, so the gate cannot run. Fix these ${errors.length} error(s) with npx golem-spec check:`,
     ...errors.map(diagnosticText)].join('\n');
 }
 

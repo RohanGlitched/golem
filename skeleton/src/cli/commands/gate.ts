@@ -10,7 +10,7 @@ export const handler: CommandHandler = async (p, io, deps) => {
   const run = await runGateOnce(boot.app, boot.robotApp, deps, runFlags(p));
   if (run.kind === 'compile-error') {
     showDiagnostics(io, run.diagnostics, 'stderr');
-    errLine(io, 'golem: the requirements do not compile; run golem check for details');
+    errLine(io, 'golem: the requirements do not compile; run npx golem-spec check for details');
     return gateExitCode([], false, true);
   }
   if (run.kind === 'empty') {

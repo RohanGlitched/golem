@@ -20,7 +20,7 @@ describe('main', () => {
   it('exits 1 naming the directory when there is no config', async () => {
     const h = createHarness({ seed: false });
     expect(await h.run('check')).toBe(1);
-    expect(h.io.stderrText()).toContain('golem init');
+    expect(h.io.stderrText()).toContain('npx golem-spec init');
   });
 });
 
@@ -242,7 +242,7 @@ describe('golem gate', () => {
     expect(out).toContain('1.2: WHEN the base is pushed with up to 200 N');
     expect(out).toMatch(/scenario: push\.force = [\d.]+ N \(seed \d+\)/);
     expect(out).toMatch(/margin: -[\d.]+ m/);
-    expect(out).toContain('reproduce: golem replay 1.2');
+    expect(out).toContain('reproduce: npx golem-spec replay 1.2');
     expect(out).toContain('gate RED: 1 of 3 requirements are not held');
     expect(h.report().meta.lastGateExitCode).toBe(2);
   });

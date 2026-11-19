@@ -1,11 +1,11 @@
 ---
 name: robot-ears
-description: Write robot EARS requirement lines with units and ranges that compile with golem check. Use it when writing or editing acceptance criteria for a robot, or when golem check reports a compile error.
+description: Write robot EARS requirement lines with units and ranges that compile with npx --no-install golem-spec check. Use it when writing or editing acceptance criteria for a robot, or when npx --no-install golem-spec check reports a compile error.
 ---
 
 # Write robot EARS lines
 
-A robot requirement is one EARS line per acceptance criterion. GOLEM compiles it into a scenario space (what the falsifier may vary) and a monitor (what must hold). Write the line, run `golem check` or the `check_requirement` tool, and fix every error before you save.
+A robot requirement is one EARS line per acceptance criterion. GOLEM compiles it into a scenario space (what the falsifier may vary) and a monitor (what must hold). Write the line, run `npx --no-install golem-spec check` or the `check_requirement` tool, and fix every error before you save.
 
 ## The five patterns
 

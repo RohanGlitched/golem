@@ -42,7 +42,7 @@ export async function compileForRun(p: ParsedCommand, io: CliIo, deps: KitDeps, 
   }
   if (hasErrors(compiled.diagnostics)) {
     showDiagnostics(io, compiled.diagnostics, 'stderr');
-    errLine(io, `golem: ${compiled.diagnostics.filter((d) => d.severity === 'error').length} error(s) in the requirements; run golem check for details`);
+    errLine(io, `golem: ${compiled.diagnostics.filter((d) => d.severity === 'error').length} error(s) in the requirements; run npx golem-spec check for details`);
     return { ok: false, code: 1 };
   }
   if (compiled.requirements.length === 0) {

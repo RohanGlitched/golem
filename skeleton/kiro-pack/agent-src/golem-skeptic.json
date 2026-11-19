@@ -14,10 +14,10 @@
   ],
   "toolsSettings": {
     "shell": {
-      "allowedCommands": ["git status", "git diff .*", "ls .*", "golem check .*"],
+      "allowedCommands": ["git status", "git diff .*", "ls .*", "npx --no-install golem-spec check .*"],
       "deniedCommands": [".*>.*", "tee .*", "rm .*", "mv .*", "cp .*"]
     },
     "write": { "deniedPaths": ["**"] }
   },
-  "mcpServers": { "golem": { "command": "golem", "args": ["mcp"] } }
+  "mcpServers": { "golem": { "command": "npx", "args": ["--no-install", "golem-spec", "mcp"] } }
 }

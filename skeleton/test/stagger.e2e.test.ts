@@ -31,7 +31,7 @@ describe.skipIf(!built)('apps/stagger through the built CLI', () => {
   it('golem --help prints the usage and exits 0', () => {
     const r = golem(['--help']);
     expect(r.status).toBe(0);
-    expect(r.stdout).toContain('golem test');
+    expect(r.stdout).toContain('npx golem-spec test');
   });
 
   it.skipIf(process.env['GOLEM_E2E'] !== '1')('golem test --budget 24 falsifies all 11 requirements with real MuJoCo', () => {

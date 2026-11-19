@@ -52,7 +52,7 @@ describe('parseArgs', () => {
 
   it('shows the usage line when a required positional is missing', () => {
     expect(fail('falsify').message).toContain(COMMANDS.falsify.usage);
-    expect(fail('replay', '--seed', '3').message).toContain('golem replay <reqId>');
+    expect(fail('replay', '--seed', '3').message).toContain('npx golem-spec replay <reqId>');
   });
 
   it('says a value is required for a last or empty value flag', () => {

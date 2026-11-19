@@ -22,7 +22,7 @@
         "git status",
         "git diff .*",
         "ls .*",
-        "golem check .*"
+        "npx --no-install golem-spec check .*"
       ],
       "deniedCommands": [
         ".*>.*",
@@ -40,8 +40,10 @@
   },
   "mcpServers": {
     "golem": {
-      "command": "golem",
+      "command": "npx",
       "args": [
+        "--no-install",
+        "golem-spec",
         "mcp"
       ]
     }
@@ -54,7 +56,7 @@
           "git status",
           "git diff *",
           "ls *",
-          "golem check *"
+          "npx --no-install golem-spec check *"
         ],
         "effect": "allow"
       },
@@ -100,7 +102,7 @@
   },
   "kiroUpgrade": {
     "revision": 3,
-    "fingerprint": "sha256:8e08fab41993ef976d3629d3a844b8e6f664f78a79accf0a0360dca989503007",
-    "source": "sha256:21e82367f9ee9b061f75f4a2044b5ddafe6b359b9b354846bb240a314b166164"
+    "fingerprint": "sha256:b26cc70ba0621e7b1a1fbdd51b16c94e8c0731cf3dc903d7e192d8089da25b51",
+    "source": "sha256:3108efd061ed5877b1efda8f8d18afc86efe2129ce93957c2dac80e74bced16b"
   }
 }

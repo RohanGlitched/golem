@@ -117,7 +117,7 @@ export async function locateApp(cwd: string, appFlag: string | undefined, fs: Ki
     }
   }
   if (appDir === undefined) {
-    throw new ConfigError(`no ${CONFIG_NAME} found from ${startDir}; run "golem init" to create one`, startDir);
+    throw new ConfigError(`no ${CONFIG_NAME} found from ${startDir}; run "npx golem-spec init" to create one`, startDir);
   }
   const configPath = `${appDir.replace(/\/$/, '')}/${CONFIG_NAME}`;
   const config = parseConfig(await fs.readFile(configPath), configPath);

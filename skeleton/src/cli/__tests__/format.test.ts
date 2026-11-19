@@ -50,7 +50,7 @@ describe('gateBlock', () => {
       '1.2: WHEN x THE robot SHALL y',
       '  scenario: push.force = 168 N (seed 417)',
       '  margin: -0.118 m',
-      '  reproduce: golem replay 1.2',
+      '  reproduce: npx golem-spec replay 1.2',
     ]);
   });
 

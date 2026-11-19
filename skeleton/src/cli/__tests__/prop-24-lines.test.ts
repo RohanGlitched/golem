@@ -35,7 +35,7 @@ describe('Property 24: printed lines carry units and ids', () => {
       expect(b).toContain(`push.force = ${formatQuantity('force', f)}`);
       expect(b).toContain(`margin: ${formatMargin(rr, 'm')}`);
       expect(b).toMatch(/margin: -[\d.e-]+ m/);
-      expect(b).toContain('golem replay 1.2');
+      expect(b).toContain('npx golem-spec replay 1.2');
     }), propConfig);
   });
 });

@@ -5,7 +5,7 @@ fileMatchPattern: "**/requirements.md"
 
 # EARS for robots: the GOLEM dialect
 
-GOLEM compiles the numbered acceptance criteria of a `requirements.md` into physics property tests. A line that does not compile is an error with the closest template as a suggestion. Check every line you write with `golem check`, or with the `check_requirement` tool, before you save it.
+GOLEM compiles the numbered acceptance criteria of a `requirements.md` into physics property tests. A line that does not compile is an error with the closest template as a suggestion. Check every line you write with `npx --no-install golem-spec check`, or with the `check_requirement` tool, before you save it.
 
 ## The five patterns
 
@@ -41,10 +41,10 @@ Put the harshest believable value in the trigger. The falsifier finds the bounda
 
 ## Running the checks
 
-- `golem check` compiles every line and prints `file:line:col: severity: message` with a suggestion.
-- `golem test --budget 24` falsifies every requirement. `golem falsify <id>` watches one.
-- `golem replay <id>` re-runs the pinned counterexample and writes `.golem/replays/<id>.csv`.
-- `golem gate` exits 0 only when every requirement holds and no pinned seed fails, and exits 2 otherwise.
+- `npx --no-install golem-spec check` compiles every line and prints `file:line:col: severity: message` with a suggestion.
+- `npx --no-install golem-spec test --budget 24` falsifies every requirement. `npx --no-install golem-spec falsify <id>` watches one.
+- `npx --no-install golem-spec replay <id>` re-runs the pinned counterexample and writes `.golem/replays/<id>.csv`.
+- `npx --no-install golem-spec gate` exits 0 only when every requirement holds and no pinned seed fails, and exits 2 otherwise.
 
 A `held` verdict means no counterexample was found within the stated search budget. It is not a proof.
 
@@ -64,16 +64,8 @@ When a requirement fails, change the controller. Do not weaken, delete or reword
 | Test after spec task | 300 s | The default of 64 trials per requirement. |
 | Summon the ghosts (manual) | 1800 s | 256 trials per requirement. |
 
-The Stop hook blocks the agent at most once per stop attempt and at most five times in a row per session. Kiro runs the Stop hook once per user turn, so the repair loop is driven by the `golem-tuner` agent itself and by the `falsify-and-fix` workflow, which runs `golem gate` after every tuner iteration.
+The Stop hook blocks the agent at most once per stop attempt and at most five times in a row per session. Kiro runs the Stop hook once per user turn, so the repair loop is driven by the `golem-tuner` agent itself and by the `falsify-and-fix` workflow, which runs `npx --no-install golem-spec gate` after every tuner iteration.
 
-## When `golem` is not on the path
+## How the commands run
 
-`golem init` registers the MCP server as `golem mcp`. When the `golem` binary is not on the path, replace the entry in `.kiro/settings/mcp.json` with:
-
-```json
-{
-  "mcpServers": {
-    "golem": { "command": "npx", "args": ["golem-spec", "mcp"] }
-  }
-}
-```
+Kiro's hook shells and MCP launcher do not have `node_modules/.bin` on the path, and a bare `npx golem` resolves to an unrelated npm package. Every command here therefore runs as `npx --no-install golem-spec <command>`, which uses the copy installed with `npm i -D golem-spec` and never downloads another. The MCP entry in `.kiro/settings/mcp.json` is `{ "command": "npx", "args": ["--no-install", "golem-spec", "mcp"] }`.

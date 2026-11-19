@@ -56,7 +56,7 @@ describe('run_requirement and falsify', () => {
     const r = await m.call('falsify', { reqId: '1.2', budget: 24 });
     expect(r.isError).toBe(false);
     expect(r.json).toMatchObject({ reqId: '1.2', status: 'broken', counterexample: { shrunk: true, unit: 'm' }, pinned: 'added' });
-    expect(r.summary).toMatch(/^1\.2 broken: margin -[\d.]+ m at push\.force = [\d.]+ N \(seed \d+\), \d+ trials, shrunk; reproduce: golem replay 1\.2$/);
+    expect(r.summary).toMatch(/^1\.2 broken: margin -[\d.]+ m at push\.force = [\d.]+ N \(seed \d+\), \d+ trials, shrunk; reproduce: npx golem-spec replay 1\.2$/);
     expect(JSON.parse(m.fs.text(m.path('.golem/seeds/tiny/1.2.json')) as string)).toHaveLength(1);
     expect(m.report().verdicts.find((v: { reqId: string }) => v.reqId === '1.2').status).toBe('broken');
   });
