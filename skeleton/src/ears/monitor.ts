@@ -36,6 +36,7 @@ export function buildMonitor(spec: MonitorSpec): MonitorFn {
   // A WHILE state is checked at every instant; the compiler rejects `within` on it.
   const isEventually = wrapper.kind === 'eventually' && pattern !== 'state';
   const duration = wrapper.duration;
+  const onset = spec.onset !== undefined && spec.onset > 0 ? spec.onset : 0;
   const windowed = pattern !== 'state' && duration !== undefined;
   // WHILE ψ ... for d: G(ψ → G[t, t+d] φ). Margins go into buffers that grow with the longest
   // trace seen; a monotone deque gives the sliding minimum of φ in O(n).
@@ -70,8 +71,8 @@ export function buildMonitor(spec: MonitorSpec): MonitorFn {
       if (!found) return { robustness: NaN, worstAt: 0, unit: 'trace' };
     }
     // F-then-G (`within T`): reach by the deadline, then hold to the last sample.
-    const deadline = isEventually ? a + (duration as number) : 0;
-    const b = windowed && !isEventually ? a + (duration as number) : t[n - 1]!;
+    const deadline = isEventually ? a + onset + (duration as number) : 0;
+    const b = windowed && !isEventually ? a + onset + (duration as number) : t[n - 1]!;
 
     // First index with t[i] >= a.
     let lo = 0;

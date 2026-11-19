@@ -36,7 +36,7 @@ Conventions: sources in `skeleton/src/ears/`, tests in `skeleton/src/ears/__test
   - _Bugfix: 4.1–4.7_
 - [x] 12. WHILE `for T` (defect 5)
   - _Bugfix: 5.1–5.4_
-- [ ] 13. Horizons and onset (defect 11)
+- [x] 13. Horizons and onset (defect 11)
   - _Bugfix: 11.1–11.7_
 - [ ] 14. STL formula string (improvement 1)
   - _Bugfix: I1.1–I1.4_

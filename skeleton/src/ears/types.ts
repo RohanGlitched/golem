@@ -71,6 +71,11 @@ export interface PerturbationTemplate {
   slots?: Record<string, SlotDimension>;
   /** @deprecated Returns the Dimensions; used only when `slots` is absent. */
   dims?: LegacyDims;
+  /**
+   * Latest start of the effect, in seconds after tTrigger (for example one gait period when the
+   * push waits for a stride phase). Response windows and horizons add it. Default 0.
+   */
+  maxOnset?: number;
   /** Values are keyed by slot name: a fixed slot's SI value, or the scenario value of its Dimension. */
   apply(ctx: SimContext, t: number, tTrigger: number, values: Record<string, number>): void;
   visual?(values: Record<string, number>): { force?: [number, number, number]; at?: string };
@@ -123,6 +128,8 @@ export interface MonitorSpec {
   wrapper: TemporalWrapper;
   stateMargin?: { predicate: PredicateTemplate; slots: Record<string, number> };
   disabledFeature?: boolean;
+  /** Seconds added to a `for` window and a `within` deadline (the trigger's maxOnset). Default 0. */
+  onset?: number;
 }
 
 export interface CompileOptions {

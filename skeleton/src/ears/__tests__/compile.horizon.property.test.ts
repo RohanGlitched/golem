@@ -74,7 +74,7 @@ describe('compileRequirement horizon', () => {
   });
 
   // Feature: golem-ears, Property 26: Horizon follows the wrapper and trigger durations
-  it('uses the episode length for ubiquitous requirements, extended to 2T for within T', () => {
+  it('gives a ubiquitous requirement d for `for d` and the episode, extended to 2T, for `within T`', () => {
     // **Validates: Requirements 6.9**
     fc.assert(
       fc.property(
@@ -87,7 +87,8 @@ describe('compileRequirement horizon', () => {
             optEp !== undefined ? { episodeSeconds: optEp } : {},
           );
           const episode = optEp ?? lexEp ?? 10;
-          const want = wrap === 'within' ? Math.max(episode, (2 * wMs) / 1000) : episode;
+          // golem-ears-hardening defect 11: `for d` needs d, not the whole episode.
+          const want = wrap === 'within' ? Math.max(episode, (2 * wMs) / 1000) : wMs / 1000;
           return r.requirement !== undefined && closeTo(r.requirement.horizon, want);
         },
       ),

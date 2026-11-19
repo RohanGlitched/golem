@@ -79,6 +79,23 @@ function featureDiagnostic(condition: Clause, wanted: string, features: readonly
   );
 }
 
+/**
+ * Seconds of simulation after warm-up a requirement needs.
+ * - Event/unwanted: `for d` → onset + trigger duration + d; `within T` → onset + trigger duration + 2T
+ *   (the deadline plus at least T of hold); no wrapper → the episode.
+ * - Ubiquitous, optional, perturbation state: `for d` → onset + d; `within T` → max(episode,
+ *   onset + 2T); no wrapper → the episode.
+ * - Predicate state: the episode (it is checked at every instant).
+ */
+function horizonOf(
+  timed: boolean, predicateState: boolean, wrapper: TemporalWrapper, onset: number, triggerDur: number, episode: number,
+): number {
+  if (predicateState || wrapper.duration === undefined) return episode;
+  const d = wrapper.duration;
+  if (timed) return onset + triggerDur + (wrapper.kind === 'eventually' ? 2 * d : d);
+  return wrapper.kind === 'eventually' ? Math.max(episode, onset + 2 * d) : onset + d;
+}
+
 /** Duration the trigger itself lasts (fixed value, or the top of a range), or 0. */
 function triggerDuration(bound: BoundClause<PerturbationTemplate>): number {
   const d = bound.si['duration'] ?? bound.si['duration.max'];
@@ -190,6 +207,7 @@ export function compileRequirement(
   let disabledFeature = false;
   let stateBound: BoundClause<PredicateTemplate> | undefined;
   let stateTrigger: BoundClause<PerturbationTemplate> | undefined;
+  let triggerTemplate: PerturbationTemplate | undefined;
   let dimsSources: (Span | undefined)[] = [];
   let dimsClause: Clause | undefined;
 
@@ -202,6 +220,7 @@ export function compileRequirement(
       dims = built.dims;
       perturbations.push({ template: m.bound.template.phrase, params: built.params });
       triggerDur = triggerDuration(m.bound);
+      triggerTemplate = m.bound.template;
       dimsSources = built.sources;
       dimsClause = condition;
     }
@@ -261,13 +280,10 @@ export function compileRequirement(
   const wrapper: TemporalWrapper = resp.wrapper ?? { kind: 'always' };
   const episode = options.episodeSeconds ?? lexicon.episodeSeconds ?? DEFAULT_EPISODE_SECONDS;
   const timed = pattern === 'event' || pattern === 'unwanted';
-  let horizon = episode;
-  if (wrapper.kind === 'eventually') {
-    // F-then-G needs room after the deadline to show the hold: at least T more.
-    horizon = timed ? triggerDur + 2 * wrapper.duration : Math.max(episode, 2 * wrapper.duration);
-  } else if (timed && wrapper.duration !== undefined) {
-    horizon = wrapper.duration + triggerDur;
-  }
+  const onsetOf = (t: PerturbationTemplate | undefined): number =>
+    t?.maxOnset !== undefined && Number.isFinite(t.maxOnset) && t.maxOnset > 0 ? t.maxOnset : 0;
+  const onset = onsetOf(triggerTemplate ?? stateTrigger?.template);
+  const horizon = horizonOf(timed, !!stateBound, wrapper, onset, triggerDur, episode);
 
   const spec: Parameters<typeof buildMonitor>[0] = {
     // A perturbation state is applied throughout, so its response is monitored as ubiquitous.
@@ -278,6 +294,7 @@ export function compileRequirement(
   };
   if (stateBound) spec.stateMargin = { predicate: stateBound.template, slots: stateBound.si };
   if (disabledFeature) spec.disabledFeature = true;
+  if (onset > 0 && !stateBound) spec.onset = onset;
 
   return finish({
     id: ast.id ?? options.id ?? '',

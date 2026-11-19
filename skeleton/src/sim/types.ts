@@ -65,6 +65,8 @@ export interface PerturbationTemplate {
   /** Optional short name that a PerturbationCall.template may use instead of the phrase. */
   name?: string;
   slots?: Record<string, SlotDimension>;
+  /** Latest start of the effect in seconds after tTrigger (ears adds it to windows and horizons). */
+  maxOnset?: number;
   /** @deprecated declare `slots` instead; ears calls it only when `slots` is absent. */
   dims?(slots: Record<string, SlotValue>, ranges: Record<string, SlotRange>): Dimension[];
   apply(ctx: SimContext, t: number, tTrigger: number, values: Record<string, number>): void;
