@@ -54,6 +54,8 @@ export interface KitDeps {
   createPool(o: CreatePoolOptions): Promise<TrialPool>;
   runTraced(app: RobotApp, req: CompiledRequirement, spec: TrialSpec): Promise<TracedRun>;
   gitCommit(appDir: string): Promise<string | undefined>;
+  /** Releases what the default deps hold (the cached MuJoCo models of `runTraced`). Called once at the end of `main`. */
+  dispose?(): Promise<void>;
 }
 
 /** Thrown by `runTraced` when the simulator cannot give the trace of a trial. */

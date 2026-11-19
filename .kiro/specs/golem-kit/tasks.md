@@ -261,20 +261,20 @@ This revision follows the current requirements and design:
     - fast-check, at least 100 runs, file `skeleton/src/mcp/__tests__/prop-37-proposal-roundtrip.test.ts`.
     - **Validates: Requirements 14.2**
 
-- [ ] 5. Requirements guard
-  - [ ] 5.1 Implement the Requirements_Guard script
+- [x] 5. Requirements guard
+  - [x] 5.1 Implement the Requirements_Guard script
     - Create `skeleton/kiro-pack/hooks/golem-guard-requirements.mjs` using Node built-ins only, with `targetsOf`, `normalise`, `isRequirementsPath` and `decide`.
     - Reads stdin up to 1 MiB, reads no environment variable and no agent name, and writes the exact stderr line "golem-tuner may not edit requirements. Propose changes with propose_requirement." on exit 2.
     - Test with examples through `decide`: `Requirements.md`, `a\..\requirements.md`, `my-requirements.md`, `requirements.md.bak`, invalid JSON, no path.
     - _Requirements: 18.1, 18.2, 18.3, 18.4, 18.5, 18.6, 18.7, 18.8, 18.10_
 
-  - [ ] 5.2 Write property test for the guard decision
+  - [x] 5.2 Write property test for the guard decision
     - **Property 9: Guard exits 2 if and only if a target is requirements.md**
     - Generate payloads with targets in `tool_input` or at top level, `path`, `file_path` or `paths`, mixed separators, dot segments, letter case and decoy names; assert code 2 exactly when a normalised final segment is `requirements.md`.
     - fast-check, at least 100 runs, file `skeleton/test/prop-09-guard-decision.test.ts`.
     - **Validates: Requirements 18.1, 18.3, 18.5, 18.6, 18.9, 28.13**
 
-  - [ ] 5.3 Write property test for guard independence
+  - [x] 5.3 Write property test for guard independence
     - **Property 10: Guard ignores everything except the payload**
     - Generate invalid or pathless stdin and environment variable sets; assert exit 0 with a warning that names the cause, and the same result under any environment. Add one real `child_process.spawn` test over a fixed payload list under two environments, comparing the exit code with `decide`, finishing within 500 ms.
     - fast-check, at least 100 runs, file `skeleton/test/prop-10-guard-env.test.ts`.
