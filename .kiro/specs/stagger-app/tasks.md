@@ -27,56 +27,56 @@ Conventions for every task:
     - Write `test/runtime.test.ts` (example): the same ctx returns the same object, different ctx return different objects, `resetRuntime` restores defaults, and a second `runtimeFor` call allocates nothing new
     - _Requirements: 8.10, 15.3, 15.10, 21.3_
 
-- [ ] 2. Asset pipeline libraries and script
-  - [ ] 2.1 Implement `urls.mjs`, `zip.mjs`, `stl.mjs` and file naming
+- [x] 2. Asset pipeline libraries and script
+  - [x] 2.1 Implement `urls.mjs`, `zip.mjs`, `stl.mjs` and file naming
     - `PINNED_COMMIT` (40 lowercase hex, one constant), `upstreamUrl`, `isAllowedHost`
     - `readZipEntries` with stored and deflate entries using `node:zlib` only
     - `parseBinaryStl`, `writeBinaryStl` (length `84 + 50 * n`), `hullName`, `visualName`
     - Write `test/assets.urls-zip-stl.test.ts` (examples): URL shape, rejected hosts, STL byte length, a hand-built zip with stored and deflate entries, hull and visual names differ
     - _Requirements: 1.1, 1.8, 2.6, 2.7_
 
-  - [ ]* 2.2 Write property tests for URLs, STL and naming
+  - [x]* 2.2 Write property tests for URLs, STL and naming
     - **Property 1: Download URLs are built from the pinned commit**
     - **Property 4: STL write and parse round trip**
     - **Property 5: Hull and visual file names never collide**
     - **Validates: Requirements 1.1, 1.8, 2.6, 2.7, 2.9**
 
-  - [ ] 2.3 Implement `hull.mjs` and `simplify.mjs`
+  - [x] 2.3 Implement `hull.mjs` and `simplify.mjs`
     - `buildHull(tris, name)` wraps `quickhull3d` and throws `<name>: fewer than 4 non-coplanar vertices`
     - `buildVisual(tris, maxTris = 3000)` wraps `meshoptimizer` and returns the input unchanged when it is already at or under the cap
     - Write `test/assets.hull-simplify.test.ts` (examples): a cube hull, a flat quad throws with the mesh name, a 10,000 triangle sphere reduces to at most 3,000, a small mesh is unchanged
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.8_
 
-  - [ ]* 2.4 Write property tests for hulls and visual meshes
+  - [x]* 2.4 Write property tests for hulls and visual meshes
     - **Property 2: Hull meshes enclose their source meshes**
     - **Property 3: Visual meshes respect the triangle cap**
     - **Validates: Requirements 2.1, 2.2, 2.3, 2.4, 2.5**
 
-  - [ ] 2.5 Implement `mjcf.mjs` (`rewriteMjcf`, `writeScene`)
+  - [x] 2.5 Implement `mjcf.mjs` (`rewriteMjcf`, `writeScene`)
     - Collision geoms point at hull meshes with `group` 3; visual geoms point at light meshes with `group` 2, `contype` 0, `conaffinity` 0
     - Preserve body, joint, joint range, actuator and inertial elements and nesting
     - `writeScene` includes the Robot_MJCF, adds a floor geom named `floor`, and sets `timestep` 0.002
     - Write `test/assets.mjcf.test.ts` (examples): a small G1-like MJCF, 12 leg joints in the required order, `pelvis` free joint, `floor` geom, timestep, motor actuators
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8_
 
-  - [ ]* 2.6 Write property tests for the MJCF rewrite
+  - [x]* 2.6 Write property tests for the MJCF rewrite
     - **Property 6: MJCF rewrite sets mesh groups and preserves structure**
     - **Property 7: MJCF rewrite is idempotent**
     - **Validates: Requirements 3.1, 3.2, 3.3, 3.9**
 
-  - [ ] 2.7 Implement `pack.mjs` (`WEIGHT_SPECS`, `extractWeights`, `packPolicy`, `unpackPolicy`)
+  - [x] 2.7 Implement `pack.mjs` (`WEIGHT_SPECS`, `extractWeights`, `packPolicy`, `unpackPolicy`)
     - Zip entries `policy_lstm_1/data/2` to `data/9` map to W1, b1, W2, b2, Wih, Whh, bih, bhh with the shapes of Requirement 4.2
     - Errors name the entry, expected bytes and actual bytes, or the missing entry
     - `policy.bin`: 4-byte LE header length, UTF-8 JSON header (`commit`, `gateOrder: "ifgo"`, tensors with name, shape, offset, bytes), 4-byte aligned float32 tensors
     - Write `test/assets.pack.test.ts` (examples): header fields, alignment, wrong length error text, missing entry error text
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8_
 
-  - [ ]* 2.8 Write property tests for zip extraction and policy.bin
+  - [x]* 2.8 Write property tests for zip extraction and policy.bin
     - **Property 8: policy.bin pack and unpack round trip**
     - **Property 9: Zip extraction maps entries to the right tensors**
     - **Validates: Requirements 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.9**
 
-  - [ ] 2.9 Implement `scripts/fetch-assets.mjs`, then generate and commit `robot/`
+  - [x] 2.9 Implement `scripts/fetch-assets.mjs`, then generate and commit `robot/`
     - Flow per the design: download MJCF, list meshes, download meshes, `LICENSE` and `motion.pt` through `upstreamUrl`, build hulls and visuals, rewrite MJCF, write scene, pack weights, write `SOURCE.json` (commit, upstream and local paths), print the Robot_Folder size in bytes, remove the temp dir in `finally`
     - `writeInsideRobot(path)` rejects paths outside `robot/` and the temp dir; non-200 prints URL and status and exits non-zero; a missing mesh prints the mesh name and exits non-zero
     - Expose a pure `runPipeline(inputs)` that the script calls, so tests need no network
@@ -86,7 +86,7 @@ Conventions for every task:
     - Write `test/robot-folder.test.ts` (examples): committed folder has `scene.xml`, MJCF, meshes, `policy.bin`, `LICENSE`, `SOURCE.json`; timestep 0.002; `LICENSE` contains BSD-3-Clause
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 3.4, 3.5, 3.6, 3.7, 3.8, 5.1, 5.2, 5.5, 5.7_
 
-  - [ ]* 2.10 Write property test for pipeline reproducibility
+  - [x]* 2.10 Write property test for pipeline reproducibility
     - **Property 10: The asset pipeline is reproducible**
     - **Validates: Requirements 5.4**
 
