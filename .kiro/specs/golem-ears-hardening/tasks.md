@@ -13,7 +13,7 @@ Conventions: sources in `skeleton/src/ears/`, tests in `skeleton/src/ears/__test
   - _Bugfix: 3.1–3.3_
 - [x] 3. Quote source text as written (defect 12)
   - _Bugfix: 12.1–12.3_
-- [ ] 4. Multi-word robot names (defect 13)
+- [x] 4. Multi-word robot names (defect 13)
   - _Bugfix: 13.1–13.3_
 - [ ] 5. Accept THEN before THE in WHEN, WHILE and WHERE (defect 8)
   - _Bugfix: 8.1–8.4_
