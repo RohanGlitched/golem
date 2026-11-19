@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import * as THREE from 'three';
 import { FilmstripRenderer, filmstripFrames, frameLabel } from '../reel/filmstrip.js';
-import { NO_CE_TEXT, Reel } from '../reel/reel.js';
+import { NO_CE_TEXT, REEL_LOADING_TEXT, Reel } from '../reel/reel.js';
 import { PinnedSeedStore } from '../run/pins.js';
 import { FakeRaf, FakeStorage, synthPoses } from './fakes.js';
 import { compiledLine, fakeActions, syncStore } from './generators/actions.js';
@@ -116,6 +116,31 @@ describe('Reel', () => {
     expect(signals).toHaveLength(2);
     expect(signals[0]!.aborted).toBe(true);
     expect(signals[1]!.aborted).toBe(false);
+  });
+  it('shows a labelled loading message, not empty boxes, until the replay poses exist, then eight labelled frames drawn at once', async () => {
+    let resolve!: (d: ReelData) => void;
+    const drawn: number[] = [];
+    const actions = fakeActions({
+      summaryOf: () => 'x',
+      loadReplay: () => new Promise<ReelData>((r) => { resolve = r; }),
+      renderFilmstrip: (_d, cs) => { drawn.push(cs.filter(Boolean).length); return () => {}; },
+    });
+    const { container } = render(<Reel store={syncStore({ lines: [broken('1.1')], selectedId: '1.1' })} actions={actions} />);
+    expect(screen.getByRole('status').textContent).toBe(REEL_LOADING_TEXT);
+    expect(container.querySelectorAll('canvas')).toHaveLength(0);
+    expect(drawn).toEqual([]);
+    await act(async () => { resolve(reelData()); await Promise.resolve(); });
+    expect(container.querySelectorAll('canvas')).toHaveLength(8);
+    expect(drawn).toEqual([8]); // drawn once, with all eight canvases in the page
+    expect(screen.queryByText(REEL_LOADING_TEXT)).toBeNull();
+    for (const f of container.querySelectorAll('figure')) expect(f.querySelector('figcaption')!.textContent).toMatch(/^\d\.\d\d s/);
+  });
+  it('shows no loading message and no boxes when the replay trial fails', async () => {
+    const actions = fakeActions({ loadReplay: async () => { throw new Error('boom'); }, summaryOf: () => 'x' });
+    const { container } = render(<Reel store={syncStore({ lines: [broken('1.1')], selectedId: '1.1' })} actions={actions} />);
+    await act(async () => { await Promise.resolve(); await Promise.resolve(); });
+    expect(screen.queryByText(REEL_LOADING_TEXT)).toBeNull();
+    expect(container.querySelectorAll('canvas')).toHaveLength(0);
   });
   it('keeps Copy seed and Pin this seed active when the replay trial fails', async () => {
     const actions = fakeActions({ loadReplay: async () => { throw new Error('Worker 1 crashed'); }, summaryOf: () => 'falls from 168 N' });

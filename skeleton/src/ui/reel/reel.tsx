@@ -7,6 +7,7 @@ import { useStudio } from '../tablet/actions.js';
 import type { Counterexample } from '../types.js';
 
 export const NO_CE_TEXT = 'No counterexample selected. A broken line shows its failure here.';
+export const REEL_LOADING_TEXT = 'Loading the frames: re-running the trial that broke this line to record its poses.';
 export const COPY_FAILED_TEXT = 'Copy failed: the seed is shown below, select it to copy';
 
 export function ReplayControls({ store, actions }: { store: StoreLike; actions: StudioActions }) {
@@ -63,18 +64,22 @@ export function Reel({ store, actions }: { store: StoreLike; actions: StudioActi
     setData(undefined); setError(undefined); setCopyField(undefined);
     if (!ce || !line) return;
     const ac = new AbortController();
-    let stopFilm: (() => void) | undefined;
     actions.loadReplay(line.id, ac.signal).then((d) => {
-      if (ac.signal.aborted) return;
-      setData(d);
-      queueMicrotask(() => { if (!ac.signal.aborted) stopFilm = actions.renderFilmstrip(d, canvases.current); });
+      if (!ac.signal.aborted) setData(d);
     }, (e: unknown) => {
       if (ac.signal.aborted || (e instanceof Error && e.name === 'AbortError')) return;
       setError(e instanceof Error ? e.message : String(e));
     });
-    return () => { ac.abort(); stopFilm?.(); };
+    return () => { ac.abort(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ceKey]);
+
+  // The frames are drawn as soon as the replay trial's poses exist and the canvases are in the page.
+  useEffect(() => {
+    if (!data) return;
+    return actions.renderFilmstrip(data, canvases.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
 
   const copy = async (c: Counterexample): Promise<void> => {
     const ok = await actions.copySeed(c);
@@ -93,20 +98,22 @@ export function Reel({ store, actions }: { store: StoreLike; actions: StudioActi
             {actions.summaryOf(line.id, ce)}
             {ce.classification ? <span className="golem-note">{` (classification: ${ce.classification})`}</span> : null}
           </p>
-          <div className="golem-reel-strip" role="list" aria-label="Frames around the failure">
-            {(data?.entries ?? Array.from({ length: 8 }, () => undefined)).map((e, k) => (
-              <figure key={k} role="listitem" className={`golem-frame${e?.isWorst ? ' golem-frame-worst' : ''}`}>
-                <canvas
-                  ref={(el) => { canvases.current[k] = el; }}
-                  width={160}
-                  height={120}
-                  role="img"
-                  aria-label={data?.labels[k] ?? 'Frame loading'}
-                />
-                <figcaption className="golem-num">{e ? `${e.tau.toFixed(2)} s${e.isWorst ? ' worst' : ''}` : '…'}</figcaption>
-              </figure>
-            ))}
-          </div>
+          {data ? (
+            <div className="golem-reel-strip" role="list" aria-label="Frames around the failure">
+              {data.entries.map((e, k) => (
+                <figure key={k} role="listitem" className={`golem-frame${e.isWorst ? ' golem-frame-worst' : ''}`}>
+                  <canvas
+                    ref={(el) => { canvases.current[k] = el; }}
+                    width={160}
+                    height={120}
+                    role="img"
+                    aria-label={data.labels[k] ?? `Frame at ${e.tau.toFixed(2)} s after the push`}
+                  />
+                  <figcaption className="golem-num">{`${e.tau.toFixed(2)} s${e.isWorst ? ' worst' : ''}`}</figcaption>
+                </figure>
+              ))}
+            </div>
+          ) : error ? null : <p className="golem-note golem-reel-loading" role="status">{REEL_LOADING_TEXT}</p>}
           {error ? <p className="golem-q-msg" role="status">{`The replay trial failed: ${error}`}</p> : null}
           <div className="golem-reel-row">
             <button type="button" className="golem-btn golem-btn-primary" disabled={!data} onClick={() => actions.replay(line.id)}>
