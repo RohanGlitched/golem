@@ -40,7 +40,7 @@ Conventions: sources in `skeleton/src/ears/`, tests in `skeleton/src/ears/__test
   - _Bugfix: 11.1–11.7_
 - [x] 14. STL formula string (improvement 1)
   - _Bugfix: I1.1–I1.4_
-- [ ] 15. Lexicon linter (improvement 5)
+- [x] 15. Lexicon linter (improvement 5)
   - _Bugfix: I5.1–I5.3_
 - [ ] 16. Kiro-compatibility golden corpus (improvement 3)
   - _Bugfix: I3.1–I3.3_
