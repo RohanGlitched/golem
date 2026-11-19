@@ -1,5 +1,7 @@
 // The Expectation table of a requirements.md: `| Criterion | Topic | Expectation |` with Expected_Hold / Expected_Break.
 // A line with no row, or no table at all, is Expected_Hold. The gate is green when every line meets its expectation.
+// Whenever the kit cannot tell what a mark means, the line is Expected_Hold or the gate does not run (a table error).
+import { extractCriteria } from '../ears/index.js';
 import type { Verdict } from './sibling-types.js';
 import type { RequirementOutcome } from './types.js';
 
@@ -7,12 +9,48 @@ export type Expectation = 'Expected_Hold' | 'Expected_Break';
 
 export const DEFAULT_EXPECTATION: Expectation = 'Expected_Hold';
 
+/** One body line of a table. `expectation` is undefined when the cell is not a mark. */
+export interface ExpectationRow {
+  id: string;
+  /** The mark as read; undefined when the cell is neither Expected_Hold nor Expected_Break. */
+  expectation: Expectation | undefined;
+  file?: string;
+  /** 1-based. */
+  line: number;
+}
+
+/** One problem found in the tables. An error stops the gate; a warning is only shown. */
+export interface TableIssue {
+  severity: 'error' | 'warning';
+  message: string;
+  file?: string;
+  /** 1-based. */
+  line: number;
+}
+
 export interface ParsedExpectations {
   /** Criterion id (as written in the first column) to expectation, for every row with a valid value. */
   byId: Map<string, Expectation>;
-  /** Rows that could not be read, as plain sentences. */
+  /** Every row of every table, in file order. */
+  rows: ExpectationRow[];
+  /** Everything found wrong or doubtful: parse problems first, then (after reconcile) orphan rows and unmarked lines. */
+  issues: TableIssue[];
+  /** `line <n>: <message>` for every issue, for callers that print strings. */
   problems: string[];
+  /** Number of tables recognised. */
+  tables: number;
 }
+
+const finish = (byId: Map<string, Expectation>, rows: ExpectationRow[], issues: TableIssue[], tables: number): ParsedExpectations => ({
+  byId, rows, issues, tables, problems: issues.map((i) => `line ${i.line}: ${i.message}`),
+});
+
+/** `<file>:<line>: <severity>: <message>`, the file as `show` writes it (for example relative to the working directory). */
+export function formatIssue(i: TableIssue, show: (file: string) => string = (f) => f): string {
+  return `${i.file !== undefined ? `${show(i.file)}:${i.line}` : `line ${i.line}`}: ${i.severity}: ${i.message}`;
+}
+
+export const tableErrors = (p: Pick<ParsedExpectations, 'issues'>): TableIssue[] => p.issues.filter((i) => i.severity === 'error');
 
 const cells = (row: string): string[] => {
   let s = row.trim();
@@ -24,10 +62,15 @@ const cells = (row: string): string[] => {
 const isSeparator = (row: string): boolean => /^\s*\|?[\s:|-]+\|?\s*$/.test(row) && row.includes('-');
 
 /** Reads every table whose header has a `Criterion` and an `Expectation` column. */
-export function parseExpectations(text: string): ParsedExpectations {
+export function parseExpectations(text: string, file?: string): ParsedExpectations {
   const byId = new Map<string, Expectation>();
-  const problems: string[] = [];
+  const rows: ExpectationRow[] = [];
+  const issues: TableIssue[] = [];
+  let tables = 0;
   const lines = text.split(/\r?\n/);
+  const issue = (severity: TableIssue['severity'], line: number, message: string): void => {
+    issues.push({ severity, line, message, ...(file !== undefined ? { file } : {}) });
+  };
   let idCol = -1;
   let expCol = -1;
   for (let i = 0; i < lines.length; i++) {
@@ -37,7 +80,7 @@ export function parseExpectations(text: string): ParsedExpectations {
     if (idCol < 0) {
       const a = c.findIndex((x) => /^criterion$/i.test(x));
       const b = c.findIndex((x) => /^expectation$/i.test(x));
-      if (a >= 0 && b >= 0) { idCol = a; expCol = b; }
+      if (a >= 0 && b >= 0) { idCol = a; expCol = b; tables++; }
       continue;
     }
     if (isSeparator(s)) continue;
@@ -46,32 +89,115 @@ export function parseExpectations(text: string): ParsedExpectations {
     if (id === '') continue;
     const m = /^expected[_ -]?(hold|break)$/i.exec(value);
     if (m === null) {
-      problems.push(`line ${i + 1}: the expectation of ${id} is "${value}"; use Expected_Hold or Expected_Break (treated as Expected_Hold)`);
+      rows.push({ id, expectation: undefined, line: i + 1, ...(file !== undefined ? { file } : {}) });
+      issue('error', i + 1, `the expectation of ${id} is "${value}"; use Expected_Hold or Expected_Break`);
       continue;
     }
-    if (byId.has(id)) problems.push(`line ${i + 1}: ${id} appears twice in the expectation table; the first row is used`);
-    else byId.set(id, m[1]?.toLowerCase() === 'break' ? 'Expected_Break' : 'Expected_Hold');
+    const expectation: Expectation = m[1]?.toLowerCase() === 'break' ? 'Expected_Break' : 'Expected_Hold';
+    rows.push({ id, expectation, line: i + 1, ...(file !== undefined ? { file } : {}) });
+    if (byId.has(id)) issue('warning', i + 1, `${id} appears twice in the expectation table; the first row is used`);
+    else byId.set(id, expectation);
   }
-  return { byId, problems };
+  return finish(byId, rows, issues, tables);
 }
 
 /** Merges the tables of several files; the first file that names an id wins. */
 export function mergeExpectations(parts: readonly ParsedExpectations[]): ParsedExpectations {
   const byId = new Map<string, Expectation>();
-  const problems: string[] = [];
+  const rows: ExpectationRow[] = [];
+  const issues: TableIssue[] = [];
+  let tables = 0;
   for (const p of parts) {
     for (const [k, v] of p.byId) if (!byId.has(k)) byId.set(k, v);
-    problems.push(...p.problems);
+    rows.push(...p.rows);
+    issues.push(...p.issues);
+    tables += p.tables;
   }
-  return { byId, problems };
+  return finish(byId, rows, issues, tables);
+}
+
+/** A numbered criterion of a requirements file: its id and where it is written. */
+export interface CriterionRef { id: string; file?: string; line: number }
+
+const distance = (a: string, b: string): number => {
+  let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i];
+    for (let j = 1; j <= b.length; j++) {
+      cur[j] = Math.min((cur[j - 1] as number) + 1, (prev[j] as number) + 1, (prev[j - 1] as number) + (a[i - 1] === b[j - 1] ? 0 : 1));
+    }
+    prev = cur;
+  }
+  return prev[b.length] as number;
+};
+
+/**
+ * The id that `written` most likely means, or undefined. An id that is in `ids` is returned as it is. Otherwise the
+ * id left after removing a leading `R`, `Req` or `Requirement` word and a trailing period, then the one id at the
+ * smallest edit distance (at most 2 and at most half the length). Two ids at the same distance give no suggestion,
+ * because a hint that is a guess is worse than none.
+ */
+export function nearestId(written: string, ids: readonly string[]): string | undefined {
+  if (ids.includes(written)) return written;
+  const norm = written.trim().replace(/^(?:requirement|req|r)[\s.:_-]*(?=\d)/i, '').replace(/[.\s]+$/, '');
+  if (ids.includes(norm)) return norm;
+  const limit = Math.min(2, Math.floor(written.length / 2));
+  let best: string | undefined;
+  let bestD = limit + 1;
+  let tied = false;
+  for (const id of new Set(ids)) {
+    const d = distance(written, id);
+    if (d < bestD) { best = id; bestD = d; tied = false; } else if (d === bestD && best !== undefined) tied = true;
+  }
+  return tied ? undefined : best;
+}
+
+/**
+ * Compares the rows with the criteria that exist. A row for an id that no criterion has is an error (the mark would
+ * be dropped silently). When a table exists, a criterion with no row is a warning (it is Expected_Hold).
+ */
+export function reconcileExpectations(parsed: ParsedExpectations, criteria: readonly CriterionRef[]): ParsedExpectations {
+  const ids = criteria.map((c) => c.id);
+  const known = new Set(ids);
+  const issues = [...parsed.issues];
+  for (const r of parsed.rows) {
+    if (known.has(r.id)) continue;
+    const near = nearestId(r.id, ids);
+    issues.push({
+      severity: 'error', line: r.line, ...(r.file !== undefined ? { file: r.file } : {}),
+      message: `the table marks ${r.id}, but no requirement has that id${near !== undefined ? ` (did you mean ${near}?)` : ''}`,
+    });
+  }
+  if (parsed.tables > 0) {
+    const marked = new Set(parsed.rows.map((r) => r.id));
+    const reported = new Set<string>();
+    for (const c of criteria) {
+      if (marked.has(c.id) || reported.has(c.id)) continue;
+      reported.add(c.id);
+      issues.push({
+        severity: 'warning', line: c.line, ...(c.file !== undefined ? { file: c.file } : {}),
+        message: `${c.id} has no row in the Expectation table, so it is ${DEFAULT_EXPECTATION}`,
+      });
+    }
+  }
+  return finish(parsed.byId, parsed.rows, issues, parsed.tables);
+}
+
+/**
+ * The table of the files whose text is in `texts`, in `files` order: the only way the kit reads a table. With
+ * `reconcile` (the default) it is compared with the criteria of the same texts.
+ */
+export function readExpectations(
+  texts: Readonly<Record<string, string>>, files: readonly string[], o: { reconcile?: boolean } = {},
+): ParsedExpectations {
+  const present = files.filter((f) => Object.prototype.hasOwnProperty.call(texts, f));
+  const merged = mergeExpectations(present.map((f) => parseExpectations(texts[f] as string, f)));
+  if (o.reconcile === false) return merged;
+  const criteria = present.flatMap((f) => extractCriteria(texts[f] as string).criteria.map((c) => ({ id: c.id, file: f, line: c.line })));
+  return reconcileExpectations(merged, criteria);
 }
 
 export const expectationOf = (m: ReadonlyMap<string, Expectation>, id: string): Expectation => m.get(id) ?? DEFAULT_EXPECTATION;
-
-/** The table of the files whose text is in `texts`, in `files` order: the only way the kit reads a table. */
-export function readExpectations(texts: Readonly<Record<string, string>>, files: readonly string[]): ParsedExpectations {
-  return mergeExpectations(files.filter((f) => Object.prototype.hasOwnProperty.call(texts, f)).map((f) => parseExpectations(texts[f] as string)));
-}
 
 /** True when the verdict is what the expectation asks for. An `error` verdict meets neither. */
 export function meetsExpectation(status: Verdict['status'], e: Expectation): boolean {
@@ -94,8 +220,6 @@ export const expectationTag = (status: Verdict['status'], e: Expectation): strin
 export interface Judged {
   outcome: RequirementOutcome;
   expectation: Expectation;
-  /** True when the table has a row for this requirement. */
-  explicit: boolean;
   met: boolean;
   /** Why it is not met; empty when it is. */
   miss: string;
@@ -106,7 +230,7 @@ export function judgeOutcomes(outcomes: readonly RequirementOutcome[], byId: Rea
   return outcomes.map((outcome) => {
     const expectation = expectationOf(byId, outcome.verdict.reqId);
     return {
-      outcome, expectation, explicit: byId.has(outcome.verdict.reqId),
+      outcome, expectation,
       met: meetsExpectation(outcome.verdict.status, expectation),
       miss: expectationMiss(outcome.verdict.status, expectation, outcome.verdict.trials),
     };

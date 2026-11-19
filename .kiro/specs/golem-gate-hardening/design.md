@@ -52,7 +52,7 @@ result  = reconcile ? reconcileExpectations(merged, ids) : merged
 ```
 
 `reconcileExpectations` adds to `issues`:
-- for each readable row whose id is not in `ids`: an error, with `did you mean <id>?` from `nearestId(id, ids)`: normalise the written id (strip a leading `R`, `Req` or `Requirement` word and a trailing period), return it if it is an id; otherwise the id at the smallest Levenshtein distance up to 2 (ties: file order);
+- for each readable row whose id is not in `ids`: an error, with `did you mean <id>?` from `nearestId(id, ids)`: normalise the written id (strip a leading `R`, `Req` or `Requirement` word and a trailing period), return it if it is an id; otherwise the one id at the smallest Levenshtein distance up to 2 and up to half the written length (two ids at the same distance give no suggestion: a hint that is a guess is worse than none);
 - when `merged.tables > 0`, for each id with no row and no error row: a warning.
 
 `ids` comes from `extractCriteria`, not from the compiled requirements, so a line that does not compile does not turn its row into an orphan, and `check` can report both kinds of problem in one pass. It is also the only comparison that works in `check` when the compile has errors.

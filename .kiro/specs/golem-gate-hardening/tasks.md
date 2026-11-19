@@ -21,11 +21,11 @@ Rules for every task:
   - [x] 2.1 Property test: for any table text and requirement text, `readExpectations` on `compileAll`'s texts equals `parseExpectations` of the same strings (the table never comes from a different read).
   - _Bugfix: 9.1 to 9.4_
 
-- [ ] 3. Structured table issues and reconciliation (defect 1, core)
+- [x] 3. Structured table issues and reconciliation (defect 1, core)
   - `ExpectationRow`, `TableIssue`, `rows`, `issues`, `tables` on `ParsedExpectations`; `parseExpectations(text, file?)`; `reconcileExpectations`, `nearestId`; remove the dead `Judged.explicit` or read it for the unmarked list.
   - Tests: orphan with and without a suggestion (`R1.2`, `1.20`, `1.2.`, `Req 1.3`, `1.4 and 1.5`), unmarked warning only when a table exists, ids from the extractor (a line that does not compile has no orphan row).
-  - [ ] 3.1 Property test (T.3.5, pure part): adding a row for an id that is not in `ids` always adds exactly one error and never changes `byId` for the other ids; a row for an id in `ids` adds none.
-  - [ ] 3.2 Property test: `nearestId(x, ids)` is `undefined` or an element of `ids`, and `nearestId(id, ids) === id` for every id.
+  - [x] 3.1 Property test (T.3.5, pure part): adding a row for an id that is not in `ids` always adds exactly one error and never changes `byId` for the other ids; a row for an id in `ids` adds none.
+  - [x] 3.2 Property test: `nearestId(x, ids)` is `undefined` or an element of `ids`, and `nearestId(id, ids) === id` for every id.
   - _Bugfix: 1.4, 1.5, 1.7, 1.9, 1.10_
 
 - [ ] 4. Table errors stop the gate and reach the agent (defects 1 and 2)
