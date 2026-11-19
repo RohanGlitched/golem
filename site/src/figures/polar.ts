@@ -1,12 +1,13 @@
 // Polar geometry for the G1 stability map. Pure: used at build time to draw the SVG and in the browser to redraw it.
-// 0 deg is at the top (the robot's heading), angles count clockwise. Radius is linear in force.
+// 0 deg is at the top (the robot's heading). Angles count counterclockwise, matching push.angle: 90 deg is a push
+// from the robot's left, drawn on the left. Radius is linear in force.
 import type { MapCell } from '../build/data';
 
 export interface PolarSpec { cx: number; cy: number; radius: number; maxN: number; halfWidthDeg: number }
 
 export const DEFAULT_SPEC: PolarSpec = { cx: 280, cy: 270, radius: 215, maxN: 300, halfWidthDeg: 5 };
 
-const rad = (deg: number): number => ((deg - 90) * Math.PI) / 180;
+const rad = (deg: number): number => ((-deg - 90) * Math.PI) / 180;
 
 /** Radius in px of a force, clamped to the outer ring. */
 export function radiusOf(spec: PolarSpec, forceN: number): number {
@@ -22,7 +23,7 @@ export function polarPoint(spec: PolarSpec, dirDeg: number, forceN: number): { x
 export function fromPolar(spec: PolarSpec, x: number, y: number): { dirDeg: number; forceN: number } {
   const dx = x - spec.cx;
   const dy = y - spec.cy;
-  const deg = (Math.atan2(dy, dx) * 180) / Math.PI + 90;
+  const deg = -((Math.atan2(dy, dx) * 180) / Math.PI) - 90;
   return { dirDeg: ((deg % 360) + 360) % 360, forceN: (Math.hypot(dx, dy) / spec.radius) * spec.maxN };
 }
 
@@ -34,7 +35,7 @@ export function wedgePath(spec: PolarSpec, dirDeg: number, forceN: number): stri
   if (r <= 0) return `M${f(spec.cx)} ${f(spec.cy)}Z`;
   const a = polarPoint({ ...spec, maxN: spec.maxN }, dirDeg - spec.halfWidthDeg, forceN);
   const b = polarPoint(spec, dirDeg + spec.halfWidthDeg, forceN);
-  return `M${f(spec.cx)} ${f(spec.cy)}L${f(a.x)} ${f(a.y)}A${f(r)} ${f(r)} 0 0 1 ${f(b.x)} ${f(b.y)}Z`;
+  return `M${f(spec.cx)} ${f(spec.cy)}L${f(a.x)} ${f(a.y)}A${f(r)} ${f(r)} 0 0 0 ${f(b.x)} ${f(b.y)}Z`;
 }
 
 export interface DirectionCell { phase: number; heldN: number; brokeN: number }

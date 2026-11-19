@@ -19,7 +19,7 @@ export function polarSvg(dirs: DirectionData[], weakest: number, strongest: numb
   const axes = [0, 90, 180, 270].map((deg) => {
     const p = polarPoint(spec, deg, spec.maxN);
     const l = polarPoint({ ...spec, radius: spec.radius + 20 }, deg, spec.maxN);
-    const anchor = deg === 90 ? 'start' : deg === 270 ? 'end' : 'middle';
+    const anchor = deg === 90 ? 'end' : deg === 270 ? 'start' : 'middle';
     const dy = deg === 0 ? -4 : deg === 180 ? 14 : 4;
     return `<line class="axis" x1="${spec.cx}" y1="${spec.cy}" x2="${p.x.toFixed(1)}" y2="${p.y.toFixed(1)}"/><text class="dim" text-anchor="${anchor}" x="${l.x.toFixed(1)}" y="${(l.y + dy).toFixed(1)}">${deg}°</text>`;
   }).join('');
@@ -39,7 +39,7 @@ export function polarSvg(dirs: DirectionData[], weakest: number, strongest: numb
   const desc = `Polar plot. Each wedge is a push direction in 10 degree steps; its length is the largest 0.2 second pelvis push the G1 survived, from 0 to 300 N. The shortest wedge is ${weakest} degrees and the longest is ${strongest} degrees.`;
   return `<svg class="fig-svg" viewBox="0 0 ${w} ${h}" role="group" aria-labelledby="polar-t polar-d" data-polar-svg><title id="polar-t">${title}</title><desc id="polar-d">${esc(desc)}</desc>
 <rect class="bg" width="${w}" height="${h}" fill-opacity="0"/>${rings}${axes}<path class="stroke-ghost" d="${mean}" stroke-width="1.25" stroke-dasharray="3 3"/>${wedges}
-<text class="dim" x="${spec.cx}" y="${h - 6}" text-anchor="middle">Robot facing up. Angles clockwise from its heading.</text></svg>`;
+<text class="dim" x="${spec.cx}" y="${h - 6}" text-anchor="middle">Robot facing up. Angles counterclockwise from its heading: 90° is a push from its left.</text></svg>`;
 }
 
 export function polarFigure(cells: MapCell[], summary: MapSummary): string {

@@ -137,7 +137,7 @@ ${cliBlock('mcp', undefined, 0)}
 ${mcpTools()}
 <p>A call, as recorded in the transcript:</p>
 ${codeBlock(clip((byName('mcp')?.code ?? '').split('\n').filter((l) => /tools\/call falsify|^1\.3 broken/.test(l)).slice(0, 2).join('\n'), 400), 'an MCP falsify call')}
-<p class="small muted">Tool calls return a one-line summary and then a JSON block. See the <a href="${REPO_URL}/blob/master/docs/cli-transcript.md">full transcript</a>.</p>
+<p class="small muted">Tool calls return a one-line summary and then a JSON block. See the <a href="${REPO_URL}/blob/main/docs/cli-transcript.md">full transcript</a>.</p>
 
 <h2 id="hooks">Hooks</h2>
 <p>The Stop hook is the gate: while a line is red, <code>golem gate --kiro</code> blocks the stop and returns the counterexamples as the agent's next message. Kiro fires it once per user turn, so the repair loop also lives in the tuner agent and the workflow below.</p>

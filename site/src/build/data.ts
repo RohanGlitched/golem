@@ -70,6 +70,10 @@ export interface LexiconRef {
 
 export interface SiteData {
   mapCells: MapCell[]; map: MapSummary;
+  /** The same map with Kiro's step-into-the-push reflex on top of Unitree's policy (GOLEM_REFLEX=kiro), when it has run. */
+  mapKiro: { cells: MapCell[]; summary: MapSummary } | undefined;
+  /** The recorded campaign the home hero replays (site/public/hero/pack.json): which of its directions fell. */
+  hero: { force: number; phase: number; dirs: number; fellDeg: number[] };
   falsifier: FalsifierSummary; graded: FalsifierSummary; graded256: FalsifierSummary | undefined;
   agentGate: AgentGateData; candy: CandyData; kiro: KiroData; changelog: ChangelogEntry[]; lexicons: LexiconRef[];
   reportMd: string; transcriptMd: string; preregMd: string;
@@ -144,6 +148,21 @@ export function loadSiteData(root: string = REPO_ROOT): SiteData {
   const map = json<MapSummary>('evidence/results/g1-map.summary.json');
   need(map.meta?.weakest && map.meta?.strongest && Array.isArray(map.summary), 'evidence/results/g1-map.summary.json', 'meta.weakest, meta.strongest or summary is missing');
 
+  const kiroSummary = optionalJson<MapSummary>(root, 'evidence/results/kiro-reflex/g1-map.summary.json');
+  let mapKiro: SiteData['mapKiro'];
+  if (kiroSummary) {
+    const f = 'evidence/results/kiro-reflex/g1-map.jsonl';
+    const cells = parseJsonl<MapCell>(readText(root, f), f);
+    validateMapCells(cells, f);
+    need(kiroSummary.meta?.weakest && Array.isArray(kiroSummary.summary), 'evidence/results/kiro-reflex/g1-map.summary.json', 'meta.weakest or summary is missing');
+    mapKiro = { cells, summary: kiroSummary };
+  }
+
+  const pack = json<{ force: number; phase: number; trials: { idle?: boolean; angleDeg: number; fell: boolean }[] }>('site/public/hero/pack.json');
+  const pushes = pack.trials.filter((t) => !t.idle);
+  need(pushes.length > 0, 'site/public/hero/pack.json', 'no recorded pushes. Run: npx tsx site/scripts/hero-pack.mts 150');
+  const hero = { force: pack.force, phase: pack.phase, dirs: pushes.length, fellDeg: pushes.filter((t) => t.fell).map((t) => t.angleDeg) };
+
   const falsifier = json<FalsifierSummary>('evidence/results/falsifier.summary.json');
   validateFalsifier(falsifier, 'evidence/results/falsifier.summary.json');
   const graded = json<FalsifierSummary>('evidence/results/graded-margin/falsifier.summary.json');
@@ -168,7 +187,7 @@ export function loadSiteData(root: string = REPO_ROOT): SiteData {
     : [];
 
   return {
-    mapCells, map, falsifier, graded, graded256: g256, agentGate, candy, kiro, changelog, lexicons,
+    mapCells, map, mapKiro, hero, falsifier, graded, graded256: g256, agentGate, candy, kiro, changelog, lexicons,
     reportMd: readText(root, 'evidence/REPORT.md'),
     transcriptMd: readText(root, 'docs/cli-transcript.md'),
     preregMd: readText(root, 'evidence/PREREG.md'),

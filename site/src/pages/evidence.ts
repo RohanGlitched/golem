@@ -82,7 +82,7 @@ export function evidencePage(d: SiteData): PageSpec {
   const body = `
 <h1>Evidence</h1>
 <p class="lede">Every number here comes from a committed raw file. Each section says what was run, with what budget, and what it does not show.</p>
-<p>The plan was fixed in <a href="${REPO_URL}/blob/master/evidence/PREREG.md">the pre-registration</a> before the campaigns ran. The generated <a href="${REPO_URL}/blob/master/evidence/REPORT.md">report</a> holds the full tables.</p>
+<p>The plan was fixed in <a href="${REPO_URL}/blob/main/evidence/PREREG.md">the pre-registration</a> before the campaigns ran. The generated <a href="${REPO_URL}/blob/main/evidence/REPORT.md">report</a> holds the full tables.</p>
 
 <h2 id="map">The G1 stability map</h2>
 <p>For each push direction and stride phase, the largest 0.2 s pelvis push the Unitree G1 survives for 3 s. The weakest direction is ${m.weakest.dirDeg}° at ${fmt(m.weakest.minHeldN)} N (stride phase ${m.weakest.weakestPhase}). The strongest is ${m.strongest.dirDeg}° at ${fmt(m.strongest.minHeldN)} N. That is a factor of ${fmt(m.strongest.minHeldN / m.weakest.minHeldN)}.</p>
@@ -123,7 +123,7 @@ ${candyParas}
 <li><b>Verdicts</b> come from deterministic monitors with quantitative robustness. No language model decides anything.</li>
 <li><b>Falsifier benchmark:</b> ${runs(d.falsifier)} runs in round 1 and ${runs(d.graded)} in round 2. Success rates carry exact Clopper-Pearson 95% intervals. Trials to the first counterexample are compared with a paired exact Wilcoxon signed-rank test, with a Bonferroni adjustment for 4 lines.</li>
 <li><b>Map:</b> ${m.dirs} directions × ${m.phases} stride phases × ${m.seeds} seeds, ${m.trials.toLocaleString('en-US')} trials, ${fmt(m.seconds / 60)} minutes. A 30-cell spot check re-ran from the rebuilt script and matched the committed rows exactly.</li>
-<li><b>Pre-registration:</b> <a href="${REPO_URL}/blob/master/evidence/PREREG.md"><code>evidence/PREREG.md</code></a>. One prediction in it was wrong (line 1.3 was expected to be easy to find), and the report says so.</li>
+<li><b>Pre-registration:</b> <a href="${REPO_URL}/blob/main/evidence/PREREG.md"><code>evidence/PREREG.md</code></a>. One prediction in it was wrong (line 1.3 was expected to be easy to find), and the report says so.</li>
 <li><b>Reproduce:</b> the raw rows are in <code>evidence/results/</code> and the scripts in <code>evidence/scripts/</code>.</li>
 </ul>
 

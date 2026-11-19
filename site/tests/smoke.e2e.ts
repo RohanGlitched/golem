@@ -77,9 +77,9 @@ test('hovering a wedge of the polar map reads the direction, the held force and 
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   const page = await ctx.newPage();
   await page.goto(`http://127.0.0.1:${PORT}/evidence/`);
-  await page.locator('.wedge[data-dir="260"]').dispatchEvent('pointerover');
+  await page.locator('.wedge[data-dir="80"]').dispatchEvent('pointerover');
   const text = await page.locator('#polar-read').innerText();
-  expect(text).toMatch(/260\u00b0/);
+  expect(text).toMatch(/80\u00b0/);
   expect(text).toMatch(/holds 62\.5 N/);
   expect(text).toMatch(/weakest stride phase 0\.2/);
   await ctx.close();

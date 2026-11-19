@@ -34,7 +34,7 @@ export const SITEMAP: { href: string; label: string; note: string }[] = [
 ];
 
 export const LICENCES: { what: string; licence: string; href: string }[] = [
-  { what: 'GOLEM code and this site', licence: 'Apache-2.0', href: `${REPO_URL}/blob/master/LICENSE` },
+  { what: 'GOLEM code and this site', licence: 'Apache-2.0', href: `${REPO_URL}/blob/main/LICENSE` },
   { what: 'Unitree G1 model and walking policy (unitree_rl_gym)', licence: 'BSD-3-Clause', href: '/stagger/robot/LICENSE.txt' },
   { what: 'Franka Panda (MuJoCo Menagerie)', licence: 'Apache-2.0', href: '/candy/robot/LICENSE.txt' },
   { what: 'MuJoCo', licence: 'Apache-2.0', href: 'https://github.com/google-deepmind/mujoco/blob/main/LICENSE' },

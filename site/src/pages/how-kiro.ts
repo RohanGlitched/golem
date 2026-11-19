@@ -12,7 +12,7 @@ const AUDITS: { name: string; file: string; fix: string; what: string }[] = [
   { name: 'golem-falsify and pool', file: 'docs/reviews/falsify-audit.md', fix: 'golem-falsify-hardening', what: 'the falsifier and trial pool' },
 ];
 
-const link = (rel: string): string => `<a href="${REPO_URL}/blob/master/${rel}"><code>${esc(rel)}</code></a>`;
+const link = (rel: string): string => `<a href="${REPO_URL}/blob/main/${rel}"><code>${esc(rel)}</code></a>`;
 
 function specRow(s: KiroSpec): string[] {
   const total = s.tasksDone + s.tasksOpen;

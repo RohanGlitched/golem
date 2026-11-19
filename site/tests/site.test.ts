@@ -30,7 +30,7 @@ describe('polar geometry', () => {
   });
   it('puts 0 deg at the top and 90 deg to the right', () => {
     expect(polarPoint(DEFAULT_SPEC, 0, 300).y).toBeLessThan(DEFAULT_SPEC.cy);
-    expect(polarPoint(DEFAULT_SPEC, 90, 300).x).toBeGreaterThan(DEFAULT_SPEC.cx);
+    expect(polarPoint(DEFAULT_SPEC, 90, 300).x).toBeLessThan(DEFAULT_SPEC.cx);
     expect(radiusOf(DEFAULT_SPEC, -5)).toBe(0);
   });
 });
@@ -72,7 +72,7 @@ describe('evidence data', () => {
   it('draws the home headline numbers from the summary files', () => {
     const h = headlineNumbers(data);
     expect(h.weakN).toBe(data.map.meta.weakest.minHeldN);
-    expect(h.weakDir).toBe(260);
+    expect(h.weakDir).toBe(80);
     expect(h.weakN).toBe(62.5);
     expect(h.strongN).toBeCloseTo(240.6, 1);
     expect(h.candyBroken).toBe(data.candy.broken);
