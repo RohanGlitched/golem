@@ -97,7 +97,7 @@ export function homePage(d: SiteData): PageSpec {
   const fell = hero.fellDeg.map((x) => `${x}°`).join(' and ');
   const caps = [
     { at: 0, k: 'A requirement for a Unitree G1 humanoid', h: 'This sentence is a robot’s requirement.', p: 'It is written in EARS, the format Kiro uses for acceptance criteria. GOLEM reads it as a test: a push, a duration, every direction, and a margin.' },
-    { at: 0.16, k: 'golem-spec compiles it to physics', h: 'Each ghost is one physics trial.', p: `${hero.dirs} recorded shoves of ${hero.force} N, one every ${360 / hero.dirs}°, simulated in MuJoCo on Unitree’s published walking policy.` },
+    { at: 0.16, k: 'golem-spec compiles it to physics', h: `${hero.dirs} ghosts, one per direction.`, p: `Each ghost is one MuJoCo trial of Unitree’s published walking policy. Each is shoved with ${hero.force} N from a different side, ${360 / hero.dirs}° apart.` },
     { at: 0.45, k: 'A counterexample', h: `Pushed from its left, the G1 falls.`, p: `${hero.fellDeg.length} of ${hero.dirs} directions break the sentence (${fell}). GOLEM keeps the mildest failing push as a pinned seed that runs first next time.` },
     { at: 0.78, k: 'The verdict', h: 'Where the ring cracks, the sentence is false.', p: 'A Kiro Stop hook runs golem gate. While any sentence is cracked, Kiro’s agent cannot call the task done.' },
   ];

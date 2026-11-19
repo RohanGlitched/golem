@@ -4,6 +4,7 @@ import { codeBlock, esc, fmt, inlineMd, table } from '../build/html';
 import type { PageSpec } from '../build/layout';
 import { REPO_URL } from '../build/layout';
 import { polarFigure } from '../figures/polar-figure';
+import { ringStats, sideName } from '../figures/rings';
 
 export interface NeedleRow { margin: string; budget: number; randomFound: number; fullFound: number; n: number }
 
@@ -89,6 +90,7 @@ export function evidencePage(d: SiteData): PageSpec {
 <section class="bleed" aria-label="G1 stability map"><div class="bleed-in">${polarFigure(d.mapCells, d.map)}</div></section>
 <p>Each cell is a bisection on force (one trial at 400 N, then 8 steps), and every trial is deterministic given its scenario and seed. An earlier run, made before the push direction reached the simulator, gave the same boundary in every direction. It is kept as invalid in <code>evidence/results/invalid/</code> and is not used.</p>
 
+${kiroReflexSection(d)}
 <h2 id="benchmark">The falsifier benchmark</h2>
 <p><b>Result: on these G1 lines, guided search found counterexamples no more often and no sooner than random sampling.</b> Both arms ran the same 4 lines that are written to break, with the same 20 search seeds, at budget ${d.falsifier.meta.budget}.</p>
 <h3>Round 1: the fall margin was flat</h3>
@@ -136,4 +138,28 @@ ${candyParas}
     description: `The G1 stability map (weakest ${fmt(m.weakest.minHeldN)} N at ${m.weakest.dirDeg} deg), an honest falsifier benchmark, the candy wrist finding, methods and limits.`,
     body, modules: ['/src/client/polar.ts'],
   };
+}
+
+/** The same map with the reflex Kiro's golem-tuner agent wrote, direction by direction. */
+function kiroReflexSection(d: SiteData): string {
+  if (!d.mapKiro) return '<h2 id="kiro-reflex">With Kiro’s reflex</h2><p class="pending">The map with Kiro’s reflex has not been committed yet.</p>';
+  const a = d.map.summary, b = d.mapKiro.summary.summary;
+  const sa = ringStats(a, 100), sb = ringStats(b, 100);
+  const byDir = new Map(b.map((x) => [x.dirDeg, x]));
+  const rows = [...a].sort((x, y) => x.dirDeg - y.dirDeg).map((x) => {
+    const y = byDir.get(x.dirDeg);
+    const delta = y ? y.minHeldN - x.minHeldN : NaN;
+    return [`${x.dirDeg}°`, sideName(x.dirDeg), fmt(x.minHeldN), y ? fmt(y.minHeldN) : '–', Number.isFinite(delta) ? `${delta >= 0 ? '+' : ''}${fmt(delta)}` : '–'];
+  });
+  return `<h2 id="kiro-reflex">With Kiro’s reflex</h2>
+<p>The same campaign (${d.mapKiro.summary.meta.cells} cells, ${d.mapKiro.summary.meta.trials} trials) with <code>GOLEM_REFLEX=kiro</code>: the lateral step-into-the-push reflex that Kiro’s <code>golem-tuner</code> agent wrote to make requirement 1.3 hold. Unitree’s policy, the PD law and the model are unchanged; the reflex only rewrites the velocity command the policy sees.</p>
+<div class="stats">
+<div class="stat"><b class="hold">${fmt(sa.weakest.minHeldN)} → ${fmt(sb.weakest.minHeldN)} N</b><span>Weakest push survived (${sa.weakest.dirDeg}° before, ${sb.weakest.dirDeg}° after).</span></div>
+<div class="stat"><b>${sa.holding} → ${sb.holding}</b><span>Directions of ${sa.dirs} that hold 100 N.</span></div>
+<div class="stat"><b class="break">${fmt(sa.strongest.minHeldN)} → ${fmt(sb.strongest.minHeldN)} N</b><span>Strongest direction. It lost some headroom.</span></div>
+</div>
+<details><summary>All ${rows.length} directions, weakest push survived in newtons</summary>
+${table(['Direction', 'Pushed from', 'Unitree only', 'With Kiro’s reflex', 'Change'], rows, { num: [2, 3, 4], caption: 'Minimum over 5 stride phases and 3 seeds. Raw cells: evidence/results/g1-map.jsonl and evidence/results/kiro-reflex/g1-map.jsonl.' })}
+</details>
+<p>The agent’s session log and prompt are in <a href="${REPO_URL}/tree/main/evidence/results/tuner"><code>evidence/results/tuner/</code></a>. It checked its work with GOLEM’s MCP tools and <code>golem gate</code>; this map is a separate re-measurement afterwards, over all 36 directions, 5 stride phases and 3 seeds.</p>`;
 }
