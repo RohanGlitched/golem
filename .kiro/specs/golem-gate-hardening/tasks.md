@@ -42,10 +42,10 @@ Rules for every task:
   - [x] 5.2 Property test (T.3.1): flipping one row between `Expected_Hold` and `Expected_Break` flips `met` of that line and no other line, for a `held` and for a `broken` verdict.
   - _Bugfix: 3.1 to 3.8_
 
-- [ ] 6. The Stop reason offers a remedy the agent may take; override fields (defects 4 and 5)
+- [x] 6. The Stop reason offers a remedy the agent may take; override fields (defects 4 and 5)
   - New `Expected_Break` block text; `GateOverride.unmetReqIds`; `brokenReqIds` lists status not `held` plus pseudo ids; the override message carries the miss text.
   - Tests: M9 and M10 mutants die; a stale `Expected_Break` line stays red with and without `--kiro` (4.4); six stops give an override with `unmetReqIds: ['1.2']`, `brokenReqIds: []`.
-  - [ ] 6.1 Property test: for any set of verdicts and marks, `unmetReqIds` is exactly the ids with `met === false`, `brokenReqIds` is a subset of it, and a `held` verdict is never in `brokenReqIds`.
+  - [x] 6.1 Property test: for any set of verdicts and marks, `unmetReqIds` is exactly the ids with `met === false`, `brokenReqIds` is a subset of it, and a `held` verdict is never in `brokenReqIds`.
   - _Bugfix: 4.1 to 4.5, 5.1, 5.3, 5.4, 5.7_
 
 - [ ] 7. Re-run a held `Expected_Break` line at 4 times the budget (defect 8)

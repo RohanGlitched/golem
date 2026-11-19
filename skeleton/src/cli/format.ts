@@ -128,7 +128,8 @@ export function expectationBlock(j: Judged): string {
     `${id}: ${o.req.source}`,
     `  ${j.miss}`,
     `  closest margin: ${formatMargin(o.verdict.closest.robustness, o.unit)} at ${formatScenario(o.req.space, o.verdict.closest.scenario)} (seed ${o.verdict.closest.seed})`,
-    `  look further: npx golem-spec falsify ${id} --budget 200, or move this line to Expected_Hold if the controller now holds it`,
+    `  This line held, so the controller is better than the spec expects. Look further with npx golem-spec falsify ${id} --budget 200. `
+    + `If it still holds, tell the user to move row ${id} of the Expectation table to Expected_Hold. Do not edit requirements.md yourself.`,
   ].join('\n');
 }
 

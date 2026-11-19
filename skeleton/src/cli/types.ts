@@ -61,7 +61,12 @@ export interface ReportMeta {
 /** Additive fields (A5): `unit` of the monitor, `ears` source line; `expectation` and `met` from the Expectation table. */
 export interface ReportVerdict extends Verdict { unit?: string; ears?: string; partial?: boolean; expectation?: Expectation; met?: boolean }
 
-export interface GateOverride { sessionId: string; timestamp: string; count: number; brokenReqIds: string[] }
+/**
+ * A stop allowed on a red gate. 'unmetReqIds': every id that did not meet its expectation, plus 'compile', 'config', 'run'
+ * or 'expectations' for a gate that could not run. 'brokenReqIds': those among them whose verdict is not 'held' (a stale
+ * Expected_Break line is unmet, not broken). 'unmetReqIds' is always written; reports from before golem-gate-hardening lack it.
+ */
+export interface GateOverride { sessionId: string; timestamp: string; count: number; brokenReqIds: string[]; unmetReqIds?: string[] }
 
 export interface ReportFile {
   schema: 1;

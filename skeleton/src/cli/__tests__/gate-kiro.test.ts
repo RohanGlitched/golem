@@ -38,7 +38,7 @@ describe('golem gate --kiro', () => {
     expect(sixth.stderr).toContain('1.2: WHEN the base is pushed');
     expect(state(h)['s1']?.count).toBe(0);
     const rep = h.report();
-    expect(rep.gateOverrides).toEqual([{ sessionId: 's1', timestamp: expect.any(String), count: 5, brokenReqIds: ['1.2'] }]);
+    expect(rep.gateOverrides).toEqual([{ sessionId: 's1', timestamp: expect.any(String), count: 5, brokenReqIds: ['1.2'], unmetReqIds: ['1.2'] }]);
     const seventh = await stop(h, 's1');
     expect(JSON.parse(seventh.stdout).decision).toBe('block');
     expect(h.report().gateOverrides).toHaveLength(1);
