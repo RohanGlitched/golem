@@ -58,7 +58,10 @@ describe('Property 32: pool results in input order, for every pool kind', () => 
             res.forEach((r, j) => expect(r.spec).toBe(specs[j]));
             expect(res.map(view)).toEqual(ref.results[i]!.map(view));
             // onResult: once per spec, only on the submitting call.
-            expect([...got.calls[i]!].sort((a, b) => a.seed - b.seed)).toEqual([...specs].sort((a, b) => a.seed - b.seed));
+            // Compare by identity in the input list: two specs may share a seed (and differ only in `record`), so a
+            // sort by seed alone leaves ties in arrival order, which legitimately differs between pools.
+            const at = (s: (typeof specs)[number]): number => specs.indexOf(s);
+            expect([...got.calls[i]!].map(at).sort((a, b) => a - b)).toEqual(specs.map((_, k) => k));
             expect(got.calls[i]!.every((s) => specs.includes(s))).toBe(true);
           });
           await pool.close();
