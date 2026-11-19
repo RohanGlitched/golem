@@ -74,14 +74,14 @@ Rules that apply to every task:
     - **Property 16: Invalid paths change nothing**
     - **Validates: Requirements 2.6, 2.7, 2.10**
 
-- [ ] 6. Model cache
-  - [~] 6.1 Implement `model-cache.ts` (`ModelCache`)
+- [x] 6. Model cache
+  - [x] 6.1 Implement `model-cache.ts` (`ModelCache`)
     - A per-instance `Map<string, Promise>` with a `generation` counter. `getModel` stores the in-flight promise synchronously, deletes a failed entry, wraps errors with the app id, and deletes any partial model handle once. `dispose` deletes every settled model once, and a compile that finishes after `dispose` deletes itself and rejects.
     - Example tests (fake `Mj`): `files()` called once, a hit skips `files()`, FS and compile, concurrent requests share one compile, a failure leaves no entry and other ids unchanged, a retry after failure, and `dispose` then a new request compiles again.
     - Example test: the message includes the app id and the compiler message.
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9_
 
-  - [~] 6.2 Write property test for the model cache
+  - [x] 6.2 Write property test for the model cache
     - **Property 17: Model cache compiles once and recovers**
     - **Validates: Requirements 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9**
 
