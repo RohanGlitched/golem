@@ -406,8 +406,8 @@ Conventions for every task:
     - **Property 22: Pose frame validation**
     - **Validates: Requirements 10.12, 10.13, 29.5, 29.6**
 
-- [ ] 12. Aura rendering
-  - [ ] 12.1 Implement `aura/aura-view.ts`
+- [x] 12. Aura rendering
+  - [x] 12.1 Implement `aura/aura-view.ts`
     - The 36×1 `Uint8` `DataTexture` (linear filter, repeat wrap on U), the decal quad with `AURA_VERT` and `AURA_FRAG` (`--hold` fill and ring, dashed edge for held-only bins, discard for unknown bins), the instanced tick mesh with `TICK_VERT` (capacity 512, unused instance off the decal), texture rewrite and `scheduler.requestOnce()` per trial batch, theme uniforms, re-centre on Reset, no glow and no shadow, `dispose`.
     - Example tests: texture wrap, filter and size, one `requestOnce` per batch, a bin with a break writes `G = 255`.
     - _Requirements: 14.1, 14.2, 14.3, 14.4, 14.5, 14.6, 14.11_
