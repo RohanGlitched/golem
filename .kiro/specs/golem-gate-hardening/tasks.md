@@ -79,7 +79,7 @@ Rules for every task:
   - [x] 11.1 Property test (T.3.2): adding `Expected_Hold` rows for every id changes neither the exit code nor the verdict list.
   - _Bugfix: 11.1, 11.3, 11.4, T.1, T.4_
 
-- [ ] 12. Spec text, kit steering, reinstall the pack (defects 3 and 5)
+- [x] 12. Spec text, kit steering, reinstall the pack (defects 3 and 5)
   - golem-kit: Requirement 7A, corrected 7.3, 7.4, 7.6, 8.2, 8.20, 8.21 and glossary, design section. stagger-app 17.8. `golem-ears.md`: Expectation table section, "never change a mark to turn the gate green", "a Break mark needs a pinned seed", the gate sentence.
   - `npm run pack:build`, `kiro-cli agent validate --path` on every agent, `golem init --force` into `apps/stagger` and `apps/candy`.
   - _Bugfix: 1.8, 3.3, 5.5, 5.6, 8.4_

@@ -171,8 +171,10 @@ flowchart TD
     A -->|yes| B[read stdin payload, 1 s cap, session_id or 'default']
     B --> C[load .golem/gate-state.json, prune entries older than 7 days]
     C --> CE{compile error?}
-    CE -->|yes| CR[red gate, no trial, reason lists the Diagnostics]
-    CE -->|no| D[run gate: pinned seeds, then Quick_Budget]
+    CE -->|yes| CR[red gate, no trial, reason lists the Diagnostics or the table errors]
+    CE -->|no| TE{table error?}
+    TE -->|yes| CR
+    TE -->|no| D[run gate: pinned seeds, then Quick_Budget, then a 4x retry of each held Expected_Break line]
     D --> F{green?}
     CR --> H
     F -->|yes| G[gateCounter green: delete key]
@@ -186,7 +188,7 @@ flowchart TD
     J -->|red, allowStop true| L[stdout empty, stderr RED message, exit 0]
 ```
 
-Under `--kiro`, all messages other than the block JSON go to stderr (8.4). The state file is written before anything is printed on stdout (8.16). A write failure prints a warning and the counter's decision still applies (8.19). Only a usage or Config_File error exits 1 with 0 bytes on stdout, and it does so before the state is read (8.9, 8.22). A compile error is not a start error under `--kiro`: it is a Red_Gate that the counter counts, so the agent cannot stop with a broken spec. Without `--kiro`, a compile error exits 1 (7.11). A Gate_Override is appended only for an allow at count 5 (8.21). A deduped allow at count 0 appends none, because the earlier call already logged it.
+Under `--kiro`, all messages other than the block JSON go to stderr (8.4). The state file is written before anything is printed on stdout (8.16). A write failure prints a warning and the counter's decision still applies (8.19). Only a usage or Config_File error exits 1 with 0 bytes on stdout, and it does so before the state is read (8.9, 8.22). A compile error is not a start error under `--kiro`: it is a Red_Gate that the counter counts, so the agent cannot stop with a broken spec. A Table_Error (7A.4) is handled the same way: no trial runs, `gate` exits 1, `--kiro` blocks with a reason that names the rows. Without `--kiro`, a compile error exits 1 (7.11). A Gate_Override is appended only for an allow at count 5 (8.21). A deduped allow at count 0 appends none, because the earlier call already logged it.
 
 ### Why the guard is agent-scoped
 
@@ -447,7 +449,7 @@ interface RunOptions {
   req?: string;                                  // restrict to one requirement id
   budget?: number; timeS?: number; workers?: number; searchSeed?: number;
   mode: 'full' | 'random-only';
-  budgetKind: 'test' | 'gate' | 'mcp-run' | 'mcp-falsify';   // selects defaults and the A1 pinned-seed arithmetic
+  budgetKind: 'test' | 'gate' | 'gate-retry' | 'mcp-run' | 'mcp-falsify';   // selects defaults and the A1 pinned-seed arithmetic; gate-retry is 4x the gate budget
   signal?: AbortSignal;
   onProgress?: (e: ProgressEvent) => void;
 }
@@ -456,7 +458,7 @@ interface RequirementOutcome {
   verdict: Verdict; meta: RunMetadata; unit: string | undefined;          // A5
   pinned?: 'added' | 'duplicate';
 }
-interface CompileOutcome { requirements: CompiledRequirement[]; diagnostics: FileDiagnostic[] }
+interface CompileOutcome { requirements: CompiledRequirement[]; diagnostics: FileDiagnostic[]; files: string[]; texts: Record<string, string> }   // texts: the one read of each file
 interface FileDiagnostic extends Diagnostic { file: string }
 
 declare function compileAll(app: LocatedApp, robotApp: RobotApp, deps: KitDeps, onlyFile?: string): Promise<CompileOutcome>;
@@ -469,6 +471,10 @@ declare function withPool<T>(deps: KitDeps, app: LocatedApp, robotApp: RobotApp,
 Defaults in `toFalsifyOptions`: `test` and CLI `falsify` use `maxTrials 64` when neither `--budget` nor `--time` is given (4.6); `gate` uses `24 + pinnedValid` (A1, 7.2); with `--budget` or `--time` the gate applies the flag as `test` does (7.2); both flags end the search at whichever limit is reached first (4.7). `maxWallMs = timeS * 1000`. `searchSeed` is the flag, else `config.searchSeed`, else 1. `mode` is `full` except for MCP `run_requirement`. The call to `falsify` always passes `seedDb` as a read-only reader, so the falsifier never writes. After a `broken` result, `pinCounterexample(db, appId, outcome.pinEntry)` runs before the command returns (4.14, 5.8).
 
 `withPool` creates the pool with `deps.createPool` and closes it in `finally`, on success, throw or abort (4.16, 5.9, 7.10). The pool size is `--workers`, or the Node_Pool default when absent (4.5).
+
+### Expectation table (`expectation.ts`)
+
+`parseExpectations(text, file?)` is a line scanner (fenced code and 4-space code skipped, quote markers stripped, cells split on unescaped pipes) that returns rows with their file and line, `byId`, the issues found while reading a row and the number of tables. `mergeExpectations` resolves the rows of all files together (`resolveRows`: equal marks warn, different marks are an error and `Expected_Hold`). `reconcileExpectations(parsed, criteria)` adds orphan rows (errors, with `nearestId`) and unmarked lines (warnings). `readExpectations(texts, files)` is the only entry point of the gate and `check`; it reads the texts that `compileAll` returned, so verdicts and marks describe the same version of the file. `markChanges` compares with `KitDeps.readCommitted`. The decision (`meetsExpectation`, `judgeOutcomes`) is unchanged. Details and reasons: `.kiro/specs/golem-gate-hardening/design.md`; the requirement is 7A.
 
 ### Output formatting (`format.ts`)
 

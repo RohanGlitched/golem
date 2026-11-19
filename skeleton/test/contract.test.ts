@@ -49,7 +49,7 @@ describe('contract untouched', () => {
     expect(sib).toMatch(/signalUnits\?: Record<string, string>/);
     expect(sib).toMatch(/trace\?: Trace/);
     const types = readFileSync(join(SKELETON_DIR, 'src', 'cli', 'types.ts'), 'utf8');
-    expect(types).toMatch(/interface ReportVerdict extends Verdict \{ unit\?: string; ears\?: string; partial\?: boolean \}/);
+    expect(types).toMatch(/interface ReportVerdict extends Verdict \{ unit\?: string; ears\?: string; partial\?: boolean; expectation\?: Expectation; met\?: boolean \}/);
   });
 
   it('keeps the kit types assignable from the contract: a plain CompiledRequirement and RobotApp need no new field', async () => {
