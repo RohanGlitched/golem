@@ -6,7 +6,7 @@ The X2 model needed no changes. Its four `motor` actuators already act along the
 
 ## Measured result
 
-Measured with the real CLI (`npx --no-install golem-spec test --budget 64`), with six search seeds (1 to 6) and one run at budget 256. The raw output of three runs (seeds 2, 3 and 1), plus check, alsify and gate, is in `docs/cli-transcript.md`. A margin is the distance from failure in the line's own unit: positive means the line held. A held line means no counterexample was found within 64 trials, not a proof.
+Measured with the real CLI (`npx --no-install golem-spec test --budget 64`), with six search seeds (1 to 6) and one run at budget 256. The raw output of three runs (seeds 2, 3 and 1), plus check, falsify and gate, is in `docs/cli-transcript.md`. A margin is the distance from failure in the line's own unit: positive means the line held. A held line means no counterexample was found within 64 trials, not a proof.
 
 | Line | Expectation | Verdict at budget 64 | Measured margin (search seeds 1 to 6) | What the line says |
 |---|---|---|---|---|

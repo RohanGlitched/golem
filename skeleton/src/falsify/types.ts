@@ -105,7 +105,7 @@ export interface RunMetadata {
   boundarySensitive?: boolean;
   /**
    * Options that rerun this run trial for trial with a trial limit instead of a clock (same requirement,
-   * trial function, seed database and search seed). Pass them to alsify as they are.
+   * trial function, seed database and search seed). Pass them to falsify as they are.
    */
   replayOptions: ReplayOptions;
   verification?: { scenario: Scenario; seeds: number[]; robustness: (number | null)[]; errors: string[] };
