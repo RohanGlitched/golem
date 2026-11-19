@@ -85,13 +85,13 @@ Rules that apply to every task:
     - **Property 17: Model cache compiles once and recovers**
     - **Validates: Requirements 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9**
 
-- [ ] 7. Handle helpers
-  - [~] 7.1 Implement `helpers.ts` (`withDoubleBuffer`, `geomDistance`, `forEachContact`)
+- [x] 7. Handle helpers
+  - [x] 7.1 Implement `helpers.ts` (`withDoubleBuffer`, `geomDistance`, `forEachContact`)
     - Validate `n` before creating a buffer. Track and release through the registry in `finally`. `geomDistance` copies `fromto` into a new array. `forEachContact` visits `0..ncon-1` in ascending order and still deletes the vector when `ncon` is 0.
     - Example tests (fake `Mj`): an invalid `n` names the length and creates no buffer, delete-once on return and on throw, the same error rethrown, `fromto` copy valid after delete, and a buffer length of 6.
     - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7, 10.8, 10.9, 10.10, 10.11_
 
-  - [~] 7.2 Write property test for the helpers
+  - [x] 7.2 Write property test for the helpers
     - **Property 18: Helpers delete exactly once**
     - **Validates: Requirements 10.1, 10.2, 10.3, 10.4, 10.6, 10.7, 10.8, 10.9, 10.10, 10.11**
 
