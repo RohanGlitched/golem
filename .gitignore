@@ -9,3 +9,4 @@ playwright-reportskeleton/ui-demo/public/robot/
 
 # per-run report written by golem test/gate
 **/.golem/report.json
+**/.golem/gate-state.json
