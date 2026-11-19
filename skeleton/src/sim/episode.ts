@@ -61,6 +61,12 @@ function allFinite(a: ArrayLike<number>): boolean {
   return true;
 }
 
+/** mjDSBL_AUTORESET (65536 in MuJoCo 4.0.1). */
+function autoresetBit(mj: any): number {
+  const v = mj?.mjtDisableBit?.mjDSBL_AUTORESET?.value;
+  return typeof v === 'number' ? v : 65536;
+}
+
 // ------------------------------------------------------------------ runner
 
 export async function runTrial(
@@ -87,6 +93,8 @@ export async function runTrial(
   let cleanupError: unknown;
   let hasCleanupError = false;
   try {
+    // D1: MuJoCo's auto-reset would silently repair a blown-up state. The restore below undoes it.
+    model.opt.disableflags = model.opt.disableflags | autoresetBit(mj);
     const data = scope.track(new mj.MjData(model), 'MjData');
     const rng = mulberry32(spec.seed);
     ctx = buildContext(mj, model, data, app.names);
