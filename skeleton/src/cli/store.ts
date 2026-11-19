@@ -7,7 +7,7 @@ export type { GateOverride, GateState, ReportFile, ReportMeta, ReportVerdict };
 
 const errText = (e: unknown): string => (e instanceof Error ? e.message : String(e));
 
-/** A counter owned by the caller for temp file names; never `Math.random`. */
+/** A counter owned by the caller for temp file names; never a random value. */
 export function tmpCounter(prefix = ''): () => string {
   let n = 0;
   return () => `${prefix}${n++}`;

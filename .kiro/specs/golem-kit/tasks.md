@@ -567,64 +567,64 @@ This revision follows the current requirements and design:
     - Add `skeleton/test/pack.test.ts` that parses every shipped JSON file (hooks, `settings/mcp.json`, three agents, workflow) and checks each required field, and runs the real `golem init` on a memory project with the real pack, asserting every written file, including the guard and the steering file, is byte-identical to its pack file.
     - _Requirements: 9.1, 9.11, 9.15, 9.16, 16.5, 28.3, 28.7, 28.22_
 
-- [ ] 12. Power and Crew app
-  - [ ] 12.1 Write the Power files
+- [x] 12. Power and Crew app
+  - [x] 12.1 Write the Power files
     - Create `skeleton/power/plugin.json` (with `$schema`, `name`, `version`, `description`, `license` `Apache-2.0`, `keywords`, and no other field), `mcp.json` (with `$schema`, stdio server, `npx golem-spec mcp`), `POWER.md` (front matter and an overview that names all eight tools) and `LICENSE` (copy of the repository root text).
     - Test: JSON fields present, the overview names every tool, `LICENSE` equals the root file.
     - _Requirements: 25.1, 25.2, 25.4, 25.8_
 
-  - [ ] 12.2 Implement the plugin manifest validator and URL scanner
+  - [x] 12.2 Implement the plugin manifest validator and URL scanner
     - Create `skeleton/scripts/pack-checks/power.ts` with `checkPluginManifest` (closed Agent Plugins 1.0 schema: permitted top-level fields `$schema`, `name`, `version`, `description`, `author`, `homepage`, `repository`, `license`, `keywords`, `extensions`; `MAJOR.MINOR.PATCH` version; non-empty name and description; licence `Apache-2.0`) and `scanUrls` (only the `$schema` value of `plugin.json` and of `mcp.json` may hold a URL; any other URL, http(s) command or endpoint and any IP address is reported).
     - Test with examples: each violation reported once, the valid manifest passes.
     - _Requirements: 25.1, 25.6, 28.7, 28.25_
 
-  - [ ] 12.3 Write property test for the URL scan
+  - [x] 12.3 Write property test for the URL scan
     - **Property 48: URL scan allows only the $schema keys**
     - Generate Power file sets with URLs, IP addresses and http(s) commands placed in any field, plus `$schema` values; assert `scanUrls` reports exactly the occurrences outside the two allowed `$schema` keys, and the shipped Power gives no findings.
     - fast-check, at least 100 runs, file `skeleton/test/prop-48-url-scan.test.ts`.
     - **Validates: Requirements 25.6, 28.25**
 
-  - [ ] 12.4 Write property test for the plugin manifest schema
+  - [x] 12.4 Write property test for the plugin manifest schema
     - **Property 49: Plugin manifest closed schema**
     - Generate manifests with permitted and unpermitted top-level fields, bad versions and missing required fields; assert `checkPluginManifest` accepts if and only if only permitted fields appear and the required ones are valid, and the shipped `plugin.json` is accepted.
     - fast-check, at least 100 runs, file `skeleton/test/prop-49-plugin-manifest.test.ts`.
     - **Validates: Requirements 25.1, 28.7**
 
-  - [ ] 12.5 Write the Crew app definition
+  - [x] 12.5 Write the Crew app definition
     - Create `skeleton/crew-app/app.json` with `agents`, `skills`, `mcpServers` and `schedule` (cron fixing minute and hour, IANA time zone), `permissions` with `network` false, and `assets/icon.png`. The agent and skill copies come from the sync script (12.6).
     - Test: field presence, cron has five fields with fixed minute and hour, no secret or network address, `agents` names the three agents and `skills` names `robot-ears` and `falsify-and-fix`.
     - _Requirements: 26.1, 26.2, 26.3, 26.4, 26.5, 26.8, 28.7_
 
-  - [ ] 12.6 Implement the Power and Crew sync script
+  - [x] 12.6 Implement the Power and Crew sync script
     - Create `skeleton/scripts/sync-power.ts`: copy skills and the steering file from `kiro-pack/` into `power/`, copy the finalized agents and skills into `crew-app/`, and a `--check` mode that exits 1 and lists each path that differs by one byte.
     - Test: a generated one-byte difference is reported by path; a clean tree exits 0; the Crew app holds no file beyond `app.json` and the files it references.
     - _Requirements: 25.3, 25.4, 25.7, 26.2, 26.7_
 
-  - [ ] 12.7 Write property test for skill parity
+  - [x] 12.7 Write property test for skill parity
     - **Property 47: Skill parity between pack and Power**
     - Over generated skill trees, assert both trees have equal path sets and equal bytes, and `sync-power.ts --check` exits 1 listing each generated one-byte difference.
     - fast-check, at least 100 runs, file `skeleton/test/prop-47-skill-parity.test.ts`.
     - **Validates: Requirements 25.3, 25.7, 28.9**
 
-  - [ ] 12.8 Add Power and Crew structural tests
+  - [x] 12.8 Add Power and Crew structural tests
     - Add `skeleton/test/power.test.ts`: `plugin.json` passes the validator, `skills/` and `mcp.json` exist, the Power holds the steering file and both skills, no script file extension and no executable bit, and an install test of `kiro-cli powers install ./skeleton/power` that runs only when `kiro-cli` exists.
     - Add `skeleton/test/crew.test.ts`: the Crew copies equal the pack agents and skills, the nightly prompt writes only through `propose_requirement`, the failure summary states the failure and proposals written.
     - _Requirements: 25.1, 25.5, 25.6, 26.6, 26.9, 28.7, 28.25_
 
-- [ ] 13. Cross-cutting checks
-  - [ ] 13.1 Add source and package scans
+- [x] 13. Cross-cutting checks
+  - [x] 13.1 Add source and package scans
     - Add `skeleton/test/scans.test.ts`: no `Math.random` in `skeleton/src/cli` and `skeleton/src/mcp`, `dependencies` list only `@modelcontextprotocol/sdk` and `@mujoco/mujoco`, `license` equals `Apache-2.0`, no `skeleton/src` import specifier in any file under `kiro-pack` or `power`, no file in `src/mcp` writes outside `proposals.ts` and `store.ts`.
     - _Requirements: 27.1, 27.4, 27.5, 27.8, 14.4_
 
-  - [ ] 13.2 Add the contract-untouched check
+  - [x] 13.2 Add the contract-untouched check
     - Add a test that parses the `interfaces.md` type blocks and asserts the kit's exported types add only optional fields and rename or remove none (`margins`, `predicates`, `signalUnits`, `trace`, report `unit`).
     - _Requirements: 27.7_
 
-  - [ ] 13.3 Add the no-network test
+  - [x] 13.3 Add the no-network test
     - Add a test that stubs `fetch`, `node:net` and `node:http` to throw, then runs every command and every MCP tool on the Tiny_Test_App and asserts all pass.
     - _Requirements: 27.3, 15.7, 15.8_
 
-  - [ ] 13.4 Record the Kiro format decisions and follow-ups, and pin each shape
+  - [x] 13.4 Record the Kiro format decisions and follow-ups, and pin each shape
     - Create `skeleton/kiro-pack/README.md` (excluded from the manifest) with the design's "Verified Kiro formats" table, the resolved decisions X1 to X7, OQ1 to OQ5, the assumptions W1, C1 and K1, and the two follow-ups that stay open: OQ6 (24.6 depends on the gate step obeying its prompt, because the repeat stop condition reads only the report, and the workflow step shape W1 is unverified) and OQ7 (until `golem-sim` exposes the trace, `golem replay` fails with a named cause).
     - Add `skeleton/test/kiro-formats.test.ts` with one structural test per item: X1 object-form `action` with `type` `command`; X2 regex matchers on sample paths; X3 closed `plugin.json` schema with `$schema`; X4 only the two `$schema` URLs; X5 pre-approved write set and the finalized Deny_Rule; X6 `gate --kiro` block JSON with exit 0 and `gate` without `--kiro` exit 2; X7 the exact command names `kiro-cli agent upgrade <dir>` and `kiro-cli agent validate --path <file>`; plus the `Manual` trigger, the workflow fields and the Crew `schedule` shape.
     - Do not change the design. A drifted shape must fail loudly.
