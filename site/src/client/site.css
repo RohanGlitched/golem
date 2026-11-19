@@ -198,3 +198,11 @@ dl.defs dd{margin:2px 0 0;color:var(--ink)}
 .poster:hover .poster-cta,.poster:focus-visible .poster-cta{background:var(--ground)}
 @media (max-width:1023px){.poster{background-image:url(/poster-dark-narrow.jpg)}[data-theme='light'] .poster{background-image:url(/poster-light-narrow.jpg)}}
 .hero-studio.is-loading .poster{display:none}
+/* Plain explanation above the studio: what GOLEM is and three steps to try it. */
+.page>.hero-what{margin:0 var(--pad) 12px;max-width:72ch}
+.page>.try-steps{margin:0 var(--pad) 24px;padding-left:1.4em;max-width:72ch;color:var(--ink-2)}
+.page>.try-steps li{margin:4px 0}
+.page>.try-steps b{color:var(--ink)}
+/* The npm package card: the one artefact a Kiro user installs. */
+.npm-card{background:var(--ground-2);border:1px solid var(--rule);border-radius:2px;padding:20px 24px;margin:40px 0}
+.npm-card h2{margin-top:0}

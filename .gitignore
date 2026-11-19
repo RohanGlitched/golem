@@ -6,4 +6,3 @@ coverage
 .DS_Store
 test-results
 playwright-reportskeleton/ui-demo/public/robot/
-.claude/

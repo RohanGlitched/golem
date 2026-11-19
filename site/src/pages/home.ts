@@ -67,8 +67,24 @@ export function homePage(d: SiteData): PageSpec {
   const gate = gateSummary(d);
   const budget = d.graded.meta.budget;
   const body = `
-<h1 class="hero-line flush">Shove the robot. Then summon the ghosts.</h1>
+<h1 class="hero-line flush">GOLEM turns a robot's written requirements into physics tests.</h1>
+<p class="lede flush hero-what">Kiro writes acceptance criteria as plain sentences (EARS). <b>GOLEM</b>, an open-source npm package called <a href="https://www.npmjs.com/package/golem-spec"><code>golem-spec</code></a>, compiles each sentence into a MuJoCo simulation test, hunts for the push or delay that breaks it, and stops Kiro's agent from calling the work done while any sentence is false.</p>
+<ol class="flush try-steps" aria-label="Try it in three steps">
+<li><b>Wake the golem</b> below and drag the Unitree G1 humanoid to shove it.</li>
+<li><b>Summon 64 ghosts</b> on a requirement: 64 simulated copies of the robot are pushed at once. Ghosts that fall turn red.</li>
+<li><b>Read the verdict</b>: the requirement either holds, with its safety margin in metres, or breaks with the smallest push that topples the robot, which you can replay.</li>
+</ol>
 <div class="flush hero-studio" id="studio" data-studio="stagger" data-when="idle" data-status="Waking the golem…"><button class="poster" type="button" data-wake aria-label="Wake the G1 studio. This loads the physics simulation."><span class="poster-cta">Wake the golem</span></button><noscript><p class="hero-fallback">The live studio needs JavaScript. The measured results below do not.</p></noscript></div>
+
+<section class="npm-card" aria-labelledby="npm-h">
+<h2 id="npm-h">One npm package runs everything on this site</h2>
+<p>Both robots here run on <a href="https://www.npmjs.com/package/golem-spec"><code>golem-spec</code></a>, the same package any Kiro project can install. It ships the EARS compiler, the MuJoCo test runner, the falsifier, the <code>golem</code> CLI, an MCP server, and a Kiro pack of hooks, agents, skills and steering.</p>
+${codeBlock(`npm i -D golem-spec     # the package
+npx golem init          # installs the Kiro hooks, agents, MCP server and skills into .kiro/
+npx golem test          # falsify every EARS requirement in .kiro/specs
+npx golem gate          # exit 0 only if every requirement holds`, 'install the npm package')}
+<p class="small muted"><a href="https://www.npmjs.com/package/golem-spec">golem-spec on npm</a> · <a href="${REPO_URL}">source on GitHub</a> · Apache-2.0</p>
+</section>
 
 <h2 id="problem">Agents ship demos, not evidence</h2>
 <p class="lede">An AI coding agent can write a walking controller in an afternoon. What it hands back is a video of the robot walking.</p>
@@ -125,6 +141,6 @@ golem gate                    # exit 0 only if every line holds`, 'the kit comma
     title: 'GOLEM: EARS requirements that run as physics tests',
     description: 'GOLEM turns the EARS acceptance criteria of a Kiro spec into MuJoCo property tests, searches for counterexamples and gates the AI agent until every requirement holds.',
     body, modules: ['/src/studio/load.ts'],
-    head: '<link rel="preload" as="image" href="/poster-dark-narrow.jpg" media="(max-width:1023px)" fetchpriority="high">\n<link rel="preload" as="image" href="/poster-dark-wide.jpg" media="(min-width:1024px)" fetchpriority="high">',
+    head: `<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"GOLEM","alternateName":"golem-spec","applicationCategory":"DeveloperApplication","operatingSystem":"Web browser, Node.js 20+","description":"An npm package (golem-spec) that compiles the EARS acceptance criteria of a Kiro spec into MuJoCo physics property tests, searches for the scenario that breaks each requirement, shrinks it to the mildest failure, and gates Kiro's AI agent with a Stop hook until every requirement holds. Demonstrated on a Unitree G1 humanoid and a Franka Panda arm.","license":"https://www.apache.org/licenses/LICENSE-2.0","codeRepository":"${REPO_URL}","downloadUrl":"https://www.npmjs.com/package/golem-spec","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>\n` + '<link rel="preload" as="image" href="/poster-dark-narrow.jpg" media="(max-width:1023px)" fetchpriority="high">\n<link rel="preload" as="image" href="/poster-dark-wide.jpg" media="(min-width:1024px)" fetchpriority="high">',
   };
 }

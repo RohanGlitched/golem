@@ -1,8 +1,32 @@
 {
   "name": "golem-spec",
   "version": "0.1.0",
-  "description": "Turn EARS acceptance criteria into physics property tests.",
+  "description": "Turn the EARS acceptance criteria of a Kiro spec into MuJoCo physics property tests: falsify, shrink, pin seeds, and gate the AI agent until every requirement holds.",
+  "keywords": [
+    "kiro",
+    "ears",
+    "requirements",
+    "property-based-testing",
+    "falsification",
+    "mujoco",
+    "robotics",
+    "humanoid",
+    "mcp",
+    "signal-temporal-logic",
+    "simulation",
+    "testing"
+  ],
+  "homepage": "https://d23v187fnxad7l.cloudfront.net/kit/",
+  "bugs": {
+    "url": "https://github.com/RohanGlitched/golem/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RohanGlitched/golem.git",
+    "directory": "skeleton"
+  },
   "license": "Apache-2.0",
+  "author": "Rohan Borade",
   "type": "module",
   "bin": {
     "golem": "dist/cli/main.js"
@@ -14,11 +38,29 @@
     "crew-app"
   ],
   "exports": {
-    ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
-    "./ui": { "types": "./dist/ui/index.d.ts", "default": "./dist/ui/index.js" },
-    "./ui/worker": { "types": "./dist/ui/worker.d.ts", "default": "./dist/ui/worker.js" },
-    "./node": { "types": "./dist/node.d.ts", "default": "./dist/node.js" },
-    "./testing": { "types": "./dist/testing.d.ts", "default": "./dist/testing.js" }
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./ui": {
+      "types": "./dist/ui/index.d.ts",
+      "default": "./dist/ui/index.js"
+    },
+    "./ui/worker": {
+      "types": "./dist/ui/worker.d.ts",
+      "default": "./dist/ui/worker.js"
+    },
+    "./node": {
+      "types": "./dist/node.d.ts",
+      "default": "./dist/node.js"
+    },
+    "./testing": {
+      "types": "./dist/testing.d.ts",
+      "default": "./dist/testing.js"
+    }
+  },
+  "engines": {
+    "node": ">=20"
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
