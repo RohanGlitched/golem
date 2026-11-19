@@ -2,6 +2,7 @@
 // Pure: no clock, no randomness, no I/O.
 import type { Clause } from './ast.js';
 import { hasError, makeDiagnostic, sortDiagnostics, type Diagnostic } from './diagnostics.js';
+import { extractCriteria, type RawCriterion } from './extract.js';
 import { matchPerturbation, matchPredicate, type BoundClause } from './matcher.js';
 import { buildMonitor } from './monitor.js';
 import { parse } from './parser.js';
@@ -65,6 +66,66 @@ function duplicateDimensions(
     ));
   });
   return out;
+}
+
+export interface FileCompileResult {
+  /** File order. */
+  requirements: CompiledRequirement[];
+  /** Extractor and compiler diagnostics, in file coordinates, ascending by start. */
+  diagnostics: Diagnostic[];
+}
+
+/** Maps an offset inside a criterion's joined text to file coordinates. */
+function toFilePosition(
+  crit: RawCriterion, index: number,
+): { offset: number; line: number; column: number } {
+  const segs = crit.segments;
+  let seg = segs[0]!;
+  for (const s of segs) {
+    if (s.textIndex <= index) seg = s; else break;
+  }
+  // An index in the joining space (or past the end) clamps to the end of its segment.
+  const within = Math.min(Math.max(0, index - seg.textIndex), seg.length);
+  return { offset: seg.offset + within, line: seg.line, column: seg.column + within };
+}
+
+function remapDiagnostic(crit: RawCriterion, d: Diagnostic): Diagnostic {
+  const from = toFilePosition(crit, d.start);
+  let end = from.offset;
+  if (d.end > d.start) end = toFilePosition(crit, d.end - 1).offset + 1;
+  const out: Diagnostic = { ...d, start: from.offset, end: Math.max(from.offset, end), line: from.line, column: from.column };
+  return out;
+}
+
+/**
+ * Compiles every EARS criterion of a Kiro requirements.md. Each criterion is
+ * compiled on its own, so an invalid one never hides a valid one. Diagnostics
+ * are reported in file coordinates.
+ */
+export function compileRequirementsFile(
+  text: string, lexicon: Lexicon, options: CompileOptions = {},
+): FileCompileResult {
+  const ex = extractCriteria(text);
+  const requirements: CompiledRequirement[] = [];
+  const diagnostics: Diagnostic[] = [...ex.diagnostics];
+  const seenIds = new Set<string>();
+
+  for (const crit of ex.criteria) {
+    if (seenIds.has(crit.id)) {
+      diagnostics.push(makeDiagnostic(
+        'NON_EARS_LINE',
+        `Requirement ID ${crit.id} is used more than once; both criteria are kept.`,
+        { start: crit.offset, end: crit.offset + crit.text.length, line: crit.line, column: crit.column },
+        { severity: 'warning' },
+      ));
+    }
+    seenIds.add(crit.id);
+
+    const r = compileRequirement(crit.text, lexicon, { ...options, id: crit.id });
+    for (const d of r.diagnostics) diagnostics.push(remapDiagnostic(crit, d));
+    if (r.requirement) requirements.push(r.requirement);
+  }
+  return { requirements, diagnostics: sortDiagnostics(diagnostics) };
 }
 
 export function compileRequirement(

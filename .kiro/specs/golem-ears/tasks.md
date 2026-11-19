@@ -201,18 +201,18 @@ Conventions for every task:
     - **Property 30: Compiled requirements carry the line's identity and ordered unique dimensions**
     - **Validates: Requirements 12.1, 12.2, 12.3, 12.4, 12.5, 12.7**
 
-- [ ] 13. Formatter
+- [x] 13. Formatter
   - [x] 13.1 Implement `format.ts`
     - Print the five canonical shapes, with an optional ID followed by one space, a comma attached to the previous token, and quantity text as written. Throw an `Error` naming the field for a missing or unknown `pattern`. Never mutate the AST.
     - Write example tests: each shape, `0.20 s` stays `0.20 s`, `200 N` is never printed as `0.2 kN`, the invalid pattern throws.
     - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7, 10.11_
-  - [-] 13.2 Write property test for the parse and format round trip
+  - [x] 13.2 Write property test for the parse and format round trip
     - **Property 31: Parse and format round trip**
     - **Validates: Requirements 10.8, 13.3**
-  - [-] 13.3 Write property test for comma insensitivity
+  - [x] 13.3 Write property test for comma insensitivity
     - **Property 10: Optional commas do not change the AST or the canonical text**
     - **Validates: Requirements 3.6, 3.7, 10.9**
-  - [-] 13.4 Write property test for canonical layout and idempotence
+  - [x] 13.4 Write property test for canonical layout and idempotence
     - **Property 32: Canonical text layout and idempotence**
     - **Validates: Requirements 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7, 10.10**
 
@@ -226,27 +226,27 @@ Conventions for every task:
     - Add `arbRequirementsFile` in `__tests__/generators.file.ts`: headings, `.` or `)` numbering, continuation lines, bullets, non-EARS lines, `FOR ALL` lines, LF or CRLF, each file carrying its expected criteria list.
     - Write example tests that the generated expectation matches a hand-written file.
     - _Requirements: 13.2_
-  - [~] 14.3 Write property test for extraction
+  - [-] 14.3 Write property test for extraction
     - **Property 33: Extractor returns qualifying criteria with unique ordered IDs and exact positions**
     - **Validates: Requirements 11.1, 11.2, 11.4, 11.7, 11.13**
-  - [~] 14.4 Write property test for skipped lines
+  - [-] 14.4 Write property test for skipped lines
     - **Property 34: Extractor skips non-EARS and FOR ALL lines with a warning and ignores bullets**
     - **Validates: Requirements 11.5, 11.8, 11.11, 11.12**
-  - [~] 14.5 Write property test for layout insensitivity
+  - [-] 14.5 Write property test for layout insensitivity
     - **Property 35: Extractor is insensitive to line endings, number format and continuation layout**
     - **Validates: Requirements 11.8, 11.9, 11.10**
 
 - [ ] 15. File-level compilation
-  - [-] 15.1 Implement `compileRequirementsFile` in `compile.ts`
+  - [x] 15.1 Implement `compileRequirementsFile` in `compile.ts`
     - Extract, compile each criterion independently, and keep every valid requirement in file order. Map diagnostic offsets, lines and columns to file coordinates, using a per-criterion offset map for joined continuation lines. A repeated Requirement ID adds one warning at the second criterion and keeps both.
     - Write example tests: one invalid criterion among valid ones, a diagnostic position in file coordinates, a duplicate ID.
     - _Requirements: 8.14, 12.8, 12.9, 12.10_
-  - [~] 15.2 Write property test for file compilation
+  - [-] 15.2 Write property test for file compilation
     - **Property 36: File compilation isolates failures and reports in file coordinates**
     - **Validates: Requirements 12.8, 12.9, 12.10, 8.14**
 
 - [ ] 16. Public entry point
-  - [~] 16.1 Wire the exports
+  - [-] 16.1 Wire the exports
     - Create `skeleton/src/ears/index.ts` exporting `compileRequirement`, `compileRequirementsFile`, `extractCriteria`, `tokenize`, `parse`, `format`, `parseQuantity`, `toSI`, `fromSI`, `tokenEditDistance` and the public types.
     - Re-export them from `skeleton/src/index.ts` so apps import from `golem-spec`. Do not deep-import `skeleton/src/ears/...` anywhere outside the module.
     - _Requirements: 12.14_
