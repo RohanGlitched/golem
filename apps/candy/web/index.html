@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GOLEM studio: candy sorter</title>
+    <meta name="description" content="A Franka Panda with a suction cup sorts Halloween candy while trick-or-treaters' hands reach in. Its requirements are tested in MuJoCo, in your browser." />
+    <style>
+      html, body { margin: 0; padding: 0; background: #2A211C; color: #EDE6DC; }
+      body { font: 16px/1.55 'B612', system-ui, sans-serif; }
+      .candy-intro { max-width: 72ch; padding: 20px 24px 8px; }
+      .candy-intro h1 { font: 700 25px/1.25 'Gloock', Georgia, serif; margin: 0 0 8px; }
+      .candy-intro p { margin: 0 0 8px; color: #B8AC9E; }
+      .candy-intro b { color: #EDE6DC; font-weight: 700; }
+      .candy-notes { max-width: 72ch; padding: 8px 24px 32px; color: #B8AC9E; }
+      .candy-notes h2 { font: 700 20px/1.3 'B612', system-ui, sans-serif; color: #EDE6DC; margin: 16px 0 4px; }
+      .candy-notes p { margin: 0 0 8px; }
+      noscript { display: block; padding: 24px; }
+    </style>
+  </head>
+  <body>
+    <header class="candy-intro">
+      <h1>Candy sorter</h1>
+      <p>A Franka Panda with a suction cup sorts six pieces of Halloween candy into three bowls by colour on a doorstep table. Trick-or-treaters stand on the doorstep side, beyond the table edge that faces away from the robot, and reach in toward the bowls.</p>
+      <p><b>Drag the hand</b> with the pointer to reach in yourself. It keeps a height of 0.05 m to 0.25 m above the table and stays out of the robot's base column. Watch the arm slow down as the hand comes closer.</p>
+    </header>
+    <div id="app"></div>
+    <section class="candy-notes" aria-label="About this studio">
+      <h2>How the arm keeps clear</h2>
+      <p>Speed-and-separation monitoring, version 1 (SSM_v1), scales the arm's speed down as the hand comes nearer to the suction cup tip, and stops it close in. It measures the distance to the tip only and watches no other link. Lines 1.1 and 8.1 ask that every link stays at least 0.10 m from the hand, so they are expected to break, and a broken line is a valid result.</p>
+      <h2>What "from any direction" means here</h2>
+      <p>Nobody stands behind the robot. In this app "from any direction" means the doorstep half: an arc of 120° on the far side of the table, from -60° to +60° about straight out from the base. The hand enters on the doorstep edge, reaches toward the nearest bowl at 0.05 m to 0.25 m above the table, and never passes the base column. A "held" result means no counterexample was found within the search budget, not a proof.</p>
+    </section>
+    <noscript>The studio needs JavaScript and WebGL. The requirements are in apps/candy/.kiro/specs/candy-sorter/requirements.md.</noscript>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

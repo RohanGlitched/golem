@@ -5,10 +5,12 @@
     "types": ["node"],
     "allowJs": true,
     "checkJs": false,
+    "jsx": "react-jsx",
     "paths": {
       "golem-spec": ["../../skeleton/src/index.ts"],
       "golem-spec/node": ["../../skeleton/src/node.ts"],
-      "golem-spec/ui": ["../../skeleton/src/ui/index.ts"]
+      "golem-spec/ui": ["../../skeleton/src/ui/index.ts"],
+      "golem-spec/ui/worker": ["../../skeleton/src/ui/worker.ts"]
     }
   },
   "include": ["controller", "web", "scripts", "test", "*.ts"]

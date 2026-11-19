@@ -138,3 +138,10 @@ export const NUSERDATA = 24;
 export const UD = {
   vacuum: 0, lag: 1, count: 2, switch: 3, target: 4, warnCount: 5, warnValue: 6, colour: 8,
 } as const;
+
+// ---------------------------------------------------------------- studio hand
+
+/** Radius (m) of the base column around the base axis that a dragged Hand keeps out of: the Panda base plus the palm radius and a margin. */
+export const BASE_KEEP_OUT = 0.22;
+/** Where the studio lets the pointer carry the Hand (m): beside and beyond the Table, never far from it and never behind the base (xMin 0 also keeps the push out of the base column inside the area). */
+export const HAND_DRAG_AREA = { xMin: 0, xMax: 1.45, yMin: -1.20, yMax: 1.20 } as const;

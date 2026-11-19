@@ -1,6 +1,6 @@
 // Pure geometry helpers shared by the controller, the signals and the lexicon: no MuJoCo, no clock, no random draw.
 import {
-  BOWL, BOWLS, CANDY_COUNT, D_OV, DOORSTEP, DROPPED_Z, HAND_START, OVERLAP_STEP, RESTING_SPEED, TABLE, TRAY, WORKSPACE,
+  BASE_KEEP_OUT, BOWL, BOWLS, CANDY_COUNT, D_OV, DOORSTEP, DROPPED_Z, HAND_DRAG_AREA, HAND_HEIGHT_RANGE, HAND_START, OVERLAP_STEP, RESTING_SPEED, TABLE, TRAY, WORKSPACE,
 } from './constants';
 
 // ---------------------------------------------------------------- candy classification
@@ -128,6 +128,26 @@ export function handPose(out: Float64Array, t: number, tTrigger: number, v: Hand
   const travelled = Math.min(v.speed * tau, len);
   const k = len > 0 ? travelled / len : 0;
   out[0] = ex + dx * k; out[1] = ey + dy * k; out[2] = v.height; out[3] = Math.atan2(-dy, -dx);
+}
+// ---------------------------------------------------------------- hand in the studio
+
+/**
+ * Where the studio lets the pointer carry the Hand: `p` (x, y, z in m) with z held in the 0.05 m to 0.25 m band that the
+ * trials use, x and y held in HAND_DRAG_AREA, and the Hand pushed out of the base column (a disc of BASE_KEEP_OUT about the
+ * base axis) along the radius. It never crosses the column, because the column is not in the area it may stand in.
+ * A non-finite coordinate counts as the Hand's start value.
+ */
+export function constrainDraggedHand(p: readonly [number, number, number]): [number, number, number] {
+  const fin = (v: number, d: number): number => (Number.isFinite(v) ? v : d);
+  const A = HAND_DRAG_AREA;
+  let x = Math.min(A.xMax, Math.max(A.xMin, fin(p[0], HAND_START.x)));
+  let y = Math.min(A.yMax, Math.max(A.yMin, fin(p[1], HAND_START.y)));
+  const z = Math.min(HAND_HEIGHT_RANGE.max, Math.max(HAND_HEIGHT_RANGE.min, fin(p[2], HAND_HEIGHT_RANGE.max)));
+  const r = Math.sqrt(x * x + y * y);
+  if (r < BASE_KEEP_OUT) {
+    if (r > 1e-9) { x *= BASE_KEEP_OUT / r; y *= BASE_KEEP_OUT / r; } else { x = BASE_KEEP_OUT; y = 0; }
+  }
+  return [x, y, z];
 }
 // ---------------------------------------------------------------- candy placement
 

@@ -13,7 +13,16 @@ The safety function is deliberately incomplete. Speed-and-separation monitoring 
 - `scripts/fetch-assets.mjs`: the asset pipeline
 - `test/`: Vitest and fast-check tests
 - `.kiro/specs/candy-sorter/requirements.md`: the app's own requirements
+- `web/`: the studio page (`index.html`, `main.ts`, `worker.ts`, `vite.config.ts`)
 - `.kiro/hooks/gate.json`: a `Stop` hook that runs `golem gate --kiro`
+
+## Studio
+
+The studio page is served with the `dev` script of this package (http://localhost:5188/) and built with the `build` script (typecheck, then `web/dist`, with the robot files copied to `web/dist/robot`).
+
+`web/main.ts` mounts GOLEM's studio on the Panda with the requirements file above. Trials run in Web Workers (`web/worker.ts`), or on the page with `?inline=1`. `?autorun=1` tests every line on load and `?trials=N` sets the budget (default 48). Drag the hand with the pointer: it keeps a height of 0.05 m to 0.25 m above the table and stays out of the base column (`constrainDraggedHand` in `geometry.ts`; the studio option is `dragBody`). The studio draws geom group 2 only, so every visual geom of `scene.xml` is in group 2.
+
+A production build inlines the pool's worker entry script as a data URL, so a built page falls back to running trials on the page thread. The dev server starts the workers.
 
 ## Regenerating the robot folder
 

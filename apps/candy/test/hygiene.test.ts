@@ -30,10 +30,10 @@ describe('imports', () => {
     const everything = [...source, ...files('test', ['.ts'], ['node_modules']).filter((p) => !/hygiene\.test|p37-hygiene|sourceScan/.test(p))];
     for (const p of everything) expect(deepImports(read(p)), rel(p)).toEqual([]);
   });
-  it('reaches the skeleton only through golem-spec, golem-spec/ui or golem-spec/node', () => {
+  it('reaches the skeleton only through golem-spec, golem-spec/ui, golem-spec/ui/worker or golem-spec/node', () => {
     for (const p of source) expect(badSkeletonImports(read(p)), rel(p)).toEqual([]);
     const used = new Set(source.flatMap((p) => importSpecifiers(read(p))).filter((s) => s.startsWith('golem-spec')));
-    expect([...used].every((s) => ['golem-spec', 'golem-spec/ui', 'golem-spec/node'].includes(s))).toBe(true);
+    expect([...used].every((s) => ['golem-spec', 'golem-spec/ui', 'golem-spec/ui/worker', 'golem-spec/node'].includes(s))).toBe(true);
     expect(used.has('golem-spec')).toBe(true);
   });
 });
