@@ -87,79 +87,79 @@ Test rules for every task (`testing.md`):
     - **Property 25: Budget validation and fractions**
     - **Validates: Requirements 8.1, 8.6, 8.7, 8.9, 4.11, 4.12**
 
-- [ ] 8. Cross-entropy search
-  - [~] 8.1 Implement `initCem`, `refitCem` and `sampleCem`
+- [x] 8. Cross-entropy search
+  - [x] 8.1 Implement `initCem`, `refitCem` and `sampleCem`
     - Elite selection by `(robustness, index)` total order, initial fit from Phase 1 (midpoint and 25% width fallback), exact refit (smoothing `alpha = 1` default), sigma floor, keep previous state when fewer than 2 elites, dimension-major sampling from `deriveSeed(searchSeed, 5, g)`, generation size and elite fraction validation.
     - Write example tests: zero Phase 1 trials, one elite, NaN trials excluded, fixed dimensions unchanged, invalid generation size or elite fraction.
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8, 5.12, 5.13, 5.15, 19.4_
-  - [~] 8.2 Write property test for elite selection
+  - [x] 8.2 Write property test for elite selection
     - **Property 6: Elite selection is a total order with lower-index tie-break**
     - **Validates: Requirements 5.1, 5.5, 19.4**
-  - [~] 8.3 Write property test for CEM fit
+  - [x] 8.3 Write property test for CEM fit
     - **Property 7: CEM fit clamps and keeps previous state**
     - **Validates: Requirements 5.1, 5.2, 5.8, 5.13**
-  - [~] 8.4 Write property test for CEM sampling ranges
+  - [x] 8.4 Write property test for CEM sampling ranges
     - **Property 2: Sampling ranges, wrap-aware** (CEM part: `sampleCem` for valid states, near-degenerate sigma and mean at the seam)
     - **Validates: Requirements 5.3, 5.4, 21.6**
 
-- [ ] 9. Shrinker
-  - [~] 9.1 Implement `shrink`
+- [x] 9. Shrinker
+  - [x] 9.1 Implement `shrink`
     - Severity coordinate for `up`, `down` and wrap dimensions, milder-end test first, then bisection, global trial limit, tolerance as a fraction of width, `null` from `runTrial` stops with the mildest failing scenario so far, errors and NaN count as not failing and are logged, `shrunk` flag, no-op when already at the milder end.
     - Write example tests: failure at the milder end accepts at once, non-monotone failing set, budget gone mid-shrink, errored candidate, wrap dimension never crossing the seam.
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.8, 6.9, 6.10, 6.11, 6.12, 6.13, 6.14, 6.15_
-  - [~] 9.2 Write property test that the shrunk scenario still fails
+  - [x] 9.2 Write property test that the shrunk scenario still fails
     - **Property 10: Shrinker output still fails**
     - **Validates: Requirements 6.2, 6.3, 6.4, 21.3**
-  - [~] 9.3 Write property test that severity never increases
+  - [x] 9.3 Write property test that severity never increases
     - **Property 11: Shrinker never increases severity**
     - **Validates: Requirements 6.1, 6.5, 6.10, 21.3**
-  - [~] 9.4 Write property test for untouched dimensions
+  - [x] 9.4 Write property test for untouched dimensions
     - **Property 12: Shrinker leaves none and fixed dimensions**
     - **Validates: Requirements 6.6, 21.4**
-  - [~] 9.5 Write property test for limits, flag and no-op
+  - [x] 9.5 Write property test for limits, flag and no-op
     - **Property 13: Shrinker limits, flag and no-op**
     - **Validates: Requirements 6.7, 6.8, 6.11, 6.12**
-  - [~] 9.6 Write property test for shrinker determinism
+  - [x] 9.6 Write property test for shrinker determinism
     - **Property 14: Shrinker determinism**
     - **Validates: Requirements 6.15**
 
-- [ ] 10. Counterexample classification
-  - [~] 10.1 Implement `verificationSeeds` and `classify`
+- [x] 10. Counterexample classification
+  - [x] 10.1 Implement `verificationSeeds` and `classify`
     - Three seeds from salt 3 candidates, skipping the original seed, mutually distinct. `classify` returns `robust`, `seed-sensitive` or `undefined` on any error.
     - Write example tests for all-negative, one non-negative, zero as boundary (not failing), a `null` outcome, and the original seed appearing as a candidate.
     - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 7.9_
-  - [~] 10.2 Write property test for the classification rule
+  - [x] 10.2 Write property test for the classification rule
     - **Property 15: Classification rule**
     - **Validates: Requirements 7.3, 7.4, 7.5**
 
-- [ ] 11. Seed database with injected file system
-  - [~] 11.1 Implement `FileSystem` and `memoryFileSystem`
+- [x] 11. Seed database with injected file system
+  - [x] 11.1 Implement `FileSystem` and `memoryFileSystem`
     - Map-backed implementation with a call log and a fault hook (fail the Nth call of a method), `ENOENT` on missing files, `remove` ignoring a missing file.
     - Write example tests for the call log, fault injection and missing-file behaviour.
     - _Requirements: 11.12, 20.9_
-  - [~] 11.2 Implement `SeedDatabase`, `pinCounterexample`, canonical JSON and id validation
+  - [x] 11.2 Implement `SeedDatabase`, `pinCounterexample`, canonical JSON and id validation
     - Id validation before any file-system call, read errors that name the path and the first invalid entry index or parse position, equality rule ignoring `robustness`, `shrunk` and `foundAfter`, append with dedupe, canonical JSON (sorted keys, 2 spaces, one trailing newline, non-finite numbers rejected), atomic temp-and-rename write with temp cleanup and path in errors.
     - Write example tests: missing file returns `[]` and creates nothing, invalid JSON, non-array, bad entry index, duplicate add leaves the file untouched, failure at `writeFile` and at `rename`.
     - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5, 11.7, 11.8, 11.9, 11.10, 11.11_
-  - [~] 11.3 Write property test for the seed database round trip
+  - [x] 11.3 Write property test for the seed database round trip
     - **Property 28: Seed database round trip**
     - **Validates: Requirements 11.1, 11.2, 11.6, 21.10**
-  - [~] 11.4 Write property test for dedupe and canonical form
+  - [x] 11.4 Write property test for dedupe and canonical form
     - **Property 29: Seed database dedupe and canonical form**
     - **Validates: Requirements 11.3, 11.4, 11.10, 21.11**
-  - [~] 11.5 Write property test for id validation
+  - [x] 11.5 Write property test for id validation
     - **Property 30: Seed database id validation**
     - **Validates: Requirements 11.11**
-  - [~] 11.6 Write property test for atomic writes
+  - [x] 11.6 Write property test for atomic writes
     - **Property 31: Atomic writes**
     - **Validates: Requirements 11.8, 11.9**
 
-- [ ] 12. Progress events and falsifier test helpers
-  - [~] 12.1 Implement progress event construction and safe callback invocation
+- [x] 12. Progress events and falsifier test helpers
+  - [x] 12.1 Implement progress event construction and safe callback invocation
     - Deep-frozen copies, callback errors and rejected promises swallowed, promises never awaited, `trialsRemaining` is `null` without `maxTrials`, no event after an observed abort.
     - Write example tests: a callback that throws, a rejecting async callback, mutation of the source after delivery, frozen event.
     - _Requirements: 9.1, 9.2, 9.3, 9.8, 9.9, 9.11, 17.6_
-  - [~] 12.2 Implement synthetic robustness functions and a direct test pool
+  - [x] 12.2 Implement synthetic robustness functions and a direct test pool
     - In `skeleton/src/falsify/testing.ts` (test-only export): a seeded family of pure `(scenario, seed) -> robustness` functions (half-spaces `signal - threshold`, boxes, unions of boxes for non-monotone cases, seed-dependent noise), a fast-check arbitrary for `ScenarioSpace` (1 to 6 dimensions mixing fixed, `up`, `down`, `none` and wrap), and `directPool(trialFn)`, a minimal in-memory `TrialPool` for falsifier tests with optional shuffled completion order.
     - Write example tests that the functions are pure, that `directPool` returns results in input order with `results[i].spec` equal to `specs[i]`, and that a stubbed `Math.random` that throws is never called.
     - _Requirements: 19.1, 20.6, 20.7, 21.1_
