@@ -46,9 +46,9 @@ describe('package scans', () => {
     expect(Object.keys(pkg['dependencies']).sort()).toEqual(['@modelcontextprotocol/sdk', '@mujoco/mujoco']);
   });
 
-  it('states Apache-2.0 and exposes the golem bin (requirements 27.5, 1.8)', () => {
+  it('states Apache-2.0 and exposes the golem bin and its golem-spec alias (requirements 27.5, 1.8)', () => {
     expect(pkg['license']).toBe('Apache-2.0');
-    expect(pkg['bin']).toEqual({ golem: 'dist/cli/main.js' });
+    expect(pkg['bin']).toEqual({ golem: 'dist/cli/main.js', 'golem-spec': 'dist/cli/main.js' });
   });
 
   it('has no skeleton/src import specifier in any file under kiro-pack, power or crew-app (requirement 27.8)', () => {
