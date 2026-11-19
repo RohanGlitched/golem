@@ -230,6 +230,18 @@ export function compileRequirement(
 
   const resp = matchPredicate(ast.response, lexicon);
   diagnostics.push(...resp.diagnostics);
+  if (stateBound && resp.wrapper?.kind === 'eventually') {
+    // G(ψ → F φ) has no agreed meaning for a robot requirement; ask for `for` or nothing.
+    const toks = ast.response.tokens;
+    let w = toks.length - 1;
+    while (w >= 0 && toks[w]!.text.toLowerCase() !== 'within') w--;
+    const at = toks[Math.max(0, w)]!;
+    diagnostics.push(makeDiagnostic(
+      'PATTERN_MISMATCH',
+      "A WHILE requirement is checked at every instant where its state holds, so its response takes 'for <duration>' or no time limit, not 'within'",
+      { start: at.start, end: at.end, line: at.line, column: at.column },
+    ));
+  }
 
   if (pattern !== 'event' && pattern !== 'unwanted') {
     // Template dims: the response template's, then the state template's.

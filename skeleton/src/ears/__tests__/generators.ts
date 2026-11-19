@@ -278,6 +278,11 @@ const arbTemporal: fc.Arbitrary<string> = fc.oneof(
   arbQuantity('duration').map((q) => ` for ${q.text}`),
   arbQuantity('duration').map((q) => ` within ${q.text}`),
 );
+/** A WHILE response takes `for` or no wrapper (golem-ears-hardening defect 5). */
+const arbStateTemporal: fc.Arbitrary<string> = fc.oneof(
+  fc.constant(''),
+  arbQuantity('duration').map((q) => ` for ${q.text}`),
+);
 
 /**
  * A valid line of any of the five patterns built from `lexicon`, with a random
@@ -313,7 +318,7 @@ export function arbValidLine(lexicon: Lexicon, pattern?: Pattern): fc.Arbitrary<
       fc.tuple(
         fc.constant(p),
         arbCondition(p),
-        fc.tuple(predicatePhrase, arbTemporal).chain(([ph, tmp]) =>
+        fc.tuple(predicatePhrase, p === 'state' ? arbStateTemporal : arbTemporal).chain(([ph, tmp]) =>
           arbFillPhrase(ph).map((c) => ({ ...c, text: c.text + tmp })),
         ),
         fc.constantFrom(...lexicon.robotNames),

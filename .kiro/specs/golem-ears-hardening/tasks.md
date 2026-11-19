@@ -34,7 +34,7 @@ Conventions: sources in `skeleton/src/ears/`, tests in `skeleton/src/ears/__test
 - [x] 11. `within T` as F then G (defect 4)
   - Update the reference monitor and the soundness property to the corrected semantics
   - _Bugfix: 4.1–4.7_
-- [ ] 12. WHILE `for T` (defect 5)
+- [x] 12. WHILE `for T` (defect 5)
   - _Bugfix: 5.1–5.4_
 - [ ] 13. Horizons and onset (defect 11)
   - _Bugfix: 11.1–11.7_

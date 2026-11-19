@@ -25,6 +25,8 @@ export function refMonitor(spec: MonitorSpec, trace: Trace): RefResult {
   const windowed = spec.pattern !== 'state' && spec.wrapper.duration !== undefined;
   const eventually = spec.wrapper.kind === 'eventually';
   if (eventually && spec.pattern !== 'state') return refWithin(spec, trace, a, needed);
+  const holdFor = state && spec.wrapper.kind === 'always' ? (spec.wrapper.duration ?? 0) : 0;
+  if (state && holdFor > 0) return refStateFor(spec, trace, needed, holdFor);
   const b = windowed ? a + (spec.wrapper.duration as number) : trace.t[trace.t.length - 1]!;
 
   const indices: number[] = [];
@@ -50,6 +52,42 @@ export function refMonitor(spec: MonitorSpec, trace: Trace): RefResult {
     if (m < best) {
       best = m;
       bestAt = ti;
+    }
+  }
+  return { robustness: best, worstAt: bestAt, unit };
+}
+
+/**
+ * WHILE ψ ... for d as G(ψ → G[t, t+d] φ), by brute force: for every sample i, the worst φ over
+ * t_i <= t_j <= t_i + d, against -ψ_i. worstAt: the earliest worst φ sample of the critical i, or
+ * t_i when a positive -ψ_i decides it.
+ */
+function refStateFor(spec: MonitorSpec, trace: Trace, needed: string[], d: number): RefResult {
+  const unit = spec.predicate.unit;
+  const st = spec.stateMargin!;
+  const n = trace.t.length;
+  const p: number[] = [];
+  const s: number[] = [];
+  for (let i = 0; i < n; i++) {
+    const at: Record<string, number> = {};
+    for (const name of needed) at[name] = trace.signals[name]![i]!;
+    const m = spec.predicate.margin(at, spec.slots);
+    if (Number.isNaN(m)) return { robustness: NaN, worstAt: trace.t[i]!, unit };
+    const sm = st.predicate.margin(at, st.slots);
+    if (Number.isNaN(sm)) return { robustness: NaN, worstAt: trace.t[i]!, unit: st.predicate.unit };
+    p.push(m);
+    s.push(sm);
+  }
+  let best = Infinity;
+  let bestAt = trace.t[0]!;
+  for (let i = 0; i < n; i++) {
+    let minP = Infinity;
+    let jAt = i;
+    for (let j = i; j < n && trace.t[j]! <= trace.t[i]! + d; j++) if (p[j]! < minP) { minP = p[j]!; jAt = j; }
+    const term = Math.max(-s[i]!, minP);
+    if (term < best) {
+      best = term;
+      bestAt = -s[i]! > minP && term > 0 ? trace.t[i]! : trace.t[jAt]!;
     }
   }
   return { robustness: best, worstAt: bestAt, unit };

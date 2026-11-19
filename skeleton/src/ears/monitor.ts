@@ -37,6 +37,12 @@ export function buildMonitor(spec: MonitorSpec): MonitorFn {
   const isEventually = wrapper.kind === 'eventually' && pattern !== 'state';
   const duration = wrapper.duration;
   const windowed = pattern !== 'state' && duration !== undefined;
+  // WHILE ψ ... for d: G(ψ → G[t, t+d] φ). Margins go into buffers that grow with the longest
+  // trace seen; a monotone deque gives the sliding minimum of φ in O(n).
+  const holdFor = state && wrapper.kind === 'always' && duration !== undefined && duration > 0 ? duration : 0;
+  let pBuf = new Float64Array(0);
+  let sBuf = new Float64Array(0);
+  let dq = new Int32Array(0);
 
   return (trace: Trace): MonitorResult => {
     const signals = trace.signals;
@@ -76,6 +82,45 @@ export function buildMonitor(spec: MonitorSpec): MonitorFn {
     }
     if (lo >= n || t[lo]! > b) return { robustness: NaN, worstAt: 0, unit: 'trace' };
     if (isEventually && t[lo]! > deadline) return { robustness: NaN, worstAt: 0, unit: 'trace' };
+
+    if (stateSlots && holdFor > 0) {
+      if (pBuf.length < n) { pBuf = new Float64Array(n); sBuf = new Float64Array(n); dq = new Int32Array(n); }
+      for (let i = lo; i < n; i++) {
+        for (let k = 0; k < respNames.length; k++) rs[respNames[k]!] = arrays[respIdx[k]!]![i]!;
+        const m = predicate.margin(rs, respSlots);
+        if (m !== m) return { robustness: NaN, worstAt: t[i]!, unit };
+        for (let k = 0; k < stateNames.length; k++) ss[stateNames[k]!] = arrays[stateIdx[k]!]![i]!;
+        const sm = stateSlots.margin(ss, stateSlotValues as Record<string, number>);
+        if (sm !== sm) return { robustness: NaN, worstAt: t[i]!, unit: stateSlots.unit };
+        pBuf[i] = m;
+        sBuf[i] = sm;
+      }
+      let worst = Infinity;
+      let worstAt = t[lo]!;
+      let r = lo - 1;
+      let head = 0;
+      let tail = 0;
+      for (let i = lo; i < n; i++) {
+        const end = t[i]! + holdFor;
+        while (r + 1 < n && t[r + 1]! <= end) {
+          r++;
+          // Pop strictly larger values only, so the front is the earliest minimum.
+          while (tail > head && pBuf[dq[tail - 1]!]! > pBuf[r]!) tail--;
+          dq[tail++] = r;
+        }
+        while (dq[head]! < i) head++;
+        const j = dq[head]!;
+        const minP = pBuf[j]!;
+        const ns = -sBuf[i]!;
+        const term = ns > minP ? ns : minP;
+        if (term < worst) {
+          worst = term;
+          // A violation points at the response sample; a held implication at the state instant.
+          worstAt = ns > minP && term > 0 ? t[i]! : t[j]!;
+        }
+      }
+      return { robustness: worst, worstAt, unit };
+    }
 
     // Always: the minimum and its first time. F-then-G: the minimum from the last sample at or
     // before the deadline to the end, and the time of the last sample with a margin <= 0.
