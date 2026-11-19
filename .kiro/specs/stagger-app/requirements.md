@@ -360,7 +360,7 @@ Out of scope: the EARS compiler, the episode runner, the falsifier, the shared U
 5. THE Requirements_File SHALL include at least one Expected_Hold line for push recovery, for example a push with up to 100 N for 0.2 s from any direction at any point in the stride, after which the G1 stays upright for 3 s.
 6. THE Requirements_File SHALL include at least one Expected_Hold line for speed tracking on level ground.
 7. THE Requirements_File SHALL include at least two Expected_Break lines, one of which is a push of up to 250 N from behind, with a duration of 0.2 s, after which the G1 stays upright for 3 s.
-8. THE Requirements_File SHALL mark each requirement as an Expected_Hold or an Expected_Break in a Glossary table or an Introduction paragraph, and SHALL NOT carry the mark inside an EARS line.
+8. THE Requirements_File SHALL mark each requirement as an Expected_Hold or an Expected_Break in the Expectation table of the Requirements_File (golem-kit Requirement 7A), and SHALL NOT carry the mark inside an EARS line. (Amended by golem-gate-hardening: the kit reads tables only, so an Introduction paragraph is not a valid place for a mark.)
 9. THE Requirements_File SHALL state the harshest believable value in each trigger, as `ears-for-robots.md` requires.
 10. THE Requirements_File SHALL carry the requirement ID first on every EARS line, matching Kiro's numbering.
 11. WHEN the falsifier runs on an Expected_Break line with the default search budget, THE falsifier SHALL find a counterexample (expected-break check, run as part of the evidence in `evidence/`, not in CI).

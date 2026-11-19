@@ -1,0 +1,17 @@
+M1	KILLED  	a line with no row defaults to Expected_Break
+M2	KILLED  	an error verdict meets Expected_Break
+M3	SURVIVED	value match becomes case-sensitive (canonical spelling only)
+M4	SURVIVED	parser no longer splits CRLF
+M5	SURVIVED	a table does not end at the first non-table line
+M6	KILLED  	duplicate-row warning removed
+M6b	KILLED  	last duplicate row wins instead of the first
+M7	SURVIVED	gate prints no table warnings
+M8	SURVIVED	gate --kiro prints no table warnings
+M9	SURVIVED	the "move this line to Expected_Hold" advice removed
+M10	SURVIVED	override message drops the expectation miss text
+M11	KILLED  	grouped output never printed
+M12	KILLED  	merge: last file wins
+M13	SURVIVED	separator test loosened (an empty-ish row counts)
+M14	SURVIVED	bold/backtick stripping removed
+M15	SURVIVED	header match case-sensitive
+M16	SURVIVED	CONTROL: no-op, must SURVIVE

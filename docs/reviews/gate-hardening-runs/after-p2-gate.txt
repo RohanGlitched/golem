@@ -1,0 +1,268 @@
+
+=== A1 no table at all  [gate ]  exit 2
+--- stdout
+1.2: WHEN the base is pushed with up to 200 N THE robot SHALL keep its height above 0.4 m for 1 s
+  scenario: push.force = 149 N (seed 1984748471)
+  margin: -0.00132 m
+  reproduce: npx golem-spec replay 1.2
+
+gate RED: 1 of 3 requirements are not held
+
+=== A2 correct table  [gate ]  exit 0
+--- stdout
+Expected_Hold (2 lines: must hold)
+  ok    1.1  HELD  closest margin +0.206 m  no counterexample in 24 trials; from the 4 uniformly random ones, failure rate below 75 % (95 % confidence)
+  ok    1.3  HELD  closest margin +0.305 rad  no counterexample in 24 trials; from the 4 uniformly random ones, failure rate below 75 % (95 % confidence)
+
+Expected_Break (1 line: must break)
+  ok    1.2  BROKEN  margin -0.00132 m  42 trials  push.force = 149 N  (shrunk, seed 1984748471)
+
+gate GREEN: every requirement meets its expectation (2 held as expected, 1 broke as expected; 90 trials, pinned seeds first, then the quick budget)
+
+=== A3 unknown value on the break line (typo)  [gate ]  exit 1
+--- stdout
+
+--- stderr
+golem gate: .kiro/specs/tiny/requirements.md:7: error: the expectation of 1.2 is "Expected_Brek"; use Expected_Hold or Expected_Break
+golem gate: the Expectation table has 1 error(s); run npx golem-spec check
+
+=== A4 missing row for 1.2 (table exists)  [gate ]  exit 2
+--- stdout
+1.2: WHEN the base is pushed with up to 200 N THE robot SHALL keep its height above 0.4 m for 1 s
+  scenario: push.force = 149 N (seed 1984748471)
+  margin: -0.00132 m
+  reproduce: npx golem-spec replay 1.2
+
+gate RED: 1 of 3 requirements are not held
+--- stderr
+golem gate: .kiro/specs/tiny/requirements.md:14: warning: 1.2 has no row in the Expectation table, so it is Expected_Hold
+
+=== A5 duplicated row, Break first then Hold  [gate ]  exit 1
+--- stdout
+
+--- stderr
+golem gate: .kiro/specs/tiny/requirements.md:7: error: the table gives 1.2 two marks: Expected_Break at line 6 and Expected_Hold at line 7
+golem gate: .kiro/specs/tiny/requirements.md:13: warning: 1.1 has no row in the Expectation table, so it is Expected_Hold
+golem gate: .kiro/specs/tiny/requirements.md:15: warning: 1.3 has no row in the Expectation table, so it is Expected_Hold
+golem gate: the Expectation table has 1 error(s); run npx golem-spec check
+
+=== A5b duplicated row, Hold first then Break  [gate ]  exit 1
+--- stdout
+
+--- stderr
+golem gate: .kiro/specs/tiny/requirements.md:7: error: the table gives 1.2 two marks: Expected_Hold at line 6 and Expected_Break at line 7
+golem gate: .kiro/specs/tiny/requirements.md:13: warning: 1.1 has no row in the Expectation table, so it is Expected_Hold
+golem gate: .kiro/specs/tiny/requirements.md:15: warning: 1.3 has no row in the Expectation table, so it is Expected_Hold
+golem gate: the Expectation table has 1 error(s); run npx golem-spec check
+
+=== A6 Expected_Break line that holds (GREEN controller)  [gate ]  exit 2
+--- stdout
+Expected_Hold (2 lines: must hold)
+  ok    1.1  HELD  closest margin +0.206 m  no counterexample in 24 trials; from the 4 uniformly random ones, failure rate below 75 % (95 % confidence)
+  ok    1.3  HELD  closest margin +0.305 rad  no counterexample in 24 trials; from the 4 uniformly random ones, failure rate below 75 % (95 % confidence)
+
+Expected_Break (1 line: must break)
+  FAIL  1.2  HELD  closest margin +0.208 m  no counterexample in 96 trials; from the 19 uniformly random ones, failure rate below 15.8 % (95 % confidence)  <- expected to break but held within budget 96 trials
+
+1.2: WHEN the base is pushed with up to 100 N THE robot SHALL keep its height above 0.4 m for 1 s
+  expected to break but held within budget 96 trials
+  closest margin: +0.208 m at push.force = 96.2 N (seed 593471940)
+  This line held, so the controller is better than the spec expects. Look further with npx golem-spec falsify 1.2 --budget 200. If it still holds, tell the user to move row 1.2 of the Expectation table to Expected_Hold. Do not edit requirements.md yourself.
+
+gate RED: 1 of 3 requirements do not meet their expectation
+--- stderr
+golem gate: .kiro/specs/tiny/requirements.md:12: warning: 1.1 has no row in the Expectation table, so it is Expected_Hold
+golem gate: .kiro/specs/tiny/requirements.md:14: warning: 1.3 has no row in the Expectation table, so it is Expected_Hold
+
+=== A7 mixed case  [gate ]  exit 0
+--- stdout
+Expected_Hold (2 lines: must hold)
+  ok    1.1  HELD  closest margin +0.206 m  no counterexample in 24 trials; from the 4 uniformly random ones, failure rate below 75 % (95 % confidence)
+  ok    1.3  HELD  closest margin +0.305 rad  no counterexample in 24 trials; from the 4 uniformly random ones, failure rate below 75 % (95 % confidence)
+
+Expected_Break (1 line: must break)
+  ok    1.2  BROKEN  margin -0.00132 m  42 trials  push.force = 149 N  (shrunk, seed 1984748471)
+
+gate GREEN: every requirement meets its expectation (2 held as expected, 1 broke as expected; 90 trials, pinned seeds first, then the quick budget)
+
+=== A8 table after the requirements  [gate ]  exit 0
+--- stdout
+Expected_Hold (2 lines: must hold)
+  ok    1.1  HELD  closest margin +0.206 m  no counterexample in 24 trials; from the 4 uniformly random ones, failure rate below 75 % (95 % confidence)
+  ok    1.3  HELD  closest margin +0.305 rad  no counterexample in 24 trials; from the 4 uniformly random ones, failure rate below 75 % (95 % confidence)
+
+Expected_Break (1 line: must break)
+  ok    1.2  BROKEN  margin -0.00132 m  42 trials  push.force = 149 N  (shrunk, seed 1984748471)
+
+gate GREEN: every requirement meets its expectation (2 held as expected, 1 broke as expected; 90 trials, pinned seeds first, then the quick budget)
+--- stderr
+golem gate: .kiro/specs/tiny/requirements.md:7: warning: 1.1 has no row in the Expectation table, so it is Expected_Hold
+golem gate: .kiro/specs/tiny/requirements.md:9: warning: 1.3 has no row in the Expectation table, so it is Expected_Hold
+
+=== A9 CRLF everywhere  [gate ]  exit 0
+--- stdout
+Expected_Hold (2 lines: must hold)
+  ok    1.1  HELD  closest margin +0.206 m  no counterexample in 24 trials; from the 4 uniformly random ones, failure rate below 75 % (95 % confidence)
+  ok    1.3  HELD  closest margin +0.305 rad  no counterexample in 24 trials; from the 4 uniformly random ones, failure rate below 75 % (95 % confidence)
+
+Expected_Break (1 line: must break)
+  ok    1.2  BROKEN  margin -0.00132 m  42 trials  push.force = 149 N  (shrunk, seed 1984748471)
+
+gate GREEN: every requirement meets its expectation (2 held as expected, 1 broke as expected; 90 trials, pinned seeds first, then the quick budget)
+--- stderr
+golem gate: .kiro/specs/tiny/requirements.md:12: warning: 1.1 has no row in the Expectation table, so it is Expected_Hold
+golem gate: .kiro/specs/tiny/requirements.md:14: warning: 1.3 has no row in the Expectation table, so it is Expected_Hold
+
+=== A10 CRLF, table after  [gate ]  exit 0
+--- stdout
+Expected_Hold (2 lines: must hold)
+  ok    1.1  HELD  closest margin +0.206 m  no counterexample in 24 trials; from the 4 uniformly random ones, failure rate below 75 % (95 % confidence)
+  ok    1.3  HELD  closest margin +0.305 rad  no counterexample in 24 trials; from the 4 uniformly random ones, failure rate below 75 % (95 % confidence)
+
+Expected_Break (1 line: must break)
+  ok    1.2  BROKEN  margin -0.00132 m  42 trials  push.force = 149 N  (shrunk, seed 1984748471)
+
+gate GREEN: every requirement meets its expectation (2 held as expected, 1 broke as expected; 90 trials, pinned seeds first, then the quick budget)
+--- stderr
+golem gate: .kiro/specs/tiny/requirements.md:7: warning: 1.1 has no row in the Expectation table, so it is Expected_Hold
+golem gate: .kiro/specs/tiny/requirements.md:9: warning: 1.3 has no row in the Expectation table, so it is Expected_Hold
+
+=== B1 orphan row: id written R1.2 (mark silently lost)  [gate ]  exit 1
+--- stdout
+
+--- stderr
+golem gate: .kiro/specs/tiny/requirements.md:6: error: the table marks R1.2, but no requirement has that id (did you mean 1.2?)
+golem gate: .kiro/specs/tiny/requirements.md:12: warning: 1.1 has no row in the Expectation table, so it is Expected_Hold
+golem gate: .kiro/specs/tiny/requirements.md:13: warning: 1.2 has no row in the Expectation table, so it is Expected_Hold
+golem gate: .kiro/specs/tiny/requirements.md:14: warning: 1.3 has no row in the Expectation table, so it is Expected_Hold
+golem gate: the Expectation table has 1 error(s); run npx golem-spec check
+
+=== B2 orphan row: id 1.20 (typo)  [gate ]  exit 1
+--- stdout
+
+--- stderr
+golem gate: .kiro/specs/tiny/requirements.md:6: error: the table marks 1.20, but no requirement has that id (did you mean 1.2?)
+golem gate: .kiro/specs/tiny/requirements.md:12: warning: 1.1 has no row in the Expectation table, so it is Expected_Hold
+golem gate: .kiro/specs/tiny/requirements.md:13: warning: 1.2 has no row in the Expectation table, so it is Expected_Hold
+golem gate: .kiro/specs/tiny/requirements.md:14: warning: 1.3 has no row in the Expectation table, so it is Expected_Hold
+golem gate: the Expectation table has 1 error(s); run npx golem-spec check
+
+=== B3 table inside a fenced example block  [gate ]  exit 2
+--- stdout
+1.2: WHEN the base is pushed with up to 200 N THE robot SHALL keep its height above 0.4 m for 1 s
+  scenario: push.force = 149 N (seed 1984748471)
+  margin: -0.00132 m
+  reproduce: npx golem-spec replay 1.2
+
+gate RED: 1 of 3 requirements are not held
+
+=== B4 every line marked Expected_Break on a controller that breaks only 1.2  [gate ]  exit 2
+--- stdout
+Expected_Hold (0 lines: must hold)
+  none
+
+Expected_Break (3 lines: must break)
+  FAIL  1.1  HELD  closest margin +0.208 m  no counterexample in 96 trials; from the 19 uniformly random ones, failure rate below 15.8 % (95 % confidence)  <- expected to break but held within budget 96 trials
+  ok    1.2  BROKEN  margin -0.00132 m  42 trials  push.force = 149 N  (shrunk, seed 1984748471)
+  FAIL  1.3  HELD  closest margin +0.308 rad  no counterexample in 96 trials; from the 19 uniformly random ones, failure rate below 15.8 % (95 % confidence)  <- expected to break but held within budget 96 trials
+
+1.1: WHEN the base is pushed with up to 100 N THE robot SHALL keep its height above 0.4 m for 1 s
+  expected to break but held within budget 96 trials
+  closest margin: +0.208 m at push.force = 96.2 N (seed 593471940)
+  This line held, so the controller is better than the spec expects. Look further with npx golem-spec falsify 1.1 --budget 200. If it still holds, tell the user to move row 1.1 of the Expectation table to Expected_Hold. Do not edit requirements.md yourself.
+
+1.3: WHEN the base is pushed with up to 100 N THE robot SHALL keep its tilt below 0.5 rad for 1 s
+  expected to break but held within budget 96 trials
+  closest margin: +0.308 rad at push.force = 96.2 N (seed 593471940)
+  This line held, so the controller is better than the spec expects. Look further with npx golem-spec falsify 1.3 --budget 200. If it still holds, tell the user to move row 1.3 of the Expectation table to Expected_Hold. Do not edit requirements.md yourself.
+
+gate RED: 2 of 3 requirements do not meet their expectation
+
+=== B5 gaming: flip only the broken line to Expected_Break, same controller  [gate ]  exit 0
+--- stdout
+Expected_Hold (2 lines: must hold)
+  ok    1.1  HELD  closest margin +0.206 m  no counterexample in 24 trials; from the 4 uniformly random ones, failure rate below 75 % (95 % confidence)
+  ok    1.3  HELD  closest margin +0.305 rad  no counterexample in 24 trials; from the 4 uniformly random ones, failure rate below 75 % (95 % confidence)
+
+Expected_Break (1 line: must break)
+  ok    1.2  BROKEN  margin -0.00132 m  42 trials  push.force = 149 N  (shrunk, seed 1984748471)
+
+gate GREEN: every requirement meets its expectation (2 held as expected, 1 broke as expected; 90 trials, pinned seeds first, then the quick budget)
+--- stderr
+golem gate: .kiro/specs/tiny/requirements.md:12: warning: 1.1 has no row in the Expectation table, so it is Expected_Hold
+golem gate: .kiro/specs/tiny/requirements.md:14: warning: 1.3 has no row in the Expectation table, so it is Expected_Hold
+
+=== B6 --json with a table  [gate --json]  exit 0
+--- stdout
+{"ok":true,"exitCode":0,"verdicts":[{"reqId":"1.1","status":"held","trials":24,"randomTrials":4,"guidedTrials":20,"closest":{"robustness":0.20602496459090613,"scenario":{"push.force":97.57401210445096},"seed":1984748471},"ms":4.168699999999944,"failureRateUpper95":0.75,"failureRateUpper95Exact":0.527129195498412,"expectation":"Expected_Hold","met":true},{"reqId":"1.2","status":"broken","trials":42,"randomTrials":4,"guidedTrials":20,"closest":{"robustness":-0.19000062034581794,"scenario":{"push.force":195.14802420890192},"seed":3254842707},"ms":5.325399999999945,"failureRateUpper95":0.75,"failureRateUpper95Exact":0.527129195498412,"counterexample":{"reqId":"1.2","scenario":{"push.force":149.41020603494053},"seed":1984748471,"robustness":-0.0013198111310521732,"shrunk":true,"foundAfter":11},"expectation":"Expected_Break","met":true},{"reqId":"1.3","status":"held","trials":24,"randomTrials":4,"guidedTrials":20,"closest":{"robustness":0.3048519757910981,"scenario":{"push.force":97.57401210445096},"seed":1984748471},"ms":3.3841999999999643,"failureRateUpper95":0.75,"failureRateUpper95Exact":0.527129195498412,"expectation":"Expected_Hold","met":true}],"expectationChanges":[],"expectations":[{"reqId":"1.1","expectation":"Expected_Hold","status":"held","met":true},{"reqId":"1.2","expectation":"Expected_Break","status":"broken","met":true},{"reqId":"1.3","expectation":"Expected_Hold","status":"held","met":true}]}
+--- stderr
+golem gate: .kiro/specs/tiny/requirements.md:12: warning: 1.1 has no row in the Expectation table, so it is Expected_Hold
+golem gate: .kiro/specs/tiny/requirements.md:14: warning: 1.3 has no row in the Expectation table, so it is Expected_Hold
+
+=== B7 --json unknown value  [gate --json]  exit 1
+--- stdout
+
+--- stderr
+golem gate: .kiro/specs/tiny/requirements.md:6: error: the expectation of 1.2 is "oops"; use Expected_Hold or Expected_Break
+golem gate: .kiro/specs/tiny/requirements.md:12: warning: 1.1 has no row in the Expectation table, so it is Expected_Hold
+golem gate: .kiro/specs/tiny/requirements.md:14: warning: 1.3 has no row in the Expectation table, so it is Expected_Hold
+golem gate: the Expectation table has 1 error(s); run npx golem-spec check
+
+=== C1 kiro: Expected_Break line holds  [gate --kiro]  exit 0
+--- stdout decision=block reason(726 chars):
+1.2: WHEN the base is pushed with up to 100 N THE robot SHALL keep its height above 0.4 m for 1 s
+  expected to break but held within budget 48 trials
+  closest margin: +0.216 m at push.force = 94.6 N (seed 1198092853)
+  This line held, so the controller is better than the spec expects. Look further with npx golem-spec falsify 1.2 --budget 200. If it still holds, tell the user to move row 1.2 of the Expectation table to Expected_Hold. Do not edit requirements.md yourself.
+
+Expectation table notes:
+  .kiro/specs/tiny/requirements.md:12: warning: 1.1 has no row in the Expectation table, so it is Expected_Hold
+  .kiro/specs/tiny/requirements.md:14: warning: 1.3 has no row in the Expectation table, so it is Expected_Hold
+--- stderr (not visible to the agent on exit 0)
+golem gate: .kiro/specs/tiny/requirements.md:12: warning: 1.1 has no row in the Expectation table, so it is Expected_Hold
+golem gate: .kiro/specs/tiny/requirements.md:14: warning: 1.3 has no row in the Expectation table, so it is Expected_Hold
+golem gate: RED, blocking this stop (block 1 of 5 for session s1)
+
+=== C2 kiro: Expected_Hold line breaks (no table)  [gate --kiro]  exit 0
+--- stdout decision=block reason(206 chars):
+1.2: WHEN the base is pushed with up to 200 N THE robot SHALL keep its height above 0.4 m for 1 s
+  scenario: push.force = 149 N (seed 1984748471)
+  margin: -0.00132 m
+  reproduce: npx golem-spec replay 1.2
+--- stderr (not visible to the agent on exit 0)
+golem gate: RED, blocking this stop (block 1 of 5 for session s1)
+
+=== C3 kiro: typo value on the break line  [gate --kiro]  exit 0
+--- stdout decision=block reason(476 chars):
+The Expectation table has 1 error(s), so the gate cannot run. Fix the rows named here (a wrong id or a misspelt mark). If you may not edit requirements.md, tell the user. Do not change a mark to make the gate pass.
+  .kiro/specs/tiny/requirements.md:7: error: the expectation of 1.2 is "Expected_Brek"; use Expected_Hold or Expected_Break
+
+Expectation table notes:
+  .kiro/specs/tiny/requirements.md:15: warning: 1.3 has no row in the Expectation table, so it is Expected_Hold
+--- stderr (not visible to the agent on exit 0)
+golem gate: .kiro/specs/tiny/requirements.md:7: error: the expectation of 1.2 is "Expected_Brek"; use Expected_Hold or Expected_Break
+golem gate: .kiro/specs/tiny/requirements.md:15: warning: 1.3 has no row in the Expectation table, so it is Expected_Hold
+golem gate: RED, blocking this stop (block 1 of 5 for session s1)
+
+=== C4 kiro: break line breaks (green)  [gate --kiro]  exit 0
+--- stdout: (empty: stop allowed)
+--- stderr (not visible to the agent on exit 0)
+golem gate: .kiro/specs/tiny/requirements.md:12: warning: 1.1 has no row in the Expectation table, so it is Expected_Hold
+golem gate: .kiro/specs/tiny/requirements.md:14: warning: 1.3 has no row in the Expectation table, so it is Expected_Hold
+gate GREEN: every requirement meets its expectation (2 Expected_Hold held, 1 Expected_Break broke; 54 trials)
+
+=== C5 kiro: orphan id R1.2  [gate --kiro]  exit 0
+--- stdout decision=block reason(694 chars):
+The Expectation table has 1 error(s), so the gate cannot run. Fix the rows named here (a wrong id or a misspelt mark). If you may not edit requirements.md, tell the user. Do not change a mark to make the gate pass.
+  .kiro/specs/tiny/requirements.md:6: error: the table marks R1.2, but no requirement has that id (did you mean 1.2?)
+
+Expectation table notes:
+  .kiro/specs/tiny/requirements.md:12: warning: 1.1 has no row in the Expectation table, so it is Expected_Hold
+  .kiro/specs/tiny/requirements.md:13: warning: 1.2 has no row in the Expectation table, so it is Expected_Hold
+  .kiro/specs/tiny/requirements.md:14: warning: 1.3 has no row in the Expectation table, so it is Expected_Hold
+--- stderr (not visible to the agent on exit 0)
+golem gate: .kiro/specs/tiny/requirements.md:6: error: the table marks R1.2, but no requirement has that id (did you mean 1.2?)
+golem gate: .kiro/specs/tiny/requirements.md:12: warning: 1.1 has no row in the Expectation table, so it is Expected_Hold
+golem gate: .kiro/specs/tiny/requirements.md:13: warning: 1.2 has no row in the Expectation table, so it is Expected_Hold
+golem gate: .kiro/specs/tiny/requirements.md:14: warning: 1.3 has no row in the Expectation table, so it is Expected_Hold
+golem gate: RED, blocking this stop (block 1 of 5 for session s1)

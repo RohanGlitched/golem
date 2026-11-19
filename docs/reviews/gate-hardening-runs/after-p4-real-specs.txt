@@ -1,0 +1,12 @@
+
+.\apps\candy\.kiro\specs\candy-sorter\requirements.md
+  criteria: 8  table rows: 8  problems: 0
+  criteria without a row : []
+  rows without a criterion: []
+  Expected_Break: ["1.1","8.1"]
+
+.\apps\stagger\.kiro\specs\g1-walking\requirements.md
+  criteria: 11  table rows: 11  problems: 0
+  criteria without a row : []
+  rows without a criterion: []
+  Expected_Break: ["1.2","4.2","6.2"]

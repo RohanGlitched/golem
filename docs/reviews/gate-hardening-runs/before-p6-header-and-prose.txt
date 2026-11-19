@@ -1,0 +1,7 @@
+header "Criteria | Topic | Expectation"                 rows read: 0  warnings: 0
+header "Criterion | Topic | Expectations"               rows read: 0  warnings: 0
+header "ID | Topic | Expectation"                       rows read: 0  warnings: 0
+header "Criterion | Topic | Expected"                   rows read: 0  warnings: 0
+Introduction paragraph: "1.2 is Expected_Break."        rows read: 0  warnings: 0
+bullet list: "- 1.2: Expected_Break"                    rows read: 0  warnings: 0
+HTML table                                              rows read: 0  warnings: 0

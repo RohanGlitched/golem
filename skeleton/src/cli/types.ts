@@ -1,6 +1,7 @@
 // Outcome and report shapes shared by the CLI and the MCP server. Types only.
 import type { Diagnostic } from '../ears/index.js';
 import type { PinnedSeedEntry, ProgressEvent, RunMetadata } from '../falsify/index.js';
+import type { Expectation, MarkChange } from './expectation.js';
 import type { CompiledRequirement, Verdict } from './sibling-types.js';
 
 export interface FileDiagnostic extends Diagnostic { file: string }
@@ -10,6 +11,8 @@ export interface CompileOutcome {
   diagnostics: FileDiagnostic[];
   /** Files in listed order, so diagnostics can be sorted by file order. */
   files: string[];
+  /** The text of every file that was read, by path: the one source of the requirements and of the Expectation table. */
+  texts: Record<string, string>;
 }
 
 export interface RunOptions {
@@ -21,7 +24,7 @@ export interface RunOptions {
   searchSeed?: number;
   mode: 'full' | 'random-only';
   /** Selects defaults and the pinned-seed arithmetic (assumption A1). */
-  budgetKind: 'test' | 'gate' | 'mcp-run' | 'mcp-falsify';
+  budgetKind: 'test' | 'gate' | 'gate-retry' | 'mcp-run' | 'mcp-falsify';
   signal?: AbortSignal;
   onProgress?: (e: ProgressEvent, req: CompiledRequirement) => void;
   /** Called after each requirement finished (and was pinned), so commands can print its line at once. */
@@ -51,12 +54,19 @@ export interface ReportMeta {
   durationS: number;
   searchSeed: number;
   lastGateExitCode?: number;
+  /** Marks of the Expectation table that differ from HEAD, written by the gate. Omitted when none moved. */
+  expectationChanges?: MarkChange[];
 }
 
-/** Additive fields (A5): `unit` of the monitor, `ears` source line. */
-export interface ReportVerdict extends Verdict { unit?: string; ears?: string; partial?: boolean }
+/** Additive fields (A5): `unit` of the monitor, `ears` source line; `expectation` and `met` from the Expectation table. */
+export interface ReportVerdict extends Verdict { unit?: string; ears?: string; partial?: boolean; expectation?: Expectation; met?: boolean }
 
-export interface GateOverride { sessionId: string; timestamp: string; count: number; brokenReqIds: string[] }
+/**
+ * A stop allowed on a red gate. 'unmetReqIds': every id that did not meet its expectation, plus 'compile', 'config', 'run'
+ * or 'expectations' for a gate that could not run. 'brokenReqIds': those among them whose verdict is not 'held' (a stale
+ * Expected_Break line is unmet, not broken). 'unmetReqIds' is always written; reports from before golem-gate-hardening lack it.
+ */
+export interface GateOverride { sessionId: string; timestamp: string; count: number; brokenReqIds: string[]; unmetReqIds?: string[] }
 
 export interface ReportFile {
   schema: 1;

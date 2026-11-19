@@ -3,7 +3,9 @@ import { extractCriteria } from '../ears/index.js';
 import type { FalsifyOptions, FalsifyResult, PinnedSeedEntry } from '../falsify/index.js';
 import type { KitDeps } from './deps.js';
 import { locateApp, type LocatedApp } from './config.js';
-import { mergeExpectations, parseExpectations, type ParsedExpectations } from './expectation.js';
+import {
+  diffExpectations, expectationOf, meetsExpectation, readExpectations, tableErrors, type Expectation, type MarkChange, type ParsedExpectations,
+} from './expectation.js';
 import { sortDiagnostics } from './format.js';
 import { relative } from './paths.js';
 import { reportVerdict, createUnitCapture } from './signal-units.js';
@@ -13,6 +15,8 @@ import type { CompileOutcome, FileDiagnostic, ReportFile, ReportMeta, ReportVerd
 
 export const DEFAULT_TEST_TRIALS = 64;
 export const GATE_QUICK_TRIALS = 24;
+/** A held Expected_Break line is searched again with this many times the budget before the gate calls its mark unmet. */
+export const RETRY_FACTOR = 4;
 export const MCP_DEFAULT_TRIALS = 24;
 
 export const reportPath = (app: Pick<LocatedApp, 'appDir'>): string => `${app.appDir}/.golem/report.json`;
@@ -50,6 +54,7 @@ export async function compileAll(app: LocatedApp, robotApp: RobotApp, deps: KitD
   const requirements: CompiledRequirement[] = [];
   const diagnostics: FileDiagnostic[] = [];
   const seen = new Map<string, string>();
+  const texts: Record<string, string> = {};
   for (const file of files) {
     let text: string;
     try {
@@ -58,6 +63,7 @@ export async function compileAll(app: LocatedApp, robotApp: RobotApp, deps: KitD
       if ((e as { code?: string }).code === 'ENOENT') throw new MissingFileError(file);
       throw e;
     }
+    texts[file] = text;
     const r = deps.compileFile(text, robotApp.lexicon);
     for (const d of r.diagnostics) diagnostics.push({ ...d, file });
     if (extractCriteria(text).criteria.length === 0) {
@@ -78,16 +84,43 @@ export async function compileAll(app: LocatedApp, robotApp: RobotApp, deps: KitD
       requirements.push(req);
     }
   }
-  return { requirements, diagnostics: sortDiagnostics(diagnostics, files), files };
+  return { requirements, diagnostics: sortDiagnostics(diagnostics, files), files, texts };
 }
 
-/** The Expectation tables of every listed Requirements_File. A file that cannot be read is skipped (compileAll reports it). */
+/**
+ * The Expectation tables of every listed Requirements_File, read now (used by `test` and the MCP tools; the gate builds
+ * its table from the text it compiled). A file that is absent is skipped, because compileAll reports it; any other read
+ * error is not swallowed.
+ */
 export async function loadExpectations(app: Pick<LocatedApp, 'config'>, deps: Pick<KitDeps, 'fs'>): Promise<ParsedExpectations> {
-  const parts: ParsedExpectations[] = [];
+  const texts: Record<string, string> = {};
+  const files: string[] = [];
   for (const file of app.config.requirements) {
-    try { parts.push(parseExpectations(await deps.fs.readFile(file))); } catch { /* absent file: no table */ }
+    try {
+      texts[file] = await deps.fs.readFile(file);
+      files.push(file);
+    } catch (e) {
+      if ((e as { code?: string }).code !== 'ENOENT') throw e;
+    }
   }
-  return mergeExpectations(parts);
+  return readExpectations(texts, files);
+}
+
+/**
+ * The marks that differ from the committed files: for each listed file deps.readCommitted gives the text at HEAD (nothing outside
+ * a repository, for an untracked file or on any git error), and the effective expectations of the two versions are compared.
+ * A mark that moves is a spec change, not a fix, and the report and the output say so (defect 3).
+ */
+export async function markChanges(deps: Pick<KitDeps, 'readCommitted'>, compiled: Pick<CompileOutcome, 'files'>, current: ParsedExpectations): Promise<MarkChange[]> {
+  if (deps.readCommitted === undefined) return [];
+  const texts: Record<string, string> = {};
+  const files: string[] = [];
+  for (const f of compiled.files) {
+    const t = await deps.readCommitted(f).catch(() => undefined);
+    if (t !== undefined) { texts[f] = t; files.push(f); }
+  }
+  if (files.length === 0) return [];
+  return diffExpectations(readExpectations(texts, files, { reconcile: false }), current);
 }
 
 export const hasErrors = (d: readonly FileDiagnostic[]): boolean => d.some((x) => x.severity === 'error');
@@ -126,6 +159,12 @@ export function toFalsifyOptions(
       break;
     case 'mcp-falsify':
       budget.maxTrials = (o.budget ?? MCP_DEFAULT_TRIALS) + pinnedValid;
+      break;
+    case 'gate-retry':
+      // A held Expected_Break line, run again at 4 times the budget of the first pass (defect 8).
+      if (o.budget !== undefined) budget.maxTrials = RETRY_FACTOR * o.budget;
+      if (o.timeS !== undefined) budget.maxWallMs = RETRY_FACTOR * o.timeS * 1000;
+      if (!flagged) budget.maxTrials = RETRY_FACTOR * GATE_QUICK_TRIALS + pinnedValid;
       break;
   }
   const out: FalsifyOptions = {
@@ -206,7 +245,8 @@ export async function withPool<T>(
 export type GateRun =
   | { kind: 'compile-error'; diagnostics: FileDiagnostic[]; compiled: CompileOutcome }
   | { kind: 'empty'; compiled: CompileOutcome }
-  | { kind: 'ran'; outcomes: RequirementOutcome[]; compiled: CompileOutcome; durationS: number; totalTrials: number };
+  | { kind: 'table-error'; expectations: ParsedExpectations; changes: MarkChange[]; compiled: CompileOutcome }
+  | { kind: 'ran'; outcomes: RequirementOutcome[]; compiled: CompileOutcome; expectations: ParsedExpectations; changes: MarkChange[]; durationS: number; totalTrials: number };
 
 /** One gate pass: compile, then pinned seeds and the quick budget for every requirement, then the pinned rule. */
 export async function runGateOnce(
@@ -217,22 +257,48 @@ export async function runGateOnce(
   const compiled = await compileAll(app, robotApp, deps);
   if (hasErrors(compiled.diagnostics)) return { kind: 'compile-error', diagnostics: compiled.diagnostics, compiled };
   if (compiled.requirements.length === 0) return { kind: 'empty', compiled };
+  // The table comes from the text that was compiled, before the first trial (defect 9).
+  const expectations = readExpectations(compiled.texts, compiled.files);
+  // A wrong table is a gate that cannot run, like a compile error: no trial is worth running against a doubtful mark.
+  const changes = await markChanges(deps, compiled, expectations);
+  if (tableErrors(expectations).length > 0) return { kind: 'table-error', expectations, changes, compiled };
   const t0 = deps.clock();
   const o: RunOptions = { mode: 'full', budgetKind: 'gate', ...flags, ...(signal !== undefined ? { signal } : {}) };
-  const raw = await withPool(deps, app, robotApp, flags.workers, (pool) => runRequirements(app, robotApp, compiled.requirements, o, deps, pool));
-  const outcomes = raw.map(applyPinnedRule);
-  return { kind: 'ran', outcomes, compiled, durationS: (deps.clock() - t0) / 1000, totalTrials: outcomes.reduce((n, x) => n + x.verdict.trials, 0) };
+  const outcomes = await withPool(deps, app, robotApp, flags.workers, async (pool) => {
+    const first = (await runRequirements(app, robotApp, compiled.requirements, o, deps, pool)).map(applyPinnedRule);
+    // A line marked Expected_Break that held is a claim about the search, and the quick budget can miss (defect 8):
+    // run it once more with a larger budget, and let that run decide.
+    const retryOpts: RunOptions = { ...o, budgetKind: 'gate-retry' };
+    const out: RequirementOutcome[] = [];
+    for (const x of first) {
+      if (expectationOf(expectations.byId, x.verdict.reqId) !== 'Expected_Break' || x.verdict.status !== 'held') { out.push(x); continue; }
+      const again = await runRequirements(app, robotApp, [x.req], { ...retryOpts, req: x.verdict.reqId }, deps, pool);
+      out.push(...again.map(applyPinnedRule));
+    }
+    return out;
+  });
+  return { kind: 'ran', outcomes, compiled, expectations, changes, durationS: (deps.clock() - t0) / 1000, totalTrials: outcomes.reduce((n, x) => n + x.verdict.trials, 0) };
 }
 
 // ---------------------------------------------------------------- report
 
-export const toReportVerdicts = (outcomes: readonly RequirementOutcome[]): ReportVerdict[] =>
-  outcomes.map((o) => reportVerdict(o.verdict, o.unit, o.req.source));
+/** The verdicts as stored; with the table's marks each also records its expectation and whether it was met. */
+export const toReportVerdicts = (outcomes: readonly RequirementOutcome[], marks?: ReadonlyMap<string, Expectation>): ReportVerdict[] =>
+  outcomes.map((o) => {
+    const v = reportVerdict(o.verdict, o.unit, o.req.source);
+    if (marks === undefined) return v;
+    const expectation = expectationOf(marks, o.verdict.reqId);
+    return { ...v, expectation, met: meetsExpectation(o.verdict.status, expectation) };
+  });
 
 /** Merges the outcomes into `.golem/report.json`. A failed write is a warning, never a failed run (4.10, 7.9). */
 export async function writeRunReport(
   deps: KitDeps, app: LocatedApp, outcomes: readonly RequirementOutcome[], scope: 'all' | { reqId: string },
-  durationS: number, warn: (m: string) => void, extra: { lastGateExitCode?: number; gateOverride?: ReportFile['gateOverrides'][number] } = {},
+  durationS: number, warn: (m: string) => void, extra: {
+    lastGateExitCode?: number; gateOverride?: ReportFile['gateOverrides'][number];
+    /** The marks of the table (its byId map): every verdict then records its expectation. */
+    expectations?: ReadonlyMap<string, Expectation>; expectationChanges?: readonly MarkChange[];
+  } = {},
 ): Promise<ReportFile | undefined> {
   const path = reportPath(app);
   const prev = await readReport(deps.fs, path);
@@ -244,8 +310,9 @@ export async function writeRunReport(
     durationS,
     searchSeed: first?.meta.searchSeed ?? app.config.searchSeed ?? 1,
     ...(extra.lastGateExitCode !== undefined ? { lastGateExitCode: extra.lastGateExitCode } : {}),
+    ...(extra.expectationChanges !== undefined && extra.expectationChanges.length > 0 ? { expectationChanges: [...extra.expectationChanges] } : {}),
   };
-  let report = mergeReport(prev.report, toReportVerdicts(outcomes), meta, scope);
+  let report = mergeReport(prev.report, toReportVerdicts(outcomes, extra.expectations), meta, scope);
   if (extra.gateOverride !== undefined) report = { ...report, gateOverrides: [...report.gateOverrides, extra.gateOverride] };
   try {
     await atomicWriteFile(deps.fs, path, stableJson(report), tmpCounter(`${deps.now().getTime().toString(36)}-`));

@@ -1,0 +1,27 @@
+M1	KILLED  	a line with no row defaults to Expected_Break
+M2	KILLED  	an error verdict meets Expected_Break
+M3	KILLED  	value match becomes case-sensitive (canonical spelling only)
+M4	KILLED  	parser splits only on LF (CRLF is then equivalent, lone CR is not)
+M5	KILLED  	a table does not end at the first non-table line
+M6	KILLED  	the same-mark duplicate warning removed
+M6b	KILLED  	a conflicting duplicate is no longer Expected_Hold (first row wins)
+M7	KILLED  	gate prints no table warnings
+M8	SURVIVED	gate --kiro prints no table warnings on stderr (ran branch)   <- first run; the test 'logs a warning of the table on stderr when the gate is green' was added and the mutant re-run alone: KILLED
+M9	KILLED  	the "do not edit requirements.md yourself" advice removed
+M10	KILLED  	override message drops the expectation miss text
+M11	KILLED  	grouped output never printed
+M12	KILLED  	merge ignores the rows of every file
+M13	KILLED  	separator test loosened (a row of colons counts)
+M14	KILLED  	bold and backtick stripping removed
+M15	KILLED  	header match case-sensitive
+M17	KILLED  	no orphan row is ever reported
+M18	KILLED  	no unmarked line is ever reported
+M19	KILLED  	a moved mark is never reported
+M20	KILLED  	a held Expected_Break line is never run again
+M21	KILLED  	fenced code is read as data
+M22	KILLED  	a table error does not stop the gate
+M23	KILLED  	a held line is listed as broken in the override
+M24	KILLED  	the Stop reason never shows a moved mark
+M25	KILLED  	the Stop reason never carries the table notes
+M26	KILLED  	the report never records the moved marks
+M16	SURVIVED	CONTROL: no-op, must SURVIVE

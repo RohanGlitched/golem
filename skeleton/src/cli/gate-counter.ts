@@ -20,6 +20,11 @@ function setKey(s: GateState, k: string, v: Entry): void {
   Object.defineProperty(s, k, { value: v, enumerable: true, writable: true, configurable: true });
 }
 
+/** What a stop allowed on a red gate records: every id that is not met, and those among them that are not `held`. */
+export function overrideIds(unmet: readonly { id: string; status: 'held' | 'broken' | 'error' }[]): { unmetReqIds: string[]; brokenReqIds: string[] } {
+  return { unmetReqIds: unmet.map((u) => u.id), brokenReqIds: unmet.filter((u) => u.status !== 'held').map((u) => u.id) };
+}
+
 /** Seconds from the stored `updatedAt` of the session to `startMs`, or `undefined` without a usable entry. */
 export function elapsedSeconds(state: Readonly<GateState>, sessionId: string, startMs: number): number | undefined {
   if (!own(state, sessionId)) return undefined;

@@ -1,6 +1,6 @@
 // Helpers shared by the command handlers.
 import type { CliIo, KitDeps } from '../deps.js';
-import { diagnosticText } from '../format.js';
+import { diagnosticText, type ShownDiagnostic } from '../format.js';
 import { MissingFileError, compileAll, displayPath, hasErrors, type Bootstrapped } from '../service.js';
 import type { ParsedCommand } from '../args.js';
 import type { CompileOutcome, FileDiagnostic, RunOptions } from '../types.js';
@@ -23,7 +23,7 @@ export function runFlags(p: ParsedCommand): Pick<RunOptions, 'budget' | 'timeS' 
   return o;
 }
 
-export const showDiagnostics = (io: CliIo, d: readonly FileDiagnostic[], to: 'stdout' | 'stderr'): void => {
+export const showDiagnostics = (io: CliIo, d: readonly ShownDiagnostic[], to: 'stdout' | 'stderr'): void => {
   for (const x of d) io[to].write(`${diagnosticText({ ...x, file: displayPath(io.cwd, x.file) })}\n`);
 };
 

@@ -32,7 +32,7 @@
     },
     {
       "rel": "skills/falsify-and-fix/SKILL.md",
-      "sha256": "481a6b6842ef9955d95f74705a1755f74a6730c73614f625250c8b2fbb7c91e5",
+      "sha256": "aa23b6382570ae37ba593526c42d38ad84ad70eb8f1ef97b2ef423ec8731453c",
       "kind": "copy"
     },
     {
@@ -42,7 +42,7 @@
     },
     {
       "rel": "steering/golem-ears.md",
-      "sha256": "3bcf91be53cfffc2b70befbb97307ab0aba1d44cec334be1b36e5cf999ca0169",
+      "sha256": "c8906648436a2c149dbad207482516d52d38e132c863a90a76f54e6c875b792b",
       "kind": "copy"
     },
     {

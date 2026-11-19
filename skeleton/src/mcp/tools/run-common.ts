@@ -78,8 +78,8 @@ export async function runTool(args: Record<string, unknown>, ctx: ToolCtx, mode:
     }
     const outcome = outcomes[0];
     if (outcome === undefined) return errorResult(`no result for ${reqId}`);
-    await writeRunReport(ctx.deps, ctx.located, [outcome], { reqId }, (ctx.deps.clock() - t0) / 1000, () => undefined);
     const { byId } = await ctx.expectations();
+    await writeRunReport(ctx.deps, ctx.located, [outcome], { reqId }, (ctx.deps.clock() - t0) / 1000, () => undefined, { expectations: byId });
     const expectation = byId.get(reqId);
     return makeToolResult(verdictSummary(outcome, expectation), verdictJson(outcome, expectation), outcome.verdict.status === 'error');
   }, ctx.signal);

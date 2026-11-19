@@ -1,8 +1,8 @@
 // `golem gate` without --kiro: exit 0 green, 2 red, 1 when it cannot start (CI and the repair workflow).
 import { gateExitCode } from '../exit.js';
-import { judgeOutcomes } from '../expectation.js';
+import { formatIssue, judgeOutcomes, markChangeText, tableErrors } from '../expectation.js';
 import { NOTHING_TO_CHECK, expectationBlock, gateGroups } from '../format.js';
-import { bootstrap, loadExpectations, runGateOnce, writeRunReport } from '../service.js';
+import { bootstrap, displayPath, runGateOnce, writeRunReport } from '../service.js';
 import type { CommandHandler } from '../run.js';
 import { appFlag, errLine, line, runFlags, showDiagnostics } from './common.js';
 
@@ -14,24 +14,32 @@ export const handler: CommandHandler = async (p, io, deps) => {
     errLine(io, 'golem: the requirements do not compile; run npx golem-spec check for details');
     return gateExitCode([], false, true);
   }
+  if (run.kind === 'table-error') {
+    for (const c of run.changes) errLine(io, `golem gate: ${markChangeText(c)}`);
+    for (const i of run.expectations.issues) errLine(io, `golem gate: ${formatIssue(i, (f) => displayPath(io.cwd, f))}`);
+    errLine(io, `golem gate: the Expectation table has ${tableErrors(run.expectations).length} error(s); run npx golem-spec check`);
+    return gateExitCode([], false, true);
+  }
   if (run.kind === 'empty') {
     errLine(io, `golem gate: ${NOTHING_TO_CHECK}`);
     return gateExitCode([], false);
   }
-  const expectations = await loadExpectations(boot.app, deps);
-  for (const m of expectations.problems) errLine(io, `golem gate: warning: ${m}`);
+  const expectations = run.expectations;
+  for (const i of expectations.issues) errLine(io, `golem gate: ${formatIssue(i, (f) => displayPath(io.cwd, f))}`);
   const judged = judgeOutcomes(run.outcomes, expectations.byId);
   const verdicts = judged.map((j) => ({ ...j.outcome.verdict, expectation: j.expectation }));
   const code = gateExitCode(verdicts, false);
-  await writeRunReport(deps, boot.app, run.outcomes, 'all', run.durationS, (m) => errLine(io, m), { lastGateExitCode: code });
+  await writeRunReport(deps, boot.app, run.outcomes, 'all', run.durationS, (m) => errLine(io, m), { lastGateExitCode: code, expectations: expectations.byId, expectationChanges: run.changes });
   const unmet = judged.filter((j) => !j.met);
   if (p.flags['json'] === true) {
     line(io, JSON.stringify({
-      ok: code === 0, exitCode: code, verdicts: run.outcomes.map((o) => o.verdict),
+      ok: code === 0, exitCode: code, verdicts: judged.map((j) => ({ ...j.outcome.verdict, expectation: j.expectation, met: j.met })),
+      expectationChanges: run.changes,
       expectations: judged.map((j) => ({ reqId: j.outcome.verdict.reqId, expectation: j.expectation, status: j.outcome.verdict.status, met: j.met })),
     }));
     return code;
   }
+  for (const c of run.changes) line(io, markChangeText(c));
   // A spec with no Expected_Break line keeps the plain output; one with any prints both groups.
   const grouped = judged.some((j) => j.expectation === 'Expected_Break');
   if (grouped) for (const l of gateGroups(judged)) line(io, l);

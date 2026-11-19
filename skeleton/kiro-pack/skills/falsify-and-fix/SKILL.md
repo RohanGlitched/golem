@@ -12,7 +12,7 @@ Follow these six steps, in this order, until `npx --no-install golem-spec gate` 
 3. Explain the margin. Call `explain_margin` to see which signal has the lowest margin and at what time. Call `replay` for a 10 Hz summary of the trace.
 4. Fix. Change the controller (files under `controller/` or `tuning/`) so that the margin of that signal rises. Make the smallest change that does it.
 5. Re-run. Call `falsify` again with the same budget, then `run_requirement` on the other requirements to check that nothing else broke. The pinned seed runs first, so the old counterexample is checked again.
-6. Gate. Run `npx --no-install golem-spec gate`. Exit code 0 means every requirement held and no pinned seed fails: the loop ends. Exit code 2 means a requirement is still red: go back to step 1. Exit code 1 means a usage, compile or runtime error: report it instead of retrying.
+6. Gate. Run `npx --no-install golem-spec gate`. Exit code 0 means every requirement meets its expectation (held, or broken where the Expectation table says `Expected_Break`) and no pinned seed fails: the loop ends. Exit code 2 means a requirement is still red: go back to step 1, unless the block says an `Expected_Break` line held. Then the controller is better than the spec expects: tell the user to move that row to `Expected_Hold` and do not edit `requirements.md`. Exit code 1 means a usage, compile, Expectation table or runtime error: report it instead of retrying.
 
 ## Rules
 

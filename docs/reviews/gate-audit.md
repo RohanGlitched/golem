@@ -179,3 +179,49 @@ Test names are good: they state the behaviour (`'uses the first row of an id tha
 1. Defects 1 and 2 together (reconcile, errors, put problems in the Stop `reason`). About 80 lines plus tests.
 2. Defect 3 (report fields, uncommitted-mark line) and defect 4 (wording).
 3. Defects 6, 7 and 9 (small parser changes), then defect 5 (spec text), then the properties above.
+
+## After golem-gate-hardening
+
+Spec: `.kiro/specs/golem-gate-hardening/` (bugfix.md, design.md, tasks.md). Branch `fix/gate-hardening`, commits `golem-gate-hardening: 1` to `13`. Raw output of the probes before and after is in `docs/reviews/gate-hardening-runs/` (`before-*.txt`, `after-*.txt`); the mutants are re-run by `docs/reviews/gate-hardening-runs/mutate-after.mjs`. Every new test file failed on the code before its fix (the commit messages give the counts).
+
+### Before and after, per defect
+
+| # | Defect | Before (probe) | After (probe) | Tests |
+|---|---|---|---|---|
+| 1 | Orphan row, unmarked line silent | `p2` B1, B2, C5: `R1.2` and `1.20` give exit 2 and the ordinary counterexample block, no word about the row | exit 1 before any trial: `the table marks R1.2, but no requirement has that id (did you mean 1.2?)`; a line with no row warns (`p2` A4) | `expectation-reconcile.test.ts`, `gate-table-errors.test.ts` |
+| 2 | Table complaints on stderr only; marks guessed | `p2` C3: Stop reason of 206 characters, the typo on stderr | `p2` C3: the reason starts with `The Expectation table has 1 error(s), so the gate cannot run. ...` and names the row (476 characters); `gate` exits 1; `check` and `test` print the same issues; the stop is counted | `gate-table-errors.test.ts` |
+| 3 | One row turns red to green unseen | `p3` 1: report has no "expect" anywhere | every verdict has `expectation` and `met` (`p3` 1: true); `meta.expectationChanges`; `gate` prints `1.2: Expected_Hold -> Expected_Break (uncommitted)`, the Stop reason starts with it, `--json` carries it. The exit code is unchanged by design | `gate-marks.test.ts` |
+| 4 | Remedy "edit the spec" | `p2` C1: `... or move this line to Expected_Hold if the controller now holds it` | `p2` C1, A6: `tell the user to move row 1.2 of the Expectation table to Expected_Hold. Do not edit requirements.md yourself.`, same text for CI | `gate-override.test.ts` (M9 dies) |
+| 5 | Override lists held lines as broken; spec text wrong | `p3` 2: `brokenReqIds: ["1.2"]` while 1.2 is `held` | `unmetReqIds: ["1.2"]`, `brokenReqIds: []`; golem-kit has Requirement 7A and corrected 7.3 to 7.6, 8.2, 8.20, 8.21, glossary; stagger-app 17.8 says table | `gate-override.test.ts` (M10 dies) |
+| 6 | Fenced table is data; header exact | `p2` B3 exit 0 from an example in a fence; `p6` 0 rows, 0 warnings for `Criteria`, `ID`, `Expected` | `p2` B3 exit 2 (the example is ignored); `p6` reads `Criteria`, `Expectations`, `ID`, `Expected` (1 row each); an indented table and a header with no id column warn | `expectation-markdown.test.ts` |
+| 7 | Duplicate rows pick a winner by position | `p2` A5 exit 0, A5b exit 2 | A5 and A5b both exit 1 with `the table gives 1.2 two marks: ... at line 6 and ... at line 7`; `byId` is `Expected_Hold` for both orders and for two files | `expectation-duplicates.test.ts` |
+| 8 | Quick budget can miss an Expected_Break line | 160 N: 3 of 59 search seeds red (2, 15, 58) | 0 of 60 (`after-p5-corrected.txt`); a held Break line is run again with 4 x the budget and says `held within budget 96 trials` | `gate-retry.test.ts` |
+| 9 | Table read after the run, errors swallowed | file saved during the run: marks of the new version, verdicts of the old | table parsed from the compiled text before the first trial; only `ENOENT` is tolerated | `expectation-read.test.ts` |
+| 10 | Row parsing | `p1`: `A \| B` shifts a column; `> |` table, pipe-less table, lone CR give 0 rows; `gate --json` `verdicts[]` has no expectation | all read (`after-p1-parser.txt`); every JSON verdict has `expectation` and `met` | `expectation-rows.test.ts` |
+| 11 | `}  } else if`; doubled FAIL row | present | split; a hygiene test fails on the old line; the doubled FAIL row stays (the audit calls it readable) | `hygiene.test.ts` |
+
+The committed files still parse cleanly: `after-p4-real-specs.txt` is the same as before (11 of 11 stagger rows, 8 of 8 candy rows, no problem), and `hygiene.test.ts` now asserts it in CI.
+
+### Correction to this audit's defect 8
+
+`p5-flaky-break.mts` passes `--search-seed 0`, and the argument parser accepts only positive integers, so that run exits 1 (usage error), not 2. One of the 60 "misses" in each row was that error, and the 175 N and 200 N rows had no real miss. Seeds 1 to 59 at 160 N give 3 real misses (2, 15, 58). The probe is unchanged; `gate-hardening-runs/p5-corrected.mts` uses seeds 1 to 60. `after-p5.txt` therefore still prints 1/60 for each row: that one is seed 0.
+
+### Test quality after the fixes
+
+Mutants (`after-mutate.txt`): 26 mutants of the code and the output, 26 killed (M8 survived the first run; the test `logs a warning of the table on stderr when the gate is green` was added and the mutant killed on a re-run), the control M16 survives. Before: 6 of 15 real mutants died. The nine that survived (M3, M5, M7, M8, M9, M10, M13, M14, M15) all die now.
+
+The six properties the audit asks for exist: mark flip (`gate-marks.test.ts`), explicit Hold equals no row (`hygiene.test.ts`), spelling invariance and row permutation (`expectation-rows.test.ts`, with LF, CRLF and CR, aliases, bold, backticks, column order, pipes at the edges, a quote prefix and an escaped pipe), orphan soundness (`expectation-reconcile.test.ts`, `gate-table-errors.test.ts`) and Stop output shape (`gate-table-errors.test.ts`). Added: fence and indent, duplicate fail-closed, retry set, override ids, change listing. Scope `src/cli` with the two e2e files: 47 files and 274 tests at the start, 57 files and 423 tests now. The whole `skeleton` suite passes (320 files, `tsc --noEmit` clean, `npm run pack:build`, `pack:check` and the three `kiro-cli agent validate --path` calls pass).
+
+### What was not fixed, and why
+
+- **The guard hook is not extended to other agents (defect 3).** It already denies every write to a `requirements.md` for `golem-tuner`, the one agent with a Stop hook, table rows included. `golem-scribe` and `golem-skeptic` exist to write and review specs, and a workspace-wide guard would stop spec mode. A moved mark now shows in the gate output, in the Stop reason and in the report, and the steering tells every agent not to move one.
+- **A moved mark does not block (defect 3).** The kit cannot tell a legitimate edit from gaming. The comparison needs a git repository with the file tracked; elsewhere no change is listed.
+- **A stale `Expected_Break` line still blocks up to five times (defect 4).** The audit proposes letting it block once under `--kiro`. That would make the Stop hook less closed and the Gate_Counter is a contract. The block now tells the agent what to do (report to the user), and after five blocks the stop is allowed and a Gate_Override records it with `unmetReqIds`.
+- **No table digest in `meta` (defect 3).** Every verdict now carries its own expectation, which a reviewer can read; a digest cannot be read.
+- **Prose marks are not read (defect 5).** "1.2 is Expected_Break" is ambiguous, so the spec wording changed instead.
+- **A pipe inside backticks still splits a cell (defect 10).** That is GitHub's rule; `\|` is the way to write one.
+- **The doubled FAIL row of `gateGroups` stays (defect 11).**
+
+### Unrelated flaky tests seen while checking
+
+`src/mcp/__tests__/prop-34-time-cap.test.ts` (a real 8 s time cap) and `src/pool/pool.equivalence.property.test.ts` each failed once in a full run under load and passed in 3 and 2 isolated re-runs. Neither imports code this work changed.
