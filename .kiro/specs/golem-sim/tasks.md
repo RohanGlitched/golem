@@ -154,60 +154,60 @@ Rules that apply to every task:
     - Example tests (Test_App, at most 2 s simulated): a probe around `mj_step` and `controller.step` shows an unchanged handle counter and zero new `Float64Array` or `Float32Array` instances inside the loop, `out` identity is equal at every call, forced WASM memory growth in a controller gives the same trace as no growth, and heap growth with a 1.5 s horizon and forced GC is 64 KiB or less (only when run with `--expose-gc`). Also a 2 s trial with a warm model completes in under 1 s.
     - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.5, 12.6, 12.7, 12.8, 12.9, 13.9_
 
-- [ ] 15. Runner property tests (Test_App, at most 2 s simulated per trial)
-  - [~] 15.1 Write property test for determinism
+- [x] 15. Runner property tests (Test_App, at most 2 s simulated per trial)
+  - [x] 15.1 Write property test for determinism
     - **Property 1: Determinism**
     - **Validates: Requirements 11.1, 11.2, 11.3, 11.4, 11.5, 11.6, 11.7, 11.8, 15.2**
 
-  - [~] 15.2 Write property test for trace length
+  - [x] 15.2 Write property test for trace length
     - **Property 2: Trace length**
     - **Validates: Requirements 7.6, 7.7, 7.8, 15.3**
 
-  - [~] 15.3 Write property test for the exact time axis
+  - [x] 15.3 Write property test for the exact time axis
     - **Property 3: Time axis is exact**
     - **Validates: Requirements 7.5, 7.9, 5.8**
 
-  - [~] 15.4 Write property test for the trigger event
+  - [x] 15.4 Write property test for the trigger event
     - **Property 4: Trigger event**
     - **Validates: Requirements 6.1, 6.2, 6.14, 15.4**
 
-  - [~] 15.5 Write property test for warm-up isolation
+  - [x] 15.5 Write property test for warm-up isolation
     - **Property 5: Warm-up isolation and step counts**
     - **Validates: Requirements 5.7, 5.8, 5.9, 6.4**
 
-  - [~] 15.6 Write property test for early-stop soundness
+  - [x] 15.6 Write property test for early-stop soundness
     - **Property 6: Early stop is sound**
     - **Validates: Requirements 9.2, 9.3, 9.4, 9.5, 9.6, 9.7, 9.15, 15.5**
 
-  - [~] 15.7 Write property test for perturbation call order
+  - [x] 15.7 Write property test for perturbation call order
     - **Property 7: Perturbation calls are ordered, fresh and stable**
     - **Validates: Requirements 6.3, 6.5, 6.6, 6.7, 6.8, 6.9, 6.10, 11.10**
 
-  - [~] 15.8 Write property test for handle leaks
+  - [x] 15.8 Write property test for handle leaks
     - **Property 8: No handle leaks**
     - **Validates: Requirements 5.10, 5.11, 6.13, 7.13, 9.10, 9.11, 9.12, 10.14, 10.15, 14.1, 14.10, 15.6**
 
-  - [~] 15.9 Write property test for failed-trial identity
+  - [x] 15.9 Write property test for failed-trial identity
     - **Property 9: Failed trials report their identity**
     - **Validates: Requirements 14.2, 14.3, 14.11**
 
-  - [~] 15.10 Write property test for finite robustness unless diverged
+  - [x] 15.10 Write property test for finite robustness unless diverged
     - **Property 11: Finite robustness unless diverged**
     - **Validates: Requirements 7.11, 7.12, 9.13, 15.9**
 
-  - [~] 15.11 Write property test for the pose frame layout
+  - [x] 15.11 Write property test for the pose frame layout
     - **Property 12: Pose frame layout**
     - **Validates: Requirements 8.1, 8.2, 8.3, 8.4, 8.5, 8.6, 8.8, 8.9, 8.11**
 
-  - [~] 15.12 Write property test for pose-recording invariance
+  - [x] 15.12 Write property test for pose-recording invariance
     - **Property 13: Pose recording does not change the result**
     - **Validates: Requirements 8.7, 15.8**
 
-  - [~] 15.13 Write property test for the unchanged cached model
+  - [x] 15.13 Write property test for the unchanged cached model
     - **Property 14: The cached model is unchanged by trials**
     - **Validates: Requirements 3.10, 3.11**
 
-  - [~] 15.14 Write property test for PRNG and seed behaviour
+  - [x] 15.14 Write property test for PRNG and seed behaviour
     - **Property 20: PRNG and seed behaviour**
     - **Validates: Requirements 5.2, 5.14, 11.9**
 

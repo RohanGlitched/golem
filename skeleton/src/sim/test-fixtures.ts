@@ -258,8 +258,8 @@ export function withModelAlteringTemplate(app: RobotApp): RobotApp {
     apply(ctx) {
       const m = ctx.model;
       const bob = ctx.ids['body:bob'] as number;
-      m.body_mass[bob] = m.body_mass[bob] * 2;
-      m.geom_friction[0] = m.geom_friction[0] * 0.5;
+      m.body_mass[bob] = 1.5;
+      m.geom_friction[0] = 0.1;
       m.opt.gravity[2] = -1;
     },
   };
@@ -268,6 +268,8 @@ export function withModelAlteringTemplate(app: RobotApp): RobotApp {
 
 export interface SpyEntry {
   name: string; t: number; tTrigger: number; values: Record<string, number>; xfrc: Float64Array;
+  /** MuJoCo data.time when the call was made. */
+  simTime: number;
 }
 /** Adds a template (default name `spy`) that records every apply call into `log`. */
 export function withSpyTemplate(app: RobotApp, log: SpyEntry[], name = 'spy'): RobotApp {
@@ -276,7 +278,7 @@ export function withSpyTemplate(app: RobotApp, log: SpyEntry[], name = 'spy'): R
     name,
     dims: () => [],
     apply(ctx, t, tTrigger, values) {
-      log.push({ name, t, tTrigger, values, xfrc: Float64Array.from(ctx.data.xfrc_applied as Float64Array) });
+      log.push({ name, t, tTrigger, values, xfrc: Float64Array.from(ctx.data.xfrc_applied as Float64Array), simTime: ctx.data.time });
     },
   };
   return { ...app, lexicon: { ...app.lexicon, perturbations: [...app.lexicon.perturbations, spy] } };
@@ -292,3 +294,4 @@ export function withNoDraws(app: RobotApp): RobotApp {
     },
   };
 }
+

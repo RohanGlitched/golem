@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+﻿import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildContext } from './context.js';
 import { ModelCache } from './model-cache.js';
 import { mulberry32 } from './prng.js';
@@ -57,8 +57,8 @@ describe('behaviour wrappers', () => {
     const bob = ctx.ids['body:bob'] as number;
     const mass = model.body_mass[bob], fr = model.geom_friction[0], g = model.opt.gravity[2];
     app.lexicon.perturbations[1]!.apply(ctx, 0, 0, {});
-    expect(model.body_mass[bob]).toBe(mass * 2);
-    expect(model.geom_friction[0]).toBe(fr * 0.5);
+    expect(model.body_mass[bob]).toBe(1.5);
+    expect(model.geom_friction[0]).toBe(0.1);
     expect(model.opt.gravity[2]).toBe(-1);
     model.body_mass[bob] = mass; model.geom_friction[0] = fr; model.opt.gravity[2] = g;
     expect(app.simDt).toBe(testApp.simDt);
@@ -85,3 +85,4 @@ describe('behaviour wrappers', () => {
     data.delete();
   });
 });
+
