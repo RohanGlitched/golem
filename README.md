@@ -1,16 +1,25 @@
-<!-- Cover image: docs/cover.png (long-exposure ghost campaign on the G1). Added with the site build. -->
+<p align="center"><img src="docs/cover.jpg" alt="GOLEM: robot requirements that run as physics tests. 24 ghost copies of a Unitree G1 are pushed from every side inside a ring of text; one falls in red." width="100%"></p>
+
+<p align="center">
+<a href="https://www.npmjs.com/package/golem-spec"><img alt="npm" src="https://img.shields.io/npm/v/golem-spec?color=F3D9AE&labelColor=1A1411&label=npm%20golem-spec"></a>
+<a href="LICENSE"><img alt="Apache-2.0" src="https://img.shields.io/badge/licence-Apache--2.0-C9B59C?labelColor=1A1411"></a>
+<img alt="Built with Kiro" src="https://img.shields.io/badge/built%20with-Kiro-86BFA6?labelColor=1A1411">
+<img alt="MuJoCo WASM" src="https://img.shields.io/badge/physics-MuJoCo%20WASM-D6F1F2?labelColor=1A1411">
+</p>
+
+<p align="center"><b><a href="https://d23v187fnxad7l.cloudfront.net">Live site</a></b> · <b><a href="https://d23v187fnxad7l.cloudfront.net/stagger/">Shove the G1 in your browser</a></b> · <b><a href="https://www.npmjs.com/package/golem-spec">npm package</a></b> · <b><a href="https://d23v187fnxad7l.cloudfront.net/evidence/">Evidence</a></b> · <b><a href="https://d23v187fnxad7l.cloudfront.net/how-kiro/">How Kiro built it</a></b></p>
 
 # GOLEM
 
-**Kiro writes your robot's requirements in plain sentences. GOLEM turns every sentence into a physics test, tries hard to break the robot, and won't let the agent say "done" while any sentence is false.**
+**Kiro writes your robot's requirements as plain sentences. GOLEM turns every sentence into a physics test, tries hard to break the robot, and won't let the agent say "done" while any sentence is false.**
 
-> In the legend, a golem is clay brought to life by a written word. Here the words are a Kiro spec's EARS acceptance criteria. The clay is a robot in MuJoCo, running in your browser.
+> In the legend, a golem is clay brought to life by a written word. Here the words are a Kiro spec's EARS acceptance criteria. The clay is a robot in MuJoCo, running in Node or in your browser.
 
-**Try it, no install:** https://d23v187fnxad7l.cloudfront.net
+**Try it, no install:** open the [live site](https://d23v187fnxad7l.cloudfront.net) and scroll. The circle replays 24 real recorded trials of a Unitree G1 shoved at 150 N from every side; where it falls, the sentence on the floor cracks. Then [open the studio](https://d23v187fnxad7l.cloudfront.net/stagger/):
 
 1. **Shove the robot.** Drag the Unitree G1 with your mouse or finger.
-2. **Summon the ghosts.** 64 translucent copies get pushed at once. The ones that fall turn red, and each wave homes in on the weak spot.
-3. **Read the verdict.** Each requirement either holds, with its margin in metres, or breaks with the mildest failing push: *"falls from 62.5 N at 260°, 20% into the stride"*. Replay the fall, or drag a number in the sentence and test again.
+2. **Summon the ghosts.** 64 translucent copies are pushed at once, in your browser's worker threads. The ones that fall turn red.
+3. **Read the verdict.** Each requirement either holds, with its margin in metres, or breaks with the mildest failing push it found, which you can replay.
 
 ---
 
@@ -27,7 +36,20 @@ at any point in its stride, THE robot SHALL stay upright for 3 s
 2. **Falsify.** It re-runs pinned seeds first, then random Latin-hypercube trials, then a cross-entropy search toward the lowest margin. It **shrinks** each failure to the mildest push that still breaks the line, then re-checks it on fresh seeds and at half the timestep, so a solver artefact isn't reported as a robot failure.
 3. **Gate.** Kiro hooks run `golem check` when a requirements file is saved, and `golem test` when a controller is saved. A **Stop hook runs `golem gate`**, so the agent can't finish while a requirement is red, and a guard stops the tuning agent editing the requirement instead of the robot.
 
-The engine is MuJoCo 4 compiled to WebAssembly, identical in Node and the browser. Trials are bit-for-bit deterministic, and every trial in Node is reproducible by seed.
+The engine is MuJoCo 4 compiled to WebAssembly, the same build in Node and the browser. Every trial is reproducible from its scenario and seed.
+
+## Kiro made the robot stronger, and GOLEM measured it
+
+Requirement 1.3 says the G1 survives a 100 N push from any direction. On Unitree's published policy alone it does not. GOLEM handed the counterexample to `golem-tuner`, a Kiro agent limited to the controller's reflex file, which wrote a lateral step-into-the-push reflex under the Stop gate. The full stability map (36 directions × 5 stride phases × 3 seeds, 4,860 trials) was then run again with the reflex on:
+
+| | Unitree's policy | With Kiro's reflex |
+|---|---:|---:|
+| Weakest push survived | 62.5 N (pushed from the left, 80°) | **101.6 N** (90°) |
+| Directions that hold 100 N | 34 of 36 | **36 of 36** |
+| Mean of the weakest push per direction | 174.6 N | 185.4 N |
+| Strongest direction | 240.6 N | 231.3 N (it gave up some headroom) |
+
+The agent's session log is in [`evidence/results/tuner/`](evidence/results/tuner); the two maps are in [`evidence/results/`](evidence/results). The reflex ships as a switch (`GOLEM_REFLEX=kiro`); the default stays Unitree's policy exactly.
 
 ## The kit: one command into any Kiro project
 
@@ -37,6 +59,8 @@ npx golem-spec init        # installs hooks, agents, MCP, skills, steering and a
 npx golem-spec test        # falsify every requirement
 npx golem-spec gate        # exit 0 only if everything holds
 ```
+
+Use `npx golem-spec`, not `npx golem`: a bare `npx golem` resolves to an unrelated npm package.
 
 | What lands in `.kiro/` | What it does |
 |---|---|
@@ -53,8 +77,8 @@ The same pack ships as a **Kiro Power** (`skeleton/power`) and a **Kiro Crew app
 
 | App | Robot | What GOLEM found |
 |---|---|---|
-| [`apps/stagger`](apps/stagger) | Unitree G1 humanoid running Unitree's published walking policy (it matches Unitree's own reference run to 2.5 µm) | It falls from **62.5 N** pushed from its right side at 20% of its stride, yet holds **240 N** from behind-left. That's 4,860 trials, all in `evidence/`. |
-| [`apps/candy`](apps/candy) | Franka Panda with a suction cup, sorting Halloween candy while trick-or-treaters reach in | The first safety controller watched only the cup. GOLEM found the **wrist flange** ending 2–10 cm from a child's hand in 25% of trials. |
+| [`apps/stagger`](apps/stagger) | Unitree G1 humanoid running Unitree's published walking policy (it matches Unitree's own reference run to 2.5 µm) | It falls from **62.5 N** pushed from its left at 20% of its stride, yet holds **240 N** from the front right: 4,860 trials, all in `evidence/`. With Kiro's reflex the weakest direction rises to **101.6 N**. |
+| [`apps/candy`](apps/candy) | Franka Panda with a suction cup, sorting Halloween candy while trick-or-treaters reach in | 57 of 228 trials break "keep every link at least 0.10 m from the hand". The link closest to the hand is the **wrist** (link 7) in 48 of them and the cup in 9: the first safety controller watched only the cup. |
 
 ## Evidence
 
@@ -62,7 +86,7 @@ Every number here comes from committed raw data in [`evidence/`](evidence), usin
 
 ## How Kiro built GOLEM
 
-Kiro CLI did the building: 15 specs (including 3 bugfix specs written from independent audits in [`docs/reviews/`](docs/reviews)), 224 requirements, 2,273 EARS acceptance criteria, 340 correctness properties, 656 completed tasks and 461 property-test assertions. The root [`.kiro/`](.kiro) holds the steering, specs, hooks, agents and MCP config used to build it. The full account is on the site's *How Kiro built this* page.
+Kiro CLI did the building: 15 specs (including 3 bugfix specs written from independent audits in [`docs/reviews/`](docs/reviews)), 224 requirements, 2,273 EARS acceptance criteria, 293 correctness properties, 663 completed tasks and 461 property-test assertions. The root [`.kiro/`](.kiro) holds the steering, specs, hooks, agents and MCP config used to build it. The full account is on the site's *How Kiro built this* page.
 
 ## Run it locally
 

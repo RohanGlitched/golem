@@ -27,9 +27,7 @@
     "searchSeeds": 20,
     "seconds": 854.3
   },
-  "skippedApps": [
-    "candy"
-  ],
+  "skippedApps": [],
   "summary": [
     {
       "app": "stagger",

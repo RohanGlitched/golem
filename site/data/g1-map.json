@@ -1,3782 +1,3782 @@
 {
   "cells": [
     {
-      "brokeN": 184.375,
-      "dirDeg": 0,
-      "heldN": 182.8125,
-      "phase": 0,
-      "seed": 1000
-    },
-    {
-      "brokeN": 184.375,
-      "dirDeg": 0,
-      "heldN": 182.8125,
-      "phase": 0,
-      "seed": 1001
-    },
-    {
-      "brokeN": 184.375,
-      "dirDeg": 0,
-      "heldN": 182.8125,
-      "phase": 0,
-      "seed": 1002
-    },
-    {
-      "brokeN": 200,
-      "dirDeg": 0,
-      "heldN": 198.4375,
-      "phase": 0.2,
-      "seed": 1000
-    },
-    {
-      "brokeN": 200,
-      "dirDeg": 0,
-      "heldN": 198.4375,
-      "phase": 0.2,
-      "seed": 1001
-    },
-    {
-      "brokeN": 200,
-      "dirDeg": 0,
-      "heldN": 198.4375,
-      "phase": 0.2,
-      "seed": 1002
-    },
-    {
-      "brokeN": 207.8125,
-      "dirDeg": 0,
-      "heldN": 206.25,
-      "phase": 0.4,
-      "seed": 1000
-    },
-    {
-      "brokeN": 207.8125,
-      "dirDeg": 0,
-      "heldN": 206.25,
-      "phase": 0.4,
-      "seed": 1001
-    },
-    {
-      "brokeN": 209.375,
-      "dirDeg": 0,
-      "heldN": 207.8125,
-      "phase": 0.4,
-      "seed": 1002
-    },
-    {
-      "brokeN": 193.75,
-      "dirDeg": 0,
-      "heldN": 192.1875,
-      "phase": 0.6,
-      "seed": 1000
-    },
-    {
-      "brokeN": 189.0625,
-      "dirDeg": 0,
-      "heldN": 187.5,
-      "phase": 0.6,
-      "seed": 1001
-    },
-    {
-      "brokeN": 193.75,
-      "dirDeg": 0,
-      "heldN": 192.1875,
-      "phase": 0.6,
-      "seed": 1002
-    },
-    {
-      "brokeN": 173.4375,
-      "dirDeg": 0,
-      "heldN": 171.875,
-      "phase": 0.8,
-      "seed": 1000
-    },
-    {
-      "brokeN": 173.4375,
-      "dirDeg": 0,
-      "heldN": 171.875,
-      "phase": 0.8,
-      "seed": 1001
-    },
-    {
-      "brokeN": 173.4375,
-      "dirDeg": 0,
-      "heldN": 171.875,
-      "phase": 0.8,
-      "seed": 1002
-    },
-    {
-      "brokeN": 203.125,
-      "dirDeg": 10,
-      "heldN": 201.5625,
-      "phase": 0,
-      "seed": 1000
-    },
-    {
-      "brokeN": 203.125,
-      "dirDeg": 10,
-      "heldN": 201.5625,
-      "phase": 0,
-      "seed": 1001
-    },
-    {
-      "brokeN": 203.125,
-      "dirDeg": 10,
-      "heldN": 201.5625,
-      "phase": 0,
-      "seed": 1002
-    },
-    {
-      "brokeN": 201.5625,
-      "dirDeg": 10,
-      "heldN": 200,
-      "phase": 0.2,
-      "seed": 1000
-    },
-    {
-      "brokeN": 193.75,
-      "dirDeg": 10,
-      "heldN": 192.1875,
-      "phase": 0.2,
-      "seed": 1001
-    },
-    {
-      "brokeN": 195.3125,
-      "dirDeg": 10,
-      "heldN": 193.75,
-      "phase": 0.2,
-      "seed": 1002
-    },
-    {
-      "brokeN": 215.625,
-      "dirDeg": 10,
-      "heldN": 214.0625,
-      "phase": 0.4,
-      "seed": 1000
-    },
-    {
-      "brokeN": 215.625,
-      "dirDeg": 10,
-      "heldN": 214.0625,
-      "phase": 0.4,
-      "seed": 1001
-    },
-    {
-      "brokeN": 212.5,
-      "dirDeg": 10,
-      "heldN": 210.9375,
-      "phase": 0.4,
-      "seed": 1002
-    },
-    {
-      "brokeN": 187.5,
-      "dirDeg": 10,
-      "heldN": 185.9375,
-      "phase": 0.6,
-      "seed": 1000
-    },
-    {
-      "brokeN": 187.5,
-      "dirDeg": 10,
-      "heldN": 185.9375,
-      "phase": 0.6,
-      "seed": 1001
-    },
-    {
-      "brokeN": 195.3125,
-      "dirDeg": 10,
-      "heldN": 193.75,
-      "phase": 0.6,
-      "seed": 1002
-    },
-    {
-      "brokeN": 195.3125,
-      "dirDeg": 10,
-      "heldN": 193.75,
-      "phase": 0.8,
-      "seed": 1000
-    },
-    {
-      "brokeN": 195.3125,
-      "dirDeg": 10,
-      "heldN": 193.75,
-      "phase": 0.8,
-      "seed": 1001
-    },
-    {
-      "brokeN": 195.3125,
-      "dirDeg": 10,
-      "heldN": 193.75,
-      "phase": 0.8,
-      "seed": 1002
-    },
-    {
-      "brokeN": 214.0625,
-      "dirDeg": 20,
-      "heldN": 212.5,
-      "phase": 0,
-      "seed": 1000
-    },
-    {
-      "brokeN": 212.5,
-      "dirDeg": 20,
-      "heldN": 210.9375,
-      "phase": 0,
-      "seed": 1001
-    },
-    {
-      "brokeN": 212.5,
-      "dirDeg": 20,
-      "heldN": 210.9375,
-      "phase": 0,
-      "seed": 1002
-    },
-    {
-      "brokeN": 206.25,
-      "dirDeg": 20,
-      "heldN": 204.6875,
-      "phase": 0.2,
-      "seed": 1000
-    },
-    {
-      "brokeN": 206.25,
-      "dirDeg": 20,
-      "heldN": 204.6875,
-      "phase": 0.2,
-      "seed": 1001
-    },
-    {
-      "brokeN": 206.25,
-      "dirDeg": 20,
-      "heldN": 204.6875,
-      "phase": 0.2,
-      "seed": 1002
-    },
-    {
-      "brokeN": 217.1875,
-      "dirDeg": 20,
-      "heldN": 215.625,
-      "phase": 0.4,
-      "seed": 1000
-    },
-    {
-      "brokeN": 217.1875,
-      "dirDeg": 20,
-      "heldN": 215.625,
-      "phase": 0.4,
-      "seed": 1001
-    },
-    {
-      "brokeN": 215.625,
-      "dirDeg": 20,
-      "heldN": 214.0625,
-      "phase": 0.4,
-      "seed": 1002
-    },
-    {
-      "brokeN": 206.25,
-      "dirDeg": 20,
-      "heldN": 204.6875,
-      "phase": 0.6,
-      "seed": 1000
-    },
-    {
-      "brokeN": 207.8125,
-      "dirDeg": 20,
-      "heldN": 206.25,
-      "phase": 0.6,
-      "seed": 1001
-    },
-    {
-      "brokeN": 210.9375,
-      "dirDeg": 20,
-      "heldN": 209.375,
-      "phase": 0.6,
-      "seed": 1002
-    },
-    {
-      "brokeN": 206.25,
-      "dirDeg": 20,
-      "heldN": 204.6875,
-      "phase": 0.8,
-      "seed": 1000
-    },
-    {
-      "brokeN": 206.25,
-      "dirDeg": 20,
-      "heldN": 204.6875,
-      "phase": 0.8,
-      "seed": 1001
-    },
-    {
-      "brokeN": 204.6875,
-      "dirDeg": 20,
-      "heldN": 203.125,
-      "phase": 0.8,
-      "seed": 1002
-    },
-    {
-      "brokeN": 217.1875,
-      "dirDeg": 30,
-      "heldN": 215.625,
-      "phase": 0,
-      "seed": 1000
-    },
-    {
-      "brokeN": 217.1875,
-      "dirDeg": 30,
-      "heldN": 215.625,
-      "phase": 0,
-      "seed": 1001
-    },
-    {
-      "brokeN": 218.75,
-      "dirDeg": 30,
-      "heldN": 217.1875,
-      "phase": 0,
-      "seed": 1002
-    },
-    {
-      "brokeN": 215.625,
-      "dirDeg": 30,
-      "heldN": 214.0625,
-      "phase": 0.2,
-      "seed": 1000
-    },
-    {
-      "brokeN": 215.625,
-      "dirDeg": 30,
-      "heldN": 214.0625,
-      "phase": 0.2,
-      "seed": 1001
-    },
-    {
-      "brokeN": 215.625,
-      "dirDeg": 30,
-      "heldN": 214.0625,
-      "phase": 0.2,
-      "seed": 1002
-    },
-    {
-      "brokeN": 229.6875,
-      "dirDeg": 30,
-      "heldN": 228.125,
-      "phase": 0.4,
-      "seed": 1000
-    },
-    {
-      "brokeN": 228.125,
-      "dirDeg": 30,
-      "heldN": 226.5625,
-      "phase": 0.4,
-      "seed": 1001
-    },
-    {
-      "brokeN": 226.5625,
-      "dirDeg": 30,
-      "heldN": 225,
-      "phase": 0.4,
-      "seed": 1002
-    },
-    {
-      "brokeN": 220.3125,
-      "dirDeg": 30,
-      "heldN": 218.75,
-      "phase": 0.6,
-      "seed": 1000
-    },
-    {
-      "brokeN": 220.3125,
-      "dirDeg": 30,
-      "heldN": 218.75,
-      "phase": 0.6,
-      "seed": 1001
-    },
-    {
-      "brokeN": 220.3125,
-      "dirDeg": 30,
-      "heldN": 218.75,
-      "phase": 0.6,
-      "seed": 1002
-    },
-    {
-      "brokeN": 212.5,
-      "dirDeg": 30,
-      "heldN": 210.9375,
-      "phase": 0.8,
-      "seed": 1000
-    },
-    {
-      "brokeN": 212.5,
-      "dirDeg": 30,
-      "heldN": 210.9375,
-      "phase": 0.8,
-      "seed": 1001
-    },
-    {
-      "brokeN": 212.5,
-      "dirDeg": 30,
-      "heldN": 210.9375,
-      "phase": 0.8,
-      "seed": 1002
-    },
-    {
-      "brokeN": 206.25,
-      "dirDeg": 40,
-      "heldN": 204.6875,
-      "phase": 0,
-      "seed": 1000
-    },
-    {
-      "brokeN": 206.25,
-      "dirDeg": 40,
-      "heldN": 204.6875,
-      "phase": 0,
-      "seed": 1001
-    },
-    {
-      "brokeN": 206.25,
-      "dirDeg": 40,
-      "heldN": 204.6875,
-      "phase": 0,
-      "seed": 1002
-    },
-    {
-      "brokeN": 217.1875,
-      "dirDeg": 40,
-      "heldN": 215.625,
-      "phase": 0.2,
-      "seed": 1000
-    },
-    {
-      "brokeN": 217.1875,
-      "dirDeg": 40,
-      "heldN": 215.625,
-      "phase": 0.2,
-      "seed": 1001
-    },
-    {
-      "brokeN": 217.1875,
-      "dirDeg": 40,
-      "heldN": 215.625,
-      "phase": 0.2,
-      "seed": 1002
-    },
-    {
-      "brokeN": 229.6875,
-      "dirDeg": 40,
-      "heldN": 228.125,
-      "phase": 0.4,
-      "seed": 1000
-    },
-    {
-      "brokeN": 226.5625,
-      "dirDeg": 40,
-      "heldN": 225,
-      "phase": 0.4,
-      "seed": 1001
-    },
-    {
-      "brokeN": 226.5625,
-      "dirDeg": 40,
-      "heldN": 225,
-      "phase": 0.4,
-      "seed": 1002
-    },
-    {
-      "brokeN": 193.75,
-      "dirDeg": 40,
-      "heldN": 192.1875,
-      "phase": 0.6,
-      "seed": 1000
-    },
-    {
-      "brokeN": 203.125,
-      "dirDeg": 40,
-      "heldN": 201.5625,
-      "phase": 0.6,
-      "seed": 1001
-    },
-    {
-      "brokeN": 198.4375,
-      "dirDeg": 40,
-      "heldN": 196.875,
-      "phase": 0.6,
-      "seed": 1002
-    },
-    {
-      "brokeN": 206.25,
-      "dirDeg": 40,
-      "heldN": 204.6875,
-      "phase": 0.8,
-      "seed": 1000
-    },
-    {
-      "brokeN": 206.25,
-      "dirDeg": 40,
-      "heldN": 204.6875,
-      "phase": 0.8,
-      "seed": 1001
-    },
-    {
-      "brokeN": 204.6875,
-      "dirDeg": 40,
-      "heldN": 203.125,
-      "phase": 0.8,
-      "seed": 1002
-    },
-    {
-      "brokeN": 215.625,
-      "dirDeg": 50,
-      "heldN": 214.0625,
-      "phase": 0,
-      "seed": 1000
-    },
-    {
-      "brokeN": 215.625,
-      "dirDeg": 50,
-      "heldN": 214.0625,
-      "phase": 0,
-      "seed": 1001
-    },
-    {
-      "brokeN": 214.0625,
-      "dirDeg": 50,
-      "heldN": 212.5,
-      "phase": 0,
-      "seed": 1002
-    },
-    {
-      "brokeN": 212.5,
-      "dirDeg": 50,
-      "heldN": 210.9375,
-      "phase": 0.2,
-      "seed": 1000
-    },
-    {
-      "brokeN": 212.5,
-      "dirDeg": 50,
-      "heldN": 210.9375,
-      "phase": 0.2,
-      "seed": 1001
-    },
-    {
-      "brokeN": 214.0625,
-      "dirDeg": 50,
-      "heldN": 212.5,
-      "phase": 0.2,
-      "seed": 1002
-    },
-    {
-      "brokeN": 212.5,
-      "dirDeg": 50,
-      "heldN": 210.9375,
-      "phase": 0.4,
-      "seed": 1000
-    },
-    {
-      "brokeN": 223.4375,
-      "dirDeg": 50,
-      "heldN": 221.875,
-      "phase": 0.4,
-      "seed": 1001
-    },
-    {
-      "brokeN": 212.5,
-      "dirDeg": 50,
-      "heldN": 210.9375,
-      "phase": 0.4,
-      "seed": 1002
-    },
-    {
-      "brokeN": 204.6875,
-      "dirDeg": 50,
-      "heldN": 203.125,
-      "phase": 0.6,
-      "seed": 1000
-    },
-    {
-      "brokeN": 204.6875,
-      "dirDeg": 50,
-      "heldN": 203.125,
-      "phase": 0.6,
-      "seed": 1001
-    },
-    {
-      "brokeN": 206.25,
-      "dirDeg": 50,
-      "heldN": 204.6875,
-      "phase": 0.6,
-      "seed": 1002
-    },
-    {
-      "brokeN": 210.9375,
-      "dirDeg": 50,
-      "heldN": 209.375,
-      "phase": 0.8,
-      "seed": 1000
-    },
-    {
-      "brokeN": 210.9375,
-      "dirDeg": 50,
-      "heldN": 209.375,
-      "phase": 0.8,
-      "seed": 1001
-    },
-    {
-      "brokeN": 209.375,
-      "dirDeg": 50,
-      "heldN": 207.8125,
-      "phase": 0.8,
-      "seed": 1002
-    },
-    {
-      "brokeN": 209.375,
-      "dirDeg": 60,
-      "heldN": 207.8125,
-      "phase": 0,
-      "seed": 1000
-    },
-    {
-      "brokeN": 212.5,
-      "dirDeg": 60,
-      "heldN": 210.9375,
-      "phase": 0,
-      "seed": 1001
-    },
-    {
-      "brokeN": 212.5,
-      "dirDeg": 60,
-      "heldN": 210.9375,
-      "phase": 0,
-      "seed": 1002
-    },
-    {
-      "brokeN": 212.5,
-      "dirDeg": 60,
-      "heldN": 210.9375,
-      "phase": 0.2,
-      "seed": 1000
-    },
-    {
-      "brokeN": 212.5,
-      "dirDeg": 60,
-      "heldN": 210.9375,
-      "phase": 0.2,
-      "seed": 1001
-    },
-    {
-      "brokeN": 212.5,
-      "dirDeg": 60,
-      "heldN": 210.9375,
-      "phase": 0.2,
-      "seed": 1002
-    },
-    {
-      "brokeN": 237.5,
-      "dirDeg": 60,
-      "heldN": 235.9375,
-      "phase": 0.4,
-      "seed": 1000
-    },
-    {
-      "brokeN": 239.0625,
-      "dirDeg": 60,
-      "heldN": 237.5,
-      "phase": 0.4,
-      "seed": 1001
-    },
-    {
-      "brokeN": 235.9375,
-      "dirDeg": 60,
-      "heldN": 234.375,
-      "phase": 0.4,
-      "seed": 1002
-    },
-    {
-      "brokeN": 195.3125,
-      "dirDeg": 60,
-      "heldN": 193.75,
-      "phase": 0.6,
-      "seed": 1000
-    },
-    {
-      "brokeN": 195.3125,
-      "dirDeg": 60,
-      "heldN": 193.75,
-      "phase": 0.6,
-      "seed": 1001
-    },
-    {
-      "brokeN": 195.3125,
-      "dirDeg": 60,
-      "heldN": 193.75,
-      "phase": 0.6,
-      "seed": 1002
-    },
-    {
-      "brokeN": 195.3125,
-      "dirDeg": 60,
-      "heldN": 193.75,
-      "phase": 0.8,
-      "seed": 1000
-    },
-    {
-      "brokeN": 195.3125,
-      "dirDeg": 60,
-      "heldN": 193.75,
-      "phase": 0.8,
-      "seed": 1001
-    },
-    {
-      "brokeN": 195.3125,
-      "dirDeg": 60,
-      "heldN": 193.75,
-      "phase": 0.8,
-      "seed": 1002
-    },
-    {
-      "brokeN": 196.875,
-      "dirDeg": 70,
-      "heldN": 195.3125,
-      "phase": 0,
-      "seed": 1000
-    },
-    {
-      "brokeN": 196.875,
-      "dirDeg": 70,
-      "heldN": 195.3125,
-      "phase": 0,
-      "seed": 1001
-    },
-    {
-      "brokeN": 198.4375,
-      "dirDeg": 70,
-      "heldN": 196.875,
-      "phase": 0,
-      "seed": 1002
-    },
-    {
-      "brokeN": 206.25,
-      "dirDeg": 70,
-      "heldN": 204.6875,
-      "phase": 0.2,
-      "seed": 1000
-    },
-    {
-      "brokeN": 209.375,
-      "dirDeg": 70,
-      "heldN": 207.8125,
-      "phase": 0.2,
-      "seed": 1001
-    },
-    {
-      "brokeN": 209.375,
-      "dirDeg": 70,
-      "heldN": 207.8125,
-      "phase": 0.2,
-      "seed": 1002
-    },
-    {
-      "brokeN": 248.4375,
-      "dirDeg": 70,
-      "heldN": 246.875,
-      "phase": 0.4,
-      "seed": 1000
-    },
-    {
-      "brokeN": 253.125,
-      "dirDeg": 70,
-      "heldN": 251.5625,
-      "phase": 0.4,
-      "seed": 1001
-    },
-    {
-      "brokeN": 251.5625,
-      "dirDeg": 70,
-      "heldN": 250,
-      "phase": 0.4,
-      "seed": 1002
-    },
-    {
-      "brokeN": 221.875,
-      "dirDeg": 70,
-      "heldN": 220.3125,
-      "phase": 0.6,
-      "seed": 1000
-    },
-    {
-      "brokeN": 223.4375,
-      "dirDeg": 70,
-      "heldN": 221.875,
-      "phase": 0.6,
-      "seed": 1001
-    },
-    {
-      "brokeN": 221.875,
-      "dirDeg": 70,
-      "heldN": 220.3125,
-      "phase": 0.6,
-      "seed": 1002
-    },
-    {
-      "brokeN": 173.4375,
-      "dirDeg": 70,
-      "heldN": 171.875,
-      "phase": 0.8,
-      "seed": 1000
-    },
-    {
-      "brokeN": 173.4375,
-      "dirDeg": 70,
-      "heldN": 171.875,
-      "phase": 0.8,
-      "seed": 1001
-    },
-    {
-      "brokeN": 173.4375,
-      "dirDeg": 70,
-      "heldN": 171.875,
-      "phase": 0.8,
-      "seed": 1002
-    },
-    {
-      "brokeN": 173.4375,
-      "dirDeg": 80,
-      "heldN": 171.875,
-      "phase": 0,
-      "seed": 1000
-    },
-    {
-      "brokeN": 173.4375,
-      "dirDeg": 80,
-      "heldN": 171.875,
-      "phase": 0,
-      "seed": 1001
-    },
-    {
-      "brokeN": 173.4375,
-      "dirDeg": 80,
-      "heldN": 171.875,
-      "phase": 0,
-      "seed": 1002
-    },
-    {
-      "brokeN": 234.375,
-      "dirDeg": 80,
-      "heldN": 232.8125,
-      "phase": 0.2,
-      "seed": 1000
-    },
-    {
-      "brokeN": 234.375,
-      "dirDeg": 80,
-      "heldN": 232.8125,
-      "phase": 0.2,
-      "seed": 1001
-    },
-    {
-      "brokeN": 234.375,
-      "dirDeg": 80,
-      "heldN": 232.8125,
-      "phase": 0.2,
-      "seed": 1002
-    },
-    {
-      "brokeN": 310.9375,
-      "dirDeg": 80,
-      "heldN": 309.375,
-      "phase": 0.4,
-      "seed": 1000
-    },
-    {
-      "brokeN": 307.8125,
-      "dirDeg": 80,
-      "heldN": 306.25,
-      "phase": 0.4,
-      "seed": 1001
-    },
-    {
-      "brokeN": 304.6875,
-      "dirDeg": 80,
-      "heldN": 303.125,
-      "phase": 0.4,
-      "seed": 1002
-    },
-    {
-      "brokeN": 217.1875,
-      "dirDeg": 80,
-      "heldN": 215.625,
-      "phase": 0.6,
-      "seed": 1000
-    },
-    {
-      "brokeN": 217.1875,
-      "dirDeg": 80,
-      "heldN": 215.625,
-      "phase": 0.6,
-      "seed": 1001
-    },
-    {
-      "brokeN": 217.1875,
-      "dirDeg": 80,
-      "heldN": 215.625,
-      "phase": 0.6,
-      "seed": 1002
-    },
-    {
-      "brokeN": 146.875,
-      "dirDeg": 80,
-      "heldN": 145.3125,
-      "phase": 0.8,
-      "seed": 1000
-    },
-    {
-      "brokeN": 146.875,
-      "dirDeg": 80,
-      "heldN": 145.3125,
-      "phase": 0.8,
-      "seed": 1001
-    },
-    {
-      "brokeN": 146.875,
-      "dirDeg": 80,
-      "heldN": 145.3125,
-      "phase": 0.8,
-      "seed": 1002
-    },
-    {
-      "brokeN": 148.4375,
-      "dirDeg": 90,
-      "heldN": 146.875,
-      "phase": 0,
-      "seed": 1000
-    },
-    {
-      "brokeN": 146.875,
-      "dirDeg": 90,
-      "heldN": 145.3125,
-      "phase": 0,
-      "seed": 1001
-    },
-    {
-      "brokeN": 148.4375,
-      "dirDeg": 90,
-      "heldN": 146.875,
-      "phase": 0,
-      "seed": 1002
-    },
-    {
       "brokeN": 256.25,
-      "dirDeg": 90,
-      "heldN": 254.6875,
-      "phase": 0.2,
-      "seed": 1000
-    },
-    {
-      "brokeN": 256.25,
-      "dirDeg": 90,
-      "heldN": 254.6875,
-      "phase": 0.2,
-      "seed": 1001
-    },
-    {
-      "brokeN": 253.125,
-      "dirDeg": 90,
-      "heldN": 251.5625,
-      "phase": 0.2,
-      "seed": 1002
-    },
-    {
-      "brokeN": 296.875,
-      "dirDeg": 90,
-      "heldN": 295.3125,
-      "phase": 0.4,
-      "seed": 1000
-    },
-    {
-      "brokeN": 301.5625,
-      "dirDeg": 90,
-      "heldN": 300,
-      "phase": 0.4,
-      "seed": 1001
-    },
-    {
-      "brokeN": 287.5,
-      "dirDeg": 90,
-      "heldN": 285.9375,
-      "phase": 0.4,
-      "seed": 1002
-    },
-    {
-      "brokeN": 204.6875,
-      "dirDeg": 90,
-      "heldN": 203.125,
-      "phase": 0.6,
-      "seed": 1000
-    },
-    {
-      "brokeN": 203.125,
-      "dirDeg": 90,
-      "heldN": 201.5625,
-      "phase": 0.6,
-      "seed": 1001
-    },
-    {
-      "brokeN": 203.125,
-      "dirDeg": 90,
-      "heldN": 201.5625,
-      "phase": 0.6,
-      "seed": 1002
-    },
-    {
-      "brokeN": 137.5,
-      "dirDeg": 90,
-      "heldN": 135.9375,
-      "phase": 0.8,
-      "seed": 1000
-    },
-    {
-      "brokeN": 137.5,
-      "dirDeg": 90,
-      "heldN": 135.9375,
-      "phase": 0.8,
-      "seed": 1001
-    },
-    {
-      "brokeN": 137.5,
-      "dirDeg": 90,
-      "heldN": 135.9375,
-      "phase": 0.8,
-      "seed": 1002
-    },
-    {
-      "brokeN": 167.1875,
-      "dirDeg": 100,
-      "heldN": 165.625,
-      "phase": 0,
-      "seed": 1000
-    },
-    {
-      "brokeN": 168.75,
-      "dirDeg": 100,
-      "heldN": 167.1875,
-      "phase": 0,
-      "seed": 1001
-    },
-    {
-      "brokeN": 165.625,
-      "dirDeg": 100,
-      "heldN": 164.0625,
-      "phase": 0,
-      "seed": 1002
-    },
-    {
-      "brokeN": 240.625,
-      "dirDeg": 100,
-      "heldN": 239.0625,
-      "phase": 0.2,
-      "seed": 1000
-    },
-    {
-      "brokeN": 240.625,
-      "dirDeg": 100,
-      "heldN": 239.0625,
-      "phase": 0.2,
-      "seed": 1001
-    },
-    {
-      "brokeN": 245.3125,
-      "dirDeg": 100,
-      "heldN": 243.75,
-      "phase": 0.2,
-      "seed": 1002
-    },
-    {
-      "brokeN": 350,
-      "dirDeg": 100,
-      "heldN": 348.4375,
-      "phase": 0.4,
-      "seed": 1000
-    },
-    {
-      "brokeN": 350,
-      "dirDeg": 100,
-      "heldN": 348.4375,
-      "phase": 0.4,
-      "seed": 1001
-    },
-    {
-      "brokeN": 342.1875,
-      "dirDeg": 100,
-      "heldN": 340.625,
-      "phase": 0.4,
-      "seed": 1002
-    },
-    {
-      "brokeN": 159.375,
-      "dirDeg": 100,
-      "heldN": 157.8125,
-      "phase": 0.6,
-      "seed": 1000
-    },
-    {
-      "brokeN": 159.375,
-      "dirDeg": 100,
-      "heldN": 157.8125,
-      "phase": 0.6,
-      "seed": 1001
-    },
-    {
-      "brokeN": 156.25,
-      "dirDeg": 100,
-      "heldN": 154.6875,
-      "phase": 0.6,
-      "seed": 1002
-    },
-    {
-      "brokeN": 123.4375,
-      "dirDeg": 100,
-      "heldN": 121.875,
-      "phase": 0.8,
-      "seed": 1000
-    },
-    {
-      "brokeN": 123.4375,
-      "dirDeg": 100,
-      "heldN": 121.875,
-      "phase": 0.8,
-      "seed": 1001
-    },
-    {
-      "brokeN": 123.4375,
-      "dirDeg": 100,
-      "heldN": 121.875,
-      "phase": 0.8,
-      "seed": 1002
-    },
-    {
-      "brokeN": 160.9375,
-      "dirDeg": 110,
-      "heldN": 159.375,
-      "phase": 0,
-      "seed": 1000
-    },
-    {
-      "brokeN": 160.9375,
-      "dirDeg": 110,
-      "heldN": 159.375,
-      "phase": 0,
-      "seed": 1001
-    },
-    {
-      "brokeN": 160.9375,
-      "dirDeg": 110,
-      "heldN": 159.375,
-      "phase": 0,
-      "seed": 1002
-    },
-    {
-      "brokeN": 248.4375,
-      "dirDeg": 110,
-      "heldN": 246.875,
-      "phase": 0.2,
-      "seed": 1000
-    },
-    {
-      "brokeN": 246.875,
-      "dirDeg": 110,
-      "heldN": 245.3125,
-      "phase": 0.2,
-      "seed": 1001
-    },
-    {
-      "brokeN": 245.3125,
-      "dirDeg": 110,
-      "heldN": 243.75,
-      "phase": 0.2,
-      "seed": 1002
-    },
-    {
-      "brokeN": 270.3125,
-      "dirDeg": 110,
-      "heldN": 268.75,
-      "phase": 0.4,
-      "seed": 1000
-    },
-    {
-      "brokeN": 321.875,
-      "dirDeg": 110,
-      "heldN": 320.3125,
-      "phase": 0.4,
-      "seed": 1001
-    },
-    {
-      "brokeN": 325,
-      "dirDeg": 110,
-      "heldN": 323.4375,
-      "phase": 0.4,
-      "seed": 1002
-    },
-    {
-      "brokeN": 171.875,
-      "dirDeg": 110,
-      "heldN": 170.3125,
-      "phase": 0.6,
-      "seed": 1000
-    },
-    {
-      "brokeN": 171.875,
-      "dirDeg": 110,
-      "heldN": 170.3125,
-      "phase": 0.6,
-      "seed": 1001
-    },
-    {
-      "brokeN": 171.875,
-      "dirDeg": 110,
-      "heldN": 170.3125,
-      "phase": 0.6,
-      "seed": 1002
-    },
-    {
-      "brokeN": 135.9375,
-      "dirDeg": 110,
-      "heldN": 134.375,
-      "phase": 0.8,
-      "seed": 1000
-    },
-    {
-      "brokeN": 135.9375,
-      "dirDeg": 110,
-      "heldN": 134.375,
-      "phase": 0.8,
-      "seed": 1001
-    },
-    {
-      "brokeN": 135.9375,
-      "dirDeg": 110,
-      "heldN": 134.375,
-      "phase": 0.8,
-      "seed": 1002
-    },
-    {
-      "brokeN": 171.875,
-      "dirDeg": 120,
-      "heldN": 170.3125,
-      "phase": 0,
-      "seed": 1000
-    },
-    {
-      "brokeN": 162.5,
-      "dirDeg": 120,
-      "heldN": 160.9375,
-      "phase": 0,
-      "seed": 1001
-    },
-    {
-      "brokeN": 170.3125,
-      "dirDeg": 120,
-      "heldN": 168.75,
-      "phase": 0,
-      "seed": 1002
-    },
-    {
-      "brokeN": 242.1875,
-      "dirDeg": 120,
-      "heldN": 240.625,
-      "phase": 0.2,
-      "seed": 1000
-    },
-    {
-      "brokeN": 243.75,
-      "dirDeg": 120,
-      "heldN": 242.1875,
-      "phase": 0.2,
-      "seed": 1001
-    },
-    {
-      "brokeN": 245.3125,
-      "dirDeg": 120,
-      "heldN": 243.75,
-      "phase": 0.2,
-      "seed": 1002
-    },
-    {
-      "brokeN": 304.6875,
-      "dirDeg": 120,
-      "heldN": 303.125,
-      "phase": 0.4,
-      "seed": 1000
-    },
-    {
-      "brokeN": 304.6875,
-      "dirDeg": 120,
-      "heldN": 303.125,
-      "phase": 0.4,
-      "seed": 1001
-    },
-    {
-      "brokeN": 303.125,
-      "dirDeg": 120,
-      "heldN": 301.5625,
-      "phase": 0.4,
-      "seed": 1002
-    },
-    {
-      "brokeN": 209.375,
-      "dirDeg": 120,
-      "heldN": 207.8125,
-      "phase": 0.6,
-      "seed": 1000
-    },
-    {
-      "brokeN": 243.75,
-      "dirDeg": 120,
-      "heldN": 242.1875,
-      "phase": 0.6,
-      "seed": 1001
-    },
-    {
-      "brokeN": 250,
-      "dirDeg": 120,
-      "heldN": 248.4375,
-      "phase": 0.6,
-      "seed": 1002
-    },
-    {
-      "brokeN": 162.5,
-      "dirDeg": 120,
-      "heldN": 160.9375,
-      "phase": 0.8,
-      "seed": 1000
-    },
-    {
-      "brokeN": 162.5,
-      "dirDeg": 120,
-      "heldN": 160.9375,
-      "phase": 0.8,
-      "seed": 1001
-    },
-    {
-      "brokeN": 192.1875,
-      "dirDeg": 120,
-      "heldN": 190.625,
-      "phase": 0.8,
-      "seed": 1002
-    },
-    {
-      "brokeN": 225,
-      "dirDeg": 130,
-      "heldN": 223.4375,
-      "phase": 0,
-      "seed": 1000
-    },
-    {
-      "brokeN": 228.125,
-      "dirDeg": 130,
-      "heldN": 226.5625,
-      "phase": 0,
-      "seed": 1001
-    },
-    {
-      "brokeN": 229.6875,
-      "dirDeg": 130,
-      "heldN": 228.125,
-      "phase": 0,
-      "seed": 1002
-    },
-    {
-      "brokeN": 234.375,
-      "dirDeg": 130,
-      "heldN": 232.8125,
-      "phase": 0.2,
-      "seed": 1000
-    },
-    {
-      "brokeN": 253.125,
-      "dirDeg": 130,
-      "heldN": 251.5625,
-      "phase": 0.2,
-      "seed": 1001
-    },
-    {
-      "brokeN": 253.125,
-      "dirDeg": 130,
-      "heldN": 251.5625,
-      "phase": 0.2,
-      "seed": 1002
-    },
-    {
-      "brokeN": 301.5625,
-      "dirDeg": 130,
-      "heldN": 300,
-      "phase": 0.4,
-      "seed": 1000
-    },
-    {
-      "brokeN": 223.4375,
-      "dirDeg": 130,
-      "heldN": 221.875,
-      "phase": 0.4,
-      "seed": 1001
-    },
-    {
-      "brokeN": 221.875,
-      "dirDeg": 130,
-      "heldN": 220.3125,
-      "phase": 0.4,
-      "seed": 1002
-    },
-    {
-      "brokeN": 242.1875,
-      "dirDeg": 130,
-      "heldN": 240.625,
-      "phase": 0.6,
-      "seed": 1000
-    },
-    {
-      "brokeN": 210.9375,
-      "dirDeg": 130,
-      "heldN": 209.375,
-      "phase": 0.6,
-      "seed": 1001
-    },
-    {
-      "brokeN": 225,
-      "dirDeg": 130,
-      "heldN": 223.4375,
-      "phase": 0.6,
-      "seed": 1002
-    },
-    {
-      "brokeN": 221.875,
-      "dirDeg": 130,
-      "heldN": 220.3125,
-      "phase": 0.8,
-      "seed": 1000
-    },
-    {
-      "brokeN": 217.1875,
-      "dirDeg": 130,
-      "heldN": 215.625,
-      "phase": 0.8,
-      "seed": 1001
-    },
-    {
-      "brokeN": 221.875,
-      "dirDeg": 130,
-      "heldN": 220.3125,
-      "phase": 0.8,
-      "seed": 1002
-    },
-    {
-      "brokeN": 235.9375,
-      "dirDeg": 140,
-      "heldN": 234.375,
-      "phase": 0,
-      "seed": 1000
-    },
-    {
-      "brokeN": 235.9375,
-      "dirDeg": 140,
-      "heldN": 234.375,
-      "phase": 0,
-      "seed": 1001
-    },
-    {
-      "brokeN": 231.25,
-      "dirDeg": 140,
-      "heldN": 229.6875,
-      "phase": 0,
-      "seed": 1002
-    },
-    {
-      "brokeN": 254.6875,
-      "dirDeg": 140,
-      "heldN": 253.125,
-      "phase": 0.2,
-      "seed": 1000
-    },
-    {
-      "brokeN": 254.6875,
-      "dirDeg": 140,
-      "heldN": 253.125,
-      "phase": 0.2,
-      "seed": 1001
-    },
-    {
-      "brokeN": 254.6875,
-      "dirDeg": 140,
-      "heldN": 253.125,
-      "phase": 0.2,
-      "seed": 1002
-    },
-    {
-      "brokeN": 212.5,
-      "dirDeg": 140,
-      "heldN": 210.9375,
-      "phase": 0.4,
-      "seed": 1000
-    },
-    {
-      "brokeN": 215.625,
-      "dirDeg": 140,
-      "heldN": 214.0625,
-      "phase": 0.4,
-      "seed": 1001
-    },
-    {
-      "brokeN": 215.625,
-      "dirDeg": 140,
-      "heldN": 214.0625,
-      "phase": 0.4,
-      "seed": 1002
-    },
-    {
-      "brokeN": 265.625,
-      "dirDeg": 140,
-      "heldN": 264.0625,
-      "phase": 0.6,
-      "seed": 1000
-    },
-    {
-      "brokeN": 245.3125,
-      "dirDeg": 140,
-      "heldN": 243.75,
-      "phase": 0.6,
-      "seed": 1001
-    },
-    {
-      "brokeN": 250,
-      "dirDeg": 140,
-      "heldN": 248.4375,
-      "phase": 0.6,
-      "seed": 1002
-    },
-    {
-      "brokeN": 250,
-      "dirDeg": 140,
-      "heldN": 248.4375,
-      "phase": 0.8,
-      "seed": 1000
-    },
-    {
-      "brokeN": 250,
-      "dirDeg": 140,
-      "heldN": 248.4375,
-      "phase": 0.8,
-      "seed": 1001
-    },
-    {
-      "brokeN": 246.875,
-      "dirDeg": 140,
-      "heldN": 245.3125,
-      "phase": 0.8,
-      "seed": 1002
-    },
-    {
-      "brokeN": 264.0625,
-      "dirDeg": 150,
-      "heldN": 262.5,
-      "phase": 0,
-      "seed": 1000
-    },
-    {
-      "brokeN": 264.0625,
-      "dirDeg": 150,
-      "heldN": 262.5,
-      "phase": 0,
-      "seed": 1001
-    },
-    {
-      "brokeN": 259.375,
-      "dirDeg": 150,
-      "heldN": 257.8125,
-      "phase": 0,
-      "seed": 1002
-    },
-    {
-      "brokeN": 273.4375,
-      "dirDeg": 150,
-      "heldN": 271.875,
-      "phase": 0.2,
-      "seed": 1000
-    },
-    {
-      "brokeN": 267.1875,
-      "dirDeg": 150,
-      "heldN": 265.625,
-      "phase": 0.2,
-      "seed": 1001
-    },
-    {
-      "brokeN": 265.625,
-      "dirDeg": 150,
-      "heldN": 264.0625,
-      "phase": 0.2,
-      "seed": 1002
-    },
-    {
-      "brokeN": 214.0625,
-      "dirDeg": 150,
-      "heldN": 212.5,
-      "phase": 0.4,
-      "seed": 1000
-    },
-    {
-      "brokeN": 212.5,
-      "dirDeg": 150,
-      "heldN": 210.9375,
-      "phase": 0.4,
-      "seed": 1001
-    },
-    {
-      "brokeN": 212.5,
-      "dirDeg": 150,
-      "heldN": 210.9375,
-      "phase": 0.4,
-      "seed": 1002
-    },
-    {
-      "brokeN": 218.75,
-      "dirDeg": 150,
-      "heldN": 217.1875,
-      "phase": 0.6,
-      "seed": 1000
-    },
-    {
-      "brokeN": 239.0625,
-      "dirDeg": 150,
-      "heldN": 237.5,
-      "phase": 0.6,
-      "seed": 1001
-    },
-    {
-      "brokeN": 243.75,
-      "dirDeg": 150,
-      "heldN": 242.1875,
-      "phase": 0.6,
-      "seed": 1002
-    },
-    {
-      "brokeN": 253.125,
-      "dirDeg": 150,
-      "heldN": 251.5625,
-      "phase": 0.8,
-      "seed": 1000
-    },
-    {
-      "brokeN": 250,
-      "dirDeg": 150,
-      "heldN": 248.4375,
-      "phase": 0.8,
-      "seed": 1001
-    },
-    {
-      "brokeN": 253.125,
-      "dirDeg": 150,
-      "heldN": 251.5625,
-      "phase": 0.8,
-      "seed": 1002
-    },
-    {
-      "brokeN": 265.625,
-      "dirDeg": 160,
-      "heldN": 264.0625,
-      "phase": 0,
-      "seed": 1000
-    },
-    {
-      "brokeN": 265.625,
-      "dirDeg": 160,
-      "heldN": 264.0625,
-      "phase": 0,
-      "seed": 1001
-    },
-    {
-      "brokeN": 276.5625,
-      "dirDeg": 160,
-      "heldN": 275,
-      "phase": 0,
-      "seed": 1002
-    },
-    {
-      "brokeN": 250,
-      "dirDeg": 160,
-      "heldN": 248.4375,
-      "phase": 0.2,
-      "seed": 1000
-    },
-    {
-      "brokeN": 250,
-      "dirDeg": 160,
-      "heldN": 248.4375,
-      "phase": 0.2,
-      "seed": 1001
-    },
-    {
-      "brokeN": 250,
-      "dirDeg": 160,
-      "heldN": 248.4375,
-      "phase": 0.2,
-      "seed": 1002
-    },
-    {
-      "brokeN": 245.3125,
-      "dirDeg": 160,
-      "heldN": 243.75,
-      "phase": 0.4,
-      "seed": 1000
-    },
-    {
-      "brokeN": 245.3125,
-      "dirDeg": 160,
-      "heldN": 243.75,
-      "phase": 0.4,
-      "seed": 1001
-    },
-    {
-      "brokeN": 243.75,
-      "dirDeg": 160,
-      "heldN": 242.1875,
-      "phase": 0.4,
-      "seed": 1002
-    },
-    {
-      "brokeN": 245.3125,
-      "dirDeg": 160,
-      "heldN": 243.75,
-      "phase": 0.6,
-      "seed": 1000
-    },
-    {
-      "brokeN": 242.1875,
-      "dirDeg": 160,
-      "heldN": 240.625,
-      "phase": 0.6,
-      "seed": 1001
-    },
-    {
-      "brokeN": 245.3125,
-      "dirDeg": 160,
-      "heldN": 243.75,
-      "phase": 0.6,
-      "seed": 1002
-    },
-    {
-      "brokeN": 246.875,
-      "dirDeg": 160,
-      "heldN": 245.3125,
-      "phase": 0.8,
-      "seed": 1000
-    },
-    {
-      "brokeN": 245.3125,
-      "dirDeg": 160,
-      "heldN": 243.75,
-      "phase": 0.8,
-      "seed": 1001
-    },
-    {
-      "brokeN": 245.3125,
-      "dirDeg": 160,
-      "heldN": 243.75,
-      "phase": 0.8,
-      "seed": 1002
-    },
-    {
-      "brokeN": 267.1875,
-      "dirDeg": 170,
-      "heldN": 265.625,
-      "phase": 0,
-      "seed": 1000
-    },
-    {
-      "brokeN": 270.3125,
-      "dirDeg": 170,
-      "heldN": 268.75,
-      "phase": 0,
-      "seed": 1001
-    },
-    {
-      "brokeN": 262.5,
-      "dirDeg": 170,
-      "heldN": 260.9375,
-      "phase": 0,
-      "seed": 1002
-    },
-    {
-      "brokeN": 251.5625,
-      "dirDeg": 170,
-      "heldN": 250,
-      "phase": 0.2,
-      "seed": 1000
-    },
-    {
-      "brokeN": 251.5625,
-      "dirDeg": 170,
-      "heldN": 250,
-      "phase": 0.2,
-      "seed": 1001
-    },
-    {
-      "brokeN": 253.125,
-      "dirDeg": 170,
-      "heldN": 251.5625,
-      "phase": 0.2,
-      "seed": 1002
-    },
-    {
-      "brokeN": 239.0625,
-      "dirDeg": 170,
-      "heldN": 237.5,
-      "phase": 0.4,
-      "seed": 1000
-    },
-    {
-      "brokeN": 240.625,
-      "dirDeg": 170,
-      "heldN": 239.0625,
-      "phase": 0.4,
-      "seed": 1001
-    },
-    {
-      "brokeN": 239.0625,
-      "dirDeg": 170,
-      "heldN": 237.5,
-      "phase": 0.4,
-      "seed": 1002
-    },
-    {
-      "brokeN": 246.875,
-      "dirDeg": 170,
-      "heldN": 245.3125,
-      "phase": 0.6,
-      "seed": 1000
-    },
-    {
-      "brokeN": 267.1875,
-      "dirDeg": 170,
-      "heldN": 265.625,
-      "phase": 0.6,
-      "seed": 1001
-    },
-    {
-      "brokeN": 248.4375,
-      "dirDeg": 170,
-      "heldN": 246.875,
-      "phase": 0.6,
-      "seed": 1002
-    },
-    {
-      "brokeN": 237.5,
-      "dirDeg": 170,
-      "heldN": 235.9375,
-      "phase": 0.8,
-      "seed": 1000
-    },
-    {
-      "brokeN": 235.9375,
-      "dirDeg": 170,
-      "heldN": 234.375,
-      "phase": 0.8,
-      "seed": 1001
-    },
-    {
-      "brokeN": 237.5,
-      "dirDeg": 170,
-      "heldN": 235.9375,
-      "phase": 0.8,
-      "seed": 1002
-    },
-    {
-      "brokeN": 256.25,
-      "dirDeg": 180,
+      "dirDeg": 0,
       "heldN": 254.6875,
       "phase": 0,
       "seed": 1000
     },
     {
       "brokeN": 257.8125,
-      "dirDeg": 180,
+      "dirDeg": 0,
       "heldN": 256.25,
       "phase": 0,
       "seed": 1001
     },
     {
       "brokeN": 256.25,
-      "dirDeg": 180,
+      "dirDeg": 0,
       "heldN": 254.6875,
       "phase": 0,
       "seed": 1002
     },
     {
       "brokeN": 207.8125,
-      "dirDeg": 180,
+      "dirDeg": 0,
       "heldN": 206.25,
       "phase": 0.2,
       "seed": 1000
     },
     {
       "brokeN": 207.8125,
-      "dirDeg": 180,
+      "dirDeg": 0,
       "heldN": 206.25,
       "phase": 0.2,
       "seed": 1001
     },
     {
       "brokeN": 207.8125,
-      "dirDeg": 180,
+      "dirDeg": 0,
       "heldN": 206.25,
       "phase": 0.2,
       "seed": 1002
     },
     {
       "brokeN": 229.6875,
-      "dirDeg": 180,
+      "dirDeg": 0,
       "heldN": 228.125,
       "phase": 0.4,
       "seed": 1000
     },
     {
       "brokeN": 229.6875,
-      "dirDeg": 180,
+      "dirDeg": 0,
       "heldN": 228.125,
       "phase": 0.4,
       "seed": 1001
     },
     {
       "brokeN": 229.6875,
-      "dirDeg": 180,
+      "dirDeg": 0,
       "heldN": 228.125,
       "phase": 0.4,
       "seed": 1002
     },
     {
       "brokeN": 260.9375,
-      "dirDeg": 180,
+      "dirDeg": 0,
       "heldN": 259.375,
       "phase": 0.6,
       "seed": 1000
     },
     {
       "brokeN": 260.9375,
-      "dirDeg": 180,
+      "dirDeg": 0,
       "heldN": 259.375,
       "phase": 0.6,
       "seed": 1001
     },
     {
       "brokeN": 262.5,
-      "dirDeg": 180,
+      "dirDeg": 0,
       "heldN": 260.9375,
       "phase": 0.6,
       "seed": 1002
     },
     {
       "brokeN": 218.75,
-      "dirDeg": 180,
+      "dirDeg": 0,
       "heldN": 217.1875,
       "phase": 0.8,
       "seed": 1000
     },
     {
       "brokeN": 220.3125,
-      "dirDeg": 180,
+      "dirDeg": 0,
       "heldN": 218.75,
       "phase": 0.8,
       "seed": 1001
     },
     {
       "brokeN": 218.75,
-      "dirDeg": 180,
+      "dirDeg": 0,
       "heldN": 217.1875,
       "phase": 0.8,
       "seed": 1002
     },
     {
       "brokeN": 223.4375,
-      "dirDeg": 190,
+      "dirDeg": 10,
       "heldN": 221.875,
       "phase": 0,
       "seed": 1000
     },
     {
       "brokeN": 225,
-      "dirDeg": 190,
+      "dirDeg": 10,
       "heldN": 223.4375,
       "phase": 0,
       "seed": 1001
     },
     {
       "brokeN": 225,
-      "dirDeg": 190,
+      "dirDeg": 10,
       "heldN": 223.4375,
       "phase": 0,
       "seed": 1002
     },
     {
       "brokeN": 187.5,
-      "dirDeg": 190,
+      "dirDeg": 10,
       "heldN": 185.9375,
       "phase": 0.2,
       "seed": 1000
     },
     {
       "brokeN": 187.5,
-      "dirDeg": 190,
+      "dirDeg": 10,
       "heldN": 185.9375,
       "phase": 0.2,
       "seed": 1001
     },
     {
       "brokeN": 187.5,
-      "dirDeg": 190,
+      "dirDeg": 10,
       "heldN": 185.9375,
       "phase": 0.2,
       "seed": 1002
     },
     {
       "brokeN": 229.6875,
-      "dirDeg": 190,
+      "dirDeg": 10,
       "heldN": 228.125,
       "phase": 0.4,
       "seed": 1000
     },
     {
       "brokeN": 229.6875,
-      "dirDeg": 190,
+      "dirDeg": 10,
       "heldN": 228.125,
       "phase": 0.4,
       "seed": 1001
     },
     {
       "brokeN": 231.25,
-      "dirDeg": 190,
+      "dirDeg": 10,
       "heldN": 229.6875,
       "phase": 0.4,
       "seed": 1002
     },
     {
       "brokeN": 282.8125,
-      "dirDeg": 190,
+      "dirDeg": 10,
       "heldN": 281.25,
       "phase": 0.6,
       "seed": 1000
     },
     {
       "brokeN": 282.8125,
-      "dirDeg": 190,
+      "dirDeg": 10,
       "heldN": 281.25,
       "phase": 0.6,
       "seed": 1001
     },
     {
       "brokeN": 282.8125,
-      "dirDeg": 190,
+      "dirDeg": 10,
       "heldN": 281.25,
       "phase": 0.6,
       "seed": 1002
     },
     {
       "brokeN": 240.625,
-      "dirDeg": 190,
+      "dirDeg": 10,
       "heldN": 239.0625,
       "phase": 0.8,
       "seed": 1000
     },
     {
       "brokeN": 240.625,
-      "dirDeg": 190,
+      "dirDeg": 10,
       "heldN": 239.0625,
       "phase": 0.8,
       "seed": 1001
     },
     {
       "brokeN": 239.0625,
-      "dirDeg": 190,
+      "dirDeg": 10,
       "heldN": 237.5,
       "phase": 0.8,
       "seed": 1002
     },
     {
       "brokeN": 304.6875,
-      "dirDeg": 200,
+      "dirDeg": 20,
       "heldN": 303.125,
       "phase": 0,
       "seed": 1000
     },
     {
       "brokeN": 304.6875,
-      "dirDeg": 200,
+      "dirDeg": 20,
       "heldN": 303.125,
       "phase": 0,
       "seed": 1001
     },
     {
       "brokeN": 301.5625,
-      "dirDeg": 200,
+      "dirDeg": 20,
       "heldN": 300,
       "phase": 0,
       "seed": 1002
     },
     {
       "brokeN": 189.0625,
-      "dirDeg": 200,
+      "dirDeg": 20,
       "heldN": 187.5,
       "phase": 0.2,
       "seed": 1000
     },
     {
       "brokeN": 189.0625,
-      "dirDeg": 200,
+      "dirDeg": 20,
       "heldN": 187.5,
       "phase": 0.2,
       "seed": 1001
     },
     {
       "brokeN": 189.0625,
-      "dirDeg": 200,
+      "dirDeg": 20,
       "heldN": 187.5,
       "phase": 0.2,
       "seed": 1002
     },
     {
       "brokeN": 239.0625,
-      "dirDeg": 200,
+      "dirDeg": 20,
       "heldN": 237.5,
       "phase": 0.4,
       "seed": 1000
     },
     {
       "brokeN": 242.1875,
-      "dirDeg": 200,
+      "dirDeg": 20,
       "heldN": 240.625,
       "phase": 0.4,
       "seed": 1001
     },
     {
       "brokeN": 242.1875,
-      "dirDeg": 200,
+      "dirDeg": 20,
       "heldN": 240.625,
       "phase": 0.4,
       "seed": 1002
     },
     {
       "brokeN": 293.75,
-      "dirDeg": 200,
+      "dirDeg": 20,
       "heldN": 292.1875,
       "phase": 0.6,
       "seed": 1000
     },
     {
       "brokeN": 293.75,
-      "dirDeg": 200,
+      "dirDeg": 20,
       "heldN": 292.1875,
       "phase": 0.6,
       "seed": 1001
     },
     {
       "brokeN": 298.4375,
-      "dirDeg": 200,
+      "dirDeg": 20,
       "heldN": 296.875,
       "phase": 0.6,
       "seed": 1002
     },
     {
       "brokeN": 296.875,
-      "dirDeg": 200,
+      "dirDeg": 20,
       "heldN": 295.3125,
       "phase": 0.8,
       "seed": 1000
     },
     {
       "brokeN": 296.875,
-      "dirDeg": 200,
+      "dirDeg": 20,
       "heldN": 295.3125,
       "phase": 0.8,
       "seed": 1001
     },
     {
       "brokeN": 296.875,
-      "dirDeg": 200,
+      "dirDeg": 20,
       "heldN": 295.3125,
       "phase": 0.8,
       "seed": 1002
     },
     {
       "brokeN": 318.75,
-      "dirDeg": 210,
+      "dirDeg": 30,
       "heldN": 317.1875,
       "phase": 0,
       "seed": 1000
     },
     {
       "brokeN": 353.125,
-      "dirDeg": 210,
+      "dirDeg": 30,
       "heldN": 351.5625,
       "phase": 0,
       "seed": 1001
     },
     {
       "brokeN": 354.6875,
-      "dirDeg": 210,
+      "dirDeg": 30,
       "heldN": 353.125,
       "phase": 0,
       "seed": 1002
     },
     {
       "brokeN": 201.5625,
-      "dirDeg": 210,
+      "dirDeg": 30,
       "heldN": 200,
       "phase": 0.2,
       "seed": 1000
     },
     {
       "brokeN": 201.5625,
-      "dirDeg": 210,
+      "dirDeg": 30,
       "heldN": 200,
       "phase": 0.2,
       "seed": 1001
     },
     {
       "brokeN": 204.6875,
-      "dirDeg": 210,
+      "dirDeg": 30,
       "heldN": 203.125,
       "phase": 0.2,
       "seed": 1002
     },
     {
       "brokeN": 248.4375,
-      "dirDeg": 210,
+      "dirDeg": 30,
       "heldN": 246.875,
       "phase": 0.4,
       "seed": 1000
     },
     {
       "brokeN": 248.4375,
-      "dirDeg": 210,
+      "dirDeg": 30,
       "heldN": 246.875,
       "phase": 0.4,
       "seed": 1001
     },
     {
       "brokeN": 248.4375,
-      "dirDeg": 210,
+      "dirDeg": 30,
       "heldN": 246.875,
       "phase": 0.4,
       "seed": 1002
     },
     {
       "brokeN": 284.375,
-      "dirDeg": 210,
+      "dirDeg": 30,
       "heldN": 282.8125,
       "phase": 0.6,
       "seed": 1000
     },
     {
       "brokeN": 284.375,
-      "dirDeg": 210,
+      "dirDeg": 30,
       "heldN": 282.8125,
       "phase": 0.6,
       "seed": 1001
     },
     {
       "brokeN": 287.5,
-      "dirDeg": 210,
+      "dirDeg": 30,
       "heldN": 285.9375,
       "phase": 0.6,
       "seed": 1002
     },
     {
       "brokeN": 309.375,
-      "dirDeg": 210,
+      "dirDeg": 30,
       "heldN": 307.8125,
       "phase": 0.8,
       "seed": 1000
     },
     {
       "brokeN": 312.5,
-      "dirDeg": 210,
+      "dirDeg": 30,
       "heldN": 310.9375,
       "phase": 0.8,
       "seed": 1001
     },
     {
       "brokeN": 310.9375,
-      "dirDeg": 210,
+      "dirDeg": 30,
       "heldN": 309.375,
       "phase": 0.8,
       "seed": 1002
     },
     {
       "brokeN": 315.625,
-      "dirDeg": 220,
+      "dirDeg": 40,
       "heldN": 314.0625,
       "phase": 0,
       "seed": 1000
     },
     {
       "brokeN": 315.625,
-      "dirDeg": 220,
+      "dirDeg": 40,
       "heldN": 314.0625,
       "phase": 0,
       "seed": 1001
     },
     {
       "brokeN": 315.625,
-      "dirDeg": 220,
+      "dirDeg": 40,
       "heldN": 314.0625,
       "phase": 0,
       "seed": 1002
     },
     {
       "brokeN": 225,
-      "dirDeg": 220,
+      "dirDeg": 40,
       "heldN": 223.4375,
       "phase": 0.2,
       "seed": 1000
     },
     {
       "brokeN": 225,
-      "dirDeg": 220,
+      "dirDeg": 40,
       "heldN": 223.4375,
       "phase": 0.2,
       "seed": 1001
     },
     {
       "brokeN": 218.75,
-      "dirDeg": 220,
+      "dirDeg": 40,
       "heldN": 217.1875,
       "phase": 0.2,
       "seed": 1002
     },
     {
       "brokeN": 237.5,
-      "dirDeg": 220,
+      "dirDeg": 40,
       "heldN": 235.9375,
       "phase": 0.4,
       "seed": 1000
     },
     {
       "brokeN": 235.9375,
-      "dirDeg": 220,
+      "dirDeg": 40,
       "heldN": 234.375,
       "phase": 0.4,
       "seed": 1001
     },
     {
       "brokeN": 225,
-      "dirDeg": 220,
+      "dirDeg": 40,
       "heldN": 223.4375,
       "phase": 0.4,
       "seed": 1002
     },
     {
       "brokeN": 284.375,
-      "dirDeg": 220,
+      "dirDeg": 40,
       "heldN": 282.8125,
       "phase": 0.6,
       "seed": 1000
     },
     {
       "brokeN": 290.625,
-      "dirDeg": 220,
+      "dirDeg": 40,
       "heldN": 289.0625,
       "phase": 0.6,
       "seed": 1001
     },
     {
       "brokeN": 290.625,
-      "dirDeg": 220,
+      "dirDeg": 40,
       "heldN": 289.0625,
       "phase": 0.6,
       "seed": 1002
     },
     {
       "brokeN": 306.25,
-      "dirDeg": 220,
+      "dirDeg": 40,
       "heldN": 304.6875,
       "phase": 0.8,
       "seed": 1000
     },
     {
       "brokeN": 306.25,
-      "dirDeg": 220,
+      "dirDeg": 40,
       "heldN": 304.6875,
       "phase": 0.8,
       "seed": 1001
     },
     {
       "brokeN": 326.5625,
-      "dirDeg": 220,
+      "dirDeg": 40,
       "heldN": 325,
       "phase": 0.8,
       "seed": 1002
     },
     {
       "brokeN": 281.25,
-      "dirDeg": 230,
+      "dirDeg": 50,
       "heldN": 279.6875,
       "phase": 0,
       "seed": 1000
     },
     {
       "brokeN": 284.375,
-      "dirDeg": 230,
+      "dirDeg": 50,
       "heldN": 282.8125,
       "phase": 0,
       "seed": 1001
     },
     {
       "brokeN": 278.125,
-      "dirDeg": 230,
+      "dirDeg": 50,
       "heldN": 276.5625,
       "phase": 0,
       "seed": 1002
     },
     {
       "brokeN": 239.0625,
-      "dirDeg": 230,
+      "dirDeg": 50,
       "heldN": 237.5,
       "phase": 0.2,
       "seed": 1000
     },
     {
       "brokeN": 239.0625,
-      "dirDeg": 230,
+      "dirDeg": 50,
       "heldN": 237.5,
       "phase": 0.2,
       "seed": 1001
     },
     {
       "brokeN": 239.0625,
-      "dirDeg": 230,
+      "dirDeg": 50,
       "heldN": 237.5,
       "phase": 0.2,
       "seed": 1002
     },
     {
       "brokeN": 225,
-      "dirDeg": 230,
+      "dirDeg": 50,
       "heldN": 223.4375,
       "phase": 0.4,
       "seed": 1000
     },
     {
       "brokeN": 225,
-      "dirDeg": 230,
+      "dirDeg": 50,
       "heldN": 223.4375,
       "phase": 0.4,
       "seed": 1001
     },
     {
       "brokeN": 225,
-      "dirDeg": 230,
+      "dirDeg": 50,
       "heldN": 223.4375,
       "phase": 0.4,
       "seed": 1002
     },
     {
       "brokeN": 206.25,
-      "dirDeg": 230,
+      "dirDeg": 50,
       "heldN": 204.6875,
       "phase": 0.6,
       "seed": 1000
     },
     {
       "brokeN": 206.25,
-      "dirDeg": 230,
+      "dirDeg": 50,
       "heldN": 204.6875,
       "phase": 0.6,
       "seed": 1001
     },
     {
       "brokeN": 207.8125,
-      "dirDeg": 230,
+      "dirDeg": 50,
       "heldN": 206.25,
       "phase": 0.6,
       "seed": 1002
     },
     {
       "brokeN": 254.6875,
-      "dirDeg": 230,
+      "dirDeg": 50,
       "heldN": 253.125,
       "phase": 0.8,
       "seed": 1000
     },
     {
       "brokeN": 250,
-      "dirDeg": 230,
+      "dirDeg": 50,
       "heldN": 248.4375,
       "phase": 0.8,
       "seed": 1001
     },
     {
       "brokeN": 250,
-      "dirDeg": 230,
+      "dirDeg": 50,
       "heldN": 248.4375,
       "phase": 0.8,
       "seed": 1002
     },
     {
       "brokeN": 295.3125,
-      "dirDeg": 240,
+      "dirDeg": 60,
       "heldN": 293.75,
       "phase": 0,
       "seed": 1000
     },
     {
       "brokeN": 287.5,
-      "dirDeg": 240,
+      "dirDeg": 60,
       "heldN": 285.9375,
       "phase": 0,
       "seed": 1001
     },
     {
       "brokeN": 290.625,
-      "dirDeg": 240,
+      "dirDeg": 60,
       "heldN": 289.0625,
       "phase": 0,
       "seed": 1002
     },
     {
       "brokeN": 228.125,
-      "dirDeg": 240,
+      "dirDeg": 60,
       "heldN": 226.5625,
       "phase": 0.2,
       "seed": 1000
     },
     {
       "brokeN": 228.125,
-      "dirDeg": 240,
+      "dirDeg": 60,
       "heldN": 226.5625,
       "phase": 0.2,
       "seed": 1001
     },
     {
       "brokeN": 228.125,
-      "dirDeg": 240,
+      "dirDeg": 60,
       "heldN": 226.5625,
       "phase": 0.2,
       "seed": 1002
     },
     {
       "brokeN": 181.25,
-      "dirDeg": 240,
+      "dirDeg": 60,
       "heldN": 179.6875,
       "phase": 0.4,
       "seed": 1000
     },
     {
       "brokeN": 181.25,
-      "dirDeg": 240,
+      "dirDeg": 60,
       "heldN": 179.6875,
       "phase": 0.4,
       "seed": 1001
     },
     {
       "brokeN": 150,
-      "dirDeg": 240,
+      "dirDeg": 60,
       "heldN": 148.4375,
       "phase": 0.4,
       "seed": 1002
     },
     {
       "brokeN": 215.625,
-      "dirDeg": 240,
+      "dirDeg": 60,
       "heldN": 214.0625,
       "phase": 0.6,
       "seed": 1000
     },
     {
       "brokeN": 221.875,
-      "dirDeg": 240,
+      "dirDeg": 60,
       "heldN": 220.3125,
       "phase": 0.6,
       "seed": 1001
     },
     {
       "brokeN": 221.875,
-      "dirDeg": 240,
+      "dirDeg": 60,
       "heldN": 220.3125,
       "phase": 0.6,
       "seed": 1002
     },
     {
       "brokeN": 237.5,
-      "dirDeg": 240,
+      "dirDeg": 60,
       "heldN": 235.9375,
       "phase": 0.8,
       "seed": 1000
     },
     {
       "brokeN": 239.0625,
-      "dirDeg": 240,
+      "dirDeg": 60,
       "heldN": 237.5,
       "phase": 0.8,
       "seed": 1001
     },
     {
       "brokeN": 239.0625,
-      "dirDeg": 240,
+      "dirDeg": 60,
       "heldN": 237.5,
       "phase": 0.8,
       "seed": 1002
     },
     {
       "brokeN": 226.5625,
-      "dirDeg": 250,
+      "dirDeg": 70,
       "heldN": 225,
       "phase": 0,
       "seed": 1000
     },
     {
       "brokeN": 225,
-      "dirDeg": 250,
+      "dirDeg": 70,
       "heldN": 223.4375,
       "phase": 0,
       "seed": 1001
     },
     {
       "brokeN": 198.4375,
-      "dirDeg": 250,
+      "dirDeg": 70,
       "heldN": 196.875,
       "phase": 0,
       "seed": 1002
     },
     {
       "brokeN": 142.1875,
-      "dirDeg": 250,
+      "dirDeg": 70,
       "heldN": 140.625,
       "phase": 0.2,
       "seed": 1000
     },
     {
       "brokeN": 142.1875,
-      "dirDeg": 250,
+      "dirDeg": 70,
       "heldN": 140.625,
       "phase": 0.2,
       "seed": 1001
     },
     {
       "brokeN": 150,
-      "dirDeg": 250,
+      "dirDeg": 70,
       "heldN": 148.4375,
       "phase": 0.2,
       "seed": 1002
     },
     {
       "brokeN": 170.3125,
-      "dirDeg": 250,
+      "dirDeg": 70,
       "heldN": 168.75,
       "phase": 0.4,
       "seed": 1000
     },
     {
       "brokeN": 171.875,
-      "dirDeg": 250,
+      "dirDeg": 70,
       "heldN": 170.3125,
       "phase": 0.4,
       "seed": 1001
     },
     {
       "brokeN": 171.875,
-      "dirDeg": 250,
+      "dirDeg": 70,
       "heldN": 170.3125,
       "phase": 0.4,
       "seed": 1002
     },
     {
       "brokeN": 145.3125,
-      "dirDeg": 250,
+      "dirDeg": 70,
       "heldN": 143.75,
       "phase": 0.6,
       "seed": 1000
     },
     {
       "brokeN": 145.3125,
-      "dirDeg": 250,
+      "dirDeg": 70,
       "heldN": 143.75,
       "phase": 0.6,
       "seed": 1001
     },
     {
       "brokeN": 146.875,
-      "dirDeg": 250,
+      "dirDeg": 70,
       "heldN": 145.3125,
       "phase": 0.6,
       "seed": 1002
     },
     {
       "brokeN": 226.5625,
-      "dirDeg": 250,
+      "dirDeg": 70,
       "heldN": 225,
       "phase": 0.8,
       "seed": 1000
     },
     {
       "brokeN": 226.5625,
-      "dirDeg": 250,
+      "dirDeg": 70,
       "heldN": 225,
       "phase": 0.8,
       "seed": 1001
     },
     {
       "brokeN": 226.5625,
-      "dirDeg": 250,
+      "dirDeg": 70,
       "heldN": 225,
       "phase": 0.8,
       "seed": 1002
     },
     {
       "brokeN": 226.5625,
-      "dirDeg": 260,
+      "dirDeg": 80,
       "heldN": 225,
       "phase": 0,
       "seed": 1000
     },
     {
       "brokeN": 226.5625,
-      "dirDeg": 260,
+      "dirDeg": 80,
       "heldN": 225,
       "phase": 0,
       "seed": 1001
     },
     {
       "brokeN": 193.75,
-      "dirDeg": 260,
+      "dirDeg": 80,
       "heldN": 192.1875,
       "phase": 0,
       "seed": 1002
     },
     {
       "brokeN": 64.0625,
-      "dirDeg": 260,
+      "dirDeg": 80,
       "heldN": 62.5,
       "phase": 0.2,
       "seed": 1000
     },
     {
       "brokeN": 118.75,
-      "dirDeg": 260,
+      "dirDeg": 80,
       "heldN": 117.1875,
       "phase": 0.2,
       "seed": 1001
     },
     {
       "brokeN": 118.75,
-      "dirDeg": 260,
+      "dirDeg": 80,
       "heldN": 117.1875,
       "phase": 0.2,
       "seed": 1002
     },
     {
       "brokeN": 118.75,
-      "dirDeg": 260,
+      "dirDeg": 80,
       "heldN": 117.1875,
       "phase": 0.4,
       "seed": 1000
     },
     {
       "brokeN": 134.375,
-      "dirDeg": 260,
+      "dirDeg": 80,
       "heldN": 132.8125,
       "phase": 0.4,
       "seed": 1001
     },
     {
       "brokeN": 134.375,
-      "dirDeg": 260,
+      "dirDeg": 80,
       "heldN": 132.8125,
       "phase": 0.4,
       "seed": 1002
     },
     {
       "brokeN": 145.3125,
-      "dirDeg": 260,
+      "dirDeg": 80,
       "heldN": 143.75,
       "phase": 0.6,
       "seed": 1000
     },
     {
       "brokeN": 145.3125,
-      "dirDeg": 260,
+      "dirDeg": 80,
       "heldN": 143.75,
       "phase": 0.6,
       "seed": 1001
     },
     {
       "brokeN": 146.875,
-      "dirDeg": 260,
+      "dirDeg": 80,
       "heldN": 145.3125,
       "phase": 0.6,
       "seed": 1002
     },
     {
       "brokeN": 239.0625,
-      "dirDeg": 260,
+      "dirDeg": 80,
       "heldN": 237.5,
       "phase": 0.8,
       "seed": 1000
     },
     {
       "brokeN": 239.0625,
-      "dirDeg": 260,
+      "dirDeg": 80,
       "heldN": 237.5,
       "phase": 0.8,
       "seed": 1001
     },
     {
       "brokeN": 239.0625,
-      "dirDeg": 260,
+      "dirDeg": 80,
       "heldN": 237.5,
       "phase": 0.8,
       "seed": 1002
     },
     {
       "brokeN": 210.9375,
-      "dirDeg": 270,
+      "dirDeg": 90,
       "heldN": 209.375,
       "phase": 0,
       "seed": 1000
     },
     {
       "brokeN": 210.9375,
-      "dirDeg": 270,
+      "dirDeg": 90,
       "heldN": 209.375,
       "phase": 0,
       "seed": 1001
     },
     {
       "brokeN": 209.375,
-      "dirDeg": 270,
+      "dirDeg": 90,
       "heldN": 207.8125,
       "phase": 0,
       "seed": 1002
     },
     {
       "brokeN": 106.25,
-      "dirDeg": 270,
+      "dirDeg": 90,
       "heldN": 104.6875,
       "phase": 0.2,
       "seed": 1000
     },
     {
       "brokeN": 101.5625,
-      "dirDeg": 270,
+      "dirDeg": 90,
       "heldN": 100,
       "phase": 0.2,
       "seed": 1001
     },
     {
       "brokeN": 101.5625,
-      "dirDeg": 270,
+      "dirDeg": 90,
       "heldN": 100,
       "phase": 0.2,
       "seed": 1002
     },
     {
       "brokeN": 82.8125,
-      "dirDeg": 270,
+      "dirDeg": 90,
       "heldN": 81.25,
       "phase": 0.4,
       "seed": 1000
     },
     {
       "brokeN": 82.8125,
-      "dirDeg": 270,
+      "dirDeg": 90,
       "heldN": 81.25,
       "phase": 0.4,
       "seed": 1001
     },
     {
       "brokeN": 82.8125,
-      "dirDeg": 270,
+      "dirDeg": 90,
       "heldN": 81.25,
       "phase": 0.4,
       "seed": 1002
     },
     {
       "brokeN": 168.75,
-      "dirDeg": 270,
+      "dirDeg": 90,
       "heldN": 167.1875,
       "phase": 0.6,
       "seed": 1000
     },
     {
       "brokeN": 168.75,
-      "dirDeg": 270,
+      "dirDeg": 90,
       "heldN": 167.1875,
       "phase": 0.6,
       "seed": 1001
     },
     {
       "brokeN": 171.875,
-      "dirDeg": 270,
+      "dirDeg": 90,
       "heldN": 170.3125,
       "phase": 0.6,
       "seed": 1002
     },
     {
       "brokeN": 232.8125,
-      "dirDeg": 270,
+      "dirDeg": 90,
       "heldN": 231.25,
       "phase": 0.8,
       "seed": 1000
     },
     {
       "brokeN": 229.6875,
-      "dirDeg": 270,
+      "dirDeg": 90,
       "heldN": 228.125,
       "phase": 0.8,
       "seed": 1001
     },
     {
       "brokeN": 239.0625,
-      "dirDeg": 270,
+      "dirDeg": 90,
       "heldN": 237.5,
       "phase": 0.8,
       "seed": 1002
     },
     {
       "brokeN": 215.625,
-      "dirDeg": 280,
+      "dirDeg": 100,
       "heldN": 214.0625,
       "phase": 0,
       "seed": 1000
     },
     {
       "brokeN": 215.625,
-      "dirDeg": 280,
+      "dirDeg": 100,
       "heldN": 214.0625,
       "phase": 0,
       "seed": 1001
     },
     {
       "brokeN": 214.0625,
-      "dirDeg": 280,
+      "dirDeg": 100,
       "heldN": 212.5,
       "phase": 0,
       "seed": 1002
     },
     {
       "brokeN": 106.25,
-      "dirDeg": 280,
+      "dirDeg": 100,
       "heldN": 104.6875,
       "phase": 0.2,
       "seed": 1000
     },
     {
       "brokeN": 109.375,
-      "dirDeg": 280,
+      "dirDeg": 100,
       "heldN": 107.8125,
       "phase": 0.2,
       "seed": 1001
     },
     {
       "brokeN": 107.8125,
-      "dirDeg": 280,
+      "dirDeg": 100,
       "heldN": 106.25,
       "phase": 0.2,
       "seed": 1002
     },
     {
       "brokeN": 118.75,
-      "dirDeg": 280,
+      "dirDeg": 100,
       "heldN": 117.1875,
       "phase": 0.4,
       "seed": 1000
     },
     {
       "brokeN": 118.75,
-      "dirDeg": 280,
+      "dirDeg": 100,
       "heldN": 117.1875,
       "phase": 0.4,
       "seed": 1001
     },
     {
       "brokeN": 112.5,
-      "dirDeg": 280,
+      "dirDeg": 100,
       "heldN": 110.9375,
       "phase": 0.4,
       "seed": 1002
     },
     {
       "brokeN": 206.25,
-      "dirDeg": 280,
+      "dirDeg": 100,
       "heldN": 204.6875,
       "phase": 0.6,
       "seed": 1000
     },
     {
       "brokeN": 204.6875,
-      "dirDeg": 280,
+      "dirDeg": 100,
       "heldN": 203.125,
       "phase": 0.6,
       "seed": 1001
     },
     {
       "brokeN": 206.25,
-      "dirDeg": 280,
+      "dirDeg": 100,
       "heldN": 204.6875,
       "phase": 0.6,
       "seed": 1002
     },
     {
       "brokeN": 228.125,
-      "dirDeg": 280,
+      "dirDeg": 100,
       "heldN": 226.5625,
       "phase": 0.8,
       "seed": 1000
     },
     {
       "brokeN": 228.125,
-      "dirDeg": 280,
+      "dirDeg": 100,
       "heldN": 226.5625,
       "phase": 0.8,
       "seed": 1001
     },
     {
       "brokeN": 226.5625,
-      "dirDeg": 280,
+      "dirDeg": 100,
       "heldN": 225,
       "phase": 0.8,
       "seed": 1002
     },
     {
       "brokeN": 218.75,
-      "dirDeg": 290,
+      "dirDeg": 110,
       "heldN": 217.1875,
       "phase": 0,
       "seed": 1000
     },
     {
       "brokeN": 217.1875,
-      "dirDeg": 290,
+      "dirDeg": 110,
       "heldN": 215.625,
       "phase": 0,
       "seed": 1001
     },
     {
       "brokeN": 217.1875,
-      "dirDeg": 290,
+      "dirDeg": 110,
       "heldN": 215.625,
       "phase": 0,
       "seed": 1002
     },
     {
       "brokeN": 151.5625,
-      "dirDeg": 290,
+      "dirDeg": 110,
       "heldN": 150,
       "phase": 0.2,
       "seed": 1000
     },
     {
       "brokeN": 151.5625,
-      "dirDeg": 290,
+      "dirDeg": 110,
       "heldN": 150,
       "phase": 0.2,
       "seed": 1001
     },
     {
       "brokeN": 151.5625,
-      "dirDeg": 290,
+      "dirDeg": 110,
       "heldN": 150,
       "phase": 0.2,
       "seed": 1002
     },
     {
       "brokeN": 140.625,
-      "dirDeg": 290,
+      "dirDeg": 110,
       "heldN": 139.0625,
       "phase": 0.4,
       "seed": 1000
     },
     {
       "brokeN": 140.625,
-      "dirDeg": 290,
+      "dirDeg": 110,
       "heldN": 139.0625,
       "phase": 0.4,
       "seed": 1001
     },
     {
       "brokeN": 140.625,
-      "dirDeg": 290,
+      "dirDeg": 110,
       "heldN": 139.0625,
       "phase": 0.4,
       "seed": 1002
     },
     {
       "brokeN": 196.875,
-      "dirDeg": 290,
+      "dirDeg": 110,
       "heldN": 195.3125,
       "phase": 0.6,
       "seed": 1000
     },
     {
       "brokeN": 196.875,
-      "dirDeg": 290,
+      "dirDeg": 110,
       "heldN": 195.3125,
       "phase": 0.6,
       "seed": 1001
     },
     {
       "brokeN": 198.4375,
-      "dirDeg": 290,
+      "dirDeg": 110,
       "heldN": 196.875,
       "phase": 0.6,
       "seed": 1002
     },
     {
       "brokeN": 221.875,
-      "dirDeg": 290,
+      "dirDeg": 110,
       "heldN": 220.3125,
       "phase": 0.8,
       "seed": 1000
     },
     {
       "brokeN": 220.3125,
-      "dirDeg": 290,
+      "dirDeg": 110,
       "heldN": 218.75,
       "phase": 0.8,
       "seed": 1001
     },
     {
       "brokeN": 221.875,
-      "dirDeg": 290,
+      "dirDeg": 110,
       "heldN": 220.3125,
       "phase": 0.8,
       "seed": 1002
     },
     {
       "brokeN": 201.5625,
-      "dirDeg": 300,
+      "dirDeg": 120,
       "heldN": 200,
       "phase": 0,
       "seed": 1000
     },
     {
       "brokeN": 200,
-      "dirDeg": 300,
+      "dirDeg": 120,
       "heldN": 198.4375,
       "phase": 0,
       "seed": 1001
     },
     {
       "brokeN": 201.5625,
-      "dirDeg": 300,
+      "dirDeg": 120,
       "heldN": 200,
       "phase": 0,
       "seed": 1002
     },
     {
       "brokeN": 179.6875,
-      "dirDeg": 300,
+      "dirDeg": 120,
       "heldN": 178.125,
       "phase": 0.2,
       "seed": 1000
     },
     {
       "brokeN": 179.6875,
-      "dirDeg": 300,
+      "dirDeg": 120,
       "heldN": 178.125,
       "phase": 0.2,
       "seed": 1001
     },
     {
       "brokeN": 179.6875,
-      "dirDeg": 300,
+      "dirDeg": 120,
       "heldN": 178.125,
       "phase": 0.2,
       "seed": 1002
     },
     {
       "brokeN": 181.25,
-      "dirDeg": 300,
+      "dirDeg": 120,
       "heldN": 179.6875,
       "phase": 0.4,
       "seed": 1000
     },
     {
       "brokeN": 171.875,
-      "dirDeg": 300,
+      "dirDeg": 120,
       "heldN": 170.3125,
       "phase": 0.4,
       "seed": 1001
     },
     {
       "brokeN": 181.25,
-      "dirDeg": 300,
+      "dirDeg": 120,
       "heldN": 179.6875,
       "phase": 0.4,
       "seed": 1002
     },
     {
       "brokeN": 184.375,
-      "dirDeg": 300,
+      "dirDeg": 120,
       "heldN": 182.8125,
       "phase": 0.6,
       "seed": 1000
     },
     {
       "brokeN": 184.375,
-      "dirDeg": 300,
+      "dirDeg": 120,
       "heldN": 182.8125,
       "phase": 0.6,
       "seed": 1001
     },
     {
       "brokeN": 182.8125,
-      "dirDeg": 300,
+      "dirDeg": 120,
       "heldN": 181.25,
       "phase": 0.6,
       "seed": 1002
     },
     {
       "brokeN": 220.3125,
-      "dirDeg": 300,
+      "dirDeg": 120,
       "heldN": 218.75,
       "phase": 0.8,
       "seed": 1000
     },
     {
       "brokeN": 220.3125,
-      "dirDeg": 300,
+      "dirDeg": 120,
       "heldN": 218.75,
       "phase": 0.8,
       "seed": 1001
     },
     {
       "brokeN": 220.3125,
-      "dirDeg": 300,
+      "dirDeg": 120,
       "heldN": 218.75,
       "phase": 0.8,
       "seed": 1002
     },
     {
       "brokeN": 193.75,
-      "dirDeg": 310,
+      "dirDeg": 130,
       "heldN": 192.1875,
       "phase": 0,
       "seed": 1000
     },
     {
       "brokeN": 193.75,
-      "dirDeg": 310,
+      "dirDeg": 130,
       "heldN": 192.1875,
       "phase": 0,
       "seed": 1001
     },
     {
       "brokeN": 195.3125,
-      "dirDeg": 310,
+      "dirDeg": 130,
       "heldN": 193.75,
       "phase": 0,
       "seed": 1002
     },
     {
       "brokeN": 193.75,
-      "dirDeg": 310,
+      "dirDeg": 130,
       "heldN": 192.1875,
       "phase": 0.2,
       "seed": 1000
     },
     {
       "brokeN": 193.75,
-      "dirDeg": 310,
+      "dirDeg": 130,
       "heldN": 192.1875,
       "phase": 0.2,
       "seed": 1001
     },
     {
       "brokeN": 193.75,
-      "dirDeg": 310,
+      "dirDeg": 130,
       "heldN": 192.1875,
       "phase": 0.2,
       "seed": 1002
     },
     {
       "brokeN": 207.8125,
-      "dirDeg": 310,
+      "dirDeg": 130,
       "heldN": 206.25,
       "phase": 0.4,
       "seed": 1000
     },
     {
       "brokeN": 207.8125,
-      "dirDeg": 310,
+      "dirDeg": 130,
       "heldN": 206.25,
       "phase": 0.4,
       "seed": 1001
     },
     {
       "brokeN": 206.25,
-      "dirDeg": 310,
+      "dirDeg": 130,
       "heldN": 204.6875,
       "phase": 0.4,
       "seed": 1002
     },
     {
       "brokeN": 179.6875,
-      "dirDeg": 310,
+      "dirDeg": 130,
       "heldN": 178.125,
       "phase": 0.6,
       "seed": 1000
     },
     {
       "brokeN": 178.125,
-      "dirDeg": 310,
+      "dirDeg": 130,
       "heldN": 176.5625,
       "phase": 0.6,
       "seed": 1001
     },
     {
       "brokeN": 181.25,
-      "dirDeg": 310,
+      "dirDeg": 130,
       "heldN": 179.6875,
       "phase": 0.6,
       "seed": 1002
     },
     {
       "brokeN": 210.9375,
-      "dirDeg": 310,
+      "dirDeg": 130,
       "heldN": 209.375,
       "phase": 0.8,
       "seed": 1000
     },
     {
       "brokeN": 210.9375,
-      "dirDeg": 310,
+      "dirDeg": 130,
       "heldN": 209.375,
       "phase": 0.8,
       "seed": 1001
     },
     {
       "brokeN": 209.375,
-      "dirDeg": 310,
+      "dirDeg": 130,
       "heldN": 207.8125,
       "phase": 0.8,
       "seed": 1002
     },
     {
       "brokeN": 190.625,
-      "dirDeg": 320,
+      "dirDeg": 140,
       "heldN": 189.0625,
       "phase": 0,
       "seed": 1000
     },
     {
       "brokeN": 190.625,
-      "dirDeg": 320,
+      "dirDeg": 140,
       "heldN": 189.0625,
       "phase": 0,
       "seed": 1001
     },
     {
       "brokeN": 190.625,
-      "dirDeg": 320,
+      "dirDeg": 140,
       "heldN": 189.0625,
       "phase": 0,
       "seed": 1002
     },
     {
       "brokeN": 187.5,
-      "dirDeg": 320,
+      "dirDeg": 140,
       "heldN": 185.9375,
       "phase": 0.2,
       "seed": 1000
     },
     {
       "brokeN": 187.5,
-      "dirDeg": 320,
+      "dirDeg": 140,
       "heldN": 185.9375,
       "phase": 0.2,
       "seed": 1001
     },
     {
       "brokeN": 187.5,
-      "dirDeg": 320,
+      "dirDeg": 140,
       "heldN": 185.9375,
       "phase": 0.2,
       "seed": 1002
     },
     {
       "brokeN": 184.375,
-      "dirDeg": 320,
+      "dirDeg": 140,
       "heldN": 182.8125,
       "phase": 0.4,
       "seed": 1000
     },
     {
       "brokeN": 184.375,
-      "dirDeg": 320,
+      "dirDeg": 140,
       "heldN": 182.8125,
       "phase": 0.4,
       "seed": 1001
     },
     {
       "brokeN": 184.375,
-      "dirDeg": 320,
+      "dirDeg": 140,
       "heldN": 182.8125,
       "phase": 0.4,
       "seed": 1002
     },
     {
       "brokeN": 200,
-      "dirDeg": 320,
+      "dirDeg": 140,
       "heldN": 198.4375,
       "phase": 0.6,
       "seed": 1000
     },
     {
       "brokeN": 200,
-      "dirDeg": 320,
+      "dirDeg": 140,
       "heldN": 198.4375,
       "phase": 0.6,
       "seed": 1001
     },
     {
       "brokeN": 200,
-      "dirDeg": 320,
+      "dirDeg": 140,
       "heldN": 198.4375,
       "phase": 0.6,
       "seed": 1002
     },
     {
       "brokeN": 207.8125,
-      "dirDeg": 320,
+      "dirDeg": 140,
       "heldN": 206.25,
       "phase": 0.8,
       "seed": 1000
     },
     {
       "brokeN": 207.8125,
-      "dirDeg": 320,
+      "dirDeg": 140,
       "heldN": 206.25,
       "phase": 0.8,
       "seed": 1001
     },
     {
       "brokeN": 207.8125,
-      "dirDeg": 320,
+      "dirDeg": 140,
       "heldN": 206.25,
       "phase": 0.8,
       "seed": 1002
     },
     {
       "brokeN": 198.4375,
-      "dirDeg": 330,
+      "dirDeg": 150,
       "heldN": 196.875,
       "phase": 0,
       "seed": 1000
     },
     {
       "brokeN": 198.4375,
-      "dirDeg": 330,
+      "dirDeg": 150,
       "heldN": 196.875,
       "phase": 0,
       "seed": 1001
     },
     {
       "brokeN": 200,
-      "dirDeg": 330,
+      "dirDeg": 150,
       "heldN": 198.4375,
       "phase": 0,
       "seed": 1002
     },
     {
       "brokeN": 190.625,
-      "dirDeg": 330,
+      "dirDeg": 150,
       "heldN": 189.0625,
       "phase": 0.2,
       "seed": 1000
     },
     {
       "brokeN": 189.0625,
-      "dirDeg": 330,
+      "dirDeg": 150,
       "heldN": 187.5,
       "phase": 0.2,
       "seed": 1001
     },
     {
       "brokeN": 187.5,
-      "dirDeg": 330,
+      "dirDeg": 150,
       "heldN": 185.9375,
       "phase": 0.2,
       "seed": 1002
     },
     {
       "brokeN": 184.375,
-      "dirDeg": 330,
+      "dirDeg": 150,
       "heldN": 182.8125,
       "phase": 0.4,
       "seed": 1000
     },
     {
       "brokeN": 184.375,
-      "dirDeg": 330,
+      "dirDeg": 150,
       "heldN": 182.8125,
       "phase": 0.4,
       "seed": 1001
     },
     {
       "brokeN": 184.375,
-      "dirDeg": 330,
+      "dirDeg": 150,
       "heldN": 182.8125,
       "phase": 0.4,
       "seed": 1002
     },
     {
       "brokeN": 203.125,
-      "dirDeg": 330,
+      "dirDeg": 150,
       "heldN": 201.5625,
       "phase": 0.6,
       "seed": 1000
     },
     {
       "brokeN": 203.125,
-      "dirDeg": 330,
+      "dirDeg": 150,
       "heldN": 201.5625,
       "phase": 0.6,
       "seed": 1001
     },
     {
       "brokeN": 201.5625,
-      "dirDeg": 330,
+      "dirDeg": 150,
       "heldN": 200,
       "phase": 0.6,
       "seed": 1002
     },
     {
       "brokeN": 192.1875,
-      "dirDeg": 330,
+      "dirDeg": 150,
       "heldN": 190.625,
       "phase": 0.8,
       "seed": 1000
     },
     {
       "brokeN": 192.1875,
-      "dirDeg": 330,
+      "dirDeg": 150,
       "heldN": 190.625,
       "phase": 0.8,
       "seed": 1001
     },
     {
       "brokeN": 192.1875,
-      "dirDeg": 330,
+      "dirDeg": 150,
       "heldN": 190.625,
       "phase": 0.8,
       "seed": 1002
     },
     {
       "brokeN": 198.4375,
-      "dirDeg": 340,
+      "dirDeg": 160,
       "heldN": 196.875,
       "phase": 0,
       "seed": 1000
     },
     {
       "brokeN": 198.4375,
-      "dirDeg": 340,
+      "dirDeg": 160,
       "heldN": 196.875,
       "phase": 0,
       "seed": 1001
     },
     {
       "brokeN": 198.4375,
-      "dirDeg": 340,
+      "dirDeg": 160,
       "heldN": 196.875,
       "phase": 0,
       "seed": 1002
     },
     {
       "brokeN": 195.3125,
-      "dirDeg": 340,
+      "dirDeg": 160,
       "heldN": 193.75,
       "phase": 0.2,
       "seed": 1000
     },
     {
       "brokeN": 195.3125,
-      "dirDeg": 340,
+      "dirDeg": 160,
       "heldN": 193.75,
       "phase": 0.2,
       "seed": 1001
     },
     {
       "brokeN": 195.3125,
-      "dirDeg": 340,
+      "dirDeg": 160,
       "heldN": 193.75,
       "phase": 0.2,
       "seed": 1002
     },
     {
       "brokeN": 193.75,
-      "dirDeg": 340,
+      "dirDeg": 160,
       "heldN": 192.1875,
       "phase": 0.4,
       "seed": 1000
     },
     {
       "brokeN": 193.75,
-      "dirDeg": 340,
+      "dirDeg": 160,
       "heldN": 192.1875,
       "phase": 0.4,
       "seed": 1001
     },
     {
       "brokeN": 193.75,
-      "dirDeg": 340,
+      "dirDeg": 160,
       "heldN": 192.1875,
       "phase": 0.4,
       "seed": 1002
     },
     {
       "brokeN": 193.75,
-      "dirDeg": 340,
+      "dirDeg": 160,
       "heldN": 192.1875,
       "phase": 0.6,
       "seed": 1000
     },
     {
       "brokeN": 193.75,
-      "dirDeg": 340,
+      "dirDeg": 160,
       "heldN": 192.1875,
       "phase": 0.6,
       "seed": 1001
     },
     {
       "brokeN": 193.75,
-      "dirDeg": 340,
+      "dirDeg": 160,
       "heldN": 192.1875,
       "phase": 0.6,
       "seed": 1002
     },
     {
       "brokeN": 184.375,
-      "dirDeg": 340,
+      "dirDeg": 160,
       "heldN": 182.8125,
       "phase": 0.8,
       "seed": 1000
     },
     {
       "brokeN": 184.375,
-      "dirDeg": 340,
+      "dirDeg": 160,
       "heldN": 182.8125,
       "phase": 0.8,
       "seed": 1001
     },
     {
       "brokeN": 185.9375,
-      "dirDeg": 340,
+      "dirDeg": 160,
       "heldN": 184.375,
       "phase": 0.8,
       "seed": 1002
     },
     {
       "brokeN": 192.1875,
-      "dirDeg": 350,
+      "dirDeg": 170,
       "heldN": 190.625,
       "phase": 0,
       "seed": 1000
     },
     {
       "brokeN": 190.625,
-      "dirDeg": 350,
+      "dirDeg": 170,
       "heldN": 189.0625,
       "phase": 0,
       "seed": 1001
     },
     {
       "brokeN": 192.1875,
-      "dirDeg": 350,
+      "dirDeg": 170,
       "heldN": 190.625,
       "phase": 0,
       "seed": 1002
     },
     {
       "brokeN": 200,
-      "dirDeg": 350,
+      "dirDeg": 170,
       "heldN": 198.4375,
       "phase": 0.2,
       "seed": 1000
     },
     {
       "brokeN": 200,
-      "dirDeg": 350,
+      "dirDeg": 170,
       "heldN": 198.4375,
       "phase": 0.2,
       "seed": 1001
     },
     {
       "brokeN": 200,
-      "dirDeg": 350,
+      "dirDeg": 170,
       "heldN": 198.4375,
       "phase": 0.2,
       "seed": 1002
     },
     {
       "brokeN": 203.125,
-      "dirDeg": 350,
+      "dirDeg": 170,
       "heldN": 201.5625,
       "phase": 0.4,
       "seed": 1000
     },
     {
       "brokeN": 203.125,
-      "dirDeg": 350,
+      "dirDeg": 170,
       "heldN": 201.5625,
       "phase": 0.4,
       "seed": 1001
     },
     {
       "brokeN": 203.125,
-      "dirDeg": 350,
+      "dirDeg": 170,
       "heldN": 201.5625,
       "phase": 0.4,
       "seed": 1002
     },
     {
       "brokeN": 198.4375,
-      "dirDeg": 350,
+      "dirDeg": 170,
       "heldN": 196.875,
       "phase": 0.6,
       "seed": 1000
     },
     {
       "brokeN": 196.875,
-      "dirDeg": 350,
+      "dirDeg": 170,
       "heldN": 195.3125,
       "phase": 0.6,
       "seed": 1001
     },
     {
       "brokeN": 200,
-      "dirDeg": 350,
+      "dirDeg": 170,
       "heldN": 198.4375,
       "phase": 0.6,
       "seed": 1002
     },
     {
       "brokeN": 176.5625,
-      "dirDeg": 350,
+      "dirDeg": 170,
       "heldN": 175,
       "phase": 0.8,
       "seed": 1000
     },
     {
       "brokeN": 176.5625,
-      "dirDeg": 350,
+      "dirDeg": 170,
       "heldN": 175,
       "phase": 0.8,
       "seed": 1001
     },
     {
       "brokeN": 178.125,
-      "dirDeg": 350,
+      "dirDeg": 170,
       "heldN": 176.5625,
+      "phase": 0.8,
+      "seed": 1002
+    },
+    {
+      "brokeN": 184.375,
+      "dirDeg": 180,
+      "heldN": 182.8125,
+      "phase": 0,
+      "seed": 1000
+    },
+    {
+      "brokeN": 184.375,
+      "dirDeg": 180,
+      "heldN": 182.8125,
+      "phase": 0,
+      "seed": 1001
+    },
+    {
+      "brokeN": 184.375,
+      "dirDeg": 180,
+      "heldN": 182.8125,
+      "phase": 0,
+      "seed": 1002
+    },
+    {
+      "brokeN": 200,
+      "dirDeg": 180,
+      "heldN": 198.4375,
+      "phase": 0.2,
+      "seed": 1000
+    },
+    {
+      "brokeN": 200,
+      "dirDeg": 180,
+      "heldN": 198.4375,
+      "phase": 0.2,
+      "seed": 1001
+    },
+    {
+      "brokeN": 200,
+      "dirDeg": 180,
+      "heldN": 198.4375,
+      "phase": 0.2,
+      "seed": 1002
+    },
+    {
+      "brokeN": 207.8125,
+      "dirDeg": 180,
+      "heldN": 206.25,
+      "phase": 0.4,
+      "seed": 1000
+    },
+    {
+      "brokeN": 207.8125,
+      "dirDeg": 180,
+      "heldN": 206.25,
+      "phase": 0.4,
+      "seed": 1001
+    },
+    {
+      "brokeN": 209.375,
+      "dirDeg": 180,
+      "heldN": 207.8125,
+      "phase": 0.4,
+      "seed": 1002
+    },
+    {
+      "brokeN": 193.75,
+      "dirDeg": 180,
+      "heldN": 192.1875,
+      "phase": 0.6,
+      "seed": 1000
+    },
+    {
+      "brokeN": 189.0625,
+      "dirDeg": 180,
+      "heldN": 187.5,
+      "phase": 0.6,
+      "seed": 1001
+    },
+    {
+      "brokeN": 193.75,
+      "dirDeg": 180,
+      "heldN": 192.1875,
+      "phase": 0.6,
+      "seed": 1002
+    },
+    {
+      "brokeN": 173.4375,
+      "dirDeg": 180,
+      "heldN": 171.875,
+      "phase": 0.8,
+      "seed": 1000
+    },
+    {
+      "brokeN": 173.4375,
+      "dirDeg": 180,
+      "heldN": 171.875,
+      "phase": 0.8,
+      "seed": 1001
+    },
+    {
+      "brokeN": 173.4375,
+      "dirDeg": 180,
+      "heldN": 171.875,
+      "phase": 0.8,
+      "seed": 1002
+    },
+    {
+      "brokeN": 203.125,
+      "dirDeg": 190,
+      "heldN": 201.5625,
+      "phase": 0,
+      "seed": 1000
+    },
+    {
+      "brokeN": 203.125,
+      "dirDeg": 190,
+      "heldN": 201.5625,
+      "phase": 0,
+      "seed": 1001
+    },
+    {
+      "brokeN": 203.125,
+      "dirDeg": 190,
+      "heldN": 201.5625,
+      "phase": 0,
+      "seed": 1002
+    },
+    {
+      "brokeN": 201.5625,
+      "dirDeg": 190,
+      "heldN": 200,
+      "phase": 0.2,
+      "seed": 1000
+    },
+    {
+      "brokeN": 193.75,
+      "dirDeg": 190,
+      "heldN": 192.1875,
+      "phase": 0.2,
+      "seed": 1001
+    },
+    {
+      "brokeN": 195.3125,
+      "dirDeg": 190,
+      "heldN": 193.75,
+      "phase": 0.2,
+      "seed": 1002
+    },
+    {
+      "brokeN": 215.625,
+      "dirDeg": 190,
+      "heldN": 214.0625,
+      "phase": 0.4,
+      "seed": 1000
+    },
+    {
+      "brokeN": 215.625,
+      "dirDeg": 190,
+      "heldN": 214.0625,
+      "phase": 0.4,
+      "seed": 1001
+    },
+    {
+      "brokeN": 212.5,
+      "dirDeg": 190,
+      "heldN": 210.9375,
+      "phase": 0.4,
+      "seed": 1002
+    },
+    {
+      "brokeN": 187.5,
+      "dirDeg": 190,
+      "heldN": 185.9375,
+      "phase": 0.6,
+      "seed": 1000
+    },
+    {
+      "brokeN": 187.5,
+      "dirDeg": 190,
+      "heldN": 185.9375,
+      "phase": 0.6,
+      "seed": 1001
+    },
+    {
+      "brokeN": 195.3125,
+      "dirDeg": 190,
+      "heldN": 193.75,
+      "phase": 0.6,
+      "seed": 1002
+    },
+    {
+      "brokeN": 195.3125,
+      "dirDeg": 190,
+      "heldN": 193.75,
+      "phase": 0.8,
+      "seed": 1000
+    },
+    {
+      "brokeN": 195.3125,
+      "dirDeg": 190,
+      "heldN": 193.75,
+      "phase": 0.8,
+      "seed": 1001
+    },
+    {
+      "brokeN": 195.3125,
+      "dirDeg": 190,
+      "heldN": 193.75,
+      "phase": 0.8,
+      "seed": 1002
+    },
+    {
+      "brokeN": 214.0625,
+      "dirDeg": 200,
+      "heldN": 212.5,
+      "phase": 0,
+      "seed": 1000
+    },
+    {
+      "brokeN": 212.5,
+      "dirDeg": 200,
+      "heldN": 210.9375,
+      "phase": 0,
+      "seed": 1001
+    },
+    {
+      "brokeN": 212.5,
+      "dirDeg": 200,
+      "heldN": 210.9375,
+      "phase": 0,
+      "seed": 1002
+    },
+    {
+      "brokeN": 206.25,
+      "dirDeg": 200,
+      "heldN": 204.6875,
+      "phase": 0.2,
+      "seed": 1000
+    },
+    {
+      "brokeN": 206.25,
+      "dirDeg": 200,
+      "heldN": 204.6875,
+      "phase": 0.2,
+      "seed": 1001
+    },
+    {
+      "brokeN": 206.25,
+      "dirDeg": 200,
+      "heldN": 204.6875,
+      "phase": 0.2,
+      "seed": 1002
+    },
+    {
+      "brokeN": 217.1875,
+      "dirDeg": 200,
+      "heldN": 215.625,
+      "phase": 0.4,
+      "seed": 1000
+    },
+    {
+      "brokeN": 217.1875,
+      "dirDeg": 200,
+      "heldN": 215.625,
+      "phase": 0.4,
+      "seed": 1001
+    },
+    {
+      "brokeN": 215.625,
+      "dirDeg": 200,
+      "heldN": 214.0625,
+      "phase": 0.4,
+      "seed": 1002
+    },
+    {
+      "brokeN": 206.25,
+      "dirDeg": 200,
+      "heldN": 204.6875,
+      "phase": 0.6,
+      "seed": 1000
+    },
+    {
+      "brokeN": 207.8125,
+      "dirDeg": 200,
+      "heldN": 206.25,
+      "phase": 0.6,
+      "seed": 1001
+    },
+    {
+      "brokeN": 210.9375,
+      "dirDeg": 200,
+      "heldN": 209.375,
+      "phase": 0.6,
+      "seed": 1002
+    },
+    {
+      "brokeN": 206.25,
+      "dirDeg": 200,
+      "heldN": 204.6875,
+      "phase": 0.8,
+      "seed": 1000
+    },
+    {
+      "brokeN": 206.25,
+      "dirDeg": 200,
+      "heldN": 204.6875,
+      "phase": 0.8,
+      "seed": 1001
+    },
+    {
+      "brokeN": 204.6875,
+      "dirDeg": 200,
+      "heldN": 203.125,
+      "phase": 0.8,
+      "seed": 1002
+    },
+    {
+      "brokeN": 217.1875,
+      "dirDeg": 210,
+      "heldN": 215.625,
+      "phase": 0,
+      "seed": 1000
+    },
+    {
+      "brokeN": 217.1875,
+      "dirDeg": 210,
+      "heldN": 215.625,
+      "phase": 0,
+      "seed": 1001
+    },
+    {
+      "brokeN": 218.75,
+      "dirDeg": 210,
+      "heldN": 217.1875,
+      "phase": 0,
+      "seed": 1002
+    },
+    {
+      "brokeN": 215.625,
+      "dirDeg": 210,
+      "heldN": 214.0625,
+      "phase": 0.2,
+      "seed": 1000
+    },
+    {
+      "brokeN": 215.625,
+      "dirDeg": 210,
+      "heldN": 214.0625,
+      "phase": 0.2,
+      "seed": 1001
+    },
+    {
+      "brokeN": 215.625,
+      "dirDeg": 210,
+      "heldN": 214.0625,
+      "phase": 0.2,
+      "seed": 1002
+    },
+    {
+      "brokeN": 229.6875,
+      "dirDeg": 210,
+      "heldN": 228.125,
+      "phase": 0.4,
+      "seed": 1000
+    },
+    {
+      "brokeN": 228.125,
+      "dirDeg": 210,
+      "heldN": 226.5625,
+      "phase": 0.4,
+      "seed": 1001
+    },
+    {
+      "brokeN": 226.5625,
+      "dirDeg": 210,
+      "heldN": 225,
+      "phase": 0.4,
+      "seed": 1002
+    },
+    {
+      "brokeN": 220.3125,
+      "dirDeg": 210,
+      "heldN": 218.75,
+      "phase": 0.6,
+      "seed": 1000
+    },
+    {
+      "brokeN": 220.3125,
+      "dirDeg": 210,
+      "heldN": 218.75,
+      "phase": 0.6,
+      "seed": 1001
+    },
+    {
+      "brokeN": 220.3125,
+      "dirDeg": 210,
+      "heldN": 218.75,
+      "phase": 0.6,
+      "seed": 1002
+    },
+    {
+      "brokeN": 212.5,
+      "dirDeg": 210,
+      "heldN": 210.9375,
+      "phase": 0.8,
+      "seed": 1000
+    },
+    {
+      "brokeN": 212.5,
+      "dirDeg": 210,
+      "heldN": 210.9375,
+      "phase": 0.8,
+      "seed": 1001
+    },
+    {
+      "brokeN": 212.5,
+      "dirDeg": 210,
+      "heldN": 210.9375,
+      "phase": 0.8,
+      "seed": 1002
+    },
+    {
+      "brokeN": 206.25,
+      "dirDeg": 220,
+      "heldN": 204.6875,
+      "phase": 0,
+      "seed": 1000
+    },
+    {
+      "brokeN": 206.25,
+      "dirDeg": 220,
+      "heldN": 204.6875,
+      "phase": 0,
+      "seed": 1001
+    },
+    {
+      "brokeN": 206.25,
+      "dirDeg": 220,
+      "heldN": 204.6875,
+      "phase": 0,
+      "seed": 1002
+    },
+    {
+      "brokeN": 217.1875,
+      "dirDeg": 220,
+      "heldN": 215.625,
+      "phase": 0.2,
+      "seed": 1000
+    },
+    {
+      "brokeN": 217.1875,
+      "dirDeg": 220,
+      "heldN": 215.625,
+      "phase": 0.2,
+      "seed": 1001
+    },
+    {
+      "brokeN": 217.1875,
+      "dirDeg": 220,
+      "heldN": 215.625,
+      "phase": 0.2,
+      "seed": 1002
+    },
+    {
+      "brokeN": 229.6875,
+      "dirDeg": 220,
+      "heldN": 228.125,
+      "phase": 0.4,
+      "seed": 1000
+    },
+    {
+      "brokeN": 226.5625,
+      "dirDeg": 220,
+      "heldN": 225,
+      "phase": 0.4,
+      "seed": 1001
+    },
+    {
+      "brokeN": 226.5625,
+      "dirDeg": 220,
+      "heldN": 225,
+      "phase": 0.4,
+      "seed": 1002
+    },
+    {
+      "brokeN": 193.75,
+      "dirDeg": 220,
+      "heldN": 192.1875,
+      "phase": 0.6,
+      "seed": 1000
+    },
+    {
+      "brokeN": 203.125,
+      "dirDeg": 220,
+      "heldN": 201.5625,
+      "phase": 0.6,
+      "seed": 1001
+    },
+    {
+      "brokeN": 198.4375,
+      "dirDeg": 220,
+      "heldN": 196.875,
+      "phase": 0.6,
+      "seed": 1002
+    },
+    {
+      "brokeN": 206.25,
+      "dirDeg": 220,
+      "heldN": 204.6875,
+      "phase": 0.8,
+      "seed": 1000
+    },
+    {
+      "brokeN": 206.25,
+      "dirDeg": 220,
+      "heldN": 204.6875,
+      "phase": 0.8,
+      "seed": 1001
+    },
+    {
+      "brokeN": 204.6875,
+      "dirDeg": 220,
+      "heldN": 203.125,
+      "phase": 0.8,
+      "seed": 1002
+    },
+    {
+      "brokeN": 215.625,
+      "dirDeg": 230,
+      "heldN": 214.0625,
+      "phase": 0,
+      "seed": 1000
+    },
+    {
+      "brokeN": 215.625,
+      "dirDeg": 230,
+      "heldN": 214.0625,
+      "phase": 0,
+      "seed": 1001
+    },
+    {
+      "brokeN": 214.0625,
+      "dirDeg": 230,
+      "heldN": 212.5,
+      "phase": 0,
+      "seed": 1002
+    },
+    {
+      "brokeN": 212.5,
+      "dirDeg": 230,
+      "heldN": 210.9375,
+      "phase": 0.2,
+      "seed": 1000
+    },
+    {
+      "brokeN": 212.5,
+      "dirDeg": 230,
+      "heldN": 210.9375,
+      "phase": 0.2,
+      "seed": 1001
+    },
+    {
+      "brokeN": 214.0625,
+      "dirDeg": 230,
+      "heldN": 212.5,
+      "phase": 0.2,
+      "seed": 1002
+    },
+    {
+      "brokeN": 212.5,
+      "dirDeg": 230,
+      "heldN": 210.9375,
+      "phase": 0.4,
+      "seed": 1000
+    },
+    {
+      "brokeN": 223.4375,
+      "dirDeg": 230,
+      "heldN": 221.875,
+      "phase": 0.4,
+      "seed": 1001
+    },
+    {
+      "brokeN": 212.5,
+      "dirDeg": 230,
+      "heldN": 210.9375,
+      "phase": 0.4,
+      "seed": 1002
+    },
+    {
+      "brokeN": 204.6875,
+      "dirDeg": 230,
+      "heldN": 203.125,
+      "phase": 0.6,
+      "seed": 1000
+    },
+    {
+      "brokeN": 204.6875,
+      "dirDeg": 230,
+      "heldN": 203.125,
+      "phase": 0.6,
+      "seed": 1001
+    },
+    {
+      "brokeN": 206.25,
+      "dirDeg": 230,
+      "heldN": 204.6875,
+      "phase": 0.6,
+      "seed": 1002
+    },
+    {
+      "brokeN": 210.9375,
+      "dirDeg": 230,
+      "heldN": 209.375,
+      "phase": 0.8,
+      "seed": 1000
+    },
+    {
+      "brokeN": 210.9375,
+      "dirDeg": 230,
+      "heldN": 209.375,
+      "phase": 0.8,
+      "seed": 1001
+    },
+    {
+      "brokeN": 209.375,
+      "dirDeg": 230,
+      "heldN": 207.8125,
+      "phase": 0.8,
+      "seed": 1002
+    },
+    {
+      "brokeN": 209.375,
+      "dirDeg": 240,
+      "heldN": 207.8125,
+      "phase": 0,
+      "seed": 1000
+    },
+    {
+      "brokeN": 212.5,
+      "dirDeg": 240,
+      "heldN": 210.9375,
+      "phase": 0,
+      "seed": 1001
+    },
+    {
+      "brokeN": 212.5,
+      "dirDeg": 240,
+      "heldN": 210.9375,
+      "phase": 0,
+      "seed": 1002
+    },
+    {
+      "brokeN": 212.5,
+      "dirDeg": 240,
+      "heldN": 210.9375,
+      "phase": 0.2,
+      "seed": 1000
+    },
+    {
+      "brokeN": 212.5,
+      "dirDeg": 240,
+      "heldN": 210.9375,
+      "phase": 0.2,
+      "seed": 1001
+    },
+    {
+      "brokeN": 212.5,
+      "dirDeg": 240,
+      "heldN": 210.9375,
+      "phase": 0.2,
+      "seed": 1002
+    },
+    {
+      "brokeN": 237.5,
+      "dirDeg": 240,
+      "heldN": 235.9375,
+      "phase": 0.4,
+      "seed": 1000
+    },
+    {
+      "brokeN": 239.0625,
+      "dirDeg": 240,
+      "heldN": 237.5,
+      "phase": 0.4,
+      "seed": 1001
+    },
+    {
+      "brokeN": 235.9375,
+      "dirDeg": 240,
+      "heldN": 234.375,
+      "phase": 0.4,
+      "seed": 1002
+    },
+    {
+      "brokeN": 195.3125,
+      "dirDeg": 240,
+      "heldN": 193.75,
+      "phase": 0.6,
+      "seed": 1000
+    },
+    {
+      "brokeN": 195.3125,
+      "dirDeg": 240,
+      "heldN": 193.75,
+      "phase": 0.6,
+      "seed": 1001
+    },
+    {
+      "brokeN": 195.3125,
+      "dirDeg": 240,
+      "heldN": 193.75,
+      "phase": 0.6,
+      "seed": 1002
+    },
+    {
+      "brokeN": 195.3125,
+      "dirDeg": 240,
+      "heldN": 193.75,
+      "phase": 0.8,
+      "seed": 1000
+    },
+    {
+      "brokeN": 195.3125,
+      "dirDeg": 240,
+      "heldN": 193.75,
+      "phase": 0.8,
+      "seed": 1001
+    },
+    {
+      "brokeN": 195.3125,
+      "dirDeg": 240,
+      "heldN": 193.75,
+      "phase": 0.8,
+      "seed": 1002
+    },
+    {
+      "brokeN": 196.875,
+      "dirDeg": 250,
+      "heldN": 195.3125,
+      "phase": 0,
+      "seed": 1000
+    },
+    {
+      "brokeN": 196.875,
+      "dirDeg": 250,
+      "heldN": 195.3125,
+      "phase": 0,
+      "seed": 1001
+    },
+    {
+      "brokeN": 198.4375,
+      "dirDeg": 250,
+      "heldN": 196.875,
+      "phase": 0,
+      "seed": 1002
+    },
+    {
+      "brokeN": 206.25,
+      "dirDeg": 250,
+      "heldN": 204.6875,
+      "phase": 0.2,
+      "seed": 1000
+    },
+    {
+      "brokeN": 209.375,
+      "dirDeg": 250,
+      "heldN": 207.8125,
+      "phase": 0.2,
+      "seed": 1001
+    },
+    {
+      "brokeN": 209.375,
+      "dirDeg": 250,
+      "heldN": 207.8125,
+      "phase": 0.2,
+      "seed": 1002
+    },
+    {
+      "brokeN": 248.4375,
+      "dirDeg": 250,
+      "heldN": 246.875,
+      "phase": 0.4,
+      "seed": 1000
+    },
+    {
+      "brokeN": 253.125,
+      "dirDeg": 250,
+      "heldN": 251.5625,
+      "phase": 0.4,
+      "seed": 1001
+    },
+    {
+      "brokeN": 251.5625,
+      "dirDeg": 250,
+      "heldN": 250,
+      "phase": 0.4,
+      "seed": 1002
+    },
+    {
+      "brokeN": 221.875,
+      "dirDeg": 250,
+      "heldN": 220.3125,
+      "phase": 0.6,
+      "seed": 1000
+    },
+    {
+      "brokeN": 223.4375,
+      "dirDeg": 250,
+      "heldN": 221.875,
+      "phase": 0.6,
+      "seed": 1001
+    },
+    {
+      "brokeN": 221.875,
+      "dirDeg": 250,
+      "heldN": 220.3125,
+      "phase": 0.6,
+      "seed": 1002
+    },
+    {
+      "brokeN": 173.4375,
+      "dirDeg": 250,
+      "heldN": 171.875,
+      "phase": 0.8,
+      "seed": 1000
+    },
+    {
+      "brokeN": 173.4375,
+      "dirDeg": 250,
+      "heldN": 171.875,
+      "phase": 0.8,
+      "seed": 1001
+    },
+    {
+      "brokeN": 173.4375,
+      "dirDeg": 250,
+      "heldN": 171.875,
+      "phase": 0.8,
+      "seed": 1002
+    },
+    {
+      "brokeN": 173.4375,
+      "dirDeg": 260,
+      "heldN": 171.875,
+      "phase": 0,
+      "seed": 1000
+    },
+    {
+      "brokeN": 173.4375,
+      "dirDeg": 260,
+      "heldN": 171.875,
+      "phase": 0,
+      "seed": 1001
+    },
+    {
+      "brokeN": 173.4375,
+      "dirDeg": 260,
+      "heldN": 171.875,
+      "phase": 0,
+      "seed": 1002
+    },
+    {
+      "brokeN": 234.375,
+      "dirDeg": 260,
+      "heldN": 232.8125,
+      "phase": 0.2,
+      "seed": 1000
+    },
+    {
+      "brokeN": 234.375,
+      "dirDeg": 260,
+      "heldN": 232.8125,
+      "phase": 0.2,
+      "seed": 1001
+    },
+    {
+      "brokeN": 234.375,
+      "dirDeg": 260,
+      "heldN": 232.8125,
+      "phase": 0.2,
+      "seed": 1002
+    },
+    {
+      "brokeN": 310.9375,
+      "dirDeg": 260,
+      "heldN": 309.375,
+      "phase": 0.4,
+      "seed": 1000
+    },
+    {
+      "brokeN": 307.8125,
+      "dirDeg": 260,
+      "heldN": 306.25,
+      "phase": 0.4,
+      "seed": 1001
+    },
+    {
+      "brokeN": 304.6875,
+      "dirDeg": 260,
+      "heldN": 303.125,
+      "phase": 0.4,
+      "seed": 1002
+    },
+    {
+      "brokeN": 217.1875,
+      "dirDeg": 260,
+      "heldN": 215.625,
+      "phase": 0.6,
+      "seed": 1000
+    },
+    {
+      "brokeN": 217.1875,
+      "dirDeg": 260,
+      "heldN": 215.625,
+      "phase": 0.6,
+      "seed": 1001
+    },
+    {
+      "brokeN": 217.1875,
+      "dirDeg": 260,
+      "heldN": 215.625,
+      "phase": 0.6,
+      "seed": 1002
+    },
+    {
+      "brokeN": 146.875,
+      "dirDeg": 260,
+      "heldN": 145.3125,
+      "phase": 0.8,
+      "seed": 1000
+    },
+    {
+      "brokeN": 146.875,
+      "dirDeg": 260,
+      "heldN": 145.3125,
+      "phase": 0.8,
+      "seed": 1001
+    },
+    {
+      "brokeN": 146.875,
+      "dirDeg": 260,
+      "heldN": 145.3125,
+      "phase": 0.8,
+      "seed": 1002
+    },
+    {
+      "brokeN": 148.4375,
+      "dirDeg": 270,
+      "heldN": 146.875,
+      "phase": 0,
+      "seed": 1000
+    },
+    {
+      "brokeN": 146.875,
+      "dirDeg": 270,
+      "heldN": 145.3125,
+      "phase": 0,
+      "seed": 1001
+    },
+    {
+      "brokeN": 148.4375,
+      "dirDeg": 270,
+      "heldN": 146.875,
+      "phase": 0,
+      "seed": 1002
+    },
+    {
+      "brokeN": 256.25,
+      "dirDeg": 270,
+      "heldN": 254.6875,
+      "phase": 0.2,
+      "seed": 1000
+    },
+    {
+      "brokeN": 256.25,
+      "dirDeg": 270,
+      "heldN": 254.6875,
+      "phase": 0.2,
+      "seed": 1001
+    },
+    {
+      "brokeN": 253.125,
+      "dirDeg": 270,
+      "heldN": 251.5625,
+      "phase": 0.2,
+      "seed": 1002
+    },
+    {
+      "brokeN": 296.875,
+      "dirDeg": 270,
+      "heldN": 295.3125,
+      "phase": 0.4,
+      "seed": 1000
+    },
+    {
+      "brokeN": 301.5625,
+      "dirDeg": 270,
+      "heldN": 300,
+      "phase": 0.4,
+      "seed": 1001
+    },
+    {
+      "brokeN": 287.5,
+      "dirDeg": 270,
+      "heldN": 285.9375,
+      "phase": 0.4,
+      "seed": 1002
+    },
+    {
+      "brokeN": 204.6875,
+      "dirDeg": 270,
+      "heldN": 203.125,
+      "phase": 0.6,
+      "seed": 1000
+    },
+    {
+      "brokeN": 203.125,
+      "dirDeg": 270,
+      "heldN": 201.5625,
+      "phase": 0.6,
+      "seed": 1001
+    },
+    {
+      "brokeN": 203.125,
+      "dirDeg": 270,
+      "heldN": 201.5625,
+      "phase": 0.6,
+      "seed": 1002
+    },
+    {
+      "brokeN": 137.5,
+      "dirDeg": 270,
+      "heldN": 135.9375,
+      "phase": 0.8,
+      "seed": 1000
+    },
+    {
+      "brokeN": 137.5,
+      "dirDeg": 270,
+      "heldN": 135.9375,
+      "phase": 0.8,
+      "seed": 1001
+    },
+    {
+      "brokeN": 137.5,
+      "dirDeg": 270,
+      "heldN": 135.9375,
+      "phase": 0.8,
+      "seed": 1002
+    },
+    {
+      "brokeN": 167.1875,
+      "dirDeg": 280,
+      "heldN": 165.625,
+      "phase": 0,
+      "seed": 1000
+    },
+    {
+      "brokeN": 168.75,
+      "dirDeg": 280,
+      "heldN": 167.1875,
+      "phase": 0,
+      "seed": 1001
+    },
+    {
+      "brokeN": 165.625,
+      "dirDeg": 280,
+      "heldN": 164.0625,
+      "phase": 0,
+      "seed": 1002
+    },
+    {
+      "brokeN": 240.625,
+      "dirDeg": 280,
+      "heldN": 239.0625,
+      "phase": 0.2,
+      "seed": 1000
+    },
+    {
+      "brokeN": 240.625,
+      "dirDeg": 280,
+      "heldN": 239.0625,
+      "phase": 0.2,
+      "seed": 1001
+    },
+    {
+      "brokeN": 245.3125,
+      "dirDeg": 280,
+      "heldN": 243.75,
+      "phase": 0.2,
+      "seed": 1002
+    },
+    {
+      "brokeN": 350,
+      "dirDeg": 280,
+      "heldN": 348.4375,
+      "phase": 0.4,
+      "seed": 1000
+    },
+    {
+      "brokeN": 350,
+      "dirDeg": 280,
+      "heldN": 348.4375,
+      "phase": 0.4,
+      "seed": 1001
+    },
+    {
+      "brokeN": 342.1875,
+      "dirDeg": 280,
+      "heldN": 340.625,
+      "phase": 0.4,
+      "seed": 1002
+    },
+    {
+      "brokeN": 159.375,
+      "dirDeg": 280,
+      "heldN": 157.8125,
+      "phase": 0.6,
+      "seed": 1000
+    },
+    {
+      "brokeN": 159.375,
+      "dirDeg": 280,
+      "heldN": 157.8125,
+      "phase": 0.6,
+      "seed": 1001
+    },
+    {
+      "brokeN": 156.25,
+      "dirDeg": 280,
+      "heldN": 154.6875,
+      "phase": 0.6,
+      "seed": 1002
+    },
+    {
+      "brokeN": 123.4375,
+      "dirDeg": 280,
+      "heldN": 121.875,
+      "phase": 0.8,
+      "seed": 1000
+    },
+    {
+      "brokeN": 123.4375,
+      "dirDeg": 280,
+      "heldN": 121.875,
+      "phase": 0.8,
+      "seed": 1001
+    },
+    {
+      "brokeN": 123.4375,
+      "dirDeg": 280,
+      "heldN": 121.875,
+      "phase": 0.8,
+      "seed": 1002
+    },
+    {
+      "brokeN": 160.9375,
+      "dirDeg": 290,
+      "heldN": 159.375,
+      "phase": 0,
+      "seed": 1000
+    },
+    {
+      "brokeN": 160.9375,
+      "dirDeg": 290,
+      "heldN": 159.375,
+      "phase": 0,
+      "seed": 1001
+    },
+    {
+      "brokeN": 160.9375,
+      "dirDeg": 290,
+      "heldN": 159.375,
+      "phase": 0,
+      "seed": 1002
+    },
+    {
+      "brokeN": 248.4375,
+      "dirDeg": 290,
+      "heldN": 246.875,
+      "phase": 0.2,
+      "seed": 1000
+    },
+    {
+      "brokeN": 246.875,
+      "dirDeg": 290,
+      "heldN": 245.3125,
+      "phase": 0.2,
+      "seed": 1001
+    },
+    {
+      "brokeN": 245.3125,
+      "dirDeg": 290,
+      "heldN": 243.75,
+      "phase": 0.2,
+      "seed": 1002
+    },
+    {
+      "brokeN": 270.3125,
+      "dirDeg": 290,
+      "heldN": 268.75,
+      "phase": 0.4,
+      "seed": 1000
+    },
+    {
+      "brokeN": 321.875,
+      "dirDeg": 290,
+      "heldN": 320.3125,
+      "phase": 0.4,
+      "seed": 1001
+    },
+    {
+      "brokeN": 325,
+      "dirDeg": 290,
+      "heldN": 323.4375,
+      "phase": 0.4,
+      "seed": 1002
+    },
+    {
+      "brokeN": 171.875,
+      "dirDeg": 290,
+      "heldN": 170.3125,
+      "phase": 0.6,
+      "seed": 1000
+    },
+    {
+      "brokeN": 171.875,
+      "dirDeg": 290,
+      "heldN": 170.3125,
+      "phase": 0.6,
+      "seed": 1001
+    },
+    {
+      "brokeN": 171.875,
+      "dirDeg": 290,
+      "heldN": 170.3125,
+      "phase": 0.6,
+      "seed": 1002
+    },
+    {
+      "brokeN": 135.9375,
+      "dirDeg": 290,
+      "heldN": 134.375,
+      "phase": 0.8,
+      "seed": 1000
+    },
+    {
+      "brokeN": 135.9375,
+      "dirDeg": 290,
+      "heldN": 134.375,
+      "phase": 0.8,
+      "seed": 1001
+    },
+    {
+      "brokeN": 135.9375,
+      "dirDeg": 290,
+      "heldN": 134.375,
+      "phase": 0.8,
+      "seed": 1002
+    },
+    {
+      "brokeN": 171.875,
+      "dirDeg": 300,
+      "heldN": 170.3125,
+      "phase": 0,
+      "seed": 1000
+    },
+    {
+      "brokeN": 162.5,
+      "dirDeg": 300,
+      "heldN": 160.9375,
+      "phase": 0,
+      "seed": 1001
+    },
+    {
+      "brokeN": 170.3125,
+      "dirDeg": 300,
+      "heldN": 168.75,
+      "phase": 0,
+      "seed": 1002
+    },
+    {
+      "brokeN": 242.1875,
+      "dirDeg": 300,
+      "heldN": 240.625,
+      "phase": 0.2,
+      "seed": 1000
+    },
+    {
+      "brokeN": 243.75,
+      "dirDeg": 300,
+      "heldN": 242.1875,
+      "phase": 0.2,
+      "seed": 1001
+    },
+    {
+      "brokeN": 245.3125,
+      "dirDeg": 300,
+      "heldN": 243.75,
+      "phase": 0.2,
+      "seed": 1002
+    },
+    {
+      "brokeN": 304.6875,
+      "dirDeg": 300,
+      "heldN": 303.125,
+      "phase": 0.4,
+      "seed": 1000
+    },
+    {
+      "brokeN": 304.6875,
+      "dirDeg": 300,
+      "heldN": 303.125,
+      "phase": 0.4,
+      "seed": 1001
+    },
+    {
+      "brokeN": 303.125,
+      "dirDeg": 300,
+      "heldN": 301.5625,
+      "phase": 0.4,
+      "seed": 1002
+    },
+    {
+      "brokeN": 209.375,
+      "dirDeg": 300,
+      "heldN": 207.8125,
+      "phase": 0.6,
+      "seed": 1000
+    },
+    {
+      "brokeN": 243.75,
+      "dirDeg": 300,
+      "heldN": 242.1875,
+      "phase": 0.6,
+      "seed": 1001
+    },
+    {
+      "brokeN": 250,
+      "dirDeg": 300,
+      "heldN": 248.4375,
+      "phase": 0.6,
+      "seed": 1002
+    },
+    {
+      "brokeN": 162.5,
+      "dirDeg": 300,
+      "heldN": 160.9375,
+      "phase": 0.8,
+      "seed": 1000
+    },
+    {
+      "brokeN": 162.5,
+      "dirDeg": 300,
+      "heldN": 160.9375,
+      "phase": 0.8,
+      "seed": 1001
+    },
+    {
+      "brokeN": 192.1875,
+      "dirDeg": 300,
+      "heldN": 190.625,
+      "phase": 0.8,
+      "seed": 1002
+    },
+    {
+      "brokeN": 225,
+      "dirDeg": 310,
+      "heldN": 223.4375,
+      "phase": 0,
+      "seed": 1000
+    },
+    {
+      "brokeN": 228.125,
+      "dirDeg": 310,
+      "heldN": 226.5625,
+      "phase": 0,
+      "seed": 1001
+    },
+    {
+      "brokeN": 229.6875,
+      "dirDeg": 310,
+      "heldN": 228.125,
+      "phase": 0,
+      "seed": 1002
+    },
+    {
+      "brokeN": 234.375,
+      "dirDeg": 310,
+      "heldN": 232.8125,
+      "phase": 0.2,
+      "seed": 1000
+    },
+    {
+      "brokeN": 253.125,
+      "dirDeg": 310,
+      "heldN": 251.5625,
+      "phase": 0.2,
+      "seed": 1001
+    },
+    {
+      "brokeN": 253.125,
+      "dirDeg": 310,
+      "heldN": 251.5625,
+      "phase": 0.2,
+      "seed": 1002
+    },
+    {
+      "brokeN": 301.5625,
+      "dirDeg": 310,
+      "heldN": 300,
+      "phase": 0.4,
+      "seed": 1000
+    },
+    {
+      "brokeN": 223.4375,
+      "dirDeg": 310,
+      "heldN": 221.875,
+      "phase": 0.4,
+      "seed": 1001
+    },
+    {
+      "brokeN": 221.875,
+      "dirDeg": 310,
+      "heldN": 220.3125,
+      "phase": 0.4,
+      "seed": 1002
+    },
+    {
+      "brokeN": 242.1875,
+      "dirDeg": 310,
+      "heldN": 240.625,
+      "phase": 0.6,
+      "seed": 1000
+    },
+    {
+      "brokeN": 210.9375,
+      "dirDeg": 310,
+      "heldN": 209.375,
+      "phase": 0.6,
+      "seed": 1001
+    },
+    {
+      "brokeN": 225,
+      "dirDeg": 310,
+      "heldN": 223.4375,
+      "phase": 0.6,
+      "seed": 1002
+    },
+    {
+      "brokeN": 221.875,
+      "dirDeg": 310,
+      "heldN": 220.3125,
+      "phase": 0.8,
+      "seed": 1000
+    },
+    {
+      "brokeN": 217.1875,
+      "dirDeg": 310,
+      "heldN": 215.625,
+      "phase": 0.8,
+      "seed": 1001
+    },
+    {
+      "brokeN": 221.875,
+      "dirDeg": 310,
+      "heldN": 220.3125,
+      "phase": 0.8,
+      "seed": 1002
+    },
+    {
+      "brokeN": 235.9375,
+      "dirDeg": 320,
+      "heldN": 234.375,
+      "phase": 0,
+      "seed": 1000
+    },
+    {
+      "brokeN": 235.9375,
+      "dirDeg": 320,
+      "heldN": 234.375,
+      "phase": 0,
+      "seed": 1001
+    },
+    {
+      "brokeN": 231.25,
+      "dirDeg": 320,
+      "heldN": 229.6875,
+      "phase": 0,
+      "seed": 1002
+    },
+    {
+      "brokeN": 254.6875,
+      "dirDeg": 320,
+      "heldN": 253.125,
+      "phase": 0.2,
+      "seed": 1000
+    },
+    {
+      "brokeN": 254.6875,
+      "dirDeg": 320,
+      "heldN": 253.125,
+      "phase": 0.2,
+      "seed": 1001
+    },
+    {
+      "brokeN": 254.6875,
+      "dirDeg": 320,
+      "heldN": 253.125,
+      "phase": 0.2,
+      "seed": 1002
+    },
+    {
+      "brokeN": 212.5,
+      "dirDeg": 320,
+      "heldN": 210.9375,
+      "phase": 0.4,
+      "seed": 1000
+    },
+    {
+      "brokeN": 215.625,
+      "dirDeg": 320,
+      "heldN": 214.0625,
+      "phase": 0.4,
+      "seed": 1001
+    },
+    {
+      "brokeN": 215.625,
+      "dirDeg": 320,
+      "heldN": 214.0625,
+      "phase": 0.4,
+      "seed": 1002
+    },
+    {
+      "brokeN": 265.625,
+      "dirDeg": 320,
+      "heldN": 264.0625,
+      "phase": 0.6,
+      "seed": 1000
+    },
+    {
+      "brokeN": 245.3125,
+      "dirDeg": 320,
+      "heldN": 243.75,
+      "phase": 0.6,
+      "seed": 1001
+    },
+    {
+      "brokeN": 250,
+      "dirDeg": 320,
+      "heldN": 248.4375,
+      "phase": 0.6,
+      "seed": 1002
+    },
+    {
+      "brokeN": 250,
+      "dirDeg": 320,
+      "heldN": 248.4375,
+      "phase": 0.8,
+      "seed": 1000
+    },
+    {
+      "brokeN": 250,
+      "dirDeg": 320,
+      "heldN": 248.4375,
+      "phase": 0.8,
+      "seed": 1001
+    },
+    {
+      "brokeN": 246.875,
+      "dirDeg": 320,
+      "heldN": 245.3125,
+      "phase": 0.8,
+      "seed": 1002
+    },
+    {
+      "brokeN": 264.0625,
+      "dirDeg": 330,
+      "heldN": 262.5,
+      "phase": 0,
+      "seed": 1000
+    },
+    {
+      "brokeN": 264.0625,
+      "dirDeg": 330,
+      "heldN": 262.5,
+      "phase": 0,
+      "seed": 1001
+    },
+    {
+      "brokeN": 259.375,
+      "dirDeg": 330,
+      "heldN": 257.8125,
+      "phase": 0,
+      "seed": 1002
+    },
+    {
+      "brokeN": 273.4375,
+      "dirDeg": 330,
+      "heldN": 271.875,
+      "phase": 0.2,
+      "seed": 1000
+    },
+    {
+      "brokeN": 267.1875,
+      "dirDeg": 330,
+      "heldN": 265.625,
+      "phase": 0.2,
+      "seed": 1001
+    },
+    {
+      "brokeN": 265.625,
+      "dirDeg": 330,
+      "heldN": 264.0625,
+      "phase": 0.2,
+      "seed": 1002
+    },
+    {
+      "brokeN": 214.0625,
+      "dirDeg": 330,
+      "heldN": 212.5,
+      "phase": 0.4,
+      "seed": 1000
+    },
+    {
+      "brokeN": 212.5,
+      "dirDeg": 330,
+      "heldN": 210.9375,
+      "phase": 0.4,
+      "seed": 1001
+    },
+    {
+      "brokeN": 212.5,
+      "dirDeg": 330,
+      "heldN": 210.9375,
+      "phase": 0.4,
+      "seed": 1002
+    },
+    {
+      "brokeN": 218.75,
+      "dirDeg": 330,
+      "heldN": 217.1875,
+      "phase": 0.6,
+      "seed": 1000
+    },
+    {
+      "brokeN": 239.0625,
+      "dirDeg": 330,
+      "heldN": 237.5,
+      "phase": 0.6,
+      "seed": 1001
+    },
+    {
+      "brokeN": 243.75,
+      "dirDeg": 330,
+      "heldN": 242.1875,
+      "phase": 0.6,
+      "seed": 1002
+    },
+    {
+      "brokeN": 253.125,
+      "dirDeg": 330,
+      "heldN": 251.5625,
+      "phase": 0.8,
+      "seed": 1000
+    },
+    {
+      "brokeN": 250,
+      "dirDeg": 330,
+      "heldN": 248.4375,
+      "phase": 0.8,
+      "seed": 1001
+    },
+    {
+      "brokeN": 253.125,
+      "dirDeg": 330,
+      "heldN": 251.5625,
+      "phase": 0.8,
+      "seed": 1002
+    },
+    {
+      "brokeN": 265.625,
+      "dirDeg": 340,
+      "heldN": 264.0625,
+      "phase": 0,
+      "seed": 1000
+    },
+    {
+      "brokeN": 265.625,
+      "dirDeg": 340,
+      "heldN": 264.0625,
+      "phase": 0,
+      "seed": 1001
+    },
+    {
+      "brokeN": 276.5625,
+      "dirDeg": 340,
+      "heldN": 275,
+      "phase": 0,
+      "seed": 1002
+    },
+    {
+      "brokeN": 250,
+      "dirDeg": 340,
+      "heldN": 248.4375,
+      "phase": 0.2,
+      "seed": 1000
+    },
+    {
+      "brokeN": 250,
+      "dirDeg": 340,
+      "heldN": 248.4375,
+      "phase": 0.2,
+      "seed": 1001
+    },
+    {
+      "brokeN": 250,
+      "dirDeg": 340,
+      "heldN": 248.4375,
+      "phase": 0.2,
+      "seed": 1002
+    },
+    {
+      "brokeN": 245.3125,
+      "dirDeg": 340,
+      "heldN": 243.75,
+      "phase": 0.4,
+      "seed": 1000
+    },
+    {
+      "brokeN": 245.3125,
+      "dirDeg": 340,
+      "heldN": 243.75,
+      "phase": 0.4,
+      "seed": 1001
+    },
+    {
+      "brokeN": 243.75,
+      "dirDeg": 340,
+      "heldN": 242.1875,
+      "phase": 0.4,
+      "seed": 1002
+    },
+    {
+      "brokeN": 245.3125,
+      "dirDeg": 340,
+      "heldN": 243.75,
+      "phase": 0.6,
+      "seed": 1000
+    },
+    {
+      "brokeN": 242.1875,
+      "dirDeg": 340,
+      "heldN": 240.625,
+      "phase": 0.6,
+      "seed": 1001
+    },
+    {
+      "brokeN": 245.3125,
+      "dirDeg": 340,
+      "heldN": 243.75,
+      "phase": 0.6,
+      "seed": 1002
+    },
+    {
+      "brokeN": 246.875,
+      "dirDeg": 340,
+      "heldN": 245.3125,
+      "phase": 0.8,
+      "seed": 1000
+    },
+    {
+      "brokeN": 245.3125,
+      "dirDeg": 340,
+      "heldN": 243.75,
+      "phase": 0.8,
+      "seed": 1001
+    },
+    {
+      "brokeN": 245.3125,
+      "dirDeg": 340,
+      "heldN": 243.75,
+      "phase": 0.8,
+      "seed": 1002
+    },
+    {
+      "brokeN": 267.1875,
+      "dirDeg": 350,
+      "heldN": 265.625,
+      "phase": 0,
+      "seed": 1000
+    },
+    {
+      "brokeN": 270.3125,
+      "dirDeg": 350,
+      "heldN": 268.75,
+      "phase": 0,
+      "seed": 1001
+    },
+    {
+      "brokeN": 262.5,
+      "dirDeg": 350,
+      "heldN": 260.9375,
+      "phase": 0,
+      "seed": 1002
+    },
+    {
+      "brokeN": 251.5625,
+      "dirDeg": 350,
+      "heldN": 250,
+      "phase": 0.2,
+      "seed": 1000
+    },
+    {
+      "brokeN": 251.5625,
+      "dirDeg": 350,
+      "heldN": 250,
+      "phase": 0.2,
+      "seed": 1001
+    },
+    {
+      "brokeN": 253.125,
+      "dirDeg": 350,
+      "heldN": 251.5625,
+      "phase": 0.2,
+      "seed": 1002
+    },
+    {
+      "brokeN": 239.0625,
+      "dirDeg": 350,
+      "heldN": 237.5,
+      "phase": 0.4,
+      "seed": 1000
+    },
+    {
+      "brokeN": 240.625,
+      "dirDeg": 350,
+      "heldN": 239.0625,
+      "phase": 0.4,
+      "seed": 1001
+    },
+    {
+      "brokeN": 239.0625,
+      "dirDeg": 350,
+      "heldN": 237.5,
+      "phase": 0.4,
+      "seed": 1002
+    },
+    {
+      "brokeN": 246.875,
+      "dirDeg": 350,
+      "heldN": 245.3125,
+      "phase": 0.6,
+      "seed": 1000
+    },
+    {
+      "brokeN": 267.1875,
+      "dirDeg": 350,
+      "heldN": 265.625,
+      "phase": 0.6,
+      "seed": 1001
+    },
+    {
+      "brokeN": 248.4375,
+      "dirDeg": 350,
+      "heldN": 246.875,
+      "phase": 0.6,
+      "seed": 1002
+    },
+    {
+      "brokeN": 237.5,
+      "dirDeg": 350,
+      "heldN": 235.9375,
+      "phase": 0.8,
+      "seed": 1000
+    },
+    {
+      "brokeN": 235.9375,
+      "dirDeg": 350,
+      "heldN": 234.375,
+      "phase": 0.8,
+      "seed": 1001
+    },
+    {
+      "brokeN": 237.5,
+      "dirDeg": 350,
+      "heldN": 235.9375,
       "phase": 0.8,
       "seed": 1002
     }
@@ -3786,20 +3786,20 @@
       "cells": 540,
       "dirs": 36,
       "fmax": 400,
-      "line": "R1. WHEN the pelvis is pushed with up to 400 N for 0.2 s from any direction at any point in its stride THE robot SHALL stay upright for 3 s",
+      "line": "WHEN the pelvis is pushed with up to 400 N for 0.2 s from any direction at any point in its stride THE robot SHALL stay upright for 3 s",
       "phases": 5,
-      "seconds": 272.437,
+      "seconds": 436.216,
       "seeds": 3,
       "steps": 8,
       "strongest": {
-        "dirDeg": 160,
+        "dirDeg": 340,
         "meanHeldN": 249.27083333333334,
         "minHeldN": 240.625,
         "weakestPhase": 0.6
       },
       "trials": 4860,
       "weakest": {
-        "dirDeg": 260,
+        "dirDeg": 80,
         "meanHeldN": 164.47916666666666,
         "minHeldN": 62.5,
         "weakestPhase": 0.2
@@ -3808,234 +3808,221 @@
     "summary": [
       {
         "dirDeg": 0,
-        "meanHeldN": 190.10416666666666,
-        "minHeldN": 171.875,
-        "weakestPhase": 0.8
-      },
-      {
-        "dirDeg": 10,
-        "meanHeldN": 198.4375,
-        "minHeldN": 185.9375,
-        "weakestPhase": 0.6
-      },
-      {
-        "dirDeg": 20,
-        "meanHeldN": 208.4375,
-        "minHeldN": 203.125,
-        "weakestPhase": 0.8
-      },
-      {
-        "dirDeg": 30,
-        "meanHeldN": 217.29166666666666,
-        "minHeldN": 210.9375,
-        "weakestPhase": 0.8
-      },
-      {
-        "dirDeg": 40,
-        "meanHeldN": 209.47916666666666,
-        "minHeldN": 192.1875,
-        "weakestPhase": 0.6
-      },
-      {
-        "dirDeg": 50,
-        "meanHeldN": 210.41666666666666,
-        "minHeldN": 203.125,
-        "weakestPhase": 0.6
-      },
-      {
-        "dirDeg": 60,
-        "meanHeldN": 208.85416666666666,
-        "minHeldN": 193.75,
-        "weakestPhase": 0.6
-      },
-      {
-        "dirDeg": 70,
-        "meanHeldN": 208.95833333333334,
-        "minHeldN": 171.875,
-        "weakestPhase": 0.8
-      },
-      {
-        "dirDeg": 80,
-        "meanHeldN": 214.375,
-        "minHeldN": 145.3125,
-        "weakestPhase": 0.8
-      },
-      {
-        "dirDeg": 90,
-        "meanHeldN": 206.35416666666666,
-        "minHeldN": 135.9375,
-        "weakestPhase": 0.8
-      },
-      {
-        "dirDeg": 100,
-        "meanHeldN": 206.14583333333334,
-        "minHeldN": 121.875,
-        "weakestPhase": 0.8
-      },
-      {
-        "dirDeg": 110,
-        "meanHeldN": 202.70833333333334,
-        "minHeldN": 134.375,
-        "weakestPhase": 0.8
-      },
-      {
-        "dirDeg": 120,
-        "meanHeldN": 223.02083333333334,
-        "minHeldN": 160.9375,
-        "weakestPhase": 0
-      },
-      {
-        "dirDeg": 130,
-        "meanHeldN": 232.39583333333334,
-        "minHeldN": 209.375,
-        "weakestPhase": 0.6
-      },
-      {
-        "dirDeg": 140,
-        "meanHeldN": 239.6875,
-        "minHeldN": 210.9375,
-        "weakestPhase": 0.4
-      },
-      {
-        "dirDeg": 150,
-        "meanHeldN": 244.47916666666666,
-        "minHeldN": 210.9375,
-        "weakestPhase": 0.4
-      },
-      {
-        "dirDeg": 160,
-        "meanHeldN": 249.27083333333334,
-        "minHeldN": 240.625,
-        "weakestPhase": 0.6
-      },
-      {
-        "dirDeg": 170,
-        "meanHeldN": 248.33333333333334,
-        "minHeldN": 234.375,
-        "weakestPhase": 0.8
-      },
-      {
-        "dirDeg": 180,
         "meanHeldN": 233.4375,
         "minHeldN": 206.25,
         "weakestPhase": 0.2
       },
       {
-        "dirDeg": 190,
+        "dirDeg": 10,
         "meanHeldN": 231.45833333333334,
         "minHeldN": 185.9375,
         "weakestPhase": 0.2
       },
       {
-        "dirDeg": 200,
+        "dirDeg": 20,
         "meanHeldN": 263.6458333333333,
         "minHeldN": 187.5,
         "weakestPhase": 0.2
       },
       {
-        "dirDeg": 210,
+        "dirDeg": 30,
         "meanHeldN": 276.3541666666667,
         "minHeldN": 200,
         "weakestPhase": 0.2
       },
       {
-        "dirDeg": 220,
+        "dirDeg": 40,
         "meanHeldN": 273.0208333333333,
         "minHeldN": 217.1875,
         "weakestPhase": 0.2
       },
       {
-        "dirDeg": 230,
+        "dirDeg": 50,
         "meanHeldN": 239.16666666666666,
         "minHeldN": 204.6875,
         "weakestPhase": 0.6
       },
       {
-        "dirDeg": 240,
+        "dirDeg": 60,
         "meanHeldN": 228.125,
         "minHeldN": 148.4375,
         "weakestPhase": 0.4
       },
       {
-        "dirDeg": 250,
+        "dirDeg": 70,
         "meanHeldN": 179.47916666666666,
         "minHeldN": 140.625,
         "weakestPhase": 0.2
       },
       {
-        "dirDeg": 260,
+        "dirDeg": 80,
         "meanHeldN": 164.47916666666666,
         "minHeldN": 62.5,
         "weakestPhase": 0.2
       },
       {
-        "dirDeg": 270,
+        "dirDeg": 90,
         "meanHeldN": 158.4375,
         "minHeldN": 81.25,
         "weakestPhase": 0.4
       },
       {
-        "dirDeg": 280,
+        "dirDeg": 100,
         "meanHeldN": 173.02083333333334,
         "minHeldN": 104.6875,
         "weakestPhase": 0.2
       },
       {
-        "dirDeg": 290,
+        "dirDeg": 110,
         "meanHeldN": 184.16666666666666,
         "minHeldN": 139.0625,
         "weakestPhase": 0.4
       },
       {
-        "dirDeg": 300,
+        "dirDeg": 120,
         "meanHeldN": 191.04166666666666,
         "minHeldN": 170.3125,
         "weakestPhase": 0.4
       },
       {
-        "dirDeg": 310,
+        "dirDeg": 130,
         "meanHeldN": 195.52083333333334,
         "minHeldN": 176.5625,
         "weakestPhase": 0.6
       },
       {
-        "dirDeg": 320,
+        "dirDeg": 140,
         "meanHeldN": 192.5,
         "minHeldN": 182.8125,
         "weakestPhase": 0.4
       },
       {
-        "dirDeg": 330,
+        "dirDeg": 150,
         "meanHeldN": 191.875,
         "minHeldN": 182.8125,
         "weakestPhase": 0.4
       },
       {
-        "dirDeg": 340,
+        "dirDeg": 160,
         "meanHeldN": 191.66666666666666,
         "minHeldN": 182.8125,
         "weakestPhase": 0.8
       },
       {
-        "dirDeg": 350,
+        "dirDeg": 170,
         "meanHeldN": 192.5,
         "minHeldN": 175,
+        "weakestPhase": 0.8
+      },
+      {
+        "dirDeg": 180,
+        "meanHeldN": 190.10416666666666,
+        "minHeldN": 171.875,
+        "weakestPhase": 0.8
+      },
+      {
+        "dirDeg": 190,
+        "meanHeldN": 198.4375,
+        "minHeldN": 185.9375,
+        "weakestPhase": 0.6
+      },
+      {
+        "dirDeg": 200,
+        "meanHeldN": 208.4375,
+        "minHeldN": 203.125,
+        "weakestPhase": 0.8
+      },
+      {
+        "dirDeg": 210,
+        "meanHeldN": 217.29166666666666,
+        "minHeldN": 210.9375,
+        "weakestPhase": 0.8
+      },
+      {
+        "dirDeg": 220,
+        "meanHeldN": 209.47916666666666,
+        "minHeldN": 192.1875,
+        "weakestPhase": 0.6
+      },
+      {
+        "dirDeg": 230,
+        "meanHeldN": 210.41666666666666,
+        "minHeldN": 203.125,
+        "weakestPhase": 0.6
+      },
+      {
+        "dirDeg": 240,
+        "meanHeldN": 208.85416666666666,
+        "minHeldN": 193.75,
+        "weakestPhase": 0.6
+      },
+      {
+        "dirDeg": 250,
+        "meanHeldN": 208.95833333333334,
+        "minHeldN": 171.875,
+        "weakestPhase": 0.8
+      },
+      {
+        "dirDeg": 260,
+        "meanHeldN": 214.375,
+        "minHeldN": 145.3125,
+        "weakestPhase": 0.8
+      },
+      {
+        "dirDeg": 270,
+        "meanHeldN": 206.35416666666666,
+        "minHeldN": 135.9375,
+        "weakestPhase": 0.8
+      },
+      {
+        "dirDeg": 280,
+        "meanHeldN": 206.14583333333334,
+        "minHeldN": 121.875,
+        "weakestPhase": 0.8
+      },
+      {
+        "dirDeg": 290,
+        "meanHeldN": 202.70833333333334,
+        "minHeldN": 134.375,
+        "weakestPhase": 0.8
+      },
+      {
+        "dirDeg": 300,
+        "meanHeldN": 223.02083333333334,
+        "minHeldN": 160.9375,
+        "weakestPhase": 0
+      },
+      {
+        "dirDeg": 310,
+        "meanHeldN": 232.39583333333334,
+        "minHeldN": 209.375,
+        "weakestPhase": 0.6
+      },
+      {
+        "dirDeg": 320,
+        "meanHeldN": 239.6875,
+        "minHeldN": 210.9375,
+        "weakestPhase": 0.4
+      },
+      {
+        "dirDeg": 330,
+        "meanHeldN": 244.47916666666666,
+        "minHeldN": 210.9375,
+        "weakestPhase": 0.4
+      },
+      {
+        "dirDeg": 340,
+        "meanHeldN": 249.27083333333334,
+        "minHeldN": 240.625,
+        "weakestPhase": 0.6
+      },
+      {
+        "dirDeg": 350,
+        "meanHeldN": 248.33333333333334,
+        "minHeldN": 234.375,
         "weakestPhase": 0.8
       }
     ]
   },
-  "verify": {
-    "cells": 30,
-    "commit": "fd2aff244c632b5c5bba7b8a325d30a24261c91b",
-    "dirIndices": [
-      0,
-      18
-    ],
-    "engineDirty": false,
-    "equal": true,
-    "mismatched": [],
-    "missing": [],
-    "seconds": 60.895,
-    "trials": 270
-  }
+  "verify": null
 }
