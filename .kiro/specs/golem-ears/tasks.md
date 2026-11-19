@@ -28,35 +28,35 @@ Conventions for every task:
     - Add an example test that `propConfig` has `numRuns >= 100` and a numeric seed.
     - _Requirements: 13.1, 13.2, 13.12_
 
-- [ ] 2. Unit table
-  - [~] 2.1 Implement `units.ts` table and conversions
+- [x] 2. Unit table
+  - [x] 2.1 Implement `units.ts` table and conversions
     - Add `UNIT_TABLE`, `ACCEPTED_UNITS`, `toSI` and `fromSI` with the factors and kinds from the design (N, kN, s, ms, m, cm, mm, m/s, cm/s, deg, °, rad, kg, g, %). Matching is case-sensitive. `fromSI(0, u)` returns exactly 0.
     - Write example tests: every unit's factor and kind, `n` and `M` are not accepted units, 200 kN equals 200000 N.
     - _Requirements: 2.2, 2.3, 2.4_
-  - [~] 2.2 Write property test for unit conversion identity
+  - [x] 2.2 Write property test for unit conversion identity
     - **Property 5: Unit conversion is the identity**
     - **Validates: Requirements 2.11, 13.4**
 
 - [ ] 3. Token edit distance
-  - [~] 3.1 Implement `tokenEditDistance` in `editDistance.ts`
+  - [x] 3.1 Implement `tokenEditDistance` in `editDistance.ts`
     - Levenshtein over `WildToken` and string sequences. Words compare case-folded. Equal-kind wildcards cost 0, different-kind wildcards cost 1. Use two rolling `Int32Array` rows.
     - Write example tests: identical sequences, one insertion, one substitution, case folding, wildcard kinds.
     - _Requirements: 9.1, 9.3, 9.4_
-  - [~] 3.2 Write reference Levenshtein and property test for metric laws
+  - [x] 3.2 Write reference Levenshtein and property test for metric laws
     - Create `__tests__/refEditDistance.ts` (full-matrix reference) and `arbTokenSeq` over a small alphabet in `__tests__/generators.tokens.ts`.
     - **Property 16: Token edit distance obeys the metric laws**
     - **Validates: Requirements 9.10, 9.11, 13.8**
-  - [~] 3.3 Write property test for edit distance against the reference
+  - [-] 3.3 Write property test for edit distance against the reference
     - **Property 17: Edit distance matches a reference and handles wildcards** (sequence-level: words and wildcards)
     - **Validates: Requirements 9.1, 9.3, 9.4**
 
 - [ ] 4. Tokenizer
-  - [~] 4.1 Implement `tokenizer.ts`
+  - [x] 4.1 Implement `tokenizer.ts`
     - Scan order from the design: whitespace, requirement ID at start, number, unit by longest match after a number (word boundary required), word or keyword (whole word, case-insensitive, original spelling kept), comma, otherwise one error diagnostic (`PATTERN_MISMATCH` naming the character) and continue.
     - Track line and column incrementally. `\r\n` is one break. Count UTF-16 units.
     - Write example tests: `THENCE` and `IFFY` are words, `m/s` beats `m`, `5 mx` gives a word, empty input gives no tokens, an illegal character gives one diagnostic and scanning continues, ID forms `R3.`, `2.` and `2.1`.
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 1.11_
-  - [~] 4.2 Write reference line and column calculator and property test
+  - [-] 4.2 Write reference line and column calculator and property test
     - Create `__tests__/refTokenize.ts` (independent line and column from the input prefix).
     - **Property 2: Tokenizer line and column agree with an independent calculation**
     - **Validates: Requirements 1.8, 8.9**
@@ -67,18 +67,18 @@ Conventions for every task:
     - **Property 3: Keyword recognition ignores case and whole-word only**
     - **Validates: Requirements 1.6, 1.7**
 
-- [ ] 5. AST and test generators
-  - [~] 5.1 Implement `ast.ts`
+- [x] 5. AST and test generators
+  - [x] 5.1 Implement `ast.ts`
     - Add `Pattern`, `Clause`, `ParsedRequirement` and `stripOffsets` (removes `start`, `end`, `line`, `column` and `span` recursively and upper-cases keywords).
     - Write example tests: two ASTs differing only in offsets are equal after `stripOffsets`, and `stripOffsets` does not mutate its input.
     - _Requirements: 3.12, 3.14, 10.8_
-  - [~] 5.2 Implement shared generators in `__tests__/generators.ts`
+  - [x] 5.2 Implement shared generators in `__tests__/generators.ts`
     - `arbUnit`, `arbQuantity(kind?)` (zero or one space), `arbLexicon` (1 to 6 templates per class, unique first words, mixed slot kinds, `above` margin), `arbValidLine(lexicon)` (all five patterns, ID forms, keyword case, optional commas; returns text and expected AST fields), `arbMutation` (swap, delete, insert, misspell).
     - Write example tests that generated lines tokenize without diagnostics.
     - _Requirements: 13.1, 13.2, 13.12_
 
 - [ ] 6. Quantity parsing
-  - [~] 6.1 Implement `parseQuantity` and `quantityFromTokens` in `units.ts`
+  - [-] 6.1 Implement `parseQuantity` and `quantityFromTokens` in `units.ts`
     - Quantity `text` is the exact source substring. `{count}` accepts an unsigned integer. `{ratio}` accepts `%` or a bare number in [0, 1], otherwise `BAD_RANGE` stating the interval. Other bare numbers give `MISSING_UNIT`. An unknown word after a number gives `UNKNOWN_PHRASE` listing accepted units. Kind mismatch is reported by the matcher.
     - Write example tests: `rejects a force without a unit` (`MISSING_UNIT` with line and column), `0.20 s` keeps its spelling, ratio 1.5 gives `BAD_RANGE`, count `3`.
     - _Requirements: 2.1, 2.5, 2.6, 2.7, 2.8, 2.9, 2.12_
@@ -106,7 +106,7 @@ Conventions for every task:
     - **Validates: Requirements 4.7, 4.8, 4.9**
 
 - [ ] 8. Parser
-  - [~] 8.1 Implement `parser.ts`
+  - [-] 8.1 Implement `parser.ts`
     - Single pass for the five patterns, ID stripped of its trailing period, optional comma before THE and after THEN, clause boundary at the next `THE <robot> SHALL`, keywords stored in upper case, robot name as written, clause spans from first to last token.
     - Diagnostics: `PATTERN_MISMATCH` (naming the closest pattern and the expected keyword or clause, second SHALL, empty clause) and `UNKNOWN_ROBOT` with allowed names in `suggestion`. No AST when any error is found.
     - Write example tests: one example per pattern, `WHEN x, THE robot SHALL y` equals the line without the comma, empty clause, second SHALL, unknown robot.
@@ -119,12 +119,12 @@ Conventions for every task:
     - **Validates: Requirements 3.11, 8.6**
 
 - [ ] 9. Monitor builder
-  - [~] 9.1 Implement `monitor.ts`
+  - [x] 9.1 Implement `monitor.ts`
     - `buildMonitor(spec)` as in the design: `+Infinity` for a disabled feature, `NaN` with unit `signal` for a missing signal, `NaN` with unit `trace` for no trigger or an empty window, anchor at the first `trigger` event, binary search for the window start, closed window, no interpolation, always as min and eventually as max with the earliest time on ties, `NaN` margin returns immediately, state pattern as `max(-stateMargin, responseMargin)`.
     - Allocate the scratch record and signal-array list once in `buildMonitor`. The sample loop uses indices and scalar locals only. Never write to `Trace`.
     - Write example tests: always over `[t₀, t₀+3 s]`, eventually within a window, window past the last sample, a tie keeps the earliest time, state pattern example.
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.8, 6.10, 6.11, 6.12, 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7, 7.8, 7.9, 7.10, 7.16_
-  - [~] 9.2 Write reference monitor and trace generators
+  - [x] 9.2 Write reference monitor and trace generators
     - Create `__tests__/refMonitor.ts` (naive loop filtering `a <= t <= b`) and `__tests__/generators.trace.ts` with `arbTrace` (strictly increasing `t`, 1 to 1000 samples, repeated values for ties, optional trigger events).
     - Write example tests that `arbTrace` output satisfies the trace conventions.
     - _Requirements: 13.12_
@@ -154,7 +154,7 @@ Conventions for every task:
     - **Validates: Requirements 7.1, 7.8, 7.15, 7.16**
 
 - [ ] 10. Lexicon matcher and suggestions
-  - [~] 10.1 Add `toWildcardSequence` and `closestTemplate` to `editDistance.ts`
+  - [-] 10.1 Add `toWildcardSequence` and `closestTemplate` to `editDistance.ts`
     - A number with its unit, or a bare count or ratio, collapses to one wildcard of its kind. Templates compare only within their class. Ties go to the earlier template. `tooFar` is true when `distance > max(lenA, lenB) / 2`.
     - Write example tests: a quantity counts as one token, a tie picks the first template, `tooFar` omits the suggestion, an empty class gives no template.
     - _Requirements: 9.2, 9.5, 9.6, 9.7, 9.8, 9.9_
