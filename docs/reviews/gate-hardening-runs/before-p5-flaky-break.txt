@@ -1,0 +1,4 @@
+up to 160 N (breaks above ~149 N): gate red on 4/60 search seeds with no pinned seed, although the line does break
+up to 175 N (breaks above ~149 N): gate red on 1/60 search seeds with no pinned seed, although the line does break
+up to 200 N (breaks above ~149 N): gate red on 1/60 search seeds with no pinned seed, although the line does break
+same workspace reused for 60 gates (pins accumulate): red 1/60
