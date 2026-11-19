@@ -1,4 +1,4 @@
-import { compileRequirement } from 'I:/Programs/ListofHackathon/hackathons/39-kiroween/golem/skeleton/src/ears/index.ts';
+import { compileRequirement } from '../../skeleton/src/ears/index.ts';
 const lex: any = { robotNames: ['golem'], perturbations: [], predicates: [
   { phrase: 'keep its pelvis above {length}', signals: ['pelvis_z'], unit: 'm', margin: (s: any, k: any) => s.pelvis_z - k.length },
   { phrase: 'track the commanded speed within {speed}', signals: ['v'], unit: 'm/s', margin: (s: any, k: any) => k.speed - Math.abs(s.v - 0.5) } ] };
