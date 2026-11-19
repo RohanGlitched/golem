@@ -28,6 +28,27 @@ describe('stripOffsets', () => {
     expect(stripOffsets(make(0, 1, 'when'))).toEqual(stripOffsets(make(3, 2, 'WHEN')));
   });
 
+  it('normalises clause text layout to tokens joined by one space, commas attached', () => {
+    const span = { start: 0, end: 0, line: 1, column: 1 };
+    const mk = (text: string, toks: Token[]): ParsedRequirement => ({
+      pattern: 'ubiquitous',
+      robot: { name: 'robot', span },
+      response: { text, tokens: toks, span },
+    });
+    const a = mk('hold 0.0N,  x', [tok('word', 'hold', 0), tok('number', '0.0', 5), tok('unit', 'N', 8), tok('comma', ',', 9), tok('word', 'x', 12)]);
+    const b = mk('hold 0.0 N, x', [tok('word', 'hold', 0), tok('number', '0.0', 5), tok('unit', 'N', 9), tok('comma', ',', 10), tok('word', 'x', 12)]);
+    const sa = stripOffsets(a) as { response: { text: string } };
+    expect(sa.response.text).toBe('hold 0.0 N, x');
+    expect(sa).toEqual(stripOffsets(b));
+  });
+
+  it('still distinguishes clauses whose tokens differ', () => {
+    const a = make(0, 1);
+    const b = make(0, 1);
+    b.condition!.tokens = [tok('word', 'trip', 5)];
+    expect(stripOffsets(a)).not.toEqual(stripOffsets(b));
+  });
+
   it('keeps differing content unequal', () => {
     const b = make(0, 1);
     b.pattern = 'state';

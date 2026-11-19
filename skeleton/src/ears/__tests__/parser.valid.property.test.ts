@@ -25,9 +25,11 @@ describe('Feature: golem-ears, Property 9: Generated valid lines parse to the ex
           expect(got.id).toBe(line.id);
           expect('id' in got).toBe(line.id !== undefined);
           expect(got.robot).toEqual({ name: line.robot });
-          expect(got.condition?.text).toBe(line.condition?.text);
+          // Clause.text is the exact source substring (req 3.14), so read it from the raw AST;
+          // stripOffsets normalises layout.
+          expect(ast!.condition?.text).toBe(line.condition?.text);
           expect('condition' in got).toBe(line.condition !== undefined);
-          expect(got.response.text).toBe(line.response.text);
+          expect(ast!.response.text).toBe(line.response.text);
 
           // Spans slice the input to the clause text; keyword tokens are upper-case.
           const a = ast!;

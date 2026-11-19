@@ -182,86 +182,86 @@ Conventions for every task:
 - [x] 11. Checkpoint - Ensure all tests pass
   - Run `npx vitest --run` in `skeleton/`. Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 12. Compiler
-  - [-] 12.1 Implement `compileRequirement` in `compile.ts`
+- [x] 12. Compiler
+  - [x] 12.1 Implement `compileRequirement` in `compile.ts`
     - Run tokenizer, parser, matcher and monitor builder. Return no requirement when any diagnostic is an error, and return warnings with the requirement otherwise.
     - Set `id` (AST ID, else `options.id`, else `''`), `source` (input unchanged), `pattern`, `space.dims` (trigger Dimensions in source order for event and unwanted, template `dims` otherwise), one `PerturbationCall` per matched template (Dimension name for a searched value, SI number for a fixed one), and `horizon` (wrapper plus trigger duration, or `episodeSeconds` with a 10 s default). Duplicate Dimension names give an error at the second occurrence.
     - Write example tests: one compiled example per pattern, duplicate Dimension name, WHERE with a disabled feature, `episodeSeconds` override.
     - _Requirements: 6.8, 6.9, 12.1, 12.2, 12.3, 12.4, 12.5, 12.6, 12.7, 12.11, 12.13, 5.8, 8.2, 8.3, 8.4, 8.5, 8.6, 8.7, 8.8, 8.10, 8.11, 8.12_
-  - [~] 12.2 Write property test for the horizon
+  - [x] 12.2 Write property test for the horizon
     - **Property 26: Horizon follows the wrapper and trigger durations**
     - **Validates: Requirements 6.9**
-  - [~] 12.3 Write property test for diagnostics
+  - [x] 12.3 Write property test for diagnostics
     - **Property 28: Diagnostics are well formed, ordered, positioned and decide the outcome**
     - **Validates: Requirements 8.1, 8.7, 8.8, 8.11, 8.12**
-  - [~] 12.4 Write property test for determinism and input immutability
+  - [x] 12.4 Write property test for determinism and input immutability
     - **Property 29: Compiling is deterministic and does not mutate its inputs**
     - **Validates: Requirements 1.11, 3.16, 8.13, 12.11, 12.13, 13.7**
-  - [~] 12.5 Write property test for compiled identity and dimensions
+  - [x] 12.5 Write property test for compiled identity and dimensions
     - **Property 30: Compiled requirements carry the line's identity and ordered unique dimensions**
     - **Validates: Requirements 12.1, 12.2, 12.3, 12.4, 12.5, 12.7**
 
-- [ ] 13. Formatter
-  - [-] 13.1 Implement `format.ts`
+- [x] 13. Formatter
+  - [x] 13.1 Implement `format.ts`
     - Print the five canonical shapes, with an optional ID followed by one space, a comma attached to the previous token, and quantity text as written. Throw an `Error` naming the field for a missing or unknown `pattern`. Never mutate the AST.
     - Write example tests: each shape, `0.20 s` stays `0.20 s`, `200 N` is never printed as `0.2 kN`, the invalid pattern throws.
     - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7, 10.11_
-  - [~] 13.2 Write property test for the parse and format round trip
+  - [x] 13.2 Write property test for the parse and format round trip
     - **Property 31: Parse and format round trip**
     - **Validates: Requirements 10.8, 13.3**
-  - [~] 13.3 Write property test for comma insensitivity
+  - [x] 13.3 Write property test for comma insensitivity
     - **Property 10: Optional commas do not change the AST or the canonical text**
     - **Validates: Requirements 3.6, 3.7, 10.9**
-  - [~] 13.4 Write property test for canonical layout and idempotence
+  - [x] 13.4 Write property test for canonical layout and idempotence
     - **Property 32: Canonical text layout and idempotence**
     - **Validates: Requirements 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7, 10.10**
 
-- [ ] 14. Extractor
-  - [-] 14.1 Implement `extract.ts`
+- [x] 14. Extractor
+  - [x] 14.1 Implement `extract.ts`
     - `extractCriteria(text)`: split on `\r?\n` with a line-start table, track `### Requirement <n>` and `#### Acceptance Criteria`, accept `<m>.` and `<m>)`, ignore `-` and `*` bullets, join indented continuation lines with one space, end at a blank line, a numbered line or a heading. Return `id`, `text`, `line`, `column` and `offset`.
     - Emit `NON_EARS_LINE` warnings for non-EARS and `FOR ALL` lines. Use `R0` plus one warning for a criterion before any requirement heading.
     - Write example tests: a Kiro-style file with a comma before THE and one without, ids, texts, lines and columns, CRLF equals LF, no acceptance heading gives an empty list.
     - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5, 11.6, 11.7, 11.8, 11.9, 11.10, 11.11, 11.12, 13.11_
-  - [~] 14.2 Add the requirements-file generator
+  - [x] 14.2 Add the requirements-file generator
     - Add `arbRequirementsFile` in `__tests__/generators.file.ts`: headings, `.` or `)` numbering, continuation lines, bullets, non-EARS lines, `FOR ALL` lines, LF or CRLF, each file carrying its expected criteria list.
     - Write example tests that the generated expectation matches a hand-written file.
     - _Requirements: 13.2_
-  - [~] 14.3 Write property test for extraction
+  - [x] 14.3 Write property test for extraction
     - **Property 33: Extractor returns qualifying criteria with unique ordered IDs and exact positions**
     - **Validates: Requirements 11.1, 11.2, 11.4, 11.7, 11.13**
-  - [~] 14.4 Write property test for skipped lines
+  - [x] 14.4 Write property test for skipped lines
     - **Property 34: Extractor skips non-EARS and FOR ALL lines with a warning and ignores bullets**
     - **Validates: Requirements 11.5, 11.8, 11.11, 11.12**
-  - [~] 14.5 Write property test for layout insensitivity
+  - [x] 14.5 Write property test for layout insensitivity
     - **Property 35: Extractor is insensitive to line endings, number format and continuation layout**
     - **Validates: Requirements 11.8, 11.9, 11.10**
 
-- [ ] 15. File-level compilation
-  - [~] 15.1 Implement `compileRequirementsFile` in `compile.ts`
+- [x] 15. File-level compilation
+  - [x] 15.1 Implement `compileRequirementsFile` in `compile.ts`
     - Extract, compile each criterion independently, and keep every valid requirement in file order. Map diagnostic offsets, lines and columns to file coordinates, using a per-criterion offset map for joined continuation lines. A repeated Requirement ID adds one warning at the second criterion and keeps both.
     - Write example tests: one invalid criterion among valid ones, a diagnostic position in file coordinates, a duplicate ID.
     - _Requirements: 8.14, 12.8, 12.9, 12.10_
-  - [~] 15.2 Write property test for file compilation
+  - [x] 15.2 Write property test for file compilation
     - **Property 36: File compilation isolates failures and reports in file coordinates**
     - **Validates: Requirements 12.8, 12.9, 12.10, 8.14**
 
-- [ ] 16. Public entry point
-  - [~] 16.1 Wire the exports
+- [x] 16. Public entry point
+  - [x] 16.1 Wire the exports
     - Create `skeleton/src/ears/index.ts` exporting `compileRequirement`, `compileRequirementsFile`, `extractCriteria`, `tokenize`, `parse`, `format`, `parseQuantity`, `toSI`, `fromSI`, `tokenEditDistance` and the public types.
     - Re-export them from `skeleton/src/index.ts` so apps import from `golem-spec`. Do not deep-import `skeleton/src/ears/...` anywhere outside the module.
     - _Requirements: 12.14_
-  - [~] 16.2 Write smoke tests for exports and purity
+  - [x] 16.2 Write smoke tests for exports and purity
     - Test that `golem-spec` (the `skeleton/src/index.ts` entry) exposes every public function.
     - Test that no file under `ears/` (excluding `__tests__`) mentions `Math.random`, `Date.now`, `performance.now`, `fetch` or `node:fs`.
     - _Requirements: 12.12, 12.14_
 
-- [ ] 17. Diagnostic and Kiro-file example tests
-  - [~] 17.1 Write example tests per Diagnostic kind
+- [x] 17. Diagnostic and Kiro-file example tests
+  - [x] 17.1 Write example tests per Diagnostic kind
     - One test for each of `PATTERN_MISMATCH`, `MISSING_UNIT`, `UNKNOWN_PHRASE`, `BAD_RANGE`, `UNKNOWN_ROBOT` and `NON_EARS_LINE`, asserting `kind`, one-based `line` and one-based `column`, going through the public entry point.
     - Add a test that compiles a Kiro-style `requirements.md` containing lines with and without the comma before THE and asserts ids, texts, lines and columns.
     - _Requirements: 13.10, 13.11, 13.14_
 
-- [~] 18. Final checkpoint - Ensure all tests pass
+- [x] 18. Final checkpoint - Ensure all tests pass
   - Run `npx vitest --run` in `skeleton/`, and run the TypeScript type check. Ensure all tests pass, ask the user if questions arise.
 
 ## Notes
