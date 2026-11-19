@@ -45,6 +45,8 @@ import {
   DEFAULT_TILT_WORDS, boundValues, forceFraction, fractureSignal, fractureWord, fuseFill, harshestScenario, leanDeg, livingSegments,
 } from './tablet/living.js';
 import { LiveSentence } from './signature/live-sentence.js';
+import { EmetDecal, bodyPoints, highestBody } from './signature/emet-decal.js';
+import { emetTarget, foreheadSpot } from './core/emet.js';
 import { instantMargins, traceTrial } from './signature/trace-trial.js';
 import type { TraceTrialResult } from './signature/trace-trial.js';
 import { VerdictPanel } from './verdict/verdict-panel.js';
@@ -242,6 +244,7 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
     shove?.update();
     swarm?.update(now() / 1000);
     updateLive();
+    if (emet?.animating) { emet.update(now()); scheduler.requestOnce(); }
     if (pendingAura !== null && aura) { aura.write(pendingAura); pendingAura = null; }
     if (stage && parts) {
       const groups = parts.bodyGroups;
@@ -291,6 +294,37 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
       resolveReady();
     }
   }
+
+  // ---------------------------------------------------------------- emet (golem-signature 2)
+  let emet: EmetDecal | undefined;
+  function setupEmet(bodyId: (n: string) => number): void {
+    const opt = options.emet;
+    if (opt === false || !parts || !stage) return;
+    const body = opt ? bodyId(opt.body) : highestBody(THREE, parts);
+    if (!(body >= 0) || !parts.bodyGroups[body]) {
+      if (opt) store.addMessage('warning', `The emet decal names body "${opt.body}", which ${app.name} does not have: check StudioOptions.emet.body`);
+      return;
+    }
+    const found = opt?.at ? undefined : foreheadSpot(bodyPoints(THREE, parts, body));
+    const spot = opt?.at
+      ? { at: opt.at, normal: opt.normal ?? [1, 0, 0] as [number, number, number], width: opt.width ?? 0.06 }
+      : found ? { ...found, ...(opt?.normal ? { normal: opt.normal } : {}), ...(opt?.width ? { width: opt.width } : {}) } : undefined;
+    if (!spot) return;
+    emet = new EmetDecal({
+      THREE, tokens: TOKENS[store.getState().theme], spot, hintHost: stage.el, storage, reduced,
+      announce: (m) => announcer.announceFinal(m),
+    });
+    (parts.bodyGroups[body] as THREE.Group).add(emet.group);
+    syncEmet();
+  }
+  function syncEmet(): void {
+    if (!emet) return;
+    const s = store.getState();
+    const status = s.lines.find((l) => l.id === s.selectedId)?.status;
+    if (emet.setWord(emetTarget(status, emet.word), now())) scheduler.requestOnce();
+    if (stage) stage.el.dataset['golemEmet'] = emet.word;
+  }
+  cleanups.push(store.subscribe(syncEmet));
 
   const failHero = (msg: string): void => {
     store.update({ hero: 'failed' });
@@ -362,7 +396,9 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
       swarm?.setTheme(t, store.getState().theme);
       aura?.setTheme(t);
       shove?.setInk(t.ink);
+      emet?.setTheme(t);
     });
+    setupEmet(bodyId);
     store.update({ hero: 'running' });
     scheduler.requestOnce();
   };
@@ -659,6 +695,7 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
       for (const c of cleanups.splice(0)) c();
       theme.dispose();
       shove?.dispose();
+      emet?.dispose();
       swarm?.dispose();
       aura?.dispose();
       film?.dispose();
@@ -711,5 +748,28 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
     handle.renderCalls = () => (stage?.renderer.info?.render.calls ?? 0);
     (handle as { reasons?: () => string[] }).reasons = () => [...scheduler.active()];
   }
+  // Read-only probe of the signature moments for browser tests and screenshots (not part of StudioHandle).
+  (handle as { signature?: unknown }).signature = {
+    state: () => {
+      let head: [number, number] | undefined;
+      if (emet && stage) {
+        const v = new THREE.Vector3();
+        emet.group.getWorldPosition(v).project(stage.camera);
+        head = [(v.x * 0.5 + 0.5) * stage.canvas.clientWidth, (-v.y * 0.5 + 0.5) * stage.canvas.clientHeight];
+      }
+      return { emet: emet?.word ?? 'none', crumble: emet?.crumble ?? 0, head, reasons: [...scheduler.active()] };
+    },
+    /** Moves the camera to look at the emet decal from `distance` metres in front of it. */
+    focusEmet: (distance = 0.7) => {
+      if (!emet || !stage) return;
+      const p = new THREE.Vector3(), n = new THREE.Vector3(0, 0, 1);
+      emet.group.getWorldPosition(p);
+      n.applyQuaternion(emet.group.getWorldQuaternion(new THREE.Quaternion()));
+      stage.orbit.controls.target.copy(p);
+      stage.camera.position.copy(p).addScaledVector(n, distance).add(new THREE.Vector3(0, 0, 0.05));
+      stage.orbit.controls.update();
+      scheduler.requestOnce();
+    },
+  };
   return handle;
 }

@@ -40,6 +40,7 @@ export function studioCss(fontBaseUrl = './fonts/'): string {
 .golem-stage-msg,.golem-stage-slow{position:absolute;left:20px;top:16px;max-width:60ch;color:var(--ink-2);font-size:${s13}px;pointer-events:none}
 .golem-stage-slow{top:auto;bottom:12px}
 .golem-stage-msg[hidden],.golem-stage-slow[hidden],.golem-shove-label[hidden]{display:none}
+.golem-stage-hint{position:absolute;left:20px;bottom:36px;margin:0;max-width:60ch;color:var(--ink);font-size:${s13}px;pointer-events:none}
 .golem-shove-label{position:absolute;left:0;top:0;padding:2px 6px;margin:-28px 0 0 8px;background:var(--ground-2);color:var(--ink);border:1px solid var(--rule);border-radius:2px;font-size:${s13}px;pointer-events:none}
 .golem-reel{padding:12px 20px 16px;border-top:1px solid var(--rule);min-width:0;background:var(--ground)}
 .golem-h{font-size:${s20}px;font-weight:700;line-height:1.3;margin:12px 0 8px}

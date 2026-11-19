@@ -28,6 +28,32 @@ async function runLine(page: Page, id: string): Promise<string> {
   return page.evaluate((x) => (window as unknown as W).studio.getState().lines.find((l: any) => l.id === x).status, id);
 }
 
+test.describe('emet and met', () => {
+  test('incises "emet" on the head, crumbles the first e when the selected line breaks, and re-forms it', async ({ page }) => {
+    test.setTimeout(600_000);
+    await openG1(page, '?trials=8&sleep=600000');
+    await page.evaluate(() => localStorage.removeItem('golem:emet-hint'));
+    const sig = () => page.evaluate(() => (window as unknown as W).studio.signature.state());
+    expect((await sig()).emet).toBe('emet');
+    await page.evaluate(() => (window as unknown as W).studio.signature.focusEmet(0.5));
+    await page.waitForTimeout(500);
+    await page.locator('.golem-stage').screenshot({ path: path.join(SHOTS, 'signature-emet.png') });
+    expect(await runLine(page, '6.2')).toBe('broken');
+    await page.waitForFunction(() => (window as unknown as W).studio.signature.state().crumble === 1, null, { timeout: 30_000 });
+    expect((await sig()).emet).toBe('met');
+    await expect(page.locator('.golem-stage-hint')).toHaveText('In the legend, erasing one letter unmakes the golem.');
+    await page.evaluate(() => (window as unknown as W).studio.signature.focusEmet(0.5));
+    await page.waitForTimeout(500);
+    await page.locator('.golem-stage').screenshot({ path: path.join(SHOTS, 'signature-met.png') });
+    await page.getByRole('button', { name: 'Select line 6.1' }).click();
+    await page.waitForFunction(() => (window as unknown as W).studio.signature.state().crumble === 0, null, { timeout: 30_000 });
+    expect((await sig()).emet).toBe('emet');
+    // Selecting the broken line again crumbles it again, without a second hint.
+    await page.getByRole('button', { name: 'Select line 6.2' }).click();
+    await page.waitForFunction(() => (window as unknown as W).studio.signature.state().crumble === 1, null, { timeout: 30_000 });
+  });
+});
+
 test.describe('the living sentence', () => {
   test('sets the selected response clause large in Gloock', async ({ page }) => {
     await openG1(page);
