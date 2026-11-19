@@ -88,6 +88,14 @@ function readText(root: string, relPath: string): string {
   return readFileSync(p, 'utf8');
 }
 
+/** Reads a text file that may be UTF-16 (a PowerShell redirect wrote some committed logs) or UTF-8. */
+function readTextAuto(root: string, relPath: string): string {
+  const p = path.join(root, relPath);
+  if (!existsSync(p)) throw new SiteDataError(relPath, 'file not found.');
+  const b = readFileSync(p);
+  return b[0] === 0xff && b[1] === 0xfe ? b.subarray(2).toString('utf16le') : b.toString('utf8').replace(/^\uFEFF/, '');
+}
+
 export function parseJson<T>(text: string, file: string): T {
   try { return JSON.parse(text) as T; } catch (e) { throw new SiteDataError(file, `invalid JSON (${(e as Error).message})`); }
 }
@@ -166,7 +174,7 @@ export function loadSiteData(root: string = REPO_ROOT): SiteData {
     preregMd: readText(root, 'evidence/PREREG.md'),
     reviews,
     falsifyHardeningMd: readText(root, 'docs/reviews/falsify-hardening.md'),
-    needleRuns: readText(root, 'docs/reviews/falsify-hardening-runs/after-search.txt'),
+    needleRuns: readTextAuto(root, 'docs/reviews/falsify-hardening-runs/after-search.txt'),
     pinnedSeed: json('apps/stagger/.golem/seeds/stagger/1.3.json'),
   };
 }

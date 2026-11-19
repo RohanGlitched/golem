@@ -34,3 +34,8 @@ export function table(head: string[], rows: string[][], opts: { caption?: string
 export function codeBlock(text: string, label: string): string {
   return `<div class="code"><button class="copy" type="button" aria-label="Copy ${esc(label)}">Copy</button><pre tabindex="0"><code>${esc(text)}</code></pre></div>`;
 }
+
+/** Escapes text, then turns `code` spans and **bold** into tags. For the committed Markdown that the pages quote. */
+export function inlineMd(text: string): string {
+  return esc(text).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>');
+}

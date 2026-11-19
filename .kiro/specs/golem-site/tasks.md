@@ -14,7 +14,7 @@ Compact plan, done sequentially in one session. One commit per page: `golem-site
 - [x] 4. Kit page `/kit`
   - CLI transcript excerpts, MCP tools, hooks, agents, skills, Power, workflow, Crew app, EARS dialect reference from `lexicon.json`.
   - _Requirements: 13, 14_
-- [ ] 5. Evidence page `/evidence`
+- [x] 5. Evidence page `/evidence`
   - Polar G1 map, falsifier rounds and needle benchmark, candy measurement, agent-gate "pending", methods and limits.
   - _Requirements: 15 to 18, 23_
 - [ ] 6. How Kiro built it `/how-kiro`
