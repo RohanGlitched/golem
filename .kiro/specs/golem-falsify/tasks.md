@@ -266,8 +266,8 @@ Test rules for every task (`testing.md`):
     - Write example tests with a real `worker_threads` worker and a synthetic `trialModule`: results match `InProcessPool`, `poses.frames` transferred with byte length 0 in the worker afterwards, bad worker module rejects construction and leaves no worker running, `close` is clean, invalid `size` rejected, `nodeFileSystem` round trips a seed file in a temp directory.
     - _Requirements: 14.1, 14.2, 14.3, 14.4, 14.5, 14.6, 14.7, 14.8, 20.1_
 
-- [ ] 18. Browser Web Worker adapter
-  - [~] 18.1 Implement `createBrowserPool` and `browser-entry.ts`
+- [x] 18. Browser Web Worker adapter
+  - [x] 18.1 Implement `createBrowserPool` and `browser-entry.ts`
     - Adapter in `skeleton/src/pool/browser.ts`: default `size = clamp(navigator.hardwareConcurrency - 1, 1, 8)` with 1 when the value is not a positive integer, explicit `size` must be an integer in 1 to 8, module `Worker` created per slot, assets fetched by URL from `assetBase` only, buffer transfer through `postMessage`, load failures reject `run` with the message (the pool is returned at once), same `SchedulerOptions` as the Node adapter.
     - Write example tests with a fake `Worker` global and a fake `navigator`: size defaults (`undefined`, 0, 1.5, 2, 32), explicit size 9 rejected, load failure message on `run`, `close` terminates every worker, dispatch order identical to the Node adapter for the same event script.
     - _Requirements: 15.1, 15.2, 15.3, 15.4, 15.5, 15.6, 15.7, 15.9, 15.10, 15.11, 15.12, 15.13_
