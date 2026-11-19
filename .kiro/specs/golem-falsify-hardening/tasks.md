@@ -73,5 +73,5 @@ Rules for every task:
   - Rewrite the drifted sections of `golem-falsify/design.md` and `falsify/README.md`.
   - _Bugfix: 9.2–9.4_
 
-- [ ] 16. Final checkpoint
+- [x] 16. Final checkpoint
   - Full falsify and pool suites, typecheck, probe scripts after the fixes (`docs/reviews/falsify-hardening-runs/after-*.txt`), before/after table per defect and benchmark numbers in `docs/reviews/falsify-hardening.md`.
