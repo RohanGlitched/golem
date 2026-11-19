@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { compileRequirement, extractCriteria } from '../../ears/index.js';
 import { segmentLine } from '../tablet/segments.js';
-import { commitTyped, dragQuantity, formatSpan, rangeOf, rewriteSpan, stepQuantity } from '../tablet/quantity-edit.js';
+import { commitTyped, dragQuantity, effectiveStep, formatSpan, rangeOf, rewriteSpan, stepDecimals, stepQuantity } from '../tablet/quantity-edit.js';
 import { diagnosticLabel, underlineRanges } from '../tablet/diagnostics-view.js';
 import { GOOD_LINE, testLexicon } from './generators/lexicon.js';
 import type { DiagnosticKind } from '../../ears/index.js';
@@ -108,5 +108,16 @@ describe('diagnostics view', () => {
   it('clamps, sorts and merges ranges', () => {
     expect(underlineRanges('abcdef', [{ start: 4, end: 99 }, { start: -3, end: 2 }, { start: 1, end: 3 }, { start: 5, end: 5 }]))
       .toEqual([{ start: 0, end: 3 }, { start: 4, end: 6 }]);
+  });
+});
+
+describe('effectiveStep', () => {
+  it('has no binary noise: 0.1 of a 0.05 step is exactly 0.005, so stepping 16 rad with alt returns to 16', () => {
+    expect(effectiveStep('rad', 'alt')).toBe(0.005);
+    expect(effectiveStep('kg', 'alt')).toBe(0.01);
+    expect(effectiveStep('m/s', 'alt')).toBe(0.005);
+    expect(stepDecimals('rad', 'alt', 0)).toBe(3);
+    const up = stepQuantity(16, 'rad', 1, 'alt', { min: -Infinity, max: Infinity }, 0);
+    expect(stepQuantity(up, 'rad', -1, 'alt', { min: -Infinity, max: Infinity }, 0)).toBe(16);
   });
 });

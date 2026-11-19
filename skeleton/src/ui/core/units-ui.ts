@@ -11,7 +11,8 @@ export type Modifier = 'none' | 'shift' | 'alt';
 
 export function effectiveStep(unit: string, mod: Modifier): number {
   const base = STEP[unit] ?? 1;
-  return base * (mod === 'shift' ? 10 : mod === 'alt' ? 0.1 : 1);
+  // 0.1 * 0.05 is 0.005000000000000001 in binary; 12 significant digits keeps the step's decimals at 3, not 18.
+  return Number((base * (mod === 'shift' ? 10 : mod === 'alt' ? 0.1 : 1)).toPrecision(12));
 }
 
 export interface Range { min: number; max: number }
