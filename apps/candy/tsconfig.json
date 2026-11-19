@@ -1,5 +1,15 @@
 {
   "extends": "../../tsconfig.base.json",
-  "compilerOptions": { "noEmit": true, "types": ["node"] },
-  "include": ["controller", "web", "scripts", "lexicon.ts", "app.ts"]
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["node"],
+    "allowJs": true,
+    "checkJs": false,
+    "paths": {
+      "golem-spec": ["../../skeleton/src/index.ts"],
+      "golem-spec/node": ["../../skeleton/src/node.ts"],
+      "golem-spec/ui": ["../../skeleton/src/ui/index.ts"]
+    }
+  },
+  "include": ["controller", "web", "scripts", "test", "*.ts"]
 }
