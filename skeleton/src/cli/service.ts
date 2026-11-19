@@ -38,7 +38,7 @@ export interface Bootstrapped { app: LocatedApp; robotApp: RobotApp }
 
 export async function bootstrap(cwd: string, appFlag: string | undefined, deps: KitDeps): Promise<Bootstrapped> {
   const app = await locateApp(cwd, appFlag, deps.fs);
-  const robotApp = await deps.loadApp(app.config.app);
+  const robotApp = await deps.loadApp(app.config.app, app.appDir);
   return { app, robotApp };
 }
 
