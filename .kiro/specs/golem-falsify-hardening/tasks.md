@@ -56,7 +56,7 @@ Rules for every task:
   - Test: `failureRateUpper95Exact` equals `1 - 0.05^(1/n)` with no failures and `clopperPearsonUpper(n, k)` otherwise, and is set exactly when `failureRateUpper95` is.
   - _Bugfix: C.1–C.2_
 
-- [ ] 12. Search-effectiveness property (item A)
+- [x] 12. Search-effectiveness property (item A)
   - `search.benchmark.property.test.ts`: graded needle at 400 trials, full ≥ random-only; flat needle at 1000 trials, full ≥ random-only − 8%.
   - _Bugfix: A.1–A.2_
 

@@ -12,6 +12,20 @@ const seedsFrom = (base: number): number[] => Array.from({ length: RUNS }, (_, i
 const { lo, hi, forceMin } = NEEDLE_011;
 
 describe('search effectiveness on needle benchmarks', () => {
+  it('finds the graded 0.11% needle at 400 trials in at least as many runs as random-only', async () => {
+    const graded = needle(lo, hi, forceMin, false);
+    await fc.assert(
+      fc.asyncProperty(fc.integer({ min: 1, max: 2 ** 31 }), async (base) => {
+        const seeds = seedsFrom(base);
+        const random = await foundCount(graded, seeds, 400, 'random-only');
+        const full = await foundCount(graded, seeds, 400, 'full');
+        console.log(`graded 0.11% needle, 400 trials, base ${base}: full ${full}/${RUNS}, random-only ${random}/${RUNS}`);
+        expect(full).toBeGreaterThanOrEqual(random);
+      }),
+      { numRuns: 2, seed: FC_SEED },
+    );
+  }, 60000);
+
   it('never does worse than random-only by more than 8% of the runs on the flat 0.11% needle at 1000 trials', async () => {
     const flat = needle(lo, hi, forceMin, true);
     await fc.assert(
@@ -24,5 +38,5 @@ describe('search effectiveness on needle benchmarks', () => {
       }),
       { numRuns: 2, seed: FC_SEED },
     );
-  }, 120000);
+  }, 60000);
 });
