@@ -1,4 +1,4 @@
-import load from 'file:///I:/Programs/ListofHackathon/hackathons/39-kiroween/golem/node_modules/@mujoco/mujoco/mujoco.js';
+import load from '@mujoco/mujoco';
 const mj: any = await load();
 console.log('mjDSBL_AUTORESET', mj.mjtDisableBit?.mjDSBL_AUTORESET?.value);
 const xml = `<mujoco><option timestep="0.002"/><worldbody><geom type="plane" size="5 5 .1"/>

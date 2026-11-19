@@ -1,4 +1,4 @@
-import load from 'file:///I:/Programs/ListofHackathon/hackathons/39-kiroween/golem/node_modules/@mujoco/mujoco/mujoco.js';
+import load from '@mujoco/mujoco';
 const mj: any = await load();
 const xml = `<mujoco><option timestep="0.002"/><worldbody><geom type="plane" size="5 5 .1"/>
 <body name="torso" pos="0 0 1"><freejoint/><geom type="box" size=".1 .1 .3" mass="10"/></body></worldbody></mujoco>`;

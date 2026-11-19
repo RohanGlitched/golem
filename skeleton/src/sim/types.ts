@@ -67,7 +67,11 @@ export interface Lexicon {
   episodeSeconds?: number;
 }
 
-export interface Controller { step(ctx: SimContext, t: number): void }
+export interface Controller {
+  step(ctx: SimContext, t: number): void;
+  /** Approved addition (golem-sim-hardening): called before every mj_step, warm-up included. */
+  substep?(ctx: SimContext, tSim: number): void;
+}
 export interface RobotApp {
   id: string; name: string;
   files(): Promise<Record<string, Uint8Array>>;
