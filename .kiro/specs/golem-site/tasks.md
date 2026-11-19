@@ -17,7 +17,7 @@ Compact plan, done sequentially in one session. One commit per page: `golem-site
 - [x] 5. Evidence page `/evidence`
   - Polar G1 map, falsifier rounds and needle benchmark, candy measurement, agent-gate "pending", methods and limits.
   - _Requirements: 15 to 18, 23_
-- [ ] 6. How Kiro built it `/how-kiro`
+- [x] 6. How Kiro built it `/how-kiro`
   - Counts and lists from `kiro.json`, surfaces, audits and bugfix specs, what went wrong.
   - _Requirements: 19, 20, 25_
 - [ ] 7. Quality

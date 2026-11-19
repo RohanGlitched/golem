@@ -1,6 +1,6 @@
 {
-  "generated": "2026-11-19T15:05:04.618Z",
-  "commit": "a08a51f",
+  "generated": "2026-11-19T15:14:28.921Z",
+  "commit": "109af58",
   "workspaces": [
     {
       "path": ".kiro",
@@ -122,8 +122,8 @@
           "requirements": 27,
           "earsCriteria": 223,
           "properties": 0,
-          "tasksDone": 3,
-          "tasksOpen": 4,
+          "tasksDone": 6,
+          "tasksOpen": 1,
           "waves": false
         },
         {
@@ -294,9 +294,9 @@
     }
   ],
   "commits": {
-    "total": 196,
+    "total": 198,
     "byPrefix": {
-      "golem-site": 1,
+      "golem-site": 3,
       "other": 18,
       "evidence": 2,
       "infra": 1,
@@ -327,7 +327,7 @@
     "requirements": 224,
     "earsCriteria": 2273,
     "properties": 293,
-    "tasksDone": 659,
+    "tasksDone": 662,
     "steering": 10,
     "hooks": 6,
     "agents": 4,
