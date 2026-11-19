@@ -9,7 +9,8 @@
   "exports": {
     ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
     "./ui": { "types": "./dist/ui/index.d.ts", "default": "./dist/ui/index.js" },
-    "./node": { "types": "./dist/node.d.ts", "default": "./dist/node.js" }
+    "./node": { "types": "./dist/node.d.ts", "default": "./dist/node.js" },
+    "./testing": { "types": "./dist/testing.d.ts", "default": "./dist/testing.js" }
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
@@ -27,11 +28,13 @@
     "vitest": "^2.1.0"
   },
   "peerDependencies": {
+    "fast-check": "^3.22.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "three": ">=0.160.0"
   },
   "peerDependenciesMeta": {
+    "fast-check": { "optional": true },
     "react": { "optional": true },
     "react-dom": { "optional": true },
     "three": { "optional": true }

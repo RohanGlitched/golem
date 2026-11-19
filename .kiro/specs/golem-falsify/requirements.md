@@ -1,4 +1,4 @@
-﻿# Requirements Document
+# Requirements Document
 
 ## Introduction
 
@@ -49,6 +49,7 @@ Out of scope: EARS parsing and monitors (`skeleton/src/ears`), the MuJoCo episod
 - **Synthetic_Robustness_Function**: An analytic function from a `Scenario` and seed to a robustness value, used in property tests with no physics.
 - **Seed**: The integer that fixes all randomness inside one Trial.
 - **Search_Seed**: The integer that fixes all randomness inside the Falsifier itself (sampling, elite selection, Verification_Seeds).
+- **Shrink_Reserve**: The shrink Trials allowed on top of the maximum trial count, `max(12, ceil(0.15 * T))` by default (Requirement 8, criterion 13).
 
 ## Requirements
 
@@ -162,12 +163,12 @@ Out of scope: EARS parsing and monitors (`skeleton/src/ears`), the MuJoCo episod
 6. THE Shrinker SHALL leave every dimension whose `severity` is `'none'` and every Fixed_Dimension at its input value.
 7. THE Shrinker SHALL stop bisecting a dimension when the interval width is at most a configurable tolerance, expressed as a fraction of the dimension width in the open interval (0, 1), with a default of 0.01 (1%).
 8. THE Shrinker SHALL stop when the shrink trial limit is reached, configurable as an integer of at least 1, with a default of 60 trials.
-9. WHEN the Budget is exhausted during shrinking, THE Shrinker SHALL return the mildest failing scenario found so far.
+9. WHEN the Shrink_Reserve (Requirement 8, criterion 13) or the maximum wall time is exhausted during shrinking, THE Shrinker SHALL return the mildest failing scenario found so far.
 10. WHEN a Severity_Dimension is a Wrap_Dimension, THE Shrinker SHALL measure severity as distance along the dimension from its `min`, taking `min` as the milder end, and SHALL NOT bisect across the wrap point.
 11. THE Shrinker SHALL set `Counterexample.shrunk` to true when the returned scenario differs from the input scenario in at least one dimension, and to false otherwise.
 12. WHEN the input scenario is already at the milder end of every Severity_Dimension, THE Shrinker SHALL return it unchanged without running any Trial.
 13. WHEN a Trial during shrinking throws or the Trial_Pool reports a trial error, THE Shrinker SHALL treat that candidate as not failing, SHALL continue with the remaining dimensions, and SHALL report the error in the run metadata. Such an error SHALL NOT change `Verdict.status` from `'broken'`.
-14. THE Shrinker SHALL count every shrink Trial against the Budget and against `Verdict.trials`.
+14. THE Shrinker SHALL count every shrink Trial against the Shrink_Reserve and against `Verdict.trials`.
 15. WHEN the same Search_Seed, failing scenario, Seed and Trial results are given, THE Shrinker SHALL return the same scenario.
 
 ### Requirement 7: Counterexample classification
@@ -194,16 +195,17 @@ Out of scope: EARS parsing and monitors (`skeleton/src/ears`), the MuJoCo episod
 
 1. THE Falsifier SHALL accept a Budget with a maximum trial count (a positive integer), a maximum wall time in milliseconds (a positive finite number), or both.
 2. WHEN both limits are given, THE Falsifier SHALL stop at whichever is reached first.
-3. WHEN the number of Trials started, counting Phase 0, Phase 1, Phase 2 and Phase 3 Trials, equals the maximum trial count, THE Falsifier SHALL not start another Trial, except the Verification_Seeds required by Requirement 7.
+3. WHEN the number of Trials started, counting Phase 0, Phase 1 and Phase 2 Trials, equals the maximum trial count, THE Falsifier SHALL not start another search Trial. Phase 3 shrink Trials draw on the Shrink_Reserve of criterion 13, and the Verification_Seeds required by Requirement 7 always run.
 4. WHEN the elapsed wall time since the start of the `falsify` call is at least the maximum wall time, THE Falsifier SHALL not start a new Generation or a new Shrinker Trial.
 5. WHEN the maximum wall time elapses while a Generation is running, THE Falsifier SHALL let the Trials already submitted to the Trial_Pool finish, count them against the Budget, and not submit further Trials.
 6. IF a Budget has neither a maximum trial count nor a maximum wall time, THEN THE Falsifier SHALL reject it before running any Trial with an error that names both missing fields.
 7. IF a Budget limit is not a positive finite number, or the maximum trial count is not an integer, THEN THE Falsifier SHALL reject the Budget before running any Trial with an error that names the field and the value received.
-8. THE Falsifier SHALL divide the Budget between phases with configurable fractions, each in the closed interval [0, 1], defaulting to 40% of the Budget for Phase 1 and the remainder for Phase 2, with Phase 0 and Phase 3 Trials taken from the total as they run.
+8. THE Falsifier SHALL divide the Budget between phases with configurable fractions, each in the closed interval [0, 1], defaulting to 40% of the Budget for Phase 1 and the remainder for Phase 2, with Phase 0 Trials taken from the total as they run and Phase 3 shrink Trials taken from the Shrink_Reserve of criterion 13.
 9. IF the configured Phase 1 and Phase 2 fractions sum to more than 1, THEN THE Falsifier SHALL reject the configuration before running any Trial with an error that names both fractions and their sum.
 10. WHEN Phase 1 ends with Budget unused and no Failing_Trial was found, THE Falsifier SHALL carry the unused Budget forward into Phase 2.
 11. WHEN Phase 2 ends with Budget unused and no Failing_Trial was found, THE Falsifier SHALL not carry the unused Budget into any other phase.
 12. WHEN the Budget is exhausted before Phase 2 starts and no Failing_Trial was found, THE Falsifier SHALL return a Verdict with `status` `'held'`, `guidedTrials` equal to 0, and run metadata that states the Budget was exhausted.
+13. WHERE the Budget has a maximum trial count T, THE Falsifier SHALL reserve a Shrink_Reserve of `max(reserveMin, ceil(reserveFraction * T))` shrink Trials on top of T, with defaults `reserveFraction` = 0.15 and `reserveMin` = 12, so that a counterexample found in the last Generation is still shrunk, and SHALL record the reserve in the run metadata. (Approved change for this build.)
 
 ### Requirement 9: Progress callbacks
 
