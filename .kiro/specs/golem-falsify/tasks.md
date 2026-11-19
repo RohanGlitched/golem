@@ -299,7 +299,7 @@ Test rules for every task (`testing.md`):
     - Write a test that every code block marked `ts` in both READMEs type-checks against the public exports.
     - _Requirements: 2.11, 11.1, 12.13, 20.6_
 
-- [~] 22. Checkpoint - Ensure all tests pass
+- [x] 22. Checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes
