@@ -47,4 +47,4 @@ Conventions: sources in `skeleton/src/ears/`, tests in `skeleton/src/ears/__test
 - [x] 17. Metamorphic properties (improvement 6)
   - _Bugfix: I6.1_
 - [x] 18. Correct the golem-ears requirements and design text
-- [ ] 19. Checkpoint: full suite, typecheck, probes
+- [x] 19. Checkpoint: full suite, typecheck, probes
