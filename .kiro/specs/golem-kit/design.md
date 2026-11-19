@@ -485,7 +485,7 @@ declare function diagnosticText(d: FileDiagnostic): string;                // "f
 declare function checkJson(reqs: readonly CompiledRequirement[], d: readonly FileDiagnostic[]): CheckJson;   // Req 3.7
 ```
 
-Requirement line: `R3 BROKEN margin -0.118 m 41 trials push.force = 168 N, push.angle = 135 deg (shrunk, seed 417)`. A held line ends with `no counterexample found in 64 trials`. An error line carries the first message of `meta.errors`. The phase labels map falsify's phases `0, 1, 2, 3` to `pinned, random, guided, shrink`.
+Requirement line: `R3 BROKEN margin -0.118 m 41 trials push.force = 168 N, push.angle = 135 deg (shrunk, seed 417)`. A held line ends with `no counterexample in 64 trials; from the 40 uniformly random ones, failure rate below 7.5 % (95 % confidence)`; the bound is from the random trials only, and without a bound the line ends after `trials`. An error line carries the first message of `meta.errors`. The phase labels map falsify's phases `0, 1, 2, 3` to `pinned, random, guided, shrink`.
 
 `gateBlock` has four lines: the EARS line as written, the counterexample scenario with units, the margin with unit, and `golem replay <reqId>`. For `error` status the scenario and margin lines become `error: <cause>`.
 
@@ -1103,7 +1103,7 @@ For any combination of `--budget`, `--time`, `--workers`, config seed and pinned
 
 ### Property 24: Printed lines carry units and ids
 
-For any outcome, `requirementLine` contains the requirement id, the status, the trial count, and for a broken requirement every scenario value with a unit; a held line contains "no counterexample found in N trials" with the actual N. `gateBlock` contains the EARS line, the scenario with units, the margin with unit and `golem replay <id>`, and for status `error` the cause in place of scenario and margin.
+For any outcome, `requirementLine` contains the requirement id, the status, the trial count, and for a broken requirement every scenario value with a unit; a held line contains "no counterexample in N trials" with the actual N, and with a bound it names the number of uniformly random trials the bound is from. `gateBlock` contains the EARS line, the scenario with units, the margin with unit and `golem replay <id>`, and for status `error` the cause in place of scenario and margin.
 
 **Validates: Requirements 4.8, 4.9, 7.6, 7.8**
 

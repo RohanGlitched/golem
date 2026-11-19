@@ -50,7 +50,7 @@ describe('golem gate --kiro', () => {
     h.fs.put(h.path('.kiro/specs/tiny/requirements.md'), GREEN_REQUIREMENTS);
     const r = await stop(h, 's1');
     expect(r).toMatchObject({ code: 0, stdout: '' });
-    expect(r.stderr).toContain('no counterexample found in');
+    expect(r.stderr).toContain('no counterexample in');
     expect(state(h)['s1']).toBeUndefined();
   });
 

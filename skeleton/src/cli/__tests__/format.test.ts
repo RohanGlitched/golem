@@ -30,12 +30,14 @@ describe('requirementLine', () => {
       .toBe('1.2  BROKEN  margin -0.118 m  41 trials  push.force = 168 N  (shrunk, seed 417)');
   });
 
-  it('prints "no counterexample found in N trials" for a held requirement', () => {
-    expect(requirementLine(makeOutcome({ status: 'held', trials: 64 }))).toContain('no counterexample found in 64 trials');
+  it('prints "no counterexample in N trials" for a held requirement', () => {
+    expect(requirementLine(makeOutcome({ status: 'held', trials: 64 }))).toContain('no counterexample in 64 trials');
   });
 
-  it('adds the 95 % failure rate bound when the verdict has one', () => {
-    expect(requirementLine(makeOutcome({ status: 'held', failureRate: 0.0456 }))).toContain('failure rate below 4.56 % at 95 % confidence');
+  it('says the 95 % failure rate bound is from the uniformly random trials only', () => {
+    expect(requirementLine(makeOutcome({ status: 'held', trials: 24, failureRate: 0.0456 })))
+      .toContain('no counterexample in 24 trials; from the 16 uniformly random ones, failure rate below 4.56 % (95 % confidence)');
+    expect(requirementLine(makeOutcome({ status: 'held', trials: 24 }))).not.toContain('failure rate');
   });
 
   it('prints the first error message for an error requirement', () => {

@@ -168,11 +168,13 @@ describe('share hash', () => {
 describe('verdict rows', () => {
   it('formats the held sentence with the budget', () => {
     expect(heldSentence(verdict(), { maxTrials: 240, maxMs: 30000 }))
-      .toBe('No counterexample found in 480 trials (400 random, 80 guided). Search budget: 240 trials or 30 s.');
+      .toBe('No counterexample in 480 trials (400 random, 80 guided). Search budget: 240 trials or 30 s.');
+    expect(heldSentence(verdict({ failureRateUpper95: 0.006234 }), { maxTrials: 240 }))
+      .toBe('No counterexample in 480 trials; from the 400 uniformly random ones, failure rate below 0.62 % (95 % confidence). Search budget: 240 trials.');
   });
   it('shows "not available" for a missing failure-rate bound', () => {
     const r = verdictRows(verdict(), 4, 'm', {});
-    expect(r.rows.find((x) => x.label === 'Failure-rate bound (95%)')!.value).toBe('not available');
+    expect(r.rows.find((x) => x.label === 'Failure-rate bound (95%, random trials)')!.value).toBe('not available');
     expect(r.rows.find((x) => x.label === 'Wall time')!.value).toBe('12.3 s');
     expect(r.rows.find((x) => x.label === 'Pool size')!.value).toBe('4');
     expect(verdictRows(verdict({ failureRateUpper95: 0.006234 }), 4, 'm', {}).rows[4]!.value).toBe('0.62%');

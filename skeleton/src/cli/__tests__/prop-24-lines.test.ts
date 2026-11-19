@@ -23,7 +23,7 @@ describe('Property 24: printed lines carry units and ids', () => {
 
   it('a held line holds the exact phrase with the real trial count', () => {
     fc.assert(fc.property(fc.integer({ min: 0, max: 100000 }), (trials) => {
-      expect(requirementLine(makeOutcome({ status: 'held', trials }))).toContain(`no counterexample found in ${trials} trials`);
+      expect(requirementLine(makeOutcome({ status: 'held', trials }))).toContain(`no counterexample in ${trials} trials`);
     }), propConfig);
   });
 

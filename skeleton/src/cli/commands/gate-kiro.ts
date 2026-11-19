@@ -87,7 +87,7 @@ export const handler: CommandHandler = async (p, io, deps) => {
 
   if (green) {
     if (result.kind === 'ran' && breakLines > 0) errLine(io, `gate GREEN: every requirement meets its expectation (${result.outcomes.length - breakLines} Expected_Hold held, ${breakLines} Expected_Break broke; ${result.totalTrials} trials)`);
-    else if (result.kind === 'ran') errLine(io, `no counterexample found in ${result.totalTrials} trials (${result.outcomes.length} requirements, pinned seeds first, then the quick budget)`);
+    else if (result.kind === 'ran') errLine(io, `no counterexample in ${result.totalTrials} trials (${result.outcomes.length} requirements, pinned seeds first, then the quick budget)`);
     return 0;
   }
   if (!decision.allowStop) {

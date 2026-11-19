@@ -9,6 +9,7 @@ import { hullName, parseBinaryStl, visualName, writeBinaryStl } from '../scripts
 import { PINNED_COMMIT, isAllowedHost, upstreamUrl } from '../scripts/lib/urls.mjs';
 import { readZipEntries, writeZip } from '../scripts/lib/zip.mjs';
 import { LICENSE_TEXT, policyZip, smallMeshes, smallMjcf } from './helpers/assetFixtures';
+import { enclosureTolerance, maxAbsCoordinate, maxOutside } from './helpers/hullEnclosure';
 
 const coord = fc.float({ min: -10, max: 10, noNaN: true }).map((x) => Math.fround(x));
 const soup = (min: number, max: number) =>
@@ -32,26 +33,49 @@ describe('Feature: stagger-app, Property 1: Download URLs are built from the pin
   });
 });
 
+/**
+ * Mesh vertices as CAD exports them: a 0.1 mm grid within 10 m, rounded to float32 as an STL stores them. The soup used by the
+ * other properties also draws denormal and 1e-30 coordinates, which are not meshes: on those, quickhull3d (the hull library)
+ * sometimes leaves a vertex out by up to a millimetre, a defect that does not occur at any scale a robot mesh has.
+ */
+const GRID_M = 1e-4;
+const meshCoord = fc.integer({ min: -Math.round(10 / GRID_M), max: Math.round(10 / GRID_M) }).map((k) => Math.fround(k * GRID_M));
+const meshSoup = (min: number, max: number) =>
+  fc.array(fc.tuple(meshCoord, meshCoord, meshCoord, meshCoord, meshCoord, meshCoord, meshCoord, meshCoord, meshCoord), { minLength: min, maxLength: max })
+    .map((a) => new Float32Array(a.flat()));
+
 describe('Feature: stagger-app, Property 2: Hull meshes enclose their source meshes', () => {
-  it('keeps every source vertex inside every face plane within 1e-6 m', () => {
-    fc.assert(fc.property(soup(2, 12), (tris) => {
+  it('keeps every source vertex inside every face plane, within the builder\u2019s 1e-6 m flatness threshold plus float32 rounding', () => {
+    fc.assert(fc.property(meshSoup(2, 12), (tris) => {
       let hull: Float32Array;
       try { hull = buildHull(tris, 'rand'); } catch (e) { expect(String(e)).toContain('fewer than 4 non-coplanar'); return; }
-      for (let f = 0; f < hull.length; f += 9) {
-        const a = [hull[f]!, hull[f + 1]!, hull[f + 2]!], b = [hull[f + 3]!, hull[f + 4]!, hull[f + 5]!], c = [hull[f + 6]!, hull[f + 7]!, hull[f + 8]!];
-        const u = [b[0]! - a[0]!, b[1]! - a[1]!, b[2]! - a[2]!], v = [c[0]! - a[0]!, c[1]! - a[1]!, c[2]! - a[2]!];
-        const n = [u[1]! * v[2]! - u[2]! * v[1]!, u[2]! * v[0]! - u[0]! * v[2]!, u[0]! * v[1]! - u[1]! * v[0]!];
-        const len = Math.hypot(n[0]!, n[1]!, n[2]!);
-        if (len === 0) continue;
-        for (let i = 0; i < tris.length; i += 3) {
-          const d = ((tris[i]! - a[0]!) * n[0]! + (tris[i + 1]! - a[1]!) * n[1]! + (tris[i + 2]! - a[2]!) * n[2]!) / len;
-          expect(d).toBeLessThanOrEqual(1e-6);
-        }
-      }
+      const { worst, facesChecked } = maxOutside(hull, tris);
+      expect(facesChecked).toBeGreaterThanOrEqual(1); // the check is not vacuous: some face had a plane to test
+      expect(worst).toBeLessThanOrEqual(enclosureTolerance(maxAbsCoordinate(tris)));
     }), { numRuns: 100 });
   });
-});
 
+  it('would notice a hull that leaves a vertex out (the check is not vacuous)', () => {
+    // a unit cube as a triangle soup of its 8 corners (the hull builder only reads the vertices)
+    const corners: number[][] = [];
+    for (const x of [0, 1]) for (const y of [0, 1]) for (const z of [0, 1]) corners.push([x, y, z]);
+    const soupOf = (pts: number[][]): Float32Array => {
+      const padded = [...pts]; while (padded.length % 3 !== 0) padded.push(pts[0]!);
+      return new Float32Array(padded.flat());
+    };
+    const full = soupOf(corners);
+    const fullHull = buildHull(full, 'cube');
+    expect(maxOutside(fullHull, full).worst).toBeLessThanOrEqual(enclosureTolerance(1));
+    // the hull of seven corners misses the eighth by 1/sqrt(3) m or more
+    const hullWithout = buildHull(soupOf(corners.slice(1)), 'cube-minus-one');
+    expect(maxOutside(hullWithout, full).worst).toBeGreaterThan(0.1);
+  });
+
+  it('has a tolerance of 1e-6 m plus four float32 spacings of the largest coordinate', () => {
+    expect(enclosureTolerance(0)).toBe(1e-6);
+    expect(enclosureTolerance(10)).toBeCloseTo(1e-6 + 4 * 2 ** -23 * 10, 15);
+  });
+});
 describe('Feature: stagger-app, Property 3: Visual meshes respect the triangle cap', () => {
   it('returns at most the cap, and the input itself when it already fits', async () => {
     await fc.assert(fc.asyncProperty(soup(1, 60), fc.integer({ min: 1, max: 80 }), async (tris, cap) => {

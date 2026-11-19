@@ -4,6 +4,7 @@ export { latinHypercube } from './lhs.js';
 export { shrink, DEFAULT_SHRINK } from './shrink.js';
 export { verificationSeeds, classify } from './classify.js';
 export { failureRateUpper95, clopperPearsonUpper } from './beta.js';
+export { heldWording } from './held-wording.js';
 export { replayCounterexample } from './replay.js';
 export type { ReplayCounterexampleOptions, ReplayedTrial } from './replay.js';
 export { createSeedDatabase, pinCounterexample, canonicalJson, counterexampleEquals } from './seed-db.js';

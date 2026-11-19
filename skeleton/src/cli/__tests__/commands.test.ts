@@ -75,7 +75,7 @@ describe('golem test', () => {
     const h = createHarness();
     expect(await h.run('test', '--budget', '24')).toBe(2);
     const lines = h.io.stdoutText().split('\n');
-    expect(lines[0]).toMatch(/^1\.1  HELD  closest margin \+[\d.]+ m  no counterexample found in \d+ trials/);
+    expect(lines[0]).toMatch(/^1\.1  HELD  closest margin \+[\d.]+ m  no counterexample in \d+ trials/);
     expect(lines[1]).toMatch(/^1\.2  BROKEN  margin -[\d.]+ m  \d+ trials  push\.force = [\d.]+ N  \(shrunk, seed \d+\)$/);
     expect(lines[2]).toMatch(/^1\.3  HELD/);
     expect(lines[3]).toContain('3 requirements: 1 broken, 2 held, 0 error');
@@ -250,7 +250,7 @@ describe('golem gate', () => {
   it('exits 0 and states the total trial count when every requirement holds', async () => {
     const h = createHarness({ requirements: GREEN_REQUIREMENTS });
     expect(await h.run('gate')).toBe(0);
-    expect(h.io.stdoutText()).toMatch(/^no counterexample found in \d+ trials \(3 requirements/);
+    expect(h.io.stdoutText()).toMatch(/^no counterexample in \d+ trials \(3 requirements/);
     expect(h.io.stdoutText()).toContain('in ' + String(h.report().verdicts.reduce((n: number, v: { trials: number }) => n + v.trials, 0)) + ' trials');
     expect(h.report().meta).toMatchObject({ lastGateExitCode: 0, budget: { maxTrials: 24 } });
   });

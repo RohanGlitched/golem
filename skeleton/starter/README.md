@@ -9,7 +9,7 @@
 ```
 npx --no-install golem-spec check              # compiles the 3 lines, exits 0
 npx --no-install golem-spec test --budget 24   # real MuJoCo trials; line 1.2 breaks
-npx --no-install golem-spec gate               # exits 2 and names 1.2
+npx --no-install golem-spec gate               # exits 2 and names 1.2 (red on purpose, see below)
 npx --no-install golem-spec replay 1.2         # re-runs the shrunk counterexample, writes .golem/replays/1.2.csv
 ```
 
@@ -23,5 +23,6 @@ Measured with `test --budget 24` over six search seeds (1, 2, 3, 7, 99, 12345):
 | 1.2 | push up to 30 N for 0.2 s, same response | broken | shrunk to a push of 14.5 to 15.1 N; the margin there is -0.13 to -0.93 deg at the edge, or about -300 deg once the pole tumbles |
 | 2.1 | the cart stays within 0.3 m of the centre | held | +0.19 to +0.26 m |
 
-Line 1.2 is meant to break. The motor tops out at 15 N, so a push of 15 N for 0.2 s cannot be resisted and the pole falls; below that the controller catches it.
+1.2 breaks today: the motor gives 15 N. `golem gate` stays red until you change app.js (a stronger motor, a better controller), or a person marks 1.2 Expected_Break in an Expectation table. The starter has no Expectation table, so the gate is red on purpose.
+A push of 15 N for 0.2 s cannot be resisted and the pole falls; below that the controller catches it.
 To make it hold, change the controller in `app.js` or the motor limit in `robot/scene.xml` (and `FORCE_LIMIT`), never the line.

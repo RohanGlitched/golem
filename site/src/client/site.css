@@ -213,7 +213,15 @@ dl.defs dd{margin:2px 0 0;color:var(--ink-2)}
 .studio-page{display:block}
 .studio-page .golem-studio{height:calc(100vh - 64px);height:calc(100dvh - 64px)}
 .studio-page .studio-note{padding:12px var(--pad);font-size:var(--s13);color:var(--ink-2)}
-@media (max-width:1023px){.studio-page .golem-studio{height:auto}.hero-studio{min-height:960px}.hero-studio .golem-studio{height:auto}}
+/* The G1 studio's controller switch (Unitree's policy / + Kiro's reflex), above the stage */
+.studio-controller{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:8px var(--pad);min-height:44px;background:var(--night-2);border-bottom:1px solid var(--rule);font-size:var(--s13)}
+.studio-controller-label{color:var(--ink-2)}
+.studio-controller button{font:inherit;color:var(--ink-2);background:transparent;border:1px solid var(--rule-2);border-radius:2px;padding:6px 12px;min-height:32px;cursor:pointer}
+.studio-controller button[aria-pressed='true']{background:var(--lamp);border-color:var(--lamp);color:#1A1411;font-weight:700}
+.studio-controller button:not([aria-pressed='true']):hover{color:var(--ink);border-color:var(--lamp)}
+.studio-controller-note{color:var(--ink-3);flex:1 1 280px}
+.studio-page .studio-controller ~ .hero-studio .golem-studio{height:calc(100vh - 64px - 44px);height:calc(100dvh - 64px - 44px)}
+@media (max-width:1023px){.studio-page .golem-studio,.studio-page .studio-controller ~ .hero-studio .golem-studio{height:auto}.hero-studio{min-height:960px}.hero-studio .golem-studio{height:auto}}
 .poster{position:absolute;inset:0;width:100%;border:0;padding:0;margin:0;cursor:pointer;background:var(--night) center/cover no-repeat url(/poster-dark-wide.jpg);display:flex;align-items:center;justify-content:center}
 .poster-cta{margin:0;box-shadow:0 8px 40px rgba(0,0,0,.5);font:inherit;color:#1A1411;background:var(--lamp);border-radius:999px;padding:10px 20px;min-height:44px;display:inline-flex;align-items:center;font-weight:700}
 @media (max-width:1023px){.poster{background-image:url(/poster-dark-narrow.jpg)}}
