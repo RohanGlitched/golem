@@ -27,7 +27,7 @@ Conventions for every task:
 
 ## Tasks
 
-- [ ] 1. Package and entry scaffolding
+- [x] 1. Package and entry scaffolding
   - [x] 1.1 Create the `golem-spec/ui` entry point, studio-local types and test support
     - Create the directory layout from the design (`core/`, `stage/`, `hero/`, `ghosts/`, `aura/`, `run/`, `tablet/`, `reel/`, `verdict/`, `layout/`, `__tests__/`, `e2e/`).
     - Create `index.ts` exporting `mountStudio`, `StudioOptions`, `StudioHandle` and `PerturbationVisual` (a stub `mountStudio` that throws "not implemented" until task 19), and `types.ts` with the studio-local types from Data Models, including `TokenSet`, `LineModel`, `StudioState`, `Budget`, `FalsifyFn` and the additive optional `PerturbationTemplate.visual` field.
@@ -36,98 +36,98 @@ Conventions for every task:
     - Write an example test that imports `golem-spec/ui` types and checks the export list is exactly the documented API.
     - _Requirements: 1.3, 28.3, 28.4, 28.5, 28.7, 28.8, 28.12, 30.1, 30.15_
 
-- [ ] 2. Core pure modules
-  - [ ] 2.1 Implement `core/prng.ts` and `core/format.ts`
+- [x] 2. Core pure modules
+  - [x] 2.1 Implement `core/prng.ts` and `core/format.ts`
     - `mulberry32`, `deriveStream(seed, label)`, `formatSig` (no exponent), `formatQuantityValue`, `decimalsOf`, `roundTo`.
     - Example tests: same seed gives the same sequence, `formatSig(0.000123, 3)` prints no exponent, `roundTo` removes binary noise such as 0.30000000000000004.
     - _Requirements: 6.9, 16.11, 18.7, 28.1_
 
-  - [ ] 2.2 Write property test for seeded determinism
+  - [x] 2.2 Write property test for seeded determinism
     - **Property 48: Seeded determinism**
     - Include the source scan that fails on any `Math.random` call under `skeleton/src/ui`.
     - **Validates: Requirements 6.9, 28.1**
 
-  - [ ] 2.3 Implement `core/theme-tokens.ts`
+  - [x] 2.3 Implement `core/theme-tokens.ts`
     - `TOKENS` for dark and light with the eight steering tokens from `design-language.md` plus the derived `--break-text` and `--hold-text`, `relativeLuminance`, `contrastRatio` (WCAG 2.2).
     - Example tests: token values equal the table in `design-language.md`, derived tokens equal the design table values.
     - _Requirements: 25.1, 25.6, 25.7_
 
-  - [ ] 2.4 Write property test for theme tokens and contrast
+  - [x] 2.4 Write property test for theme tokens and contrast
     - **Property 44: Theme tokens and contrast**
     - **Validates: Requirements 25.1, 25.6, 25.9**
 
-  - [ ] 2.5 Implement `core/units-ui.ts`
+  - [x] 2.5 Implement `core/units-ui.ts`
     - Step tables, ranges per kind and unit, `toDisplay` and `fromDisplay` through `toSI` and `fromSI` from `golem-ears`.
     - Example tests: force, duration, angle and percent conversions to the display unit of each kind.
     - _Requirements: 16.9, 16.10, 18.7_
 
-  - [ ]* 2.6 Write property test for display unit conversion round trip
+  - [x]* 2.6 Write property test for display unit conversion round trip
     - **Property 34: Display unit conversion round trip**
     - **Validates: Requirements 16.10, 18.7**
 
-  - [ ] 2.7 Implement `core/pose-math.ts`
+  - [x] 2.7 Implement `core/pose-math.ts`
     - `frameToTRS`, `writeMatrixTRS` (column-major, scale 1), `nlerp` with the shortest-arc sign rule, `quatRotateWXYZ`. All scalar maths, no allocation.
     - Example tests: identity quaternion gives the identity matrix, a 90° rotation about z maps +x to +y.
     - _Requirements: 2.8, 6.6, 10.6, 21.13_
 
-  - [ ] 2.8 Write property test for pose conversion
+  - [x] 2.8 Write property test for pose conversion
     - **Property 4: Pose conversion matches the quaternion definition**
     - **Validates: Requirements 2.8, 2.9, 21.13**
 
-  - [ ] 2.9 Implement `core/accumulator.ts`
+  - [x] 2.9 Implement `core/accumulator.ts`
     - `FixedStepAccumulator` with `add`, step cap with excess discard, remainder in `[0, dt)`, `resumeAfterHidden`.
     - Example tests: cap case, zero-duration frame after resume runs zero steps.
     - _Requirements: 5.8, 6.1, 6.2, 6.3_
 
-  - [ ] 2.10 Write property test for fixed-step decoupling
+  - [x] 2.10 Write property test for fixed-step decoupling
     - **Property 6: Fixed-step decoupling**
     - **Validates: Requirements 5.8, 6.1, 6.2, 6.3, 6.5**
 
-  - [ ] 2.11 Implement `core/spring.ts`
+  - [x] 2.11 Implement `core/spring.ts`
     - `shovePlaneNormal`, `rayPlane`, `springForce` (cap 400 N), `keyPushDirection` (camera-relative, vertical component zero).
     - Example tests: camera straight down gives no plane, ray parallel to the plane gives no target.
     - _Requirements: 7.2, 7.4, 7.7, 7.11, 7.12, 8.2_
 
-  - [ ] 2.12 Write property test for spring force
+  - [x] 2.12 Write property test for spring force
     - **Property 8: Spring force**
     - **Validates: Requirements 7.4, 7.11, 7.12**
 
-  - [ ]* 2.13 Write property test for ray and Shove_Plane intersection
+  - [x]* 2.13 Write property test for ray and Shove_Plane intersection
     - **Property 9: Ray and Shove_Plane intersection**
     - **Validates: Requirements 7.2, 7.7**
 
-  - [ ]* 2.14 Write property test for key push direction and magnitude
+  - [x]* 2.14 Write property test for key push direction and magnitude
     - **Property 10: Key push direction and magnitude**
     - **Validates: Requirements 8.2, 8.5**
 
-  - [ ] 2.15 Implement `core/scheduler.ts`
+  - [x] 2.15 Implement `core/scheduler.ts`
     - `RenderScheduler` with injected `raf` and `caf`, reasons as a bitmask, `acquire`, `release` (final frame), `requestOnce`, `setVisible`, `active`, `pendingFrames`.
     - Example test: with no Render_Reason active and a fake renderer, no `requestAnimationFrame` callback is pending.
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.6, 5.7, 5.8, 5.11, 30.9_
 
-  - [ ] 2.16 Write property test for the render scheduler
+  - [x] 2.16 Write property test for the render scheduler
     - **Property 11: Render scheduler draws no idle frames**
     - **Validates: Requirements 5.1, 5.2, 5.3, 5.4, 5.6, 5.7, 5.8, 5.11**
 
-  - [ ] 2.17 Implement `core/tween.ts`
+  - [x] 2.17 Implement `core/tween.ts`
     - `easeOutCubic`, `tweenValue` (clamped, exact at p = 1), `TweenLoop` with its own `requestAnimationFrame` loop that stops when all tweens end and sets the value at once under Reduced_Motion.
     - Example tests: loop stops when idle, Reduced_Motion sets the final value at once.
     - _Requirements: 23.7, 23.8, 23.12_
 
-  - [ ]* 2.18 Write property test for number tween bounds
+  - [x]* 2.18 Write property test for number tween bounds
     - **Property 43: Number tween bounds**
     - **Validates: Requirements 23.7, 23.8, 23.14**
 
-  - [ ] 2.19 Implement `core/announcer.ts`
+  - [x] 2.19 Implement `core/announcer.ts`
     - `Announcer` with a polite element and an alert element, `announceProgress` limited to one per 2000 ms, `announceFinal` always emitted, errors to the alert element, no focus moves.
     - Example tests: errors go to the alert region, no focus change.
     - _Requirements: 26.3, 26.4, 26.5, 26.13_
 
-  - [ ]* 2.20 Write property test for announcement rate limit
+  - [x]* 2.20 Write property test for announcement rate limit
     - **Property 47: Announcement rate limit**
     - **Validates: Requirements 26.3, 26.5**
 
-  - [ ] 2.21 Implement `core/store.ts`
+  - [x] 2.21 Implement `core/store.ts`
     - `StudioStore` with `subscribe`, `getState`, coalesced notify (at most one per frame), typed actions used by later tasks.
     - Example tests: several updates in one frame notify once, unsubscribe stops notifications.
     - _Requirements: 19.7, 23.9_
