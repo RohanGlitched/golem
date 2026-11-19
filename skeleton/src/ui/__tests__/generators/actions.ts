@@ -29,6 +29,8 @@ export function fakeActions(over: Partial<StudioActions> = {}): StudioActions & 
     replay: log('replay'), backToLive: log('backToLive'), play: log('play'), pause: log('pause'),
     seekTime: log('seekTime'), stepFrame: log('stepFrame'),
     copySeed: async () => true, pin: log('pin'), removePin: log('removePin'), pinsOf: () => [],
+    summaryOf: () => '', replayLabelOf: () => 'Replay the failure',
+    loadReplay: () => new Promise(() => {}), renderFilmstrip: () => () => {},
     ...over,
   };
 }

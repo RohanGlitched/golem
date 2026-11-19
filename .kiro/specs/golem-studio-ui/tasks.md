@@ -495,18 +495,18 @@ Conventions for every task:
 - [x] 17. Checkpoint - Stage, runs and panels complete
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 18. Reel and replay
-  - [ ] 18.1 Implement the filmstrip render job in `reel/filmstrip.ts`
+- [x] 18. Reel and replay
+  - [x] 18.1 Implement the filmstrip render job in `reel/filmstrip.ts`
     - `FilmstripJob` using one offscreen `WebGLRenderTarget(160, 120)` from the Stage renderer, one frame per animation frame in its own `requestAnimationFrame` loop, hero body groups set to the frame pose, ghosts, aura and live arrows hidden, a private camera, `readRenderTargetPixels` into one reused buffer flipped into eight canvases, live pose and render target restored in the same synchronous task, no change to the main camera, abort by token, canvases with `role="img"` and `aria-label` such as "Frame at 0.35 s after the push: pelvis 0.31 m above the floor".
     - Example tests with a fake renderer: one frame per animation frame, live pose restored, main camera unchanged, aborted job draws nothing further.
     - _Requirements: 20.3, 20.4, 20.10, 20.11, 20.14, 27.9_
 
-  - [ ] 18.2 Integrate Replay with the stage and scrubber
+  - [x] 18.2 Integrate Replay with the stage and scrubber
     - Apply replay poses to the hero body groups through the shared `frameToTRS` path, pause the hero, hold the `replaying` reason, "Pause", "Play", "Back to live" and "Next frame" (Reduced_Motion) controls with the label matching the state, the Scrubber (`role="slider"`, `aria-valuemin`, `aria-valuemax`, `aria-valuenow`, `aria-valuetext` in seconds after the push, ArrowLeft and ArrowRight step one frame, `--break` tick at the worst-margin time), the replay time label in Tabular_Figures rounded to 0.01 s, the push arrow shown while the replay time is inside the perturbation window.
     - Testing Library example tests: slider ARIA attributes, arrow keys step one frame, "Back to live" restores the hero.
     - _Requirements: 21.1, 21.2, 21.3, 21.4, 21.5, 21.6, 21.7, 21.8, 21.9, 21.10, 21.11, 21.12, 21.13_
 
-  - [ ] 18.3 Implement `reel/reel.tsx`
+  - [x] 18.3 Implement `reel/reel.tsx`
     - A `region` with an accessible name: the Filmstrip with frame time labels and the worst frame marked, Counterexample_Summary and classification, buttons "Replay the fall" or "Replay the failure", "Copy seed" and "Pin this seed", pinned list with "Remove pin", the "No counterexample selected. A broken line shows its failure here." message, replay trial through the pool (or the retained poses, no trial), error display that keeps "Copy seed" and "Pin this seed" active, clipboard failure fallback with the selectable field and announcement, Share_Hash update with `history.replaceState`, a horizontally scrollable strip on narrow viewports, content update within 100 ms of a selection change with the pending replay aborted.
     - Testing Library example tests: empty message, clipboard failure shows the JSON field and announces, pin twice stores once, selecting another line aborts the pending replay, replay trial error keeps the two buttons active.
     - _Requirements: 20.1, 20.5, 20.6, 20.7, 20.8, 20.9, 20.11, 20.12, 20.13, 22.1, 22.2, 22.3, 22.5, 22.6, 22.9, 26.7_

@@ -71,7 +71,7 @@ export interface StudioState {
   run?: { runId: number; lineId: string; trials: number; phase?: number; generation: number };
   aura: { total: number; ignored: number; summary: string };
   verdictRows?: VerdictRows;
-  replay?: { playing: boolean; t: number; duration: number; worstTau: number };
+  replay?: { playing: boolean; t: number; duration: number; worstTau: number; fps: number; active: boolean; lineId: string };
   theme: ThemeName;
   reducedMotion: boolean;
   hero: 'loading' | 'running' | 'sleeping' | 'replaying' | 'failed' | 'no-webgl';

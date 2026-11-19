@@ -24,6 +24,21 @@ export interface StudioActions {
   pin(ce: Counterexample): void;
   removePin(ce: Counterexample): void;
   pinsOf(lineId: string): Counterexample[];
+  /** Counterexample_Summary of a counterexample of a line. */
+  summaryOf(lineId: string, ce: Counterexample): string;
+  /** "Replay the fall" or "Replay the failure". */
+  replayLabelOf(lineId: string): string;
+  /** Replay poses of the line's counterexample: retained poses, or one pool trial with poses. */
+  loadReplay(lineId: string, signal: AbortSignal): Promise<ReelData>;
+  /** Renders the eight filmstrip frames, one per animation frame. Returns an abort function. */
+  renderFilmstrip(data: ReelData, canvases: (HTMLCanvasElement | null)[]): () => void;
+}
+
+export interface ReelData {
+  poses: { fps: number; nbody: number; frames: Float32Array };
+  worstTau: number;
+  entries: { frame: number; tau: number; isWorst: boolean }[];
+  labels: string[];
 }
 
 export interface StoreLike {

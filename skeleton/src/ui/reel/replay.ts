@@ -1,4 +1,6 @@
-// Replay of a counterexample on the hero, at 0.25 times real time. No three.js, no React.
+// Replay of a counterexample on the hero, at 0.25 times real time. No React.
+import { nlerp } from '../core/pose-math.js';
+
 export const REPLAY_SPEED = 0.25;
 
 export interface ReplayPoses { fps: number; nbody: number; frames: Float32Array }
@@ -9,6 +11,26 @@ export interface ReplayDeps {
   reduced(): boolean;
   /** Called whenever the replay time or play state changes. */
   onChange?(): void;
+}
+
+export interface PoseTarget { position: { set(x: number, y: number, z: number): unknown }; quaternion: { set(x: number, y: number, z: number, w: number): unknown } }
+
+/** Writes the replay pose at time t onto the hero body groups, with the ghosts' conversion (nlerp). */
+export function applyReplayPose(groups: PoseTarget[], p: ReplayPoses, t: number, reduced: boolean, scratch: Float64Array): void {
+  const per = p.nbody * 7;
+  const n = per > 0 ? Math.floor(p.frames.length / per) : 0;
+  if (n === 0) return;
+  const x = Math.max(0, t) * p.fps;
+  let f = Math.floor(x + 1e-9);
+  let alpha = reduced ? 0 : x - f;
+  if (f >= n - 1) { f = n - 1; alpha = 0; }
+  const f1 = f < n - 1 ? f + 1 : f;
+  for (let b = 0; b < p.nbody && b < groups.length; b++) {
+    nlerp(p.frames, p.nbody, f, f1, b, alpha < 0 ? 0 : alpha, scratch);
+    const g = groups[b] as PoseTarget;
+    g.position.set(scratch[0] as number, scratch[1] as number, scratch[2] as number);
+    g.quaternion.set(scratch[3] as number, scratch[4] as number, scratch[5] as number, scratch[6] as number);
+  }
 }
 
 export class ReplayController {

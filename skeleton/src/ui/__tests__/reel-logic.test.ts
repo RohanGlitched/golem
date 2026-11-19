@@ -36,6 +36,16 @@ function makeReplay(reduced = false) {
 }
 
 describe('ReplayController', () => {
+  it('applies the replay pose to the hero body groups with the ghost pose conversion', async () => {
+    const { applyReplayPose } = await import('../reel/replay.js');
+    const p = synthPoses(2, 31, 30);
+    const got: number[][] = [];
+    const g = () => ({ position: { set: (...a: number[]) => { got.push(a); } }, quaternion: { set: (...a: number[]) => { got.push(a); } } });
+    applyReplayPose([g(), g()], p, 10 / 30, true, new Float64Array(7));
+    const o = (10 * 2 + 1) * 7;
+    expect(got[2]).toEqual([p.frames[o], p.frames[o + 1], p.frames[o + 2]].map((x) => Math.fround(x!)));
+    expect(got[3]).toEqual([p.frames[o + 4], p.frames[o + 5], p.frames[o + 6], p.frames[o + 3]]);
+  });
   it('calls the enter and exit hooks once each', () => {
     const { r, log } = makeReplay();
     r.enter(); r.enter();
