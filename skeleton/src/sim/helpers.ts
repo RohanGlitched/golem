@@ -44,3 +44,28 @@ export function forEachContact(mj: Mj, data: any, visit: (contact: any, index: n
     registry.release(vec);
   }
 }
+
+/**
+ * Reads MuJoCo's warning counters by name (INERTIA, CONTACTFULL, CNSTRFULL, BADQPOS, BADQVEL, BADQACC,
+ * BADCTRL). `data.warning` is a reference into MjData and must never be deleted (the module aborts);
+ * each element returned by `.get(i)` is a copy and is deleted here. Allocates: not for the step loop.
+ */
+export function readWarnings(mj: Mj, data: any): Record<string, number> {
+  const out: Record<string, number> = {};
+  const enumObj = (mj as any).mjtWarning as Record<string, { value?: number }> | undefined;
+  const w = data.warning;
+  if (enumObj === undefined || w === undefined || w === null) return out;
+  const size: number = typeof w.size === 'function' ? w.size() : 0;
+  for (const key of Object.keys(enumObj)) {
+    if (!key.startsWith('mjWARN_')) continue;
+    const i = enumObj[key]?.value;
+    if (typeof i !== 'number' || i < 0 || i >= size) continue;
+    const stat = w.get(i);
+    try {
+      out[key.slice('mjWARN_'.length)] = stat.number as number;
+    } finally {
+      stat.delete?.();
+    }
+  }
+  return out;
+}

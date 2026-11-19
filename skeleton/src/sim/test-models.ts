@@ -9,14 +9,15 @@ const enc = (s: string): Uint8Array => new TextEncoder().encode(s);
 
 // ---------------------------------------------------------------- templates shared by both apps
 
-/** Vertical force `force` (N) on body `bodyKey` (an ids key) during [trigger, trigger + duration). */
+/** Vertical force `force` (N) on body `bodyKey` (an ids key) during [trigger + delay, trigger + delay + duration). */
 export function kickTemplate(bodyKey: string): PerturbationTemplate {
   return {
     phrase: 'the body is kicked upwards with {force} for {duration}',
     name: 'kick',
     dims: () => [],
     apply(ctx, t, tTrigger, values) {
-      if (t < tTrigger || t >= tTrigger + (values['duration'] as number)) return;
+      const t0 = tTrigger + (values['delay'] ?? 0);
+      if (t < t0 || t >= t0 + (values['duration'] as number)) return;
       const id = ctx.ids[bodyKey] as number;
       (ctx.data.xfrc_applied as Float64Array)[6 * id + 2] = values['force'] as number;
     },
@@ -44,7 +45,9 @@ export function shoveTemplate(bodyKey: string): PerturbationTemplate {
 export const FORCE_DIM: Dimension = { name: 'f', kind: 'force', min: 0, max: 1e31, severity: 'up' };
 export const ANGLE_DIM: Dimension = { name: 'a', kind: 'angle', min: 0, max: 2 * Math.PI, severity: 'none', wrap: true };
 
-export const kickCall = (duration = 0.02): PerturbationCall => ({ template: 'kick', params: { force: 'f', duration } });
+export const kickCall = (duration = 0.02, delay = 0): PerturbationCall => ({
+  template: 'kick', params: { force: 'f', duration, delay },
+});
 export const shoveCall = (duration = 0.1): PerturbationCall => ({
   template: 'shove', params: { force: 'f', angle: 'a', duration },
 });

@@ -13,6 +13,7 @@ import {
   withThrowingController, withThrowingSignals,
 } from './test-fixtures.js';
 import { PHYSICS_RUNS, PURE_RUNS, SEED, describeTrial } from './test-support.js';
+import { alwaysAbove, boxDropApp, kickCall } from './test-models.js';
 import type { CompiledRequirement, EarlyStopHook, RobotApp, Trace, TrialResult, TrialSpec } from './types.js';
 import { normaliseScenario } from './validate.js';
 
@@ -315,16 +316,26 @@ describe('fault properties', () => {
       }), cfg);
   });
 
-  // Feature: golem-sim, Property 11: Finite robustness unless diverged
-  it('Property 11: robustness is finite unless the trace diverged, and then it is -Infinity at the divergence time', async () => {
-    await fc.assert(fc.asyncProperty(fc.boolean(), arbScenario, arbSeed, arbSteps(30), fc.nat(40), async (diverge, sc, seed, steps, j) => {
-      const p = plan(diverge ? 'diverge' : 'ok', sc, seed, steps, j);
-      const { result, trace } = await runCaptured(p.app, p.req, p.spec);
+  // Feature: golem-sim, Property 11: Finite robustness unless diverged.
+  // golem-sim-hardening: the old version was hollow (the fixture disabled auto-reset and wrote NaN
+  // itself). This one blows a contact-rich model up for real through the runner, with no flag fiddling.
+  it('Property 11: a real blow-up (kick >= 1e12 N) diverges, a healthy kick never does, and robustness is finite otherwise', async () => {
+    const arbForce = fc.oneof(
+      fc.double({ min: 0, max: 50, noNaN: true }).map((f) => ({ f, blow: false })),
+      fc.double({ min: 12, max: 30, noNaN: true }).map((e) => ({ f: 10 ** e, blow: true })),
+    );
+    await fc.assert(fc.asyncProperty(arbForce, arbSeed, arbSteps(30), fc.nat(9), async ({ f, blow }, seed, steps, j) => {
+      const delay = Math.min(j, steps - 2) * 0.02;
+      const req = alwaysAbove({ signal: 'box.z', bound: 0.05, horizon: horizonOf(steps), perturbations: [kickCall(0.02, delay)] });
+      const { result, trace } = await runCaptured(boxDropApp, req, { app: boxDropApp.id, reqId: 'R1', scenario: { f, a: 0 }, seed });
       const divs = trace.events.filter((e) => e.name === 'diverged');
-      if (divs.length === 0) return !diverge && Number.isFinite(result.robustness);
+      if (!blow) return divs.length === 0 && Number.isFinite(result.robustness) && result.diagnostics.numerical === false;
       const lastSample = trace.t[trace.t.length - 1]!;
-      return divs.length === 1 && result.robustness === -Infinity && result.worstAt === divs[0]!.t
-        && divs[0]!.t > lastSample && Object.values(trace.signals).every((s) => s.length === trace.t.length);
+      const d = divs[0]! as { t: number; cause?: string };
+      return divs.length === 1 && result.robustness === -Infinity && result.worstAt === d.t
+        && d.t > lastSample && d.t > 0.2 + delay && d.t <= 0.2 + delay + 0.02 + 1e-9
+        && d.cause !== undefined && result.diagnostics.numerical
+        && Object.values(trace.signals).every((s) => s.length === trace.t.length);
     }), cfg);
   });
 

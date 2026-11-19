@@ -38,16 +38,21 @@ describe('behaviour wrappers', () => {
     app.signals(ctx, out);
     data.delete();
   });
-  it('withNaNControl makes qpos non-finite after a step and endTrial restores the model flag', () => {
+  it('withNaNControl makes qpos non-finite after a step with auto-reset off (as the runner sets it), and leaves the flags alone', () => {
     const { ctx, data } = open();
     const before = model.opt.disableflags;
     const app: RobotApp = withNaNControl(testApp, 0);
     const ctl = app.makeController(ctx, mulberry32(1));
-    ctl.step(ctx, 0);
-    (mj as any).mj_step(model, data);
-    expect(Number.isNaN(data.qpos[7])).toBe(true);
-    app.endTrial!(ctx);
     expect(model.opt.disableflags).toBe(before);
+    expect(app.endTrial).toBe(testApp.endTrial);
+    model.opt.disableflags = before | 65536;
+    try {
+      ctl.step(ctx, 0);
+      (mj as any).mj_step(model, data);
+      expect(Number.isNaN(data.qpos[7])).toBe(true);
+    } finally {
+      model.opt.disableflags = before;
+    }
     data.delete();
   });
   it('withModelAlteringTemplate changes mass, friction and gravity, and nothing else on the app', () => {

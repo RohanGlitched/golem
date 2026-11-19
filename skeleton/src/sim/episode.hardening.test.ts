@@ -63,4 +63,70 @@ describe('defect 1: auto-reset is disabled during trials', () => {
   });
 });
 
-void makeStoolApp; void shoveCall; void stoolApp;
+describe('defect 2 and improvement 1: bounded divergence check and numerical diagnostics', () => {
+  it('reports a finite 1e30 N blow-up as diverged, with the cause, the warning counters, solver and contact counts', async () => {
+    const { result, trace } = await run(boxDropApp, boxReq(1), { f: 1e30, a: 0 });
+    const div = trace.events.filter((e) => e.name === 'diverged') as any[];
+    expect(div).toHaveLength(1);
+    const ev = div[0];
+    expect(['qpos', 'qvel', 'qacc']).toContain(ev.cause);
+    expect(ev.phase).toBe('trial');
+    expect(Math.abs(ev.value) > 1e10 || !Number.isFinite(ev.value)).toBe(true);
+    expect(ev.warnings.BADQACC).toBeGreaterThanOrEqual(1);
+    expect(typeof ev.solverIterations).toBe('number');
+    expect(typeof ev.contacts).toBe('number');
+    // The kick starts at the trigger (0.2 s) and the blow-up is caught within the kick.
+    expect(ev.t).toBeGreaterThan(0.2);
+    expect(ev.t).toBeLessThanOrEqual(0.2 + 0.02 + 1e-9);
+    expect(result.robustness).toBeLessThan(0);
+    expect(result.worstAt).toBe(ev.t);
+    const { name: _name, ...info } = ev;
+    expect(result.diagnostics.diverged).toEqual(info);
+    expect(result.diagnostics.numerical).toBe(true);
+    // The trace holds only samples before the divergence.
+    expect(trace.t[trace.t.length - 1]!).toBeLessThan(ev.t);
+  });
+
+  it('reports a healthy contact-rich trial with contacts, solver iterations and no warnings', async () => {
+    const { result, trace } = await run(stoolApp, alwaysAbove({ signal: 'torso.z', bound: 0.25, horizon: 1 }));
+    expect(trace.events.map((e) => e.name)).toEqual(['trigger']);
+    const d = result.diagnostics;
+    expect(d.maxContacts).toBeGreaterThanOrEqual(5);
+    expect(d.maxSolverIterations).toBeGreaterThanOrEqual(1);
+    expect(d.solverSaturatedSteps).toBeGreaterThanOrEqual(0);
+    expect(Object.values(d.warnings).every((n) => n === 0)).toBe(true);
+    expect(d.warnings).toHaveProperty('BADQACC');
+    expect(d.numerical).toBe(false);
+    expect(d.diverged).toBeUndefined();
+    expect(d.simSteps).toBe(100 + 500);
+    expect(d.timestep).toBe(0.002);
+    expect(d.integrator).toBe('euler');
+    expect(d.horizon).toBe(1);
+  });
+
+  it('treats a BAD* warning counter raised during the trial as divergence even when the state looks bounded', async () => {
+    const app: RobotApp = {
+      ...boxDropApp,
+      makeController: (ctx) => {
+        let n = 0;
+        return {
+          step: () => {
+            if (n++ !== 15) return;
+            const w = ctx.data.warning;           // a reference into MjData: never delete it
+            const s = w.get(3);                   // mjWARN_BADQPOS; get() returns a copy
+            s.number = 1; w.set(3, s); s.delete();
+          },
+        };
+      },
+    };
+    const { result, trace } = await run(app, boxReq(0.6, []));
+    const div = trace.events.filter((e) => e.name === 'diverged') as any[];
+    expect(div).toHaveLength(1);
+    expect(div[0].cause).toBe('warning');
+    expect(div[0].warnings.BADQPOS).toBe(1);
+    expect(result.robustness).toBeLessThan(0);
+    expect(result.diagnostics.numerical).toBe(true);
+  });
+});
+
+void makeStoolApp; void shoveCall;
