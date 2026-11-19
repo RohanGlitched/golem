@@ -60,7 +60,7 @@ Rules for every task:
   - `search.benchmark.property.test.ts`: graded needle at 400 trials, full ≥ random-only; flat needle at 1000 trials, full ≥ random-only − 8%.
   - _Bugfix: A.1–A.2_
 
-- [ ] 13. Classification calibration (item B)
+- [x] 13. Classification calibration (item B)
   - `classify.calibration.test.ts`: confusion matrix over the noise sweep; robust recall ≥ 90%, seed-sensitive recall ≥ 85%.
   - _Bugfix: B.1–B.2_
 
