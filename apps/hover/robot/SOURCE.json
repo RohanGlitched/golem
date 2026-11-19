@@ -1,0 +1,23 @@
+{
+  "commit": "370c43965323c0944b433b202aac5058b5f907a9",
+  "repository": "https://github.com/google-deepmind/mujoco_menagerie",
+  "folder": "skydio_x2",
+  "licence": "Apache-2.0 (robot/LICENSE, unchanged)",
+  "scriptVersion": 1,
+  "sources": {
+    "LICENSE": "d42cae9a0f292b7a713597ba26e1e1e23d50df906c488f0d36fd3538af200bc1",
+    "assets/X2_lowpoly.obj": "4d6df3d7b26676a6ade8cbc320599961321ac3e3c52474d7c98dd7adc8152411",
+    "assets/X2_lowpoly_texture_SpinningProps_1024.png": "24153733dd01f9ddd37a3c79fad5e24ac876228812e3a8e95f60ccd8cedb66e1",
+    "x2.xml": "b1cc5d68eb8ff154ab93a9958b58f69210865e1793eb96b30a32f46c68cc7e71"
+  },
+  "generated": {
+    "scene.xml": "scripts/fetch-assets.mjs (sceneXml)"
+  },
+  "outputs": {
+    "LICENSE": "d42cae9a0f292b7a713597ba26e1e1e23d50df906c488f0d36fd3538af200bc1",
+    "assets/X2_lowpoly.obj": "4d6df3d7b26676a6ade8cbc320599961321ac3e3c52474d7c98dd7adc8152411",
+    "assets/X2_lowpoly_texture_SpinningProps_1024.png": "24153733dd01f9ddd37a3c79fad5e24ac876228812e3a8e95f60ccd8cedb66e1",
+    "scene.xml": "bf5d3f34e2825060c9890a961305ab96639bbbc021deca4f0df4298ea8604093",
+    "x2.xml": "b1cc5d68eb8ff154ab93a9958b58f69210865e1793eb96b30a32f46c68cc7e71"
+  }
+}

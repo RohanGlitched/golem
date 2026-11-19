@@ -1,0 +1,11 @@
+{
+  "app": "./app.ts",
+  "requirements": [".kiro/specs/hover-hold/requirements.md"],
+  "robot": "hover-hold",
+  "signalUnits": {
+    "altitude": "m",
+    "hover_distance": "m",
+    "tilt_deg": "deg",
+    "speed": "m/s"
+  }
+}

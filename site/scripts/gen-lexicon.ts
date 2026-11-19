@@ -1,15 +1,17 @@
-// Writes site/data/lexicon.json: the EARS dialect reference, generated from both apps' lexicons and compiled lines.
+// Writes site/data/lexicon.json: the EARS dialect reference, generated from the apps' lexicons and compiled lines.
 // Run from site/: npx vite-node scripts/gen-lexicon.ts   (the `gen` script runs it).
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { compileRequirement, extractCriteria } from 'golem-spec';
 import { lexicon as stagger } from '../../apps/stagger/lexicon';
 import { lexicon as candy } from '../../apps/candy/lexicon';
+import { lexicon as hover } from '../../apps/hover/lexicon';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const apps = [
   { app: 'stagger', name: 'Stagger: Unitree G1', lexicon: stagger, spec: 'apps/stagger/.kiro/specs/g1-walking/requirements.md' },
   { app: 'candy', name: 'Candy: Franka Panda', lexicon: candy, spec: 'apps/candy/.kiro/specs/candy-sorter/requirements.md' },
+  { app: 'hover', name: 'Hover: Skydio X2', lexicon: hover, spec: 'apps/hover/.kiro/specs/hover-hold/requirements.md' },
 ];
 
 const out = apps.map((a) => {

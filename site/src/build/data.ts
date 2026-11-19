@@ -40,6 +40,14 @@ export interface CandyData {
   source: { where: string; commit: string }; line: string; heading: string; trials: number; broken: number;
   closestLinkAtBreak: Record<string, number>; worstMinDistanceM: number; worstTipDistanceM: number; handSpeedMps: number; paragraphs: string[];
 }
+export interface HoverLine {
+  id: string; source: string; expectation: 'Expected_Hold' | 'Expected_Break'; status: 'held' | 'broken' | 'differs'; unit: string;
+  marginMin: number; marginMax: number; counterexamples: string[]; expectationMet: boolean;
+}
+export interface HoverData {
+  source: { transcript: string; spec: string }; budget: number; searchSeeds: number[]; lines: HoverLine[];
+  runs: { command: string; searchSeed: number; budget: number; results: Record<string, { status: string; margin: number; unit: string; scenario?: string; expectationMet: boolean }> }[];
+}
 export interface KiroSpec {
   name: string; path: string; type: string; requirements: number; earsCriteria: number; properties: number;
   tasksDone: number; tasksOpen: number; waves: boolean; status: string;
@@ -79,7 +87,7 @@ export interface SiteData {
   agentGate: AgentGateData;
   /** Experiment 3b (pre-registered 2026-11-20): the same pilot with requirement 1.3 raised to an unreachable 200 N. */
   agentGateHard: AgentGateData['runs'];
-  candy: CandyData; kiro: KiroData; changelog: ChangelogEntry[]; lexicons: LexiconRef[];
+  candy: CandyData; hover: HoverData; kiro: KiroData; changelog: ChangelogEntry[]; lexicons: LexiconRef[];
   reportMd: string; transcriptMd: string; preregMd: string;
   reviews: { name: string; file: string; text: string }[];
   falsifyHardeningMd: string;
@@ -187,6 +195,9 @@ export function loadSiteData(root: string = REPO_ROOT): SiteData {
   need(Array.isArray(agentGate.dryRuns), 'site/data/agent-gate.json', 'dryRuns is missing');
   const candy = json<CandyData>('site/data/candy.json');
   need(isNum(candy.broken) && isNum(candy.trials), 'site/data/candy.json', 'broken and trials must be numbers');
+  const hover = json<HoverData>('site/data/hover.json');
+  need(Array.isArray(hover.lines) && hover.lines.length > 0 && Array.isArray(hover.runs), 'site/data/hover.json', 'lines or runs is missing. Run: node scripts/gen-hover.mjs');
+  need(hover.lines.every((l) => isNum(l.marginMin) && isNum(l.marginMax) && (l.status === 'held' || l.status === 'broken' || l.status === 'differs')), 'site/data/hover.json', 'a line lacks its margins or status');
   const kiro = json<KiroData>('site/data/kiro.json');
   need(Array.isArray(kiro.workspaces) && kiro.totals, 'site/data/kiro.json', 'workspaces or totals is missing. Run: node scripts/kiro-stats.mjs');
   const changelog = json<ChangelogEntry[]>('site/data/changelog.json');
@@ -200,7 +211,7 @@ export function loadSiteData(root: string = REPO_ROOT): SiteData {
     : [];
 
   return {
-    mapCells, map, mapKiro, hero, falsifier, graded, graded256: g256, agentGate, agentGateHard, candy, kiro, changelog, lexicons,
+    mapCells, map, mapKiro, hero, falsifier, graded, graded256: g256, agentGate, agentGateHard, candy, hover, kiro, changelog, lexicons,
     reportMd: readText(root, 'evidence/REPORT.md'),
     transcriptMd: readText(root, 'docs/cli-transcript.md'),
     preregMd: readText(root, 'evidence/PREREG.md'),

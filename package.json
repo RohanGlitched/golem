@@ -2,7 +2,7 @@
   "name": "golem-monorepo",
   "private": true,
   "type": "module",
-  "workspaces": ["skeleton", "apps/stagger", "apps/candy", "site", "evidence"],
+  "workspaces": ["skeleton", "apps/stagger", "apps/candy", "apps/hover", "site", "evidence"],
   "engines": { "node": ">=20" },
   "scripts": {
     "test": "npm run test --workspaces --if-present",

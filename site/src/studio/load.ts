@@ -1,10 +1,11 @@
 // Page entry of every element with [data-studio="<app>"]: loads that studio's chunk and mounts it.
 // `data-when="idle"` waits for the load event and an idle moment, so text paints first (the home hero).
-type AppId = 'stagger' | 'candy';
+type AppId = 'stagger' | 'candy' | 'hover';
 
 const loaders: Record<AppId, () => Promise<{ mount(el: HTMLElement): unknown }>> = {
   stagger: () => import('./stagger'),
   candy: () => import('./candy'),
+  hover: () => import('./hover'),
 };
 
 async function start(el: HTMLElement): Promise<void> {

@@ -14,12 +14,13 @@
     "test": "vitest --run",
     "test:e2e": "playwright test -c tests/playwright.config.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "gen": "node ../scripts/kiro-stats.mjs && vite-node scripts/gen-lexicon.ts && node scripts/gen-candy.mjs",
+    "gen": "node ../scripts/kiro-stats.mjs && vite-node scripts/gen-lexicon.ts && node scripts/gen-candy.mjs && node scripts/gen-hover.mjs",
     "og": "node scripts/og.mjs",
     "lighthouse": "node scripts/lighthouse.mjs"
   },
   "dependencies": {
     "candy": "*",
+    "hover": "*",
     "golem-spec": "*",
     "stagger": "*"
   },

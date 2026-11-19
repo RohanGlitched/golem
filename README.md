@@ -74,12 +74,13 @@ Use `npx golem-spec`, not `npx golem`: a bare `npx golem` resolves to an unrelat
 
 The same pack ships as a **Kiro Power** (`skeleton/power`) and a **Kiro Crew app**, GOLEM Night Watch, in its own repository: [RohanGlitched/golem-night-watch](https://github.com/RohanGlitched/golem-night-watch) (source of truth: `skeleton/crew-app`).
 
-## Two robots, one skeleton (Skeleton Crew)
+## Three robots, one skeleton (Skeleton Crew)
 
 | App | Robot | What GOLEM found |
 |---|---|---|
 | [`apps/stagger`](apps/stagger) | Unitree G1 humanoid running Unitree's published walking policy (it matches Unitree's own reference run to 2.5 µm) | It survives **62.5 N** and falls at 64.1 N pushed from its left at 20% of its stride, yet holds **240 N** from the front: 4,860 trials, all in `evidence/`. With Kiro's reflex the weakest direction rises to **101.6 N**. |
 | [`apps/candy`](apps/candy) | Franka Panda with a suction cup, sorting Halloween candy while trick-or-treaters reach in | At a hand speed of 0.8 m/s, 57 of 228 trials break "keep every link at least 0.10 m from the hand". Its speed-and-separation controller slows and stops the arm by the cup's distance to the hand, and stops too late for the **wrist**: link 7 is the closest link in 48 of the breaks, while the cup is still about 0.14 m away in most of them. |
+| [`apps/hover`](apps/hover) | Skydio X2 quadrotor holding a hover point 1.0 m above the floor under wind gusts, a sagging battery and a lagging position estimate (a cascaded PD controller; the third app, built on the same skeleton with a lexicon, a controller and the model file) | Line 1.3 asks it to stay within 1.0 m in a gust of up to 20 N, and it breaks from **9.98 N** (the smallest gust that broke it over three search seeds of 64 trials, from any direction). Line 1.1, a gust of up to 2 N within 0.25 m, holds with at least 0.0966 m to spare. A position estimate that lags by 0.275 s breaks line 3.2 (0.30 s asked) while 0.10 s holds (line 3.1). The numbers are read from the real CLI output in [`apps/hover/docs/cli-transcript.md`](apps/hover/docs/cli-transcript.md). |
 
 ## Prior art, and what GOLEM adds
 
@@ -112,7 +113,7 @@ Every number here comes from committed raw data in [`evidence/`](evidence), usin
 
 ## How Kiro built GOLEM
 
-Kiro CLI did the building: 15 specs, among them 3 bugfix specs written from independent audits in [`docs/reviews/`](docs/reviews) and the two robots' own requirement files, which GOLEM tests (a 16th, golem-cloud, is written and not started). Together they hold 213 requirements, 2,141 EARS acceptance criteria and 273 correctness properties; 699 of 707 tasks are done, and the tests make 490 property-test assertions in 388 files (counted by `scripts/kiro-stats.mjs`, with pack copies installed into the apps counted once). The root [`.kiro/`](.kiro) holds the steering, specs, hooks, agents and MCP config used to build it. The full account is on the site's [How Kiro built it](https://d23v187fnxad7l.cloudfront.net/how-kiro/) page, and the raw logs of the 40 headless Kiro runs we kept (33 sessions) are in [`evidence/kiro-sessions/`](evidence/kiro-sessions).
+Kiro CLI did the building: 15 specs, among them 3 bugfix specs written from independent audits in [`docs/reviews/`](docs/reviews) and the three robots' own requirement files, which GOLEM tests (a 16th, golem-cloud, is written and not started). Together they hold 213 requirements, 2,141 EARS acceptance criteria and 273 correctness properties; 699 of 707 tasks are done, and the tests make 490 property-test assertions in 388 files (counted by `scripts/kiro-stats.mjs`, with pack copies installed into the apps counted once). The root [`.kiro/`](.kiro) holds the steering, specs, hooks, agents and MCP config used to build it. The full account is on the site's [How Kiro built it](https://d23v187fnxad7l.cloudfront.net/how-kiro/) page, and the raw logs of the 40 headless Kiro runs we kept (33 sessions) are in [`evidence/kiro-sessions/`](evidence/kiro-sessions).
 
 ## Run it locally
 
@@ -120,6 +121,7 @@ Kiro CLI did the building: 15 specs, among them 3 bugfix specs written from inde
 npm ci
 npm run dev -w apps/stagger    # the G1 studio
 npm run dev -w apps/candy      # the candy studio
+npm run dev -w apps/hover      # the hover studio
 npm test                       # every workspace
 ```
 

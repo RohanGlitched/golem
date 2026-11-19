@@ -6,7 +6,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const shots = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../shots');
-const PAGES = ['/', '/kit/', '/evidence/', '/how-kiro/', '/stagger/', '/candy/', '/no-such-page'];
+const PAGES = ['/', '/kit/', '/evidence/', '/how-kiro/', '/stagger/', '/candy/', '/hover/', '/no-such-page'];
 const SIZES = [{ name: '1440', width: 1440, height: 900 }, { name: '390', width: 390, height: 844 }];
 const THEMES = ['dark', 'light'] as const;
 const PORT = 4179;
@@ -40,7 +40,7 @@ for (const size of SIZES) {
         const page = await ctx.newPage();
         const errors = await open(page, url, theme);
         if (url === '/') await page.locator('[data-wake]').click();
-        if (url === '/' || url === '/stagger/' || url === '/candy/') await page.waitForTimeout(2500);
+        if (url === '/' || url === '/stagger/' || url === '/candy/' || url === '/hover/') await page.waitForTimeout(2500);
         if (url === '/') await page.locator('.golem-studio').waitFor({ timeout: 60_000 });
         await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
         const w = await page.evaluate(() => ({ sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth }));
@@ -49,7 +49,7 @@ for (const size of SIZES) {
         await expect(page.locator('footer.site-foot')).toHaveCount(1);
         expect(await page.locator('footer a[href="https://github.com/RohanGlitched/golem"]').count()).toBeGreaterThan(0);
         expect(errors, errors.join('\n')).toEqual([]);
-        if (url === '/' || url === '/stagger/' || url === '/candy/') {
+        if (url === '/' || url === '/stagger/' || url === '/candy/' || url === '/hover/') {
           await expect(page.locator('.hero-fallback')).toHaveCount(0);
           await expect(page.locator('body')).not.toContainText('Could not load MuJoCo');
           await expect(page.locator('.golem-studio')).toHaveCount(1);

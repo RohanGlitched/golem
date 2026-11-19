@@ -14,6 +14,8 @@ export interface MountArgs {
   /** Built URL of the pool's worker script. */
   entryUrl: string;
   trials?: number;
+  /** App-specific studio options, such as the body a shove pushes. */
+  options?: NonNullable<Parameters<typeof mountStudio>[3]>;
 }
 
 /** Clicks the studio's own theme button when its theme differs from the page's, so both always agree. */
@@ -35,6 +37,7 @@ export function mountSiteStudio(a: MountArgs): StudioHandle {
     theme: readTheme(),
     fontBaseUrl: '/fonts/',
     idleSleepMs: 10000,
+    ...a.options,
   });
   const sync = (): void => syncTheme(a.el);
   document.addEventListener('golem-theme', sync);

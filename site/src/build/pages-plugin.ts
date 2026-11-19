@@ -16,9 +16,10 @@ export const PAGE_ENTRIES: PageEntry[] = [
   { name: '404', file: '404.html', id: 'notfound' },
   { name: 'stagger', file: 'stagger/index.html', id: 'stagger' },
   { name: 'candy', file: 'candy/index.html', id: 'candy' },
+  { name: 'hover', file: 'hover/index.html', id: 'hover' },
 ];
 
-export const STUDIOS = ['stagger', 'candy'] as const;
+export const STUDIOS = ['stagger', 'candy', 'hover'] as const;
 
 /** `/kit/`, `/kit`, `/kit/index.html?x=1` all name the same entry. */
 export function entryForPath(urlPath: string): PageEntry | undefined {
@@ -59,7 +60,7 @@ export function robotFilesPlugin(): Plugin {
     name: 'golem-robot-files',
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
-        const m = /^\/(stagger|candy)\/robot\/(.+?)(\?.*)?$/.exec(req.url ?? '');
+        const m = /^\/(stagger|candy|hover)\/robot\/(.+?)(\?.*)?$/.exec(req.url ?? '');
         if (!m) return next();
         const file = path.join(dirOf(m[1]!), decodeURIComponent(m[2]!));
         if (!file.startsWith(dirOf(m[1]!)) || !existsSync(file) || !statSync(file).isFile()) return next();

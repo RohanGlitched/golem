@@ -1,6 +1,6 @@
 {
-  "generated": "2026-11-19T20:13:39.094Z",
-  "commit": "52e31eb",
+  "generated": "2026-11-19T21:58:43.388Z",
+  "commit": "3b48f4a",
   "workspaces": [
     {
       "path": ".kiro",
@@ -232,7 +232,7 @@
         ],
         "skills": [],
         "steering": [
-          "design-language.md:3e9b01d9aaa8",
+          "design-language.md:44a209adc255",
           "ears-for-robots.md:0b727c1e6fe6",
           "experience.md:ead1f7d4aac0",
           "interfaces.md:73364196627e",
@@ -321,6 +321,120 @@
         {
           "name": "golem-tuner",
           "file": "apps/candy/.kiro/agents/golem-tuner.json",
+          "hooks": 2,
+          "mcp": [
+            "golem"
+          ]
+        }
+      ],
+      "mcp": [
+        "golem"
+      ],
+      "skills": [
+        "falsify-and-fix",
+        "robot-ears"
+      ],
+      "keys": {
+        "agents": [
+          "golem-scribe:1adb4d1ce028",
+          "golem-skeptic:287b22822210",
+          "golem-tuner:23bfa02b86ba"
+        ],
+        "hooks": [
+          "Check requirements on save|PostFileSave|npx --no-install golem-spec check",
+          "Falsify controller on save|PostFileSave|npx --no-install golem-spec test --budget 24",
+          "Gate the agent|Stop|npx --no-install golem-spec gate --kiro",
+          "Test after spec task|PostTaskExec|npx --no-install golem-spec test",
+          "Summon the ghosts|Manual|npx --no-install golem-spec test --budget 256"
+        ],
+        "skills": [
+          "falsify-and-fix:481a6b6842ef",
+          "robot-ears:d03e01ddcc8c"
+        ],
+        "steering": [
+          "golem-ears.md:3bcf91be53cf"
+        ]
+      },
+      "workflows": [
+        "falsify-and-fix.workflow.json"
+      ]
+    },
+    {
+      "path": "apps/hover/.kiro",
+      "specs": [
+        {
+          "name": "hover-hold",
+          "path": "apps/hover/.kiro/specs/hover-hold",
+          "type": "feature",
+          "requirements": 3,
+          "earsCriteria": 6,
+          "properties": 0,
+          "tasksDone": 0,
+          "tasksOpen": 0,
+          "waves": false,
+          "status": "no tasks"
+        }
+      ],
+      "steering": [
+        "golem-ears.md"
+      ],
+      "hooks": [
+        {
+          "file": "apps/hover/.kiro/hooks/golem.json",
+          "name": "Check requirements on save",
+          "trigger": "PostFileSave",
+          "action": "command",
+          "command": "npx --no-install golem-spec check"
+        },
+        {
+          "file": "apps/hover/.kiro/hooks/golem.json",
+          "name": "Falsify controller on save",
+          "trigger": "PostFileSave",
+          "action": "command",
+          "command": "npx --no-install golem-spec test --budget 24"
+        },
+        {
+          "file": "apps/hover/.kiro/hooks/golem.json",
+          "name": "Gate the agent",
+          "trigger": "Stop",
+          "action": "command",
+          "command": "npx --no-install golem-spec gate --kiro"
+        },
+        {
+          "file": "apps/hover/.kiro/hooks/golem.json",
+          "name": "Test after spec task",
+          "trigger": "PostTaskExec",
+          "action": "command",
+          "command": "npx --no-install golem-spec test"
+        },
+        {
+          "file": "apps/hover/.kiro/hooks/golem.json",
+          "name": "Summon the ghosts",
+          "trigger": "Manual",
+          "action": "command",
+          "command": "npx --no-install golem-spec test --budget 256"
+        }
+      ],
+      "agents": [
+        {
+          "name": "golem-scribe",
+          "file": "apps/hover/.kiro/agents/golem-scribe.json",
+          "hooks": 0,
+          "mcp": [
+            "golem"
+          ]
+        },
+        {
+          "name": "golem-skeptic",
+          "file": "apps/hover/.kiro/agents/golem-skeptic.json",
+          "hooks": 0,
+          "mcp": [
+            "golem"
+          ]
+        },
+        {
+          "name": "golem-tuner",
+          "file": "apps/hover/.kiro/agents/golem-tuner.json",
           "hooks": 2,
           "mcp": [
             "golem"
@@ -475,12 +589,14 @@
     }
   ],
   "commits": {
-    "total": 278,
+    "total": 291,
     "byPrefix": {
+      "hover": 6,
+      "ci": 5,
+      "docs": 3,
+      "other": 29,
       "evidence": 12,
-      "other": 28,
       "site": 9,
-      "docs": 2,
       "merge": 20,
       "stagger": 7,
       "golem-kit": 25,
@@ -506,15 +622,15 @@
     }
   },
   "tests": {
-    "files": 388,
-    "propertyAsserts": 490
+    "files": 404,
+    "propertyAsserts": 519
   },
   "totals": {
-    "specs": 15,
+    "specs": 16,
     "specsNotStarted": 1,
     "bugfixSpecs": 3,
-    "requirements": 213,
-    "earsCriteria": 2141,
+    "requirements": 216,
+    "earsCriteria": 2147,
     "properties": 273,
     "tasksDone": 699,
     "tasksOpen": 8,

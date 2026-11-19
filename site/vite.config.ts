@@ -1,4 +1,4 @@
-﻿// Vite multi-page build of the GOLEM site. Pages are rendered from committed data by src/build/pages-plugin.ts.
+// Vite multi-page build of the GOLEM site. Pages are rendered from committed data by src/build/pages-plugin.ts.
 import { defineConfig } from 'vite';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -23,8 +23,10 @@ export const alias = [
   { find: /^golem-pool-entry(\?.*)?$/, replacement: skeleton('pool/browser-entry.ts') + '$1' },
   { find: /^@app\/stagger$/, replacement: appFile('stagger', 'app.ts') },
   { find: /^@app\/candy$/, replacement: appFile('candy', 'app.ts') },
+  { find: /^@app\/hover$/, replacement: appFile('hover', 'app.ts') },
   { find: /^@spec\/stagger(\?.*)?$/, replacement: appFile('stagger', '.kiro/specs/g1-walking/requirements.md', '.md') + '$1' },
   { find: /^@spec\/candy(\?.*)?$/, replacement: appFile('candy', '.kiro/specs/candy-sorter/requirements.md', '.md') + '$1' },
+  { find: /^@spec\/hover(\?.*)?$/, replacement: appFile('hover', '.kiro/specs/hover-hold/requirements.md', '.md') + '$1' },
 ];
 
 export default defineConfig({

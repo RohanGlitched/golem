@@ -1,0 +1,225 @@
+{
+  "source": {
+    "transcript": "apps/hover/docs/cli-transcript.md",
+    "spec": "apps/hover/.kiro/specs/hover-hold/requirements.md"
+  },
+  "budget": 64,
+  "searchSeeds": [
+    2,
+    3,
+    1
+  ],
+  "lines": [
+    {
+      "id": "1.1",
+      "source": "WHEN a gust of up to 2 N hits it for 0.5 s from any direction THE drone SHALL stay within 0.25 m of its hover point for 4 s",
+      "expectation": "Expected_Hold",
+      "status": "held",
+      "unit": "m",
+      "marginMin": 0.0966,
+      "marginMax": 0.112,
+      "counterexamples": [],
+      "expectationMet": true
+    },
+    {
+      "id": "1.2",
+      "source": "WHEN a gust of up to 3 N hits it for 0.5 s from any direction THE drone SHALL keep its tilt below 30 deg for 4 s",
+      "expectation": "Expected_Hold",
+      "status": "held",
+      "unit": "deg",
+      "marginMin": 10.7,
+      "marginMax": 11.6,
+      "counterexamples": [],
+      "expectationMet": true
+    },
+    {
+      "id": "1.3",
+      "source": "WHEN a gust of up to 20 N hits it for 0.5 s from any direction THE drone SHALL stay within 1.0 m of its hover point for 4 s",
+      "expectation": "Expected_Break",
+      "status": "broken",
+      "unit": "m",
+      "marginMin": -0.015,
+      "marginMax": -0.00295,
+      "counterexamples": [
+        "gust.force = 9.98 N, gust.angle = 307 deg",
+        "gust.force = 10 N, gust.angle = 210 deg",
+        "gust.force = 10 N, gust.angle = 11.1 deg"
+      ],
+      "expectationMet": true
+    },
+    {
+      "id": "2.1",
+      "source": "WHEN the battery sags to 60% to 100% THE drone SHALL stay above 0.5 m for 4 s",
+      "expectation": "Expected_Hold",
+      "status": "held",
+      "unit": "m",
+      "marginMin": 0.217,
+      "marginMax": 0.23,
+      "counterexamples": [],
+      "expectationMet": true
+    },
+    {
+      "id": "3.1",
+      "source": "WHEN a gust of up to 2 N hits it for 0.5 s from any direction while the position estimate lags by up to 0.10 s THE drone SHALL stay within 0.35 m of its hover point for 4 s",
+      "expectation": "Expected_Hold",
+      "status": "held",
+      "unit": "m",
+      "marginMin": 0.134,
+      "marginMax": 0.158,
+      "counterexamples": [],
+      "expectationMet": true
+    },
+    {
+      "id": "3.2",
+      "source": "WHEN a gust of up to 2 N hits it for 0.5 s from any direction while the position estimate lags by up to 0.30 s THE drone SHALL stay within 0.35 m of its hover point for 4 s",
+      "expectation": "Expected_Break",
+      "status": "broken",
+      "unit": "m",
+      "marginMin": -0.0162,
+      "marginMax": -0.00397,
+      "counterexamples": [
+        "gust.force = 0 N, gust.angle = 307 deg, estimate.lag = 0.279 s",
+        "gust.force = 0.0449 N, gust.angle = 17.1 deg, estimate.lag = 0.275 s",
+        "gust.force = 0.163 N, gust.angle = 11.1 deg, estimate.lag = 0.285 s"
+      ],
+      "expectationMet": true
+    }
+  ],
+  "runs": [
+    {
+      "command": "npx --no-install golem-spec test --budget 64 --search-seed 2",
+      "searchSeed": 2,
+      "budget": 64,
+      "results": {
+        "1.1": {
+          "status": "held",
+          "margin": 0.0966,
+          "unit": "m",
+          "expectationMet": true
+        },
+        "1.2": {
+          "status": "held",
+          "margin": 10.7,
+          "unit": "deg",
+          "expectationMet": true
+        },
+        "1.3": {
+          "status": "broken",
+          "margin": -0.00295,
+          "unit": "m",
+          "scenario": "gust.force = 9.98 N, gust.angle = 307 deg",
+          "expectationMet": true
+        },
+        "2.1": {
+          "status": "held",
+          "margin": 0.228,
+          "unit": "m",
+          "expectationMet": true
+        },
+        "3.1": {
+          "status": "held",
+          "margin": 0.134,
+          "unit": "m",
+          "expectationMet": true
+        },
+        "3.2": {
+          "status": "broken",
+          "margin": -0.0152,
+          "unit": "m",
+          "scenario": "gust.force = 0 N, gust.angle = 307 deg, estimate.lag = 0.279 s",
+          "expectationMet": true
+        }
+      }
+    },
+    {
+      "command": "npx --no-install golem-spec test --budget 64 --search-seed 3",
+      "searchSeed": 3,
+      "budget": 64,
+      "results": {
+        "1.1": {
+          "status": "held",
+          "margin": 0.112,
+          "unit": "m",
+          "expectationMet": true
+        },
+        "1.2": {
+          "status": "held",
+          "margin": 11.6,
+          "unit": "deg",
+          "expectationMet": true
+        },
+        "1.3": {
+          "status": "broken",
+          "margin": -0.00532,
+          "unit": "m",
+          "scenario": "gust.force = 10 N, gust.angle = 210 deg",
+          "expectationMet": true
+        },
+        "2.1": {
+          "status": "held",
+          "margin": 0.23,
+          "unit": "m",
+          "expectationMet": true
+        },
+        "3.1": {
+          "status": "held",
+          "margin": 0.158,
+          "unit": "m",
+          "expectationMet": true
+        },
+        "3.2": {
+          "status": "broken",
+          "margin": -0.00397,
+          "unit": "m",
+          "scenario": "gust.force = 0.0449 N, gust.angle = 17.1 deg, estimate.lag = 0.275 s",
+          "expectationMet": true
+        }
+      }
+    },
+    {
+      "command": "npx --no-install golem-spec test --budget 64",
+      "searchSeed": 1,
+      "budget": 64,
+      "results": {
+        "1.1": {
+          "status": "held",
+          "margin": 0.104,
+          "unit": "m",
+          "expectationMet": true
+        },
+        "1.2": {
+          "status": "held",
+          "margin": 10.7,
+          "unit": "deg",
+          "expectationMet": true
+        },
+        "1.3": {
+          "status": "broken",
+          "margin": -0.015,
+          "unit": "m",
+          "scenario": "gust.force = 10 N, gust.angle = 11.1 deg",
+          "expectationMet": true
+        },
+        "2.1": {
+          "status": "held",
+          "margin": 0.217,
+          "unit": "m",
+          "expectationMet": true
+        },
+        "3.1": {
+          "status": "held",
+          "margin": 0.149,
+          "unit": "m",
+          "expectationMet": true
+        },
+        "3.2": {
+          "status": "broken",
+          "margin": -0.0162,
+          "unit": "m",
+          "scenario": "gust.force = 0.163 N, gust.angle = 11.1 deg, estimate.lag = 0.285 s",
+          "expectationMet": true
+        }
+      }
+    }
+  ]
+}
