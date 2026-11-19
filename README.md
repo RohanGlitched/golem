@@ -3,6 +3,7 @@
 <p align="center">
 <a href="https://www.npmjs.com/package/golem-spec"><img alt="npm" src="https://img.shields.io/npm/v/golem-spec?color=F3D9AE&labelColor=1A1411&label=npm%20golem-spec"></a>
 <a href="LICENSE"><img alt="Apache-2.0" src="https://img.shields.io/badge/licence-Apache--2.0-C9B59C?labelColor=1A1411"></a>
+<a href="https://github.com/RohanGlitched/golem/actions/workflows/golem.yml"><img alt="golem CI status" src="https://img.shields.io/github/actions/workflow/status/RohanGlitched/golem/golem.yml?branch=main&label=golem%20CI&labelColor=1A1411"></a>
 <img alt="Built with Kiro" src="https://img.shields.io/badge/built%20with-Kiro-86BFA6?labelColor=1A1411">
 <img alt="MuJoCo WASM" src="https://img.shields.io/badge/physics-MuJoCo%20WASM-D6F1F2?labelColor=1A1411">
 </p>

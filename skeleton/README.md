@@ -48,6 +48,26 @@ The trigger defines what to search: force 0–100 N, any angle, any gait phase. 
 
 An app describes its robot once: an MJCF scene, a controller, the signals it measures, and a *lexicon* of the phrases its requirements may use. See the two example apps, `apps/stagger` (Unitree G1) and `apps/candy` (Franka Panda), in the repository.
 
+## Run GOLEM in CI
+
+`golem-spec gate` exits 0 only when every requirement meets its expectation, 2 when one does not, and 1 when it cannot run. A GitHub Action wraps it, so a pull request is red while a requirement is red:
+
+```yaml
+# .github/workflows/golem.yml
+name: golem
+on: [push, pull_request]
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: RohanGlitched/golem/.github/actions/golem-gate@main
+        with:
+          app-dir: .      # the directory with golem.config.json
+          budget: 24      # trials per requirement
+```
+
+The action sets up Node, runs `npm ci` when there is a `package-lock.json`, runs `npx --no-install golem-spec gate --json`, writes one row per requirement (expectation, verdict, margin, counterexample, reproduce command) to the job summary, uploads `.golem/report.json` and any replays, and fails the job exactly when the gate exits non-zero. `golem-spec` must be in your `devDependencies`. Inputs, outputs and a full example: https://github.com/RohanGlitched/golem/tree/main/.github/actions/golem-gate
 ## Honest limits
 
 - "Held" means no counterexample was found within the stated budget. It is not a proof.
