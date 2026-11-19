@@ -173,7 +173,7 @@ describe('falsify: Phases 0 and 1', () => {
 
   it('emits one progress event per phase 0 and per generation, with frozen contents', async () => {
     const events: ProgressEvent[] = [];
-    await falsify(req, directPool(holds), { ...base, budget: { maxTrials: 50 }, onProgress: (e) => { events.push(e); } });
+    await falsify(req, directPool(holds), { ...base, budget: { maxTrials: 50 }, cem: { generationSize: 16 }, onProgress: (e) => { events.push(e); } });
     expect(events.map((e) => [e.phase, e.generation])).toEqual([[0, 0], [1, 0], [2, 0], [2, 1]]);
     expect(events[1]!.scenarios).toHaveLength(20);
     expect(events[3]!.scenarios).toHaveLength(14); // last generation shrunk to the grant

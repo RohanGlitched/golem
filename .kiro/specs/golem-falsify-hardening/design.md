@@ -59,11 +59,11 @@ else boundarySensitive = classification === 'seed-sensitive'
 
 ```ts
 type DimDist = … | { kind: 'uniform' }                    // interval dimensions
-function eliteSet(obs: Observed[], rho: number, slots = ceil(rho·obs.length)): { elites: Observed[]; informative: boolean }
+function eliteSet(obs: Observed[], slots: number): { elites: Observed[]; informative: boolean }
 ```
 
 - Sort by (robustness, index), which is `selectElites`' total order. `γ` = robustness of the `slots`-th item. `elites` = every item with robustness `<= γ`.
-- `informative = false` when no item is below `γ` and more than `slots` items equal `γ`. Then the fit returns `uniform` / `uniformCircle` for every non-fixed dimension.
+- `informative = false` when every usable observation has the same robustness. Then the fit returns `uniform` / `uniformCircle` for every non-fixed dimension, and the next generation is drawn wholly by LHS.
 - `index` is the run order: Phase 1 trial index `i`, Phase 2 trial `n1 + j`, so elites carried across generations keep a total order.
 
 Fit per generation `g`:
@@ -71,8 +71,9 @@ Fit per generation `g`:
 ```
 pool_g = carried ∪ observations of generation g     (carried = the top `slots` of pool_{g-1} by total order)
 slots  = ceil(rho · G)
-{ elites, informative } = eliteSet(pool_g, rho, slots)
-state' = informative && elites.length >= 2 ? smooth(fit(elites), state) : uniform
+if |pool_g| < 2: keep state
+{ elites, informative } = eliteSet(pool_g, slots)
+state' = !informative ? uniform : elites.length >= 2 ? smooth(fit(elites), state) : state
 carried = first `slots` of pool_g in total order
 ```
 
@@ -81,7 +82,7 @@ Initial state: `eliteSet(phase1, rho)`. Uninformative or fewer than 2 elites giv
 Sampling a generation of nominal size `G` (D5 prefix rule):
 
 ```
-m = round(lhsFraction · G)
+m = state is uniform on every dimension ? G : round(lhsFraction · G)
 cemDraws = sampleCem(space, state, G - m, searchSeed, g)          // stream SALT.cem (5), unchanged
 lhsDraws = latinHypercube(space, m, deriveSeed(searchSeed, SALT.cemLhs = 6, 0), g)
 position i is LHS iff floor((i+1)·m/G) > floor(i·m/G)               // interleaved
@@ -90,7 +91,7 @@ take the first n (the grant)
 
 The uniform kind draws `min + u·width` (one uniform, the same stream position as the other kinds). The interleave keeps the LHS share when a generation is cut short.
 
-Why this works on the flat needle: until a trial fails, every observation is tied, so the distribution stays uniform and Phase 2 is random sampling with a 20% stratified share, the same distribution as random-only. On the graded needle the elites are strictly ordered and nothing changes except elitism, which keeps the best points if a generation lands badly.
+Why this works on the flat needle: until a trial fails, every observation is tied, so the distribution stays uniform and Phase 2 is Latin-hypercube sampling, the same distribution as random-only. On the graded needle the elites are strictly ordered and nothing changes except elitism, which keeps the best points if a generation lands badly.
 
 ## D4 and D5: time-aware grants, generation prefix, replay options
 

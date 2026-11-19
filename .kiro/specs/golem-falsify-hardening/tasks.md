@@ -28,7 +28,7 @@ Rules for every task:
   - Update the trial bound to `T + R + 6` in the accounting property.
   - _Bugfix: 1.2–1.8_
 
-- [ ] 5. CEM elites with ties, uniform fallback, elitism, LHS mix, generation size 32 (defect 2)
+- [x] 5. CEM elites with ties, uniform fallback, elitism, LHS mix, generation size 32 (defect 2)
   - Tests: `eliteSet` includes every tie and flags no information; a flat generation gives a uniform state; carried elites survive a bad generation; the LHS share sits at interleaved positions; the flat needle at 1000 trials is found no less often than random-only minus 8% (fails before: 9/30 against 21/30).
   - _Bugfix: 2.2–2.9_
 

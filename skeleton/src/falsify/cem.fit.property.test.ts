@@ -27,18 +27,24 @@ const arbObs = fc.tuple(
 
 describe('cem fit properties', () => {
   // Feature: golem-falsify, Property 7: CEM fit clamps and keeps previous state
-  it('fits the elite mean with a 1% sigma floor, keeps fixed dimensions, and keeps the previous state below 2 elites', () => {
+  // (golem-falsify-hardening defect 2: elites are every observation at or below the slot threshold, and a
+  // flat set or fewer than 2 elites gives the uniform distribution instead of the midpoint prior.)
+  it('fits the tie-aware elite mean with a 1% sigma floor, keeps fixed dimensions, and is uniform without information', () => {
     fc.assert(
       fc.property(arbSpace, arbObs, (space, [fracs, rs]) => {
         const obs = observe(space, fracs, rs);
         const state = initCem(space, obs, DEFAULT_CEM);
-        const elites = [...obs].sort((a, b) => a.robustness - b.robustness || a.index - b.index).slice(0, Math.ceil(0.25 * obs.length));
+        const sorted = [...obs].sort((a, b) => a.robustness - b.robustness || a.index - b.index);
+        const slots = Math.ceil(0.25 * obs.length);
+        const gamma = sorted[slots - 1]?.robustness;
+        const elites = gamma === undefined ? [] : sorted.filter((o) => o.robustness <= gamma);
+        const flat = obs.length > 0 && sorted[0]!.robustness === sorted[sorted.length - 1]!.robustness;
         space.dims.forEach((d, i) => {
           const dist = state.dists[i] as DimDist;
           const width = d.max - d.min;
           if (d.min === d.max) { expect(dist.kind).toBe('fixed'); return; }
-          if (elites.length < 2) {
-            expect(dist).toMatchObject({ mu: d.min + width / 2, sigma: 0.25 * width });
+          if (elites.length < 2 || flat || obs.length === 0) {
+            expect(dist.kind).toBe(d.wrap === true ? 'uniformCircle' : 'uniform');
             return;
           }
           if (d.wrap === true) {
@@ -86,15 +92,18 @@ describe('cem fit properties', () => {
             ).map(([mu, s]): DimDist => ({ kind: 'wrapped', mu, sigma: s })),
           );
         }
-        return fc.tuple(fc.double({ min: d.min, max: d.max, noNaN: true }), sigma)
-          .map(([mu, s]): DimDist => ({ kind: 'normal', mu, sigma: s }));
+        return fc.oneof(
+          fc.constant<DimDist>({ kind: 'uniform' }),
+          fc.tuple(fc.double({ min: d.min, max: d.max, noNaN: true }), sigma)
+            .map(([mu, s]): DimDist => ({ kind: 'normal', mu, sigma: s })),
+        );
       }));
     fc.assert(
       fc.property(
         arbSpace.chain((space) => fc.tuple(fc.constant(space), arbDist(space))),
         fc.integer({ min: 0, max: 60 }), u32, fc.integer({ min: 0, max: 100 }),
         ([space, dists], n, seed, g) => {
-          const state: CemState = { dists };
+          const state: CemState = { dists, carried: [] };
           for (const x of sampleCem(space, state, n, seed, g)) {
             for (const d of space.dims) {
               const v = x[d.name] as number;

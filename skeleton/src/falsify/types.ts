@@ -32,7 +32,8 @@ export interface FalsifyOptions {
   phase1Fraction?: number;
   phase2Fraction?: number;
   phase1GenerationSize?: number;
-  cem?: { generationSize?: number; eliteFraction?: number; smoothing?: number };
+  /** Defaults: generationSize 32, eliteFraction 0.25, smoothing 1, lhsFraction 0.2 (share of each Phase 2 generation drawn by LHS). */
+  cem?: { generationSize?: number; eliteFraction?: number; smoothing?: number; lhsFraction?: number };
   /**
    * `tolerance` and `maxTrials` as in the design. The shrink trials come from a reserve on top of
    * the search budget: `max(reserveMin, ceil(reserveFraction * maxTrials))`, defaults 0.15 and 12.
@@ -49,7 +50,7 @@ export interface ResolvedConfig {
   phase1Fraction: number;
   phase2Fraction: number;
   phase1GenerationSize: number;
-  cem: { generationSize: number; eliteFraction: number; smoothing: number };
+  cem: { generationSize: number; eliteFraction: number; smoothing: number; lhsFraction: number };
   shrink: { tolerance: number; maxTrials: number; reserveFraction: number; reserveMin: number };
 }
 

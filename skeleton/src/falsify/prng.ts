@@ -31,7 +31,7 @@ export function hashString(s: string): number {
 }
 
 /** Phase salts (the `phase` argument of deriveSeed). */
-export const SALT = { phase1: 1, phase2: 2, verification: 3, lhs: 4, cem: 5 } as const;
+export const SALT = { phase1: 1, phase2: 2, verification: 3, lhs: 4, cem: 5, cemLhs: 6 } as const;
 
 function base(searchSeed: number, phase: number): number {
   return fmix32(((searchSeed >>> 0) ^ Math.imul(phase + 1, 0x9e3779b1)) >>> 0);

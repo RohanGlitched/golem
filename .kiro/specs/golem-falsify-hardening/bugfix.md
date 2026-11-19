@@ -38,7 +38,7 @@ Supersedes golem-falsify 7.1 ("the shrunk scenario runs under each verification 
 
 ### Expected Behavior
 2.2 THE elite set SHALL be every observation whose robustness is at or below the `e`-th lowest robustness `γ` (`e = ceil(eliteFraction · m)`), so tied observations enter together and the input index never decides membership.
-2.3 WHEN no observation is strictly below `γ` and more than `e` observations equal `γ` (no information) THEN THE fit SHALL return the uniform distribution on every non-fixed dimension (`uniform` for interval dimensions, `uniformCircle` for wrap dimensions). The same applies to the initial fit from Phase 1 and when fewer than 2 elites exist.
+2.3 WHEN every usable observation has the same robustness (no information) THEN THE fit SHALL return the uniform distribution on every non-fixed dimension (`uniform` for interval dimensions, `uniformCircle` for wrap dimensions), and a generation drawn from that state SHALL be drawn wholly by Latin hypercube, the distribution random-only search uses. The same applies to the initial fit from Phase 1 and when Phase 1 gives fewer than 2 elites.
 2.4 THE search SHALL keep the `e` best observations of the previous fit (ordered by robustness, then run order) and add them to the next generation's observations before selecting elites.
 2.5 EACH Phase 2 generation SHALL draw `round(lhsFraction · G)` of its `G` scenarios from a Latin hypercube (option `cem.lhsFraction`, default 0.2, in [0, 1)), at interleaved positions, from a stream separate from Phase 1.
 2.6 THE default `cem.generationSize` SHALL be 32.

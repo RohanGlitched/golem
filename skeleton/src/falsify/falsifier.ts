@@ -4,7 +4,7 @@
 import { BudgetClock, validateBudget, type SearchPhase } from './budget.js';
 import { failureRateUpper95 } from './beta.js';
 import {
-  initCem, refitCem, sampleCem, validateCemParams, type CemParams, type Observed,
+  initCem, refitCem, sampleGeneration, validateCemParams, type CemParams, type Observed,
 } from './cem.js';
 import { classify, verificationSeeds } from './classify.js';
 import type {
@@ -42,7 +42,7 @@ function resolveConfig(o: FalsifyOptions): { cfg: ResolvedConfig; randomOnly: bo
   if (!Number.isInteger(sh.maxTrials) || sh.maxTrials < 1) throw new RangeError(`shrink.maxTrials must be an integer of at least 1, got ${String(sh.maxTrials)}`);
   if (!(sh.reserveFraction >= 0 && sh.reserveFraction <= 1)) throw new RangeError(`shrink.reserveFraction must be in [0, 1], got ${String(sh.reserveFraction)}`);
   if (!Number.isInteger(sh.reserveMin) || sh.reserveMin < 0) throw new RangeError(`shrink.reserveMin must be a non-negative integer, got ${String(sh.reserveMin)}`);
-  const cem = { generationSize: 16, eliteFraction: 0.25, smoothing: 1, ...stripUndefined(o.cem ?? {}) };
+  const cem = { generationSize: 32, eliteFraction: 0.25, smoothing: 1, lhsFraction: 0.2, ...stripUndefined(o.cem ?? {}) };
   const randomOnly = mode === 'random-only';
   return {
     randomOnly,
@@ -289,6 +289,7 @@ export async function falsify(
   if (!randomOnly && failures.length === 0 && !errorSeen && !fixedOnly && budget.grant(2, 1) > 0) {
     const params: CemParams = {
       genSize: cfg.cem.generationSize, eliteFraction: cfg.cem.eliteFraction, smoothing: cfg.cem.smoothing,
+      lhsFraction: cfg.cem.lhsFraction,
     };
     const problem = validateCemParams(params);
     if (problem !== undefined) {
@@ -296,13 +297,14 @@ export async function falsify(
       meta.errors.push({ phase: 2, message: problem });
     } else {
       let state = initCem(space, phase1Obs, params);
+      const runOffset = phase1Obs.reduce((m, o) => Math.max(m, o.index + 1), 0);
       let g = 0;
       let i2 = 0;
       for (;;) {
         if (aborted()) { emitter.stop(); throw abortError(); }
         const size = budget.grant(2, params.genSize);
         if (size === 0) break;
-        const scenarios = sampleCem(space, state, size, searchSeed, g);
+        const scenarios = sampleGeneration(space, state, params.genSize, size, params.lhsFraction, searchSeed, g);
         const specs = scenarios.map((s, k) => specFor(s, deriveSeed(searchSeed, SALT.phase2, i2 + k)));
         const b = await runBatch(specs);
         budget.record(2, countOf(b));
@@ -310,7 +312,7 @@ export async function falsify(
         emit(2, g, got.scenarios, got.robustness);
         if (got.error || got.failed) break;
         const obs: Observed[] = specs.map((s, k) => ({
-          scenario: s.scenario, robustness: (b.results[k] as TrialResult).robustness, index: k,
+          scenario: s.scenario, robustness: (b.results[k] as TrialResult).robustness, index: runOffset + i2 + k,
         }));
         state = refitCem(space, state, obs, params);
         g++;
