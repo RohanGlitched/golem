@@ -34,7 +34,7 @@ export function polarSvg(dirs: DirectionData[], weakest: number, strongest: numb
     return `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)} ${p.y.toFixed(1)}`;
   }).join('') + 'Z';
   const w = spec.cx * 2;
-  const h = spec.cy + spec.radius + 64;
+  const h = spec.cy + spec.radius + 86;
   const title = 'Stability map of the Unitree G1';
   const desc = `Polar plot. Each wedge is a push direction in 10 degree steps; its length is the largest 0.2 second pelvis push the G1 survived, from 0 to 300 N. The shortest wedge is ${weakest} degrees and the longest is ${strongest} degrees.`;
   return `<svg class="fig-svg" viewBox="0 0 ${w} ${h}" role="group" aria-labelledby="polar-t polar-d" data-polar-svg><title id="polar-t">${title}</title><desc id="polar-d">${esc(desc)}</desc>
