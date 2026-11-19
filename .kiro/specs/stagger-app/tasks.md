@@ -205,15 +205,15 @@ Conventions for every task:
     - Write `test/smoke.test.ts`: 2 s after warm-up with a 0 N push, fixed seed, finite robustness, expected trace length, handle counter returns to prior value plus the cached model, under 15 s; also checks that model compile gives 12 actuators and `nq` 19 within 5 s
     - _Requirements: 3.10, 3.11, 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 9.7, 18.4, 18.5, 18.6, 18.7, 18.8, 18.11_
 
-- [ ] 8. Robot requirements file
-  - [ ] 8.1 Write `.kiro/specs/g1-walking/requirements.md`
+- [x] 8. Robot requirements file
+  - [x] 8.1 Write `.kiro/specs/g1-walking/requirements.md`
     - Standard Kiro format: Introduction, Glossary (with a table marking each requirement Expected_Hold or Expected_Break), numbered requirements with user stories and EARS lines, requirement ID first on every line
     - Cover push recovery (Expected_Hold: up to 100 N for 0.2 s from any direction at any point in the stride, stay upright for 3 s), speed tracking on level ground (Expected_Hold), slopes, payload, slipping and sensor latency, and at least two Expected_Break lines including a push of up to 250 N from behind for 0.2 s
     - Use only lexicon phrases and give every number a unit; the marks stay outside the EARS lines; record no discussion edits here (use `apps/stagger/proposals.md`)
     - Write `test/requirements.test.ts` (examples): structure checks, required lines present, units on every number, ID first, marks outside EARS lines, the 250 N from behind line exists, every line compiles with the public compile function (failure prints line, diagnostic, suggestion), `perturbations` non-empty or `ubiquitous`, finite positive `horizon`, `min <= max`
     - _Requirements: 17.1, 17.2, 17.3, 17.4, 17.5, 17.6, 17.7, 17.8, 17.9, 17.10, 17.13, 17.14, 18.1, 18.2, 18.3_
 
-  - [ ]* 8.2 Write property test for requirement compile round trip and the nominal scenario
+  - [x]* 8.2 Write property test for requirement compile round trip and the nominal scenario
     - **Property 35: Requirement lines compile and re-compile to the same space**
     - Use `test/requirements.property.test.ts`; also add the nominal-scenario check (0 N or nominal values give positive robustness for every Expected_Hold and Expected_Break line, horizon at most 2 s)
     - **Validates: Requirements 18.12, 18.13**

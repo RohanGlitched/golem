@@ -17,6 +17,7 @@
 
   <worldbody>
     <light pos="1 0 3.5" dir="0 0 -1" directional="true"/>
-    <geom name="floor" size="0 0 0.05" type="plane" material="groundplane"/>
+    <!-- priority 1: contacts take the floor friction, so the friction perturbation can lower it -->
+    <geom name="floor" size="0 0 0.05" type="plane" material="groundplane" priority="1"/>
   </worldbody>
 </mujoco>
