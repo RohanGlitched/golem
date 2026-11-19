@@ -63,7 +63,7 @@ The templates read `a gust of {range:force}` and `lags by {range:duration}`; the
 
 ## Studio
 
-The studio page is served with the `dev` script of this package (http://localhost:5189/) and built with the `build` script. On the site it lives at `/hover/`. Summon ghosts on a requirement to see the gusts: ghosts that leave the allowed ball turn cinnabar.
+The studio page is served with the `dev` script of this package (http://localhost:5189/) and built with the `build` script. On the site it lives at `/hover/`. Summon ghosts on a requirement to see the gusts: ghosts that leave the allowed ball turn cinnabar. docs/studio-summon-1.3.png is a 1920x1080 capture of the studio on line 1.3 (the drone in clay, ghosts blown away in cinnabar, the floor aura at the weakest direction, 245 deg, 10 N).
 
 ## Regenerating the robot folder
 

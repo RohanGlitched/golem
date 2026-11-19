@@ -17,6 +17,7 @@ export function renderPage(id: string, data: SiteData): PageSpec {
     case 'notfound': return notFoundPage();
     case 'stagger': return studioPage('stagger');
     case 'candy': return studioPage('candy');
+    case 'hover': return studioPage('hover');
     default: throw new Error(`No page is registered under "${id}"`);
   }
 }

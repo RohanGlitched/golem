@@ -15,7 +15,7 @@ export function notFoundPage(): PageSpec {
 <li><a href="/kit/">The kit</a>: CLI, MCP tools, hooks, agents and the EARS dialect.</li>
 <li><a href="/evidence/">Evidence</a>: the stability map and the falsifier benchmark.</li>
 <li><a href="/how-kiro/">How Kiro built it</a>: specs, audits and what went wrong.</li>
-<li><a href="/stagger/">Stagger studio</a> and <a href="/candy/">Candy studio</a>.</li>
+<li><a href="/stagger/">Stagger studio</a>, <a href="/candy/">Candy studio</a> and <a href="/hover/">Hover studio</a>.</li>
 </ul>`,
   };
 }

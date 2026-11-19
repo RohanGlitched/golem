@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GOLEM studio: hover</title>
+    <meta name="description" content="A Skydio X2 quadrotor holds a hover point while wind gusts hit it, its battery sags and its position estimate lags. Its requirements are tested in MuJoCo, in your browser." />
+    <style>
+      html, body { margin: 0; padding: 0; background: #2A211C; color: #EDE6DC; }
+      body { font: 16px/1.55 'B612', system-ui, sans-serif; }
+      .hover-intro { max-width: 72ch; padding: 20px 24px 8px; }
+      .hover-intro h1 { font: 700 25px/1.25 'Gloock', Georgia, serif; margin: 0 0 8px; }
+      .hover-intro p { margin: 0 0 8px; color: #B8AC9E; }
+      .hover-intro b { color: #EDE6DC; font-weight: 700; }
+      .hover-notes { max-width: 72ch; padding: 8px 24px 32px; color: #B8AC9E; }
+      .hover-notes h2 { font: 700 20px/1.3 'B612', system-ui, sans-serif; color: #EDE6DC; margin: 16px 0 4px; }
+      .hover-notes p { margin: 0 0 8px; }
+      noscript { display: block; padding: 24px; }
+    </style>
+  </head>
+  <body>
+    <header class="hover-intro">
+      <h1>Hover</h1>
+      <p>A Skydio X2 quadrotor holds a point 1.0 m above the floor. A cascaded PD controller turns position error into tilt, and tilt into the thrust of four rotors.</p>
+      <p><b>Drag a number</b> in a sentence, or shove the drone: a gust pushes it sideways and the controller leans into the wind to come back.</p>
+    </header>
+    <div id="app"></div>
+    <section class="hover-notes" aria-label="About this studio">
+      <h2>Which lines are expected to break</h2>
+      <p>Line 1.3 asks the drone to stay within 1.0 m in a gust of up to 20 N. The controller leans at most 35 degrees, so from about 10 N the gust carries the drone out of that ball. Line 3.2 asks it to cope with a position estimate that lags by up to 0.30 s. Its position loop oscillates from a lag of about 0.27 s. A broken line is a valid result and the line is never edited to avoid it.</p>
+      <h2>What "from any direction" means here</h2>
+      <p>A gust comes from a compass direction, counterclockwise from +x seen from above. The force points away from that side. A "held" result means no counterexample was found within the search budget, not a proof.</p>
+    </section>
+    <noscript>The studio needs JavaScript and WebGL. The requirements are in apps/hover/.kiro/specs/hover-hold/requirements.md.</noscript>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

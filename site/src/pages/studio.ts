@@ -1,4 +1,4 @@
-// The two app studios, /stagger/ and /candy/. When an app is not in the checkout the page says so instead of failing the build.
+// The three app studios, /stagger/, /candy/ and /hover/. When an app is not in the checkout the page says so instead of failing the build.
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { REPO_ROOT } from '../build/data';
@@ -17,13 +17,19 @@ const INFO = {
     description: 'A Franka Panda with a suction cup sorts Halloween candy while a simulated hand reaches in. Test the speed-and-separation requirements.',
     intro: 'A Franka Panda sorts candy into three bowls while a hand reaches in from the doorstep side. Summon ghosts to test the safety lines.',
   },
+  hover: {
+    title: 'Hover studio',
+    robot: 'Skydio X2',
+    description: 'A Skydio X2 quadrotor holds a hover point while wind gusts hit it. Summon 64 ghosts to find the gust that blows it away.',
+    intro: 'A Skydio X2 holds a point 1.0 m above the floor. Drag a number in a sentence, shove the drone as a gust, or summon ghosts to test the sentence.',
+  },
 } as const;
 
-export function appPresent(id: 'stagger' | 'candy', root: string = REPO_ROOT): boolean {
+export function appPresent(id: 'stagger' | 'candy' | 'hover', root: string = REPO_ROOT): boolean {
   return existsSync(path.join(root, 'apps', id, 'app.ts')) && existsSync(path.join(root, 'apps', id, 'robot', 'SOURCE.json'));
 }
 
-export function studioPage(id: 'stagger' | 'candy'): PageSpec {
+export function studioPage(id: 'stagger' | 'candy' | 'hover'): PageSpec {
   const i = INFO[id];
   const present = appPresent(id);
   const body = present
