@@ -47,6 +47,8 @@ export interface KitDeps {
   clock(): number;
   /** Absolute path of `skeleton/kiro-pack`. */
   packRoot: string;
+  /** Absolute path of `skeleton/starter`, the cart-pole robot `golem init` writes into an empty project. Without it init writes none. */
+  starterRoot?: string;
   loadApp(modulePath: string): Promise<RobotApp>;
   compileFile: typeof compileRequirementsFile;
   compileLine: typeof compileRequirement;
@@ -93,6 +95,7 @@ export function createDefaultDeps(): KitDeps {
     now: () => new Date(),
     clock: () => performance.now(),
     packRoot: slash(fileURLToPath(new URL('../../kiro-pack', import.meta.url))),
+    starterRoot: slash(fileURLToPath(new URL('../../starter', import.meta.url))),
     async loadApp(modulePath) {
       const { prepareApp } = await import('./adapters/app-loader.js');
       const { moduleUrl, app } = await prepareApp(modulePath);

@@ -1,0 +1,18 @@
+<mujoco model="cartpole">
+  <!-- GOLEM starter robot: a cart on a rail with a hinged pole. Positive hinge angle leans the pole toward +x. -->
+  <option timestep="0.002" gravity="0 0 -9.81" integrator="implicitfast"/>
+  <worldbody>
+    <geom name="rail" type="capsule" fromto="-2 0 0.5 2 0 0.5" size="0.01" rgba="0.5 0.5 0.55 1" contype="0" conaffinity="0"/>
+    <body name="cart" pos="0 0 0.5">
+      <joint name="slider" type="slide" axis="1 0 0" limited="true" range="-2 2" damping="0.1"/>
+      <geom name="cart_box" type="box" size="0.1 0.06 0.05" mass="1.0" rgba="0.3 0.45 0.8 1" contype="0" conaffinity="0"/>
+      <body name="pole">
+        <joint name="hinge" type="hinge" axis="0 1 0" damping="0.001"/>
+        <geom name="pole_rod" type="capsule" fromto="0 0 0 0 0 0.6" size="0.02" mass="0.1" rgba="0.9 0.55 0.2 1" contype="0" conaffinity="0"/>
+      </body>
+    </body>
+  </worldbody>
+  <actuator>
+    <motor name="drive" joint="slider" gear="1" ctrllimited="true" ctrlrange="-15 15"/>
+  </actuator>
+</mujoco>
