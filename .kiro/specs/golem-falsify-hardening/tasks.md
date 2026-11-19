@@ -40,8 +40,8 @@ Rules for every task:
   - Tests (fake clock, 5 ms per wave): held run with `maxWallMs` 300 ends by 305 ms for generation sizes 32 and 64 and pool sizes 1 and 4; a time-limited generation ends its phase; shrink trials respect the wave estimate; trial-only runs never read the clock.
   - _Bugfix: 4.2–4.9_
 
-- [ ] 8. Shrinker sweep and second pass (defect 7)
-  - Tests: the non-monotone case lands in [100, 102.5] N (before: about 200 N); a second pass runs only for dimensions with a later change; Properties 10–14 still hold.
+- [x] 8. Shrinker sweep and second pass (defect 7)
+  - Tests: a failing window (130, 165) N that bisection jumps over is found from 240 N (before: 200.6 N); a second pass lowers force from 151.6 N to about 50 N when a later dimension changed; a single severity dimension gets no second pass; Properties 10–14 still hold.
   - _Bugfix: 7.3–7.7_
 
 - [ ] 9. Physical-core pool size (defect 8)

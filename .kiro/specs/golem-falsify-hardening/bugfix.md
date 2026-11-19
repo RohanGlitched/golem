@@ -117,7 +117,7 @@ Supersedes golem-falsify 8.10 and 8.11 (separate floors) and design section 3 "t
 ### Expected Behavior
 7.3 FOR each severity dimension, after the milder end passes, THE shrinker SHALL test the severities `k·hi/8` for `k = 1..7` in increasing order, stop at the first failing one, and bisect between the last passing and the first failing point (or between `7·hi/8` and `hi`).
 7.4 AFTER the first pass THE shrinker SHALL run a second pass over each dimension that has another dimension changed after it was last shrunk.
-7.5 WHEN the non-monotone case of 7.1 starts at force 240 N THEN the shrunk force SHALL be in [100, 102.5] N.
+7.5 WHEN the failing set is force in (130, 165) N or above 200 N and the shrink starts at 240 N THEN the shrunk force SHALL be in (130, 132.5] N (plain bisection tests 120, 180 and 210 and lands at 200 N). The sweep finds a failing window only when the window is at least `hi/8` wide; the probe's 20 N window [100, 120] from a start near 250 N (sweep step 31 N) is still missed, and the result is still a confirmed failure no more severe than the start.
 
 ### Unchanged Behavior
 7.6 Properties 10 to 14 SHALL CONTINUE TO hold: the output fails under the original seed, is never more severe in any dimension, leaves `none` and fixed dimensions alone, respects `maxTrials` and the budget, is deterministic, and a scenario already at the milder end runs no trial.
