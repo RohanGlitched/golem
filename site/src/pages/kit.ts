@@ -3,7 +3,7 @@ import type { LexiconRef, SiteData } from '../build/data';
 import { codeBlock, earsHtml, esc, table } from '../build/html';
 import type { PageSpec } from '../build/layout';
 import { REPO_URL } from '../build/layout';
-import { clip, excerpt, parseTranscript } from '../build/transcript';
+import { clip, excerpt, mcpCallBlock, parseTranscript } from '../build/transcript';
 import type { TranscriptSection } from '../build/transcript';
 import { frontMatter, readRepoJson, readRepoText } from '../build/repo';
 import type { HookDef, HookFile } from '../build/repo';
@@ -23,7 +23,7 @@ const WHAT: Record<string, string> = {
   test: 'Runs every requirement: pinned seeds, random trials, guided search, shrinking. Exit 2 when any line is broken.',
   falsify: 'Hunts one requirement. Pinned seeds re-run first.',
   replay: 'Re-runs a pinned counterexample exactly and writes its trace to .golem/replays/.',
-  gate: 'Exit 0 only when every requirement holds and no pinned seed fails. With --kiro it blocks an agent Stop with JSON on stdout and exits 0.',
+  gate: 'Exit 0 only when every line meets its row of the Expectation table (Expected_Hold holds, Expected_Break breaks; no row means Expected_Hold) and no pinned seed fails. With --kiro it blocks an agent Stop with JSON on stdout and exits 0.',
   init: 'Copies the Kiro pack (hooks, steering, agents, skills, MCP entry) into the project .kiro/.',
   mcp: 'Starts the stdio MCP server for Kiro agents.',
 };
@@ -69,7 +69,6 @@ function hooksTable(): string {
   const files: [string, string][] = [
     ['Installed by golem init', 'skeleton/kiro-pack/hooks/golem.json'],
     ['This repository', '.kiro/hooks/build.json'],
-    ['Candy app', 'apps/candy/.kiro/hooks/gate.json'],
   ];
   const rows: string[][] = [];
   for (const [scope, f] of files) {
@@ -118,6 +117,9 @@ export function kitPage(d: SiteData): PageSpec {
   const power = frontMatter(readRepoText('skeleton/power/POWER.md'));
   const steer = readRepoText('skeleton/kiro-pack/steering/golem-ears.md').length;
   section(ts, 'golem gate');
+  const reflexGate = ts.find((x) => x.command === 'GOLEM_REFLEX=kiro golem gate');
+  if (!reflexGate) throw new Error('docs/cli-transcript.md has no section for "GOLEM_REFLEX=kiro golem gate"');
+  const mcpCall = mcpCallBlock(byName('mcp')?.code ?? '', 'falsify', 400);
   const body = `
 <h1>The kit</h1>
 <p class="lede">One package, <code>golem-spec</code>, with one command, <code>golem</code>. It reads the EARS lines of a Kiro spec, runs them as physics tests, and hands counterexamples to the agent.</p>
@@ -128,15 +130,17 @@ ${cliBlock('check', byName('check'), 6)}
 ${cliBlock('test', byName('test'), 8)}
 ${cliBlock('falsify', byName('falsify'), 6)}
 ${cliBlock('replay', byName('replay'), 8)}
-${cliBlock('gate', byName('gate'), 14)}
+${cliBlock('gate', byName('gate'), 24)}
+<p>The same gate with Kiro's balance reflex (<code>GOLEM_REFLEX=kiro</code>), where requirement 1.3 now holds:</p>
+${codeBlock(excerpt(reflexGate.code.split('\n').map((l) => clip(l, 200)).join('\n'), 30).text, 'output of golem gate with the Kiro reflex')}
 ${cliBlock('init', undefined, 0)}
-${cliBlock('mcp', undefined, 0)}
+${cliBlock('mcp', byName('mcp'), 10)}
 
 <h2 id="mcp">MCP tools</h2>
 <p><code>golem mcp</code> speaks MCP over stdio. A Kiro agent gets these tools, so it can falsify, read a counterexample and explain the margin without a shell.</p>
 ${mcpTools()}
 <p>A call, as recorded in the transcript:</p>
-${codeBlock(clip((byName('mcp')?.code ?? '').split('\n').filter((l) => /tools\/call falsify|^1\.3 broken/.test(l)).slice(0, 2).join('\n'), 400), 'an MCP falsify call')}
+${codeBlock(mcpCall, 'an MCP falsify call')}
 <p class="small muted">Tool calls return a one-line summary and then a JSON block. See the <a href="${REPO_URL}/blob/main/docs/cli-transcript.md">full transcript</a>.</p>
 
 <h2 id="hooks">Hooks</h2>

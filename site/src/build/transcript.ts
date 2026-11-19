@@ -33,3 +33,11 @@ export function excerpt(code: string, max: number): { text: string; omitted: num
 export function clip(line: string, width: number): string {
   return line.length <= width ? line : `${line.slice(0, width)} ... [${line.length - width} more characters not shown]`;
 }
+
+/** The first call of `tool` in an MCP section: its `> tools/call` line, the one-line summary and the JSON line, each clipped to `width`. Empty when absent. */
+export function mcpCallBlock(code: string, tool: string, width: number): string {
+  const lines = code.split('\n');
+  const i = lines.findIndex((l) => l.startsWith(`> tools/call ${tool} `));
+  if (i < 0) return '';
+  return lines.slice(i, i + 3).map((l) => clip(l, width)).join('\n');
+}
