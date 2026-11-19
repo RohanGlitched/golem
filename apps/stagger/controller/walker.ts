@@ -13,6 +13,13 @@ import { DEFAULT_POSE, buildObservation } from './observation.js';
 import { ACT_DIM, OBS_DIM, type Policy } from './policy.js';
 import { actionToTarget } from './pd.js';
 import { REFLEX_LIMITS, Reflex } from './reflex.js';
+import { KiroReflex } from './kiro-reflex.js';
+
+export type ReflexKind = 'none' | 'kiro';
+let reflexKind: ReflexKind = 'none';
+/** Selects the balance reflex for Walkers created from now on: 'none' (Unitree's policy alone, the default) or 'kiro'. */
+export function setReflex(kind: ReflexKind): void { reflexKind = kind; }
+export const currentReflex = (): ReflexKind => reflexKind;
 
 export class Walker implements Controller {
   readonly target = new Float64Array(ACT_DIM);
@@ -22,7 +29,7 @@ export class Walker implements Controller {
   private readonly delayedObs = new Float64Array(OBS_DIM);
   private readonly latency = new LatencyBuffer(OBS_DIM);
   private calls = 0;
-  readonly reflex = new Reflex();
+  readonly reflex: Reflex | KiroReflex = reflexKind === 'kiro' ? new KiroReflex() : new Reflex();
   private readonly cmd = new Float64Array(3);
   private readonly rstate = { qpos: [] as ArrayLike<number>, qvel: [] as ArrayLike<number>, t: 0 };
 

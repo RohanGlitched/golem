@@ -153,4 +153,6 @@ export const stagger: RobotApp = {
   },
 };
 
+export { setReflex, currentReflex } from './controller/walker.js';
+export type { ReflexKind } from './controller/walker.js';
 export default stagger;
