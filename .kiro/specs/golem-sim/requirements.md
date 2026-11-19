@@ -1,5 +1,7 @@
 # Requirements Document
 
+> Amended by the bugfix spec `golem-sim-hardening` (`.kiro/specs/golem-sim-hardening/bugfix.md`). Where they disagree, that spec wins: divergence detection (7.11), the diverged robustness value (9.13, Property 11), warm-up divergence, pose frame timing (Requirement 8), the model guard (3.10) and horizon rounding.
+
 ## Introduction
 
 golem-sim is the simulation layer of the GOLEM skeleton, located in `skeleton/src/sim`. It loads MuJoCo WASM (`@mujoco/mujoco` 4.x) identically in Node and in browsers, writes a RobotApp's files into the MuJoCo virtual file system, compiles the model once per worker, and runs single trials. A trial is a pure function of (app, requirement, scenario, seed). It creates an MjData, seeds a PRNG, warms up under the controller, fires the trigger, applies perturbations at every simulation step, records a Trace at control rate (and optionally body poses at 30 fps), stops at the horizon or early, evaluates the monitor, releases every handle, and returns a TrialResult.
