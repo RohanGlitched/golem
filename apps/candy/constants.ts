@@ -49,8 +49,8 @@ export const HAND = { palmRadius: 0.05, forearmRadius: 0.04, forearmLength: 0.30
 export const HAND_HEIGHT_RANGE = { min: 0.05, max: 0.25 } as const;
 /** Fallback for the hand-entry range when the compiler passes no horizon (s). */
 export const HAND_ENTRY_FALLBACK = 3.0;
-/** Tip position at the Home_Pose, measured by test/scene.test.ts. */
-export const TIP_HOME_ESTIMATE = { x: 0.307, y: 0, z: 0.498 } as const;
+/** Tip position at the Home_Pose, measured by test/scene.test.ts: flange 0.590 m, cup face 0.490 m, tip 8 mm below it. */
+export const TIP_HOME_ESTIMATE = { x: 0.307, y: 0, z: 0.482 } as const;
 
 // ---------------------------------------------------------------- candy
 
@@ -74,6 +74,7 @@ export const CONAFFINITY = { world: 14, arm: 1, candy: 9, cup: 5 } as const;
 
 // ---------------------------------------------------------------- suction
 
+/** 	ipInset: the tip site lies this far beyond the cup face, toward the candy (see scripts/lib/patch.mjs). */
 export const SUCTION = { k: 400, c: 2, holdingForce: 3, engageRadius: 0.01, tipInset: 0.008 } as const;
 export const CUP = { radius: 0.02, length: 0.100 } as const;
 

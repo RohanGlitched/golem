@@ -91,7 +91,7 @@ export const ASSET_HASHES = {
 };
 
 /** Bump when the generated files change for the same commit. Recorded in robot/SOURCE.json. */
-export const SCRIPT_VERSION = 1;
+export const SCRIPT_VERSION = 2;
 
 const PANDA_XML = 'panda_nohand.xml';
 const LICENSE_PATH = 'LICENSE';

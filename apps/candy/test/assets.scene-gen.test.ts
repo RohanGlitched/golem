@@ -103,13 +103,13 @@ describe('panda patch', () => {
     const out = patchPanda(stubPandaXml(), naming);
     expect(out).toContain('<geom type="mesh" group="3" contype="2" conaffinity="1"/>');
     expect(out).toContain('<body name="cup"');
-    expect(out).toContain('<site name="tip" pos="0 0 0.092"');
+    expect(out).toContain('<site name="tip" pos="0 0 0.108"');
     expect(out).not.toContain('attachment');
     expect(out).not.toContain('<keyframe>');
     expect(out).toContain('<mesh name="link0_c" file="link0.hull.obj"/>');
     expect(out).toContain('<mesh file="link0_0.obj"/>');
   });
-  it('puts the tip 8 mm inside the 0.100 m cup face and gives the cup collision cylinder its bits', () => {
+  it('puts the tip 8 mm beyond the 0.100 m cup face, toward the candy, and gives the cup collision cylinder its bits', () => {
     const out = patchPanda(stubPandaXml(), naming);
     expect(out).toMatch(/name="cup_collision" type="cylinder" size="0.02 0.05" pos="0 0 0.05" mass="0.1" group="3" contype="8" conaffinity="5"/);
   });

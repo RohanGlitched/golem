@@ -17,10 +17,14 @@ function edit(xml, re, replacement, anchor) {
   return xml.replace(re, /** @type {any} */ (replacement));
 }
 
-/** Cup body: the collision cylinder, a visual bellows, and the `tip` site 8 mm inside the cup face. */
+/**
+ * Cup body: the collision cylinder, a visual bellows, and the `tip` site 8 mm beyond the cup face, on the side of
+ * the candy. A candy that rests against the face is then 0 to 4 mm from the site (h - 8 mm for a candy of
+ * half-height h), inside the 0.01 m engage radius.
+ */
 export function cupXml() {
   const half = CUP.length / 2;
-  const tip = CUP.length - SUCTION.tipInset;
+  const tip = CUP.length + SUCTION.tipInset;
   return `<body name="cup" pos="0 0 0.107" quat="0.9238795 0 0 -0.3826834">
                       <geom name="cup_collision" type="cylinder" size="${n(CUP.radius)} ${n(half)}" pos="0 0 ${n(half)}" mass="0.1" group="3" contype="${CONTYPE.cup}" conaffinity="${CONAFFINITY.cup}" rgba="0.1 0.1 0.12 1"/>
                       <geom name="cup_stem" type="cylinder" size="0.014 0.040" pos="0 0 0.040" group="2" contype="0" conaffinity="0" rgba="0.16 0.16 0.19 1"/>

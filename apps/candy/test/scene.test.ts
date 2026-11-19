@@ -38,7 +38,7 @@ describe('scene.xml', () => {
     console.log(`scene load + compile: ${loadMs.toFixed(0)} ms`);
     expect(loadMs).toBeLessThan(4000);
   });
-  it('puts the tip near (0.307, 0, 0.498) at the Home_Pose, pointing down', () => {
+  it('puts the tip near (0.307, 0, 0.482) at the Home_Pose, 8 mm below the cup face, pointing down', () => {
     const data = new mj.MjData(model);
     try {
       for (let i = 0; i < 7; i++) data.qpos[i] = Q_HOME[i];
@@ -48,7 +48,7 @@ describe('scene.xml', () => {
       console.log(`tip at Home_Pose: ${p.map((x) => x.toFixed(4)).join(', ')}`);
       expect(p[0]).toBeCloseTo(0.307, 1);
       expect(Math.abs(p[1]!)).toBeLessThan(0.01);
-      expect(p[2]).toBeCloseTo(0.498, 1);
+      expect(p[2]).toBeCloseTo(0.482, 2);
       const zAxis = data.site_xmat[9 * s + 8];
       expect(zAxis).toBeLessThan(-0.99);   // site z points down
     } finally { data.delete(); }

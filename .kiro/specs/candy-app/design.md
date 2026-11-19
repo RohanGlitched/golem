@@ -10,7 +10,7 @@ The design is a thin app layer on the fixed contracts in `.kiro/steering/interfa
 
 | Decision | Rationale |
 |---|---|
-| Suction is a capped spring-damper on `xfrc_applied`, with the candy body centre as reference point and the `tip` site placed 8 mm inside the cup face | The candy cannot physically reach within 10 mm of its centre if the site sits on the cup face (a candy is up to 24 mm tall). With the site 8 mm inside the face, a candy touching the cup is 0 to 4 mm from the site, so the 0.01 m engage radius is reachable and leaves 6 mm of slack. |
+| Suction is a capped spring-damper on `xfrc_applied`, with the candy body centre as reference point and the `tip` site placed 8 mm beyond the cup face, toward the candy (corrected during implementation: the first draft put it 8 mm inside the cup, which leaves a resting candy 10 to 20 mm from the site and out of the engage radius) | The candy cannot physically reach within 10 mm of its centre if the site sits on the cup face (a candy is up to 24 mm tall). With the site 8 mm inside the face, a candy touching the cup is 0 to 4 mm from the site, so the 0.01 m engage radius is reachable and leaves 6 mm of slack. |
 | `k = 400 N/m`, `c = 2 N·s/m` | The hold margin is 2x or more (Requirement 3.9 calculation below). `c·Δt/m` stays at 0.8 for the lightest candy, inside the explicit-force stability region at `Δt = 0.002 s`. |
 | Per-trial mutable parameters (vacuum ratio, tracker lag, candy colours, suction state) live in `data.userdata`, not in module state | `MjData` is created per trial and deleted with it. State cannot leak between trials, and trials stay bit-identical. |
 | Setup perturbations (candy mass, candy positions, vacuum, lag) first act at the Trigger Time, and the controller starts picking at `t = warmup + 0.3 s` | The Episode_Runner makes no `apply` call during warm-up (golem-sim 5.7, 6.4). The 0.3 s gate lets candies settle after they are placed. |
@@ -138,7 +138,7 @@ All numbers the requirements leave to the design. Frame: x forward from the Pand
 | Workspace | x ∈ [0.15, 0.90], y ∈ [-0.55, 0.55], z ∈ [0.00, 0.50] | contains the Tray, the Bowls, and the Tip's working volume. Every Table edge point lies outside it. |
 | Workspace centre `C` | (0.55, 0.00) | origin of hand-entry rays |
 | Home_Pose `q_home` | [0, -0.7854, 0, -2.3562, 0, 1.5708, 0.7854] rad | the Franka "ready" pose. All within joint limits. |
-| Tip at Home_Pose | ≈ (0.307, 0, 0.498) | flange at ≈ 0.590 m, cup 0.100 m, site 0.008 m inside. A test measures it. |
+| Tip at Home_Pose | ≈ (0.307, 0, 0.482) | flange at ≈ 0.590 m, cup face at 0.490 m, site 0.008 m beyond the face. A test measures it: (0.3069, 0, 0.4823). |
 | Hand start pose `S` | palm (0.55, 1.10, 0.30), yaw π/2 rad | the forearm points away from the Table along +y. |
 | Distance of `S` from the Tip at Home_Pose | ≈ 1.145 m to the palm centre, ≈ 1.095 m to the palm surface | meets the 1.0 m minimum (Requirement 2.5). A test measures it against the surface. |
 | Hand | palm sphere radius 0.05 m at the body origin; forearm capsule radius 0.04 m from the origin to 0.30 m along the body +x axis | yaw about z; the forearm extends from the palm toward the person |
@@ -194,7 +194,7 @@ Inactive candies (index ≥ `userdata[2]`) are parked on the floor at (-0.60 - 0
 | Suction stiffness `k` | 400 N/m |
 | Suction damping `c` | 2 N·s/m |
 | Holding_Force | 3 N; effective cap `F_cap = 3 N × Vacuum_Ratio` |
-| Tip site offset | 0.008 m inside the cup face, `z` axis pointing out of the cup (down at Home_Pose) |
+| Tip site offset | 0.008 m beyond the cup face (on the candy side), `z` axis pointing out of the cup (down at Home_Pose) |
 | Cup | cylinder radius 0.02 m, 0.100 m long, mounted on the flange with the same frame as the Menagerie hand mount (pos 0 0 0.107, quat 0.9238795 0 0 -0.3826834) |
 | Nominal Tip speed `v_nom` | 0.50 m/s |
 | Acceleration-up limit `a_up` | 2.5 m/s² (increases of commanded speed only; decreases are immediate) |

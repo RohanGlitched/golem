@@ -189,7 +189,7 @@
                       <geom name="cup_stem" type="cylinder" size="0.014 0.040" pos="0 0 0.040" group="2" contype="0" conaffinity="0" rgba="0.16 0.16 0.19 1"/>
                       <geom name="cup_bellows" type="cylinder" size="0.022 0.012" pos="0 0 0.088" group="2" contype="0" conaffinity="0" rgba="0.07 0.07 0.09 1"/>
                       <geom name="cup_lip" type="cylinder" size="0.026 0.003" pos="0 0 0.0985" group="2" contype="0" conaffinity="0" rgba="0.05 0.05 0.06 1"/>
-                      <site name="tip" pos="0 0 0.092" size="0.004" rgba="1 0.45 0.05 0.9" group="1"/>
+                      <site name="tip" pos="0 0 0.108" size="0.004" rgba="1 0.45 0.05 0.9" group="1"/>
                     </body>
                   </body>
                 </body>
