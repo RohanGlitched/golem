@@ -4,7 +4,7 @@ import { FixedStepAccumulator } from '../core/accumulator.js';
 import type { RobotApp, SimContext } from '../types.js';
 
 export const DIVERGED_TEXT = 'The simulation diverged and was reset';
-export const HOLD_TEXT = 'The live robot holds still while the ghosts run. Reset it or shove it to make it walk again.';
+export const HOLD_TEXT = 'The live robot holds still while the ghosts run. Reset it or shove it to set it moving again.';
 export const SLEEP_TEXT = 'Paused to save power: shove the robot to wake it';
 
 export interface HeroViews {
