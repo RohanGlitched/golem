@@ -148,24 +148,24 @@ Conventions for every task:
     - **Property 20: Tilt range and lateral drift geometry**
     - **Validates: Requirements 11.2, 11.3, 11.4, 11.5, 11.6, 11.7, 11.8, 11.10, 11.11, 11.12**
 
-- [ ] 5. Lexicon
-  - [ ] 5.1 Implement `predicates.ts`
+- [x] 5. Lexicon
+  - [x] 5.1 Implement `predicates.ts`
     - The four `PredicateTemplate`s with signals, units and margins from the design; `stay upright` carries the required comment (margin formula, 60 deg forced -0.01 m, reason); the speed predicate forgives `episode_time < 2`
     - Write `test/lexicon.test.ts` (examples): phrases, declared signals and units, the comment text above `stay upright`, margin spot values
     - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.5, 12.6, 12.7, 12.8_
 
-  - [ ]* 5.2 Write property tests for predicate margins
+  - [x]* 5.2 Write property tests for predicate margins
     - **Property 21: stay upright margin**
     - **Property 22: Height, speed and drift margins are exact and monotone**
     - **Property 23: Settling time is forgiven**
     - **Validates: Requirements 12.1, 12.2, 12.4, 12.5, 12.6, 12.7, 12.10, 12.11, 12.12, 12.13**
 
-  - [ ] 5.3 Implement the pure perturbation helpers in `perturbations.ts`
+  - [x] 5.3 Implement the pure perturbation helpers in `perturbations.ts`
     - `pushStartOffset`, `pushForce`, `slopeGravity`, `validateRatio` (diagnostic like `ratio 130% is outside 0% to 100%`), all allocation-free and writing into caller arrays
     - Write `test/perturbations.test.ts` (examples): 0 deg pushes along the Heading, 180 deg pushes opposite, force is zero outside the window, zero slope leaves gravity unchanged, ratio error text
     - _Requirements: 13.3, 13.4, 13.5, 13.6, 13.7, 13.8, 13.9, 14.2, 14.13_
 
-  - [ ]* 5.4 Write property tests for the perturbation helpers
+  - [x]* 5.4 Write property tests for the perturbation helpers
     - **Property 24: Push force magnitude and window**
     - **Property 25: Push direction follows the latched Heading**
     - **Property 26: Push start offset hits the requested gait phase**
@@ -174,13 +174,13 @@ Conventions for every task:
     - **Property 29: Friction ratio scales sliding friction and out-of-range ratios are rejected**
     - **Validates: Requirements 13.3, 13.4, 13.5, 13.6, 13.7, 13.8, 13.9, 13.10, 13.11, 13.12, 14.2, 14.5, 14.7, 14.10, 14.11, 14.13**
 
-  - [ ] 5.5 Implement the perturbation templates and `lexicon.ts`
+  - [x] 5.5 Implement the perturbation templates and `lexicon.ts`
     - Six `PerturbationTemplate`s with the dimensions of the design (push, slope, payload, friction, latency, command); each `apply` saves the original model values into `rt.saved` before the first change, applies from the start of the Active Phase, and allocates nothing
     - `lexicon.ts` exports `lexicon` with `robotNames: ['golem', 'G1', 'robot']`, the four predicates and six perturbations; the `{ratio}` slot handler calls `validateRatio`
     - Write `test/lexicon-structure.test.ts` (examples): phrases, dimension kinds, severities and wrap flags, `robotNames`, source scan finds no allocation inside each `apply` and no `Math.random()`
     - _Requirements: 12.9, 13.1, 13.2, 13.13, 14.1, 14.4, 14.7, 14.12, 15.1, 15.8, 15.9, 15.10, 21.1_
 
-- [ ] 6. Checkpoint - Ensure all tests pass
+- [x] 6. Checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 7. App definition
