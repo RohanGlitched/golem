@@ -23,8 +23,7 @@ function auditCard(d: SiteData, a: (typeof AUDITS)[number], specs: KiroSpec[]): 
   const text = d.reviews.find((r) => r.file === a.file)?.text ?? readRepoText(a.file);
   const verdict = /\*\*Verdict:?\s*([^*]+?)\*\*\s*(.*)/.exec(text)?.[1]?.trim() ?? /Verdict:\s*(.+)/.exec(text)?.[1]?.trim() ?? 'see the file';
   const fix = specs.find((s) => s.name === a.fix);
-  const defects = (text.match(/^\d+\.\s+\*\*/gm) ?? []).length;
-  return `<article class="card"><h3>${esc(a.name)}</h3><p>An independent review of ${esc(a.what)}. Verdict: <b>${esc(verdict.replace(/\.$/, ''))}</b>.${defects ? ` It ranks ${defects} defects.` : ''}</p><p>Bugfix spec: <code>${esc(a.fix)}</code>${fix ? `, ${fix.tasksDone} of ${fix.tasksDone + fix.tasksOpen} tasks done` : ''}.</p><p class="small">${link(a.file)}</p></article>`;
+  return `<article class="card"><h3>${esc(a.name)}</h3><p>An independent review of ${esc(a.what)}. Verdict: <b>${esc(verdict.replace(/\.$/, ''))}</b>.</p><p>Bugfix spec: <code>${esc(a.fix)}</code>${fix ? `, ${fix.tasksDone} of ${fix.tasksDone + fix.tasksOpen} tasks done` : ''}.</p><p class="small">${link(a.file)}</p></article>`;
 }
 
 export function howKiroPage(d: SiteData): PageSpec {

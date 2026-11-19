@@ -68,7 +68,7 @@ export function homePage(d: SiteData): PageSpec {
   const budget = d.graded.meta.budget;
   const body = `
 <h1 class="hero-line flush">Shove the robot. Then summon the ghosts.</h1>
-<div class="flush hero-studio" id="studio" data-studio="stagger" data-when="idle" data-status="Waking the golem…"><noscript><p class="hero-fallback">The live studio needs JavaScript. The measured results below do not.</p></noscript></div>
+<div class="flush hero-studio" id="studio" data-studio="stagger" data-when="idle" data-status="Waking the golem…"><button class="poster" type="button" data-wake aria-label="Wake the G1 studio. This loads the physics simulation."><span class="poster-cta">Wake the golem</span></button><noscript><p class="hero-fallback">The live studio needs JavaScript. The measured results below do not.</p></noscript></div>
 
 <h2 id="problem">Agents ship demos, not evidence</h2>
 <p class="lede">An AI coding agent can write a walking controller in an afternoon. What it hands back is a video of the robot walking.</p>
@@ -125,5 +125,6 @@ golem gate                    # exit 0 only if every line holds`, 'the kit comma
     title: 'GOLEM: EARS requirements that run as physics tests',
     description: 'GOLEM turns the EARS acceptance criteria of a Kiro spec into MuJoCo property tests, searches for counterexamples and gates the AI agent until every requirement holds.',
     body, modules: ['/src/studio/load.ts'],
+    head: '<link rel="preload" as="image" href="/poster-dark-narrow.jpg" media="(max-width:1023px)" fetchpriority="high">\n<link rel="preload" as="image" href="/poster-dark-wide.jpg" media="(min-width:1024px)" fetchpriority="high">',
   };
 }

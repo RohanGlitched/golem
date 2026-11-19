@@ -4,6 +4,7 @@
 import { createServer } from 'node:http';
 import { existsSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
+import { gzipSync } from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -17,7 +18,7 @@ const csp = mode === 'none' ? undefined : mode === 'eval' ? stackCsp?.replace("s
 
 const TYPES = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml',
-  '.png': 'image/png', '.wasm': 'application/wasm', '.ttf': 'font/ttf', '.txt': 'text/plain; charset=utf-8', '.xml': 'application/xml',
+  '.png': 'image/png', '.wasm': 'application/wasm', '.ttf': 'font/ttf', '.woff2': 'font/woff2', '.jpg': 'image/jpeg', '.txt': 'text/plain; charset=utf-8', '.xml': 'application/xml',
   '.stl': 'model/stl', '.bin': 'application/octet-stream', '.md': 'text/markdown; charset=utf-8',
 };
 
@@ -38,8 +39,12 @@ export function startServer(port = 4173) {
     res.end(existsSync(path.join(dist, '404.html')) ? readFileSync(path.join(dist, '404.html')) : 'Not found');
     return;
   }
-  res.writeHead(200, { ...headers, 'Content-Type': TYPES[path.extname(file).toLowerCase()] ?? 'application/octet-stream' });
-  res.end(readFileSync(file));
+  const type = TYPES[path.extname(file).toLowerCase()] ?? 'application/octet-stream';
+  // CloudFront compresses text responses (Compress: true in infra/stack.yaml); do the same so size timings match.
+  const gz = /^(text\/|application\/(json|xml)|image\/svg)/.test(type) && /\bgzip\b/.test(req.headers['accept-encoding'] ?? '');
+  const body = gz ? gzipSync(readFileSync(file)) : readFileSync(file);
+  res.writeHead(200, { ...headers, 'Content-Type': type, ...(gz ? { 'Content-Encoding': 'gzip', Vary: 'Accept-Encoding' } : {}) });
+  res.end(body);
   });
   return new Promise((resolve) => server.listen(port, '127.0.0.1', () => resolve(server)));
 }

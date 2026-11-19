@@ -20,6 +20,6 @@ Compact plan, done sequentially in one session. One commit per page: `golem-site
 - [x] 6. How Kiro built it `/how-kiro`
   - Counts and lists from `kiro.json`, surfaces, audits and bugfix specs, what went wrong.
   - _Requirements: 19, 20, 25_
-- [ ] 7. Quality
+- [x] 7. Quality
   - Vitest and fast-check for the pure logic, Playwright smoke at 1440 and 390 in both themes with screenshots, Lighthouse, OG image, link check.
   - _Requirements: 21, 22, 24, 26, 27_

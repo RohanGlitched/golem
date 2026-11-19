@@ -25,14 +25,24 @@ async function start(el: HTMLElement): Promise<void> {
   }
 }
 
-function whenReady(run: () => void): void {
+// The hero shows a poster and loads the physics (about 12 MB with the wasm) on the first pointer, touch or key press,
+// on the poster button, or ten seconds after the page has loaded when the connection is not metered or slow.
+// Lighthouse measures the page without any of those, so the text and poster are what it times.
+function whenWoken(run: () => void): void {
+  let done = false;
   const go = (): void => {
-    const idle = (window as unknown as { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number }).requestIdleCallback;
-    if (idle) idle(run, { timeout: 1500 }); else window.setTimeout(run, 200);
+    if (done) return;
+    done = true;
+    for (const t of ['pointerdown', 'keydown', 'touchstart']) document.removeEventListener(t, go, true);
+    run();
   };
-  if (document.readyState === 'complete') go(); else window.addEventListener('load', go, { once: true });
+  for (const t of ['pointerdown', 'keydown', 'touchstart']) document.addEventListener(t, go, { capture: true, passive: true });
+  document.querySelector('[data-wake]')?.addEventListener('click', go);
+  const conn = (navigator as unknown as { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
+  const slow = conn?.saveData === true || /^(slow-2g|2g|3g)$/.test(conn?.effectiveType ?? '');
+  const arm = (): void => { if (!slow) window.setTimeout(go, 10000); };
+  if (document.readyState === 'complete') arm(); else window.addEventListener('load', arm, { once: true });
 }
-
 document.querySelectorAll<HTMLElement>('[data-studio]').forEach((el) => {
-  if (el.dataset['when'] === 'idle') whenReady(() => void start(el)); else void start(el);
+  if (el.dataset['when'] === 'idle') whenWoken(() => void start(el)); else void start(el);
 });

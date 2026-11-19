@@ -1,6 +1,26 @@
 [
   {
     "date": "2026-11-19",
+    "hash": "5e41314",
+    "subject": "golem-site: 6 how-kiro page (specs, config, surfaces, audits, what went wrong); kiro.json regenerated"
+  },
+  {
+    "date": "2026-11-19",
+    "hash": "109af58",
+    "subject": "golem-site: 5 evidence page (polar G1 map, honest falsifier benchmark, needle, candy, agent-gate pending, methods, limits)"
+  },
+  {
+    "date": "2026-11-19",
+    "hash": "3cb7f3d",
+    "subject": "golem-site: 4 kit page (CLI output, MCP tools, hooks, agents, skills, Power, workflow, Crew app, EARS dialect)"
+  },
+  {
+    "date": "2026-11-19",
+    "hash": "a08a51f",
+    "subject": "golem-site: 1-3 scaffold, fonts, theme, footer, home page, studios at /stagger/ and /candy/"
+  },
+  {
+    "date": "2026-11-19",
     "hash": "b0c27eb",
     "subject": "README: first full draft (try it, what it does, the kit, two apps, evidence, how Kiro built it)"
   },
@@ -38,25 +58,5 @@
     "date": "2026-11-19",
     "hash": "9237372",
     "subject": "golem-evidence: 1 preregistration for falsifier bench, G1 map and agent-gate A/B"
-  },
-  {
-    "date": "2026-11-19",
-    "hash": "b200606",
-    "subject": "golem-evidence: 0 compact design and tasks (replace the long drafts)"
-  },
-  {
-    "date": "2026-11-19",
-    "hash": "f1a25b3",
-    "subject": "evidence: prototype G1 stability map and its first valid run (4,860 trials), plus the invalid pre-fix run kept for the record"
-  },
-  {
-    "date": "2026-11-19",
-    "hash": "8f55bda",
-    "subject": "Merge branch 'build/candy'"
-  },
-  {
-    "date": "2026-11-19",
-    "hash": "8b6a993",
-    "subject": "candy-app: 18 final checkpoint: 61 files, 327 tests green; proposal P8 (hand from behind crosses the base); studio page tasks noted as deferred"
   }
 ]

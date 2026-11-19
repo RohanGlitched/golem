@@ -27,7 +27,7 @@ export function studioPage(id: 'stagger' | 'candy'): PageSpec {
   const i = INFO[id];
   const present = appPresent(id);
   const body = present
-    ? `<div class="flush studio-page"><div class="hero-studio" id="studio" data-studio="${id}" data-status="Waking the golem…"><noscript><p class="hero-fallback">The studio needs JavaScript. The measured results do not: <a href="/evidence/">open the evidence</a>.</p></noscript></div><p class="studio-note">${i.intro} <a href="/">Back to the home page</a>. <a href="/evidence/">Measured results</a>.</p></div>`
+    ? `<h1 class="sr-only">${i.title}: ${i.robot}</h1><div class="flush studio-page"><div class="hero-studio" id="studio" data-studio="${id}" data-status="Waking the golem…"><noscript><p class="hero-fallback">The studio needs JavaScript. The measured results do not: <a href="/evidence/">open the evidence</a>.</p></noscript></div><p class="studio-note">${i.intro} <a href="/">Back to the home page</a>. <a href="/evidence/">Measured results</a>.</p></div>`
     : `<h1>${i.title}</h1><p class="lede">The ${i.robot} studio is not built in this checkout.</p><p>Its app files are missing from <code>apps/${id}/</code>, so this build ships no studio and no robot files for it. The studio appears here when the app is added and the site is rebuilt. Nothing else on the site depends on it.</p><p><a href="/">Back to the home page</a>.</p>`;
   return { id, path: `/${id}/`, title: i.title, description: i.description, body, modules: present ? ['/src/studio/load.ts'] : [], mainClass: present ? 'studio-main' : undefined };
 }

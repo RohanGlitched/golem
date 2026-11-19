@@ -14,6 +14,7 @@ export interface PageSpec {
   modules?: string[];      // extra module scripts, as source paths
   mainClass?: string;
   noindex?: boolean;
+  head?: string;           // extra tags for <head>, such as a preload
 }
 
 export const NAV: { href: string; label: string; id: string }[] = [
@@ -81,8 +82,9 @@ export function renderDocument(p: PageSpec, changelog: ChangelogEntry[]): string
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="/og.png">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="preload" href="/fonts/B612-Regular.ttf" as="font" type="font/ttf" crossorigin>
-<link rel="preload" href="/fonts/Gloock-Regular.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="preload" href="/fonts/B612-Regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/Gloock-Regular.woff2" as="font" type="font/woff2" crossorigin>
+${p.head ?? ''}
 <script src="/theme-init.js"></script>
 <link rel="stylesheet" href="/src/client/site.css">
 </head>
