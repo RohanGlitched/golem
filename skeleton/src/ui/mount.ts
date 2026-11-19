@@ -17,6 +17,7 @@ import { findTemplate, resolveArrow } from './ghosts/push-arrow.js';
 import { HeroSim, DIVERGED_TEXT, SLEEP_TEXT } from './hero/hero-sim.js';
 import { loadHero } from './hero/load-hero.js';
 import type { HeroModel } from './hero/load-hero.js';
+import { DragController } from './hero/drag.js';
 import { ShoveController } from './hero/shove.js';
 import { ActionsBar, PanelErrorBoundary } from './layout/boundary.js';
 import { studioCss } from './layout/styles.js';
@@ -196,6 +197,7 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
   let heroModel: HeroModel | undefined;
   let parts: StageParts | undefined;
   let shove: ShoveController | undefined;
+  let drag: DragController | undefined;
   let swarm: GhostSwarm | undefined;
   let aura: AuraView | undefined;
   let film: FilmstripRenderer | undefined;
@@ -212,6 +214,7 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
     scheduler: { acquire: (r) => scheduler.acquire(r), release: (r) => scheduler.release(r) },
     reduced,
     onChange: () => {
+      if (drag) { drag.disabled = replay.active; if (replay.active) drag.cancel(); }
       store.update({ replay: replay.active ? {
         active: true, playing: replay.playing, t: replay.t, duration: replay.duration, worstTau: replay.worstTau, fps: replay.fps, lineId: replayLine,
       } : undefined, hero: replay.active ? 'replaying' : hero ? (hero.sleeping ? 'sleeping' : 'running') : store.getState().hero });
@@ -269,7 +272,7 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
         THREE, scheduler, tokens: TOKENS[store.getState().theme],
         ...(hooks.createRenderer ? { createRenderer: hooks.createRenderer as (c: HTMLCanvasElement) => Renderer } : {}),
         reduced,
-        isOnBody: (e) => shove?.isOnBody(e) ?? false,
+        isOnBody: (e) => (shove?.isOnBody(e) ?? false) || (drag?.isOnBody(e) ?? false),
         onVisibility: (v) => { if (replay.active) return; if (v) hero?.resume(); else hero?.pause(); lastTs = 0; },
       });
     } catch (e) {
@@ -323,11 +326,26 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
     if (!name && firstVisual?.visual) { try { name = firstVisual.visual({})?.at; } catch { name = undefined; } }
     if (name && bodyId(name) >= 0) { primaryBody = bodyId(name); primaryName = name; }
     else primaryBody = Math.min(1, Number(h.modelLike.nbody) - 1);
+    // A dragged mocap body is carried by the pointer, not shoved: its meshes belong to the drag only.
+    const dragOpt = options.dragBody;
+    const dragBodyId = dragOpt ? bodyId(dragOpt.body) : -1;
+    const mocapIds = h.model.body_mocapid as ArrayLike<number> | undefined;
+    const mocapRow = dragBodyId >= 0 ? Number(mocapIds?.[dragBodyId] ?? -1) : -1;
+    const dragging = dragOpt !== undefined && mocapRow >= 0;
+    if (dragOpt && !dragging) store.addMessage('warning', `The drag body "${dragOpt.body}" is not a mocap body of ${app.name}, so it cannot be dragged.`);
+    const isDragMesh = (m: THREE.Object3D): boolean => dragging && m.userData['bodyId'] === dragBodyId;
     shove = new ShoveController({
-      THREE, canvas: stage.canvas, camera: stage.camera, scene: stage.scene, hero, bodyGroups: parts.bodyGroups, meshes: parts.meshes,
+      THREE, canvas: stage.canvas, camera: stage.camera, scene: stage.scene, hero, bodyGroups: parts.bodyGroups,
+      meshes: parts.meshes.filter((m) => !isDragMesh(m)),
       scheduler, announce: (m) => announcer.announceFinal(m), stiffness: options.shoveStiffness ?? 600, primaryBody,
       simDt: app.simDt, orbitKey: (e) => stage!.orbit.key(e), inkColor: tokens.ink,
     });
+    if (dragging && dragOpt) {
+      drag = new DragController({
+        THREE, canvas: stage.canvas, camera: stage.camera, hero, meshes: parts.meshes.filter(isDragMesh), mocapRow, scheduler,
+        announce: (m) => announcer.announceFinal(m), noun: dragOpt.noun ?? 'body', ...(dragOpt.constrain ? { constrain: dragOpt.constrain } : {}),
+      });
+    }
     swarm = new GhostSwarm(parts, THREE, {
       nbody: Number(h.modelLike.nbody), tokens, theme: store.getState().theme, riseDepth: Math.max(0.3, bound.height),
       reducedMotion: reduced, warn: (m) => store.addMessage('warning', m), scheduler,
@@ -540,6 +558,7 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
       for (const c of cleanups.splice(0)) c();
       theme.dispose();
       shove?.dispose();
+      drag?.dispose();
       swarm?.dispose();
       aura?.dispose();
       film?.dispose();

@@ -136,6 +136,19 @@ export class HeroSim {
 
   sync(): void { this.d.sync?.(this.views.xpos, this.views.xquat); }
 
+  /** Position of mocap row `row` (a row of `mocap_pos`). The array is read fresh: WASM may have replaced its buffer. */
+  mocapPos(row: number, out: Float64Array): void {
+    const m = this.d.data.mocap_pos as Float64Array;
+    out[0] = m[3 * row] as number; out[1] = m[3 * row + 1] as number; out[2] = m[3 * row + 2] as number;
+  }
+
+  /** Moves mocap row `row` and wakes the hero. The next physics step carries the body (and the controller's view of it) along. */
+  setMocapPos(row: number, x: number, y: number, z: number): void {
+    const m = this.d.data.mocap_pos as Float64Array;
+    m[3 * row] = x; m[3 * row + 1] = y; m[3 * row + 2] = z;
+    this.wake();
+  }
+
   /** Restarts from the initial state with the studio PRNG stream. */
   reset(): void {
     const { mj, model, data, ctx, app, rng } = this.d;

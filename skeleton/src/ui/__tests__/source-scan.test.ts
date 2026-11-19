@@ -26,7 +26,7 @@ const LAYER: Record<string, number> = {
   'aura/aura-model.ts': 2, 'aura/aura-summary.ts': 2, 'run/status.ts': 2, 'run/req-key.ts': 2, 'run/pins.ts': 2, 'run/share-hash.ts': 2, 'run/seed-json.ts': 2,
   'ghosts/ghost-shader.ts': 3, 'ghosts/push-arrow.ts': 3, 'aura/aura-view.ts': 3, 'stage/orbit.ts': 3,
   'stage/stage.ts': 4, 'hero/hero-sim.ts': 4, 'hero/load-hero.ts': 4, 'ghosts/ghost-swarm.ts': 4,
-  'hero/shove.ts': 5, 'run/recording-pool.ts': 5,
+  'hero/shove.ts': 5, 'hero/drag.ts': 5, 'run/recording-pool.ts': 5,
   'run/run-controller.ts': 6, 'run/falsify-adapter.ts': 6, 'run/inline-pool.ts': 6, 'run/studio-pool.ts': 6,
   'mount.ts': 8, 'index.ts': 8, 'worker.ts': 8,
 };
@@ -86,6 +86,6 @@ describe('source scans of skeleton/src/ui', () => {
     expect(Object.keys(ui).sort()).toEqual(['mountStudio']);
     const idx = read(path.join(UI, 'index.ts'));
     expect(idx).toMatch(/export \{ mountStudio \} from '\.\/mount\.js';/);
-    expect(idx).toMatch(/export type \{ StudioOptions, StudioHandle, PerturbationVisual \} from '\.\/types\.js';/);
+    expect(idx).toMatch(/export type \{ StudioOptions, StudioHandle, PerturbationVisual, DragBodyOption \} from '\.\/types\.js';/);
   });
 });
