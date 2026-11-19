@@ -76,7 +76,10 @@ export interface SiteData {
   /** The recorded campaign the home hero replays (site/public/hero/pack.json): which of its directions fell. */
   hero: { force: number; dirs: number; fellDeg: number[]; kiroFellDeg: number[] | undefined };
   falsifier: FalsifierSummary; graded: FalsifierSummary; graded256: FalsifierSummary | undefined;
-  agentGate: AgentGateData; candy: CandyData; kiro: KiroData; changelog: ChangelogEntry[]; lexicons: LexiconRef[];
+  agentGate: AgentGateData;
+  /** Experiment 3b (pre-registered 2026-11-20): the same pilot with requirement 1.3 raised to an unreachable 200 N. */
+  agentGateHard: AgentGateData['runs'];
+  candy: CandyData; kiro: KiroData; changelog: ChangelogEntry[]; lexicons: LexiconRef[];
   reportMd: string; transcriptMd: string; preregMd: string;
   reviews: { name: string; file: string; text: string }[];
   falsifyHardeningMd: string;
@@ -177,6 +180,10 @@ export function loadSiteData(root: string = REPO_ROOT): SiteData {
   if (g256) validateFalsifier(g256, 'evidence/results/graded-margin-256/falsifier.summary.json');
 
   const agentGate = json<AgentGateData>('site/data/agent-gate.json');
+  const hardFile = 'evidence/results/agent-gate-hard/agent-gate.jsonl';
+  const agentGateHard = existsSync(path.join(root, hardFile))
+    ? parseJsonl<NonNullable<AgentGateData['runs']>[number] & { kind: string }>(readText(root, hardFile), hardFile).filter((r) => r.kind === 'run')
+    : undefined;
   need(Array.isArray(agentGate.dryRuns), 'site/data/agent-gate.json', 'dryRuns is missing');
   const candy = json<CandyData>('site/data/candy.json');
   need(isNum(candy.broken) && isNum(candy.trials), 'site/data/candy.json', 'broken and trials must be numbers');
@@ -193,7 +200,7 @@ export function loadSiteData(root: string = REPO_ROOT): SiteData {
     : [];
 
   return {
-    mapCells, map, mapKiro, hero, falsifier, graded, graded256: g256, agentGate, candy, kiro, changelog, lexicons,
+    mapCells, map, mapKiro, hero, falsifier, graded, graded256: g256, agentGate, agentGateHard, candy, kiro, changelog, lexicons,
     reportMd: readText(root, 'evidence/REPORT.md'),
     transcriptMd: readText(root, 'docs/cli-transcript.md'),
     preregMd: readText(root, 'evidence/PREREG.md'),

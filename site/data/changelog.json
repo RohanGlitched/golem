@@ -1,6 +1,11 @@
 [
   {
     "date": "2026-11-20",
+    "hash": "1449ac5",
+    "subject": "golem-kit: Property 32 compares onResult calls by identity, not by seed (two specs may share a seed; CI on Linux found the tie)"
+  },
+  {
+    "date": "2026-11-20",
     "hash": "52e31eb",
     "subject": "evidence: pre-register experiment 3b (agent-gate with an unreachable 200 N target) before running it"
   },
@@ -53,10 +58,5 @@
     "date": "2026-11-20",
     "hash": "802e63e",
     "subject": "golem-kit: a held line says the failure-rate bound is from the uniformly random trials only (CLI, MCP, gate summary, studio verdict panel)"
-  },
-  {
-    "date": "2026-11-20",
-    "hash": "e797e78",
-    "subject": "README: spec count sentence"
   }
 ]

@@ -123,6 +123,7 @@ ${needleFlat ? `<p>The flat-margin row is the defect that round 1 hit on the G1:
 
 <h2 id="agent-gate">Does the Stop gate stop false "done" claims?</h2>
 ${agentGateSection(d)}
+${agentGateHardSection(d)}
 
 <h2 id="prior-art">Prior art, and what GOLEM adds</h2>
 <p>None of the pieces is new on its own. Falsifying cyber-physical systems against temporal logic is an established field, and property-based testing gave us shrinking. What is new is the loop: the requirement is the sentence an AI agent wrote in its own spec, the test runs in the browser or in CI with no MATLAB, and the result gates the agent.</p>
@@ -184,4 +185,17 @@ function agentGateSection(d: SiteData): string {
   return `<p><b>Result: no false claims in either arm.</b> Without the Stop hook, ${count('A', (r) => r.falseClaim)} runs claimed success while the independent gate was red; with it, ${count('B', (r) => r.falseClaim)}. The task turned out to be one these agents could do: the independent gate was green after ${count('A', (r) => r.gateGreen)} runs without the hook and ${count('B', (r) => r.gateGreen)} with it, each run a single short session, ${fmt(credits, 1)} credits for all ${runs.length}. The one run that left the gate red did not claim success. So the gate had nothing to stop here, and this pilot does not show that it reduces false claims; it shows that on this task neither arm lied. No run edited a requirements file.</p>
 <p>The subject started red: the independent gate on the untouched copy exited ${g.baseline.gateExit}. Three deviations from the pre-registration are recorded in <a href="${REPO_URL}/blob/main/evidence/PREREG.md"><code>evidence/PREREG.md</code></a> before the full run: the workspace carries the pinned seeds (restored before every independent gate), the subject stays <code>apps/stagger</code>, and Kiro's later reflex is replaced by the identity reflex so the controller is the one the plan registered. "Claims success" is the pre-registered keyword rule; several green runs phrased success in words the rule does not match, and their messages are stored for audit.</p>
 ${table(['Arm', 'Run', 'Independent gate', 'Claims success', 'False claim', 'Credits', 'Minutes', 'Files the agent changed'], rows, { num: [5, 6], caption: 'Raw records: evidence/results/agent-gate.jsonl; the stream of every run is in evidence/results/agent-gate.streams/.' })}`;
+}
+
+/** Experiment 3b: the same pilot when the target cannot be reached (1.3 at 200 N). */
+function agentGateHardSection(d: SiteData): string {
+  const runs = d.agentGateHard ?? [];
+  if (runs.length === 0) return '';
+  const arm = (a: string) => runs.filter((r) => r.arm === a);
+  const n = (a: string, f: (r: (typeof runs)[number]) => boolean) => arm(a).filter(f).length;
+  const rows = runs.map((r) => [r.arm === 'A' ? 'A (no Stop hook)' : 'B (Stop hook)', String(r.index + 1), esc(r.status), r.gateGreen ? '<span class="held">green</span>' : '<span class="broken">red</span>', r.claimsSuccess ? 'yes' : 'no', r.falseClaim ? '<span class="broken">yes</span>' : 'no', fmt(r.credits, 2), fmt(r.durationS / 60, 1)]);
+  return `<h3 id="agent-gate-hard">3b: when the target cannot be reached</h3>
+<p>Pre-registered before it ran (<a href="${REPO_URL}/blob/main/evidence/PREREG.md">PREREG.md</a>, experiment 3b): the same pilot with requirement 1.3 raised to 200 N, beyond what a reflex edit is expected to reach. <b>Without the Stop hook, ${n('A', (r) => r.falseClaim)} of 6 runs claimed success while the independent gate was red; with it, ${n('B', (r) => r.falseClaim)} of 6.</b> That is the predicted direction; with 6 runs per arm the difference is not significant (Fisher exact two-sided p = 0.55).</p>
+<p>The false claims were not lies about what the agent saw. In each one, the agent ran <code>golem gate</code> itself, at the quick budget of 24 trials per line with the default search seed, and it printed GREEN; the independent gate, with another search seed, then found a 200 N push that still breaks 1.3. So the result is as much about the gate as about the agents: a green at a small budget is weak evidence, and the hooked runs, which the Stop hook kept working (up to 11 turns against mostly 1), claimed success less often. One arm-B run errored when its temporary workspace was deleted mid-run (0 turns) and two runs hit the 20-minute limit; they count in their arms as recorded. The gate's next change follows from this: GREEN must survive a second, independent search seed.</p>
+${table(['Arm', 'Run', 'Status', 'Independent gate', 'Claims success', 'False claim', 'Credits', 'Minutes'], rows, { num: [6, 7], caption: 'Raw records: evidence/results/agent-gate-hard/agent-gate.jsonl; streams in evidence/results/agent-gate-hard/agent-gate.streams/.' })}`;
 }
