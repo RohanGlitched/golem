@@ -46,6 +46,8 @@ import {
 } from './tablet/living.js';
 import { LiveSentence } from './signature/live-sentence.js';
 import { SignatureBar } from './signature/signature-bar.js';
+import { TrailsView } from './signature/trails-view.js';
+import { savePhotograph } from './signature/photograph.js';
 import { SwarmClock } from './core/swarm-clock.js';
 import { BulletTime } from './core/bullet-time.js';
 import { EmetDecal, bodyPoints, highestBody } from './signature/emet-decal.js';
@@ -62,6 +64,8 @@ export const NOT_ELEMENT = 'mountStudio needs an HTMLElement as its first argume
 const STYLE_ID = 'golem-studio-css';
 /** The drag preview of a push stays this long after the last change of a quantity. */
 export const PREVIEW_MS = 800;
+export const LONG_EXPOSURE_LABEL = 'Long exposure';
+export const PHOTO_LABEL = 'Save photograph';
 
 const errText = (e: unknown): string => (e instanceof Error ? e.message : String(e));
 
@@ -206,6 +210,8 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
     onPlay: () => { clock.play(); swarm?.setFrozen(false); scheduler.requestOnce(); },
     onFreeze: () => { clock.freeze(); swarm?.setFrozen(true); bullet.cancel(); scheduler.requestOnce(); },
   });
+  bar.addToggle(LONG_EXPOSURE_LABEL, false, (on) => { trails?.setVisible(on); scheduler.requestOnce(); });
+  bar.addButton(PHOTO_LABEL, () => { void photograph(); });
   main.append(stageHost, bar.el, reelHost);
   root.append(actionsHost, tabletHost, main, verdictHost, liveHost);
   el.appendChild(root);
@@ -326,6 +332,33 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
     }
   }
 
+  // ---------------------------------------------------------------- long exposure (golem-signature 5)
+  let trails: TrailsView | undefined;
+  async function photograph(): Promise<void> {
+    if (!stage) return;
+    const s = store.getState();
+    const line = s.lines.find((l) => l.id === s.selectedId);
+    const n = trails?.store.count ?? 0;
+    const st = stage;
+    // A long exposure photographs the trails: the ghosts of the last generation would cover them.
+    const hideGhosts = !!(trails?.visible && swarm);
+    if (hideGhosts && swarm) swarm.group.visible = false;
+    try {
+      await savePhotograph({
+        renderer: st.renderer, render: () => st.render(), canvas: st.canvas, tokens: TOKENS[s.theme],
+        id: line ? `Requirement ${line.id}` : app.name, text: line ? line.text : app.name,
+        ...(n > 0 ? { note: `Long exposure of ${n} trials, ${trails?.store.brokenCount() ?? 0} broken` } : {}),
+        fileName: `golem-${app.id}-${line ? line.id.replace(/[^A-Za-z0-9._-]/g, '_') : 'stage'}.png`,
+      });
+      announcer.announceFinal('Saved the photograph');
+    } catch (e) {
+      announcer.announceError(`The photograph could not be saved: ${errText(e)}`);
+    } finally {
+      if (hideGhosts && swarm) swarm.group.visible = true;
+    }
+    scheduler.requestOnce();
+  }
+
   // ---------------------------------------------------------------- emet (golem-signature 2)
   let emet: EmetDecal | undefined;
   function setupEmet(bodyId: (n: string) => number): void {
@@ -412,6 +445,8 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
       },
     });
     stage.scene.add(swarm.group);
+    trails = new TrailsView(THREE, tokens, store.getState().theme);
+    stage.scene.add(trails.lines);
     aura = new AuraView(THREE, tokens, scheduler);
     const auraCentre = (): void => {
       const v = hero!.views;
@@ -422,7 +457,7 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
     stage.scene.add(aura.group);
     film = new FilmstripRenderer({
       THREE, renderer: stage.renderer, scene: stage.scene, mainCamera: stage.camera, bodyGroups: parts.bodyGroups,
-      hide: [swarm.group, aura.group, shove.arrow], restoreLive: () => { if (replay.active && replay.poses && parts) applyReplayPose(parts.bodyGroups, replay.poses, replay.t, reduced(), scratch); else hero?.sync(); },
+      hide: [swarm.group, aura.group, shove.arrow, trails.lines], restoreLive: () => { if (replay.active && replay.poses && parts) applyReplayPose(parts.bodyGroups, replay.poses, replay.t, reduced(), scratch); else hero?.sync(); },
       raf, caf, focusBody: primaryBody,
     });
     stage.onTheme((t) => {
@@ -431,6 +466,7 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
       aura?.setTheme(t);
       shove?.setInk(t.ink);
       emet?.setTheme(t);
+      trails?.setTheme(t, store.getState().theme);
     });
     setupEmet(bodyId);
     store.update({ hero: 'running' });
@@ -467,7 +503,9 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
     },
     isFall: fallOf,
     ...(options.summaryPhrases ? { summaryPhrases: options.summaryPhrases } : {}),
-    onActivity: () => { hero?.wake(); clock.play(); swarm?.setFrozen(false); },
+    onActivity: () => { hero?.wake(); clock.play(); swarm?.setFrozen(false); trails?.clear(); },
+    onTrial: (r) => { if (r.poses && trails) trails.add(r.poses.frames, r.poses.nbody, Math.min(primaryBody, r.poses.nbody - 1), r.robustness < 0); },
+    onGeneration: () => { if (trails?.visible) { trails.rebuild(); scheduler.requestOnce(); } else trails?.rebuild(); },
     swarmNow: () => clock.now,
   });
   if (pool && canRegister(pool)) for (const l of lines) if (l.compiled) pool.register(l.compiled);
@@ -731,6 +769,7 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
       theme.dispose();
       shove?.dispose();
       emet?.dispose();
+      trails?.dispose();
       bar.dispose();
       swarm?.dispose();
       aura?.dispose();
@@ -776,8 +815,10 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
           ...syntheticTrialFields(spec, poses, { warmup: app.warmup, timestep: app.simDt }),
         };
         swarm.accept(res, { robustness, worstAt: res.worstAt, warmup: app.warmup }, clock.now);
+        trails?.add(f, nb, Math.min(primaryBody, nb - 1), falls);
       }
       swarm.commitGeneration(clock.now);
+      trails?.rebuild();
       hero.wake();
       scheduler.requestOnce();
     };
@@ -797,6 +838,7 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
         emet: emet?.word ?? 'none', crumble: emet?.crumble ?? 0, head, reasons: [...scheduler.active()],
         clock: { now: clock.now, rate: clock.rate, frozen: clock.frozen }, bullet: bullet.active(now()), bulletAngle: bullet.angle(now()),
         timeline: bar.timelineVisible, playStart: swarm?.playStart ?? 0, playDuration: swarm?.playDuration ?? 0,
+        trails: { count: trails?.store.count ?? 0, vertices: trails?.vertices ?? 0, visible: trails?.visible ?? false },
       };
     },
     /** Moves the camera to look at the emet decal from `distance` metres in front of it. */

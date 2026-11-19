@@ -120,6 +120,33 @@ test.describe('bullet time and the scrubber', () => {
   });
 });
 
+test.describe('long exposure', () => {
+  test('draws every trial as a light trail and saves a 2× photograph with the requirement in the corner', async ({ page }) => {
+    await openG1(page, '?sleep=600000');
+    await page.getByRole('button', { name: 'Select line 1.2' }).click();
+    await page.evaluate(() => (window as unknown as W).studio.summonSynthetic(64, 3));
+    await page.getByRole('button', { name: 'Long exposure' }).click();
+    await expect(page.getByRole('button', { name: 'Long exposure' })).toHaveAttribute('aria-pressed', 'true');
+    const tr = await page.evaluate(() => (window as unknown as W).studio.signature.state().trails);
+    expect(tr.count).toBe(64);
+    expect(tr.visible).toBe(true);
+    expect(tr.vertices).toBe(64 * 31 * 2);
+    // A second generation adds to the same exposure.
+    await page.evaluate(() => (window as unknown as W).studio.summonSynthetic(64, 3));
+    expect((await page.evaluate(() => (window as unknown as W).studio.signature.state().trails)).count).toBe(128);
+    await page.waitForTimeout(3500);
+    await page.screenshot({ path: path.join(SHOTS, 'signature-long-exposure.png') });
+    const css = await page.locator('canvas.golem-canvas').evaluate((c) => [c.clientWidth, c.clientHeight]);
+    const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Save photograph' }).click()]);
+    expect(download.suggestedFilename()).toBe('golem-stagger-1.2.png');
+    const file = path.join(SHOTS, 'signature-photograph.png');
+    await download.saveAs(file);
+    const png = fs.readFileSync(file);
+    expect(png.subarray(1, 4).toString('ascii')).toBe('PNG');
+    expect([png.readUInt32BE(16), png.readUInt32BE(20)]).toEqual([2 * (css[0] as number), 2 * (css[1] as number)]);
+  });
+});
+
 test.describe('the living sentence', () => {
   test('sets the selected response clause large in Gloock', async ({ page }) => {
     await openG1(page);
