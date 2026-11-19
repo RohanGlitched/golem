@@ -75,13 +75,14 @@ describe('error catalogue', () => {
       .toThrow(/push\.force = -5 N is outside \[0 N, 200 N\]/);
   });
 
-  it('Req 7.11: divergence during warm-up rejects with the time in seconds and the trial identity', async () => {
+  it('Req 7.11 (amended by golem-sim-hardening defect 8): divergence during warm-up returns a counterexample, not an error', async () => {
     const cache = new ModelCache();
     const before = (await import('./handles.js')).liveHandleCount();
-    const err: any = await runTrial(withNaNControl(testApp, 3), makeTestRequirement({ horizon: 0.2 }),
-      { app: 'test', reqId: 'R1', scenario: { 'push.force': 0, 'push.angle': 0 }, seed: 11 }, { cache }).catch((e) => e);
-    expect(err).toBeInstanceOf(SimError);
-    expect(err.message).toMatch(/Trial failed \(app test, requirement R1, seed 11\): Simulation diverged during warm-up at t = [0-9.]+ s/);
+    const r = await runTrial(withNaNControl(testApp, 3), makeTestRequirement({ horizon: 0.2 }),
+      { app: 'test', reqId: 'R1', scenario: { 'push.force': 0, 'push.angle': 0 }, seed: 11 }, { cache });
+    expect(r.robustness).toBeLessThan(0);
+    expect(r.diagnostics.diverged?.phase).toBe('warmup');
+    expect(r.worstAt).toBeLessThan(0.2);
     cache.dispose();
     expect((await import('./handles.js')).liveHandleCount()).toBe(before);
   });

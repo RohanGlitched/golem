@@ -336,4 +336,43 @@ describe('defect 5: pose frames follow the sim-step schedule and the reported fp
   });
 });
 
+describe('defect 8: divergence during warm-up is a counterexample, not an error', () => {
+  const blowUpInWarmup = (monitor?: CompiledRequirement['monitor']): [RobotApp, CompiledRequirement] => {
+    const app: RobotApp = {
+      ...boxDropApp,
+      makeController: (ctx) => ({
+        step: () => {},
+        substep: (_c, tSim) => {
+          if (Math.round(tSim / 0.002) === 50) (ctx.data.xfrc_applied as Float64Array)[6 + 2] = 1e30;
+        },
+      }),
+    };
+    const req = boxReq(1, []);
+    return [app, monitor ? { ...req, monitor } : req];
+  };
+
+  it('returns a broken result with one diverged event in the warm-up phase and an empty trace', async () => {
+    const [app, req] = blowUpInWarmup();
+    const { result, trace } = await run(app, req);
+    expect(trace.t.length).toBe(0);
+    expect(trace.events).toHaveLength(1);
+    const ev = trace.events[0] as any;
+    expect(ev.name).toBe('diverged');
+    expect(ev.phase).toBe('warmup');
+    expect(ev.t).toBeCloseTo(51 * 0.002, 12);
+    expect(result.robustness).toBeLessThan(0);
+    expect(result.worstAt).toBe(ev.t);
+    expect(result.unit).toBe('m');
+    expect(result.diagnostics.diverged?.phase).toBe('warmup');
+    expect(result.diagnostics.simSteps).toBe(51);
+  });
+
+  it('uses an empty unit when the monitor cannot handle an empty trace', async () => {
+    const [app, req] = blowUpInWarmup(() => { throw new Error('empty trace'); });
+    const r = await runTrial(app, req, { app: app.id, reqId: req.id, scenario: { f: 0, a: 0 }, seed: 1 }, { cache });
+    expect(r.robustness).toBeLessThan(0);
+    expect(r.unit).toBe('');
+  });
+});
+
 void makeStoolApp; void shoveCall;

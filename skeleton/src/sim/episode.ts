@@ -129,32 +129,7 @@ export async function runTrial(
       return true;
     };
 
-    // ---- warm-up: no perturbation, no sample; xfrc is cleared before every step
-    const hasSubstep = typeof controller.substep === 'function';
-    for (let c = 0; c < v.warmupControlSteps; c++) {
-      controller.step(ctx, simIndex * simDt);
-      refreshIfDetached();
-      for (let j = 0; j < n; j++) {
-        xfrc.fill(0);
-        if (hasSubstep) { controller.substep!(ctx, simIndex * simDt); refreshIfDetached(); }
-        mj.mj_step(model, data);
-        if (afterStep('warmup')) {
-          throw new SimError(`Simulation diverged during warm-up at t = ${simIndex * simDt} s`);
-        }
-      }
-    }
-
-    // ---- prologue: trigger, then sample 0 (allocates the signal arrays once, D6)
-    const events: Array<{ name: string; t: number }> = [{ name: 'trigger', t: warmup }];
-    xfrc.fill(0);
-    // D7: one-off hooks at the trigger, in array order, before sample 0 and the first apply.
-    for (let c = 0; c < nCalls; c++) {
-      const call = calls[c] as (typeof calls)[number];
-      if (typeof call.template.begin === 'function') call.template.begin(ctx, call.values);
-    }
-    refreshIfDetached();
-    const pose = spec.record === 'poses' ? new PoseRecorder(model.nbody as number, N * controlDt, simDt) : undefined;
-    const trigIndex = simIndex;
+    const events: Array<{ name: string; t: number }> = [];
     const traceT = new Float64Array(N + 1);
     const out: Record<string, number> = {};
     const earlyStop = opts.earlyStop;
@@ -162,56 +137,85 @@ export async function runTrial(
     let sigArrs: Float64Array[] = [];
     const signals: Record<string, Float64Array> = {};
     const traceView: Trace = { t: traceT, signals, events };
-
     let recorded = 0;
+    let pose: PoseRecorder | undefined;
 
-    for (let k = 0; k <= N; k++) {
-      app.signals(ctx, out);
+    // ---- warm-up: no perturbation, no sample; xfrc is cleared before every step.
+    // D8: a divergence here ends the trial as a counterexample (no trigger, empty trace), not an error.
+    const hasSubstep = typeof controller.substep === 'function';
+    let warmDiverged = false;
+    warm: for (let c = 0; c < v.warmupControlSteps; c++) {
+      controller.step(ctx, simIndex * simDt);
       refreshIfDetached();
-      if (k === 0) {
-        sigNames = Object.keys(out);
-        sigArrs = sigNames.map((name) => {
-          const a = new Float64Array(N + 1);
-          signals[name] = a;
-          return a;
-        });
-      }
-      traceT[k] = warmup + k * controlDt;
-      for (let i = 0; i < sigNames.length; i++) {
-        (sigArrs[i] as Float64Array)[k] = out[sigNames[i] as string] as number;
-      }
-      recorded = k + 1;
-      if (pose !== undefined && k === 0) pose.recordStep(0, xpos, xquat);
-
-      if (earlyStop !== undefined) {
-        const r: unknown = earlyStop(traceView, recorded);
-        if (r !== undefined) {
-          if (typeof r !== 'number' || !Number.isFinite(r)) {
-            throw new SimError(`Early-stop hook returned ${String(r)}; a finite number or undefined is required`);
-          }
-          break;
-        }
-      }
-      if (k === N) break;
-
-      controller.step(ctx, traceT[k] as number);
-      refreshIfDetached();
-      let diverged = false;
       for (let j = 0; j < n; j++) {
         xfrc.fill(0);
-        const tSim = simIndex * simDt;
-        if (hasSubstep) { controller.substep!(ctx, tSim); refreshIfDetached(); }
-        for (let c = 0; c < nCalls; c++) {
-          const call = calls[c] as (typeof calls)[number];
-          call.template.apply(ctx, tSim, warmup, call.values);
-        }
-        refreshIfDetached();
+        if (hasSubstep) { controller.substep!(ctx, simIndex * simDt); refreshIfDetached(); }
         mj.mj_step(model, data);
-        if (afterStep('trial')) { diverged = true; break; }
-        if (pose !== undefined) pose.recordStep(simIndex - trigIndex, xpos, xquat); // D5: sim-step schedule
+        if (afterStep('warmup')) { warmDiverged = true; break warm; }
       }
-      if (diverged) break;
     }
+
+    if (!warmDiverged) {
+      // ---- prologue: trigger, then sample 0 (allocates the signal arrays once, D6)
+      events.push({ name: 'trigger', t: warmup });
+      xfrc.fill(0);
+      // D7: one-off hooks at the trigger, in array order, before sample 0 and the first apply.
+      for (let c = 0; c < nCalls; c++) {
+        const call = calls[c] as (typeof calls)[number];
+        if (typeof call.template.begin === 'function') call.template.begin(ctx, call.values);
+      }
+      refreshIfDetached();
+      if (spec.record === 'poses') pose = new PoseRecorder(model.nbody as number, N * controlDt, simDt);
+      const trigIndex = simIndex;
+
+      for (let k = 0; k <= N; k++) {
+        app.signals(ctx, out);
+        refreshIfDetached();
+        if (k === 0) {
+          sigNames = Object.keys(out);
+          sigArrs = sigNames.map((name) => {
+            const a = new Float64Array(N + 1);
+            signals[name] = a;
+            return a;
+          });
+        }
+        traceT[k] = warmup + k * controlDt;
+        for (let i = 0; i < sigNames.length; i++) {
+          (sigArrs[i] as Float64Array)[k] = out[sigNames[i] as string] as number;
+        }
+        recorded = k + 1;
+        if (pose !== undefined && k === 0) pose.recordStep(0, xpos, xquat);
+
+        if (earlyStop !== undefined) {
+          const r: unknown = earlyStop(traceView, recorded);
+          if (r !== undefined) {
+            if (typeof r !== 'number' || !Number.isFinite(r)) {
+              throw new SimError(`Early-stop hook returned ${String(r)}; a finite number or undefined is required`);
+            }
+            break;
+          }
+        }
+        if (k === N) break;
+
+        controller.step(ctx, traceT[k] as number);
+        refreshIfDetached();
+        let diverged = false;
+        for (let j = 0; j < n; j++) {
+          xfrc.fill(0);
+          const tSim = simIndex * simDt;
+          if (hasSubstep) { controller.substep!(ctx, tSim); refreshIfDetached(); }
+          for (let c = 0; c < nCalls; c++) {
+            const call = calls[c] as (typeof calls)[number];
+            call.template.apply(ctx, tSim, warmup, call.values);
+          }
+          refreshIfDetached();
+          mj.mj_step(model, data);
+          if (afterStep('trial')) { diverged = true; break; }
+          if (pose !== undefined) pose.recordStep(simIndex - trigIndex, xpos, xquat); // D5: sim-step schedule
+        }
+        if (diverged) break;
+      }
+    } // !warmDiverged
 
     // ---- end of trial: the warning counters are read once (D2: any BAD* count means divergence)
     const warnings = readWarnings(mj, data);
@@ -231,7 +235,15 @@ export async function runTrial(
       for (let i = 0; i < sigNames.length; i++) sub[sigNames[i] as string] = (sigArrs[i] as Float64Array).subarray(0, recorded);
       trace = { t: traceT.subarray(0, recorded), signals: sub, events };
     }
-    const m = req.monitor(trace);
+    let m: { robustness: number; worstAt: number; unit: string };
+    if (warmDiverged) {
+      // The empty trace gives no verdict; ask the monitor only for its unit.
+      let unit = '';
+      try { unit = req.monitor(trace).unit; } catch { unit = ''; }
+      m = { robustness: -Infinity, worstAt: simIndex * simDt, unit: typeof unit === 'string' ? unit : '' };
+    } else {
+      m = req.monitor(trace);
+    }
     const integ = model.opt.integrator as number;
     const diagnostics: TrialDiagnostics = {
       horizon: N * controlDt,
