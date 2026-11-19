@@ -84,6 +84,17 @@ describe('Property 18: suggestion is the first closest template of the right cla
     const want = expectedSuggestion(clause, phrases, cls === 'predicate');
     for (const diag of m.diagnostics) {
       if (diag.kind !== 'UNKNOWN_PHRASE') continue;
+      // golem-ears-hardening defect 9: when the clause follows the closest template up to a slot
+      // that rejects what is written, the message names that template and slot, and the suggestion
+      // is the clause rewritten with an accepted form.
+      if (/ is not accepted by \{|\} is missing in "/.test(diag.message)) {
+        expect(want).toBeDefined();
+        expect(diag.message).toContain(`in "${want}"`);
+        expect(diag.message).toContain('It accepts ');
+        expect(diag.suggestion).toBeDefined();
+        expect(diag.suggestion).not.toBe(text);
+        continue;
+      }
       expect(diag.suggestion).toBe(want);
       if (want === undefined) expect(diag.message).toContain('No close phrase exists');
       else expect(diag.message).toContain(`Did you mean "${want}"?`);

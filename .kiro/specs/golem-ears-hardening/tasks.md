@@ -25,7 +25,7 @@ Conventions: sources in `skeleton/src/ears/`, tests in `skeleton/src/ears/__test
   - Update `interfaces.md` and the sim's mirrored types; fix the `toMatchObject` in `compile.test.ts`
   - Add the G1 lexicon fixture
   - _Bugfix: 1.1–1.8, 10.1–10.4_
-- [ ] 8. Slot-aware suggestions and fixed phase (defect 9)
+- [x] 8. Slot-aware suggestions and fixed phase (defect 9)
   - _Bugfix: 9.1–9.5_
 - [ ] 9. WHERE features and distinct serialisation (defect 6)
   - _Bugfix: 6.1–6.6_
