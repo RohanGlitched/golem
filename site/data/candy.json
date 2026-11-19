@@ -1,0 +1,24 @@
+{
+  "source": {
+    "where": "branch build/candy2",
+    "commit": "060ea8b2acd80afb6574a87fd02192170d9fa4ed"
+  },
+  "line": "1.1",
+  "heading": "Hand paths: a hand enters from the doorstep half only (closed, with a measurement)",
+  "trials": 228,
+  "broken": 57,
+  "closestLinkAtBreak": {
+    "cup": 9,
+    "link7": 48
+  },
+  "worstMinDistanceM": -0.06569318235777094,
+  "worstTipDistanceM": 0.09892901953633253,
+  "handSpeedMps": 0.8,
+  "paragraphs": [
+    "The first path model ran the hand in a straight line from the Table edge on the ray at `hand.angle` to the nearest bowl. For `from behind` and for any angle in the half-plane of the base, the line crossed the Panda base column (a probe at 180°, 0.8 m/s, 0.15 m height read -19 mm on link1 while SSM_v1 saw the tip 429 mm away). That counterexample was a hand standing where the robot is, so it said nothing about SSM_v1.",
+    "Decision (the user's): trick-or-treaters stand on the doorstep side of the Table, so a hand enters only through the edge that faces away from the base (x = 1.00 m), across an arc of 120° (-60° to +60°), reaches toward the bowl nearest its entry point at 0.05 m to 0.25 m above the Table, and cannot cross the base column. `from any direction` means that arc in this app. It is documented in `lexicon.ts` and the Glossary of the requirements file. The requirement lines are unchanged. `hand.angle` is now the position across the arc (see `doorstepAzimuth` in `geometry.ts`), so a reported `hand.angle` is not a compass bearing: azimuth = -60° + 120° x (1 - |hand.angle / 180° - 1|). Properties in `test/p28-hand-path.test.ts` check the arc, the edge, the path and the base column.",
+    "Measurement of SSM_v1 against the new paths (`evidence/candy-p8-doorstep.ts`, raw rows in `evidence/results/candy-p8-doorstep.jsonl`; real runner, line 1.1, hand speed 0.8 m/s, 228 trials: 108 on a grid over the arc ends and middle, 3 heights and 3 entry times, 120 random):",
+    "- Line 1.1 breaks in 57 of 228 trials (25%). The worst case is -0.066 m (the hand overlaps link7), with the tip 0.099 m from the hand. - The closest link at the minimum is link7 in 48 breaks and the cup in 9. link4, link5 and link6 are never the closest link in a break. - The predicted mechanism did not occur. While the tip was still at least 0.40 m from the hand, so SSM_v1 had not slowed the arm, the smallest link-hand distance in any trial was 0.259 m. SSM_v1 does slow and then stop the arm. The breaks happen at the end of that slowdown. In 40 of the 57 the tip separation is 0.140 m to 0.151 m (the arm has stopped at the 0.15 m stop distance) and the closest link is link7, the wrist flange, in every one; the hand height is 0.15 m to 0.25 m in all of them. The tip works at 0.01 m to 0.10 m above the Table and link7 sits about 0.1 m above the tip, so a hand at 0.15 m to 0.25 m is up to 0.1 m closer to link7 than to the tip, and link7 ends 0.019 m to 0.099 m from the hand while SSM_v1 reads 0.15 m. In the other 17 the hand walks on after the arm has stopped (13 of them with the hand entering at about 3 s) and the tip separation falls to 0.005 m to 0.14 m. - So the defect is real, and it is a link other than the cup (link7, not the elbow or link4 to link6), but the mechanism is the stop distance, not a link that stays unmonitored while the tip is far. A link-aware separation, or a stop distance of at least 0.15 m plus the height offset of the wrist, would fix the first part. The second part (a hand that keeps coming at a stopped arm) needs a retreat, which no v1 line asks for.",
+    "Nothing was forced: the lines, the monitor and SSM_v1 are untouched."
+  ]
+}

@@ -1,0 +1,174 @@
+// Loads every committed input of the site, validates its shape and fails with the file name when it is wrong.
+// Pure of the network and of the clock: the same files give the same pages (R25).
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+export const SITE_DIR = fileURLToPath(new URL('../../', import.meta.url));
+export const REPO_ROOT = path.resolve(SITE_DIR, '..');
+
+export class SiteDataError extends Error {
+  constructor(readonly file: string, message: string) {
+    super(`${file}: ${message}`);
+    this.name = 'SiteDataError';
+  }
+}
+
+// ---------------------------------------------------------------- types
+export interface MapCell { dirDeg: number; phase: number; seed: number; heldN: number; brokeN: number; trials: number }
+export interface MapDirection { dirDeg: number; minHeldN: number; weakestPhase: number; meanHeldN: number }
+export interface MapSummary {
+  meta: {
+    line: string; dirs: number; phases: number; seeds: number; steps: number; fmax: number; cells: number; trials: number; seconds: number;
+    weakest: MapDirection; strongest: MapDirection;
+  };
+  summary: MapDirection[];
+}
+export interface ArmStats { found: number; n: number; rate: number; ci95: { lo: number; hi: number }; trialsMedian: number; trialsIqr: number; sevMedian: number }
+export interface FalsifierRow {
+  reqId: string; app: string; pairs: number; guided: ArmStats; random: ArmStats;
+  trialsTest: { n: number; p: number; pBonferroni: number };
+}
+export interface FalsifierSummary {
+  summary: FalsifierRow[];
+  lines: Record<string, string>;
+  meta: { budget: number; searchSeeds: number; commit: string; seconds: number; node: string; logicalCores: number };
+  totalRuns: number;
+  errors: number;
+}
+export interface CandyData {
+  source: { where: string; commit: string }; line: string; heading: string; trials: number; broken: number;
+  closestLinkAtBreak: Record<string, number>; worstMinDistanceM: number; worstTipDistanceM: number; handSpeedMps: number; paragraphs: string[];
+}
+export interface KiroSpec {
+  name: string; path: string; type: string; requirements: number; earsCriteria: number; properties: number;
+  tasksDone: number; tasksOpen: number; waves: boolean;
+}
+export interface KiroWorkspace {
+  path: string; specs: KiroSpec[]; steering: string[];
+  hooks: { file: string; name: string; trigger: string; action: string }[];
+  agents: { name: string; file: string; hooks: number; mcp: string[] }[];
+  mcp: string[]; skills: string[]; workflows: string[];
+}
+export interface KiroData {
+  generated: string; commit: string; workspaces: KiroWorkspace[];
+  commits: { total: number; byPrefix: Record<string, number> };
+  tests: { files: number; propertyAsserts: number };
+  totals: Record<string, number>;
+}
+export interface AgentGateData {
+  cap: number; n: number; baseline: { gateExit: number; tail: string; seconds: number; commit: string };
+  dryRuns: { arm: string; credits: number; durationS: number; gateExit: number; turns: number }[];
+}
+export interface ChangelogEntry { date: string; hash: string; subject: string }
+export interface LexiconRef {
+  app: string; name: string; robotNames: string[];
+  predicates: { phrase: string; unit: string; signals: string[]; slots: string[] }[];
+  perturbations: { phrase: string; slots: Record<string, { dim: string; severity: string }>; maxOnset?: number }[];
+  lines: { id: string; source: string; pattern: string; dims: { name: string; kind: string; min: number; max: number; severity: string; wrap?: boolean }[]; horizon: number; formula?: string }[];
+}
+
+export interface SiteData {
+  mapCells: MapCell[]; map: MapSummary;
+  falsifier: FalsifierSummary; graded: FalsifierSummary; graded256: FalsifierSummary | undefined;
+  agentGate: AgentGateData; candy: CandyData; kiro: KiroData; changelog: ChangelogEntry[]; lexicons: LexiconRef[];
+  reportMd: string; transcriptMd: string; preregMd: string;
+  reviews: { name: string; file: string; text: string }[];
+  falsifyHardeningMd: string;
+  needleRuns: string;
+  pinnedSeed: { reqId: string; scenario: Record<string, number>; seed: number; robustness: number; shrunk: boolean; classification?: string }[];
+}
+
+// ---------------------------------------------------------------- readers
+const rel = (root: string, p: string): string => path.relative(root, p).replace(/\\/g, '/');
+
+function readText(root: string, relPath: string): string {
+  const p = path.join(root, relPath);
+  if (!existsSync(p)) throw new SiteDataError(relPath, 'file not found. Generate or restore it before building the site.');
+  return readFileSync(p, 'utf8');
+}
+
+export function parseJson<T>(text: string, file: string): T {
+  try { return JSON.parse(text) as T; } catch (e) { throw new SiteDataError(file, `invalid JSON (${(e as Error).message})`); }
+}
+
+/** Reads JSON Lines strictly: a blank line is skipped, any other line must parse (R25: no silent skipping). */
+export function parseJsonl<T>(text: string, file: string): T[] {
+  const out: T[] = [];
+  text.split(/\r?\n/).forEach((line, i) => {
+    if (line.trim() === '') return;
+    try { out.push(JSON.parse(line) as T); } catch { throw new SiteDataError(file, `line ${i + 1} is not valid JSON`); }
+  });
+  return out;
+}
+
+function need(cond: unknown, file: string, what: string): asserts cond {
+  if (!cond) throw new SiteDataError(file, what);
+}
+const isNum = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v);
+
+export function validateMapCells(cells: MapCell[], file: string): void {
+  need(cells.length > 0, file, 'no rows');
+  cells.forEach((c, i) => {
+    need(isNum(c.dirDeg) && isNum(c.phase) && isNum(c.heldN) && isNum(c.brokeN), file, `row ${i + 1} lacks dirDeg, phase, heldN or brokeN as numbers`);
+    need(c.heldN <= c.brokeN, file, `row ${i + 1} holds ${c.heldN} N but breaks at ${c.brokeN} N`);
+  });
+}
+
+function validateFalsifier(s: FalsifierSummary, file: string): void {
+  need(Array.isArray(s.summary) && s.summary.length > 0, file, 'summary is missing or empty');
+  for (const r of s.summary) {
+    need(typeof r.reqId === 'string' && isNum(r.guided?.found) && isNum(r.random?.found), file, `row for ${String(r.reqId)} lacks guided/random counts`);
+  }
+  need(isNum(s.meta?.budget), file, 'meta.budget is missing');
+}
+
+function optionalJson<T>(root: string, relPath: string): T | undefined {
+  const p = path.join(root, relPath);
+  return existsSync(p) ? parseJson<T>(readFileSync(p, 'utf8'), relPath) : undefined;
+}
+
+export function loadSiteData(root: string = REPO_ROOT): SiteData {
+  const json = <T>(f: string): T => parseJson<T>(readText(root, f), f);
+
+  const mapCells = parseJsonl<MapCell>(readText(root, 'evidence/results/g1-map.jsonl'), 'evidence/results/g1-map.jsonl');
+  validateMapCells(mapCells, 'evidence/results/g1-map.jsonl');
+  const map = json<MapSummary>('evidence/results/g1-map.summary.json');
+  need(map.meta?.weakest && map.meta?.strongest && Array.isArray(map.summary), 'evidence/results/g1-map.summary.json', 'meta.weakest, meta.strongest or summary is missing');
+
+  const falsifier = json<FalsifierSummary>('evidence/results/falsifier.summary.json');
+  validateFalsifier(falsifier, 'evidence/results/falsifier.summary.json');
+  const graded = json<FalsifierSummary>('evidence/results/graded-margin/falsifier.summary.json');
+  validateFalsifier(graded, 'evidence/results/graded-margin/falsifier.summary.json');
+  const g256 = optionalJson<FalsifierSummary>(root, 'evidence/results/graded-margin-256/falsifier.summary.json');
+  if (g256) validateFalsifier(g256, 'evidence/results/graded-margin-256/falsifier.summary.json');
+
+  const agentGate = json<AgentGateData>('site/data/agent-gate.json');
+  need(Array.isArray(agentGate.dryRuns), 'site/data/agent-gate.json', 'dryRuns is missing');
+  const candy = json<CandyData>('site/data/candy.json');
+  need(isNum(candy.broken) && isNum(candy.trials), 'site/data/candy.json', 'broken and trials must be numbers');
+  const kiro = json<KiroData>('site/data/kiro.json');
+  need(Array.isArray(kiro.workspaces) && kiro.totals, 'site/data/kiro.json', 'workspaces or totals is missing. Run: node scripts/kiro-stats.mjs');
+  const changelog = json<ChangelogEntry[]>('site/data/changelog.json');
+  const lexicons = json<LexiconRef[]>('site/data/lexicon.json');
+
+  const reviewsDir = path.join(root, 'docs/reviews');
+  const reviews = existsSync(reviewsDir)
+    ? readdirSync(reviewsDir).filter((f) => f.endsWith('.md')).sort().map((f) => ({
+      name: f.replace(/\.md$/, ''), file: `docs/reviews/${f}`, text: readFileSync(path.join(reviewsDir, f), 'utf8'),
+    }))
+    : [];
+
+  return {
+    mapCells, map, falsifier, graded, graded256: g256, agentGate, candy, kiro, changelog, lexicons,
+    reportMd: readText(root, 'evidence/REPORT.md'),
+    transcriptMd: readText(root, 'docs/cli-transcript.md'),
+    preregMd: readText(root, 'evidence/PREREG.md'),
+    reviews,
+    falsifyHardeningMd: readText(root, 'docs/reviews/falsify-hardening.md'),
+    needleRuns: readText(root, 'docs/reviews/falsify-hardening-runs/after-search.txt'),
+    pinnedSeed: json('apps/stagger/.golem/seeds/stagger/1.3.json'),
+  };
+}
+
+export { rel };

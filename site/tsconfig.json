@@ -1,0 +1,17 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["node", "vite/client"],
+    "paths": {
+      "golem-spec": ["../skeleton/src/index.ts"],
+      "golem-spec/ui": ["../skeleton/src/ui/index.ts"],
+      "golem-spec/ui/worker": ["../skeleton/src/ui/worker.ts"],
+      "@app/*": ["../apps/*/app.ts"]
+    },
+    "baseUrl": "."
+  },
+  "include": ["src", "scripts/*.ts", "tests", "vite.config.ts"],
+  "exclude": ["src/studio"]
+}
