@@ -13,7 +13,7 @@ Rules for every task:
   - Point the probe scripts at this checkout (relative imports) and save their output on the unfixed code in `docs/reviews/falsify-hardening-runs/before-*.txt`.
   - _Bugfix: introduction_
 
-- [ ] 2. Restore the commented-out property (defect 3)
+- [x] 2. Restore the commented-out property (defect 3)
   - Test: `test-hygiene.test.ts` fails on any `//` comment holding a literal `\n` in a test file.
   - Split line 33 of `beta.property.test.ts`; check that Property 22 passes with the assertion live.
   - _Bugfix: 3.2–3.4_

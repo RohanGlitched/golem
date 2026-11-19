@@ -30,7 +30,10 @@ describe('failure-rate bound properties', () => {
         (n, a, b) => {
           const k1 = Math.min(a % (n + 1), b % (n + 1));
           const k2 = Math.max(a % (n + 1), b % (n + 1));
-          // Requirements 2.6/2.7 conflict for n = 2 and n = 3: the rule of three (3/n, k = 0) exceeds the exact bound for k = 1.\n          // The test documents that exception in beta.test.ts and checks the property everywhere else.\n          fc.pre(!(k1 === 0 && k2 > 0 && n <= 3));\n          expect(failureRateUpper95(n, k2) as number).toBeGreaterThanOrEqual(failureRateUpper95(n, k1) as number);
+          // Requirements 2.6/2.7 conflict for n = 2 and n = 3: the rule of three (3/n, k = 0) exceeds the exact bound for k = 1.
+          // The test documents that exception in beta.test.ts and checks the property everywhere else.
+          fc.pre(!(k1 === 0 && k2 > 0 && n <= 3));
+          expect(failureRateUpper95(n, k2) as number).toBeGreaterThanOrEqual(failureRateUpper95(n, k1) as number);
         },
       ),
       { numRuns: 200 },
