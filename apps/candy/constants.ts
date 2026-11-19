@@ -27,6 +27,8 @@ export const BOWL = {
   wallHeight: 0.05,
   floorRadius: 0.10,
   floorHalfHeight: 0.005,
+  /** The floor cylinder reaches this far below the Table surface, into the Table, so a candy cannot sink through it (proposal P9). */
+  floorSink: 0.02,
   /** Height above the Table at which a resting candy centre can lie inside the bowl. */
   zMax: 0.06,
 } as const;
@@ -75,6 +77,8 @@ export const PARK = { x: -0.60, dx: -0.05, y: 0.90, z: -0.38 } as const;
 
 export const CONTYPE = { world: 1, arm: 2, candy: 4, cup: 8 } as const;
 export const CONAFFINITY = { world: 14, arm: 1, candy: 9, cup: 5 } as const;
+/** solref of the bowl geoms (time constant in s, damping ratio). A damping ratio of 4 makes the landing in a bowl inelastic: a 20 g candy that lands at 1.2 m/s with spin no longer bounces out (proposal P9). */
+export const BOWL_CONTACT = { timeConstant: 0.02, dampRatio: 4 } as const;
 
 // ---------------------------------------------------------------- suction
 

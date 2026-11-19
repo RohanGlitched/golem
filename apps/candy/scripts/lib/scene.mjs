@@ -1,7 +1,7 @@
 // Writes robot/scene.xml: a wooden doorstep table with a felt tray, three bowls, six candies, a mocap hand,
 // lights and a night backdrop. The output depends only on the numbers in consts.mjs: no clock, no randomness.
 import {
-  BOWL, BOWLS, CANDY_COUNT, CANDY_HALF_HEIGHT, CANDY_MASS, COLOURS, CONAFFINITY, CONTYPE, FLOOR_Z, HAND, HAND_START,
+  BOWL, BOWLS, BOWL_CONTACT, CANDY_COUNT, CANDY_HALF_HEIGHT, CANDY_MASS, COLOURS, CONAFFINITY, CONTYPE, FLOOR_Z, HAND, HAND_START,
   NUSERDATA, SIM_DT, TABLE, TRAY,
 } from './consts.mjs';
 
@@ -19,6 +19,8 @@ const WOOD_DARK = [0.17, 0.10, 0.055, 1];
 const SKIN = [0.87, 0.67, 0.53, 1];
 const SLEEVE = [0.16, 0.08, 0.24, 1];
 const COLOUR_NAMES = ['orange', 'purple', 'green'];
+/** solref of the bowl geoms: overdamped, so that a candy landing in a bowl does not bounce out. The table and the candies keep the MuJoCo default. */
+const BOWL_SOLREF = `${f(BOWL_CONTACT.timeConstant)} ${f(BOWL_CONTACT.dampRatio)}`;
 
 /** Orthonormal camera axes (`xyaxes`) for a camera at `eye` looking at `target` with +z up. */
 export function lookAtXyAxes(eye, target) {
@@ -96,12 +98,12 @@ function bowlXml(i) {
   const b = /** @type {{ name: string, x: number, y: number }} */ (BOWLS[i]);
   const rgba = vec(/** @type {number[]} */ (COLOURS[i]));
   const mat = `candy_${COLOUR_NAMES[i]}`;
-  const { innerHalf: ih, wallThickness: wt, wallHeight: wh, floorRadius: fr, floorHalfHeight: fh } = BOWL;
-  const attrs = `rgba="${rgba}" material="${mat}" contype="${CONTYPE.world}" conaffinity="${CONAFFINITY.world}"`;
+  const { innerHalf: ih, wallThickness: wt, wallHeight: wh, floorRadius: fr, floorHalfHeight: fh, floorSink: fs } = BOWL;
+  const attrs = `rgba="${rgba}" material="${mat}" contype="${CONTYPE.world}" conaffinity="${CONAFFINITY.world}" solref="${BOWL_SOLREF}"`;
   const mid = ih + wt / 2;
   const half = ih + wt;
   return `<body name="${b.name}" pos="${vec([b.x, b.y, 0])}">
-      <geom name="${b.name}_floor" type="cylinder" size="${vec([fr, fh])}" pos="0 0 ${f(fh)}" ${attrs}/>
+      <geom name="${b.name}_floor" type="cylinder" size="${vec([fr, fh + fs / 2])}" pos="0 0 ${f(fh - fs / 2)}" ${attrs}/>
       <geom name="${b.name}_wall_px" type="box" size="${vec([wt / 2, half, wh / 2])}" pos="${vec([mid, 0, wh / 2])}" ${attrs}/>
       <geom name="${b.name}_wall_nx" type="box" size="${vec([wt / 2, half, wh / 2])}" pos="${vec([-mid, 0, wh / 2])}" ${attrs}/>
       <geom name="${b.name}_wall_py" type="box" size="${vec([ih, wt / 2, wh / 2])}" pos="${vec([0, mid, wh / 2])}" ${attrs}/>

@@ -67,25 +67,25 @@
     <geom name="pumpkin_eye_r" type="box" size="0.012 0.004 0.012" pos="-0.032 0.47 0.075" rgba="0.08 0.04 0.01 1" contype="0" conaffinity="0"/>
     <geom name="pumpkin_mouth" type="box" size="0.010 0.026 0.007" pos="-0.028 0.44 0.04" rgba="0.08 0.04 0.01 1" contype="0" conaffinity="0"/>
     <body name="bowl_orange" pos="0.611 -0.382 0">
-      <geom name="bowl_orange_floor" type="cylinder" size="0.1 0.005" pos="0 0 0.005" rgba="1 0.45 0.04 1" material="candy_orange" contype="1" conaffinity="14"/>
-      <geom name="bowl_orange_wall_px" type="box" size="0.005 0.08 0.025" pos="0.075 0 0.025" rgba="1 0.45 0.04 1" material="candy_orange" contype="1" conaffinity="14"/>
-      <geom name="bowl_orange_wall_nx" type="box" size="0.005 0.08 0.025" pos="-0.075 0 0.025" rgba="1 0.45 0.04 1" material="candy_orange" contype="1" conaffinity="14"/>
-      <geom name="bowl_orange_wall_py" type="box" size="0.07 0.005 0.025" pos="0 0.075 0.025" rgba="1 0.45 0.04 1" material="candy_orange" contype="1" conaffinity="14"/>
-      <geom name="bowl_orange_wall_ny" type="box" size="0.07 0.005 0.025" pos="0 -0.075 0.025" rgba="1 0.45 0.04 1" material="candy_orange" contype="1" conaffinity="14"/>
+      <geom name="bowl_orange_floor" type="cylinder" size="0.1 0.015" pos="0 0 -0.005" rgba="1 0.45 0.04 1" material="candy_orange" contype="1" conaffinity="14" solref="0.02 4"/>
+      <geom name="bowl_orange_wall_px" type="box" size="0.005 0.08 0.025" pos="0.075 0 0.025" rgba="1 0.45 0.04 1" material="candy_orange" contype="1" conaffinity="14" solref="0.02 4"/>
+      <geom name="bowl_orange_wall_nx" type="box" size="0.005 0.08 0.025" pos="-0.075 0 0.025" rgba="1 0.45 0.04 1" material="candy_orange" contype="1" conaffinity="14" solref="0.02 4"/>
+      <geom name="bowl_orange_wall_py" type="box" size="0.07 0.005 0.025" pos="0 0.075 0.025" rgba="1 0.45 0.04 1" material="candy_orange" contype="1" conaffinity="14" solref="0.02 4"/>
+      <geom name="bowl_orange_wall_ny" type="box" size="0.07 0.005 0.025" pos="0 -0.075 0.025" rgba="1 0.45 0.04 1" material="candy_orange" contype="1" conaffinity="14" solref="0.02 4"/>
     </body>
     <body name="bowl_purple" pos="0.72 0 0">
-      <geom name="bowl_purple_floor" type="cylinder" size="0.1 0.005" pos="0 0 0.005" rgba="0.55 0.22 0.85 1" material="candy_purple" contype="1" conaffinity="14"/>
-      <geom name="bowl_purple_wall_px" type="box" size="0.005 0.08 0.025" pos="0.075 0 0.025" rgba="0.55 0.22 0.85 1" material="candy_purple" contype="1" conaffinity="14"/>
-      <geom name="bowl_purple_wall_nx" type="box" size="0.005 0.08 0.025" pos="-0.075 0 0.025" rgba="0.55 0.22 0.85 1" material="candy_purple" contype="1" conaffinity="14"/>
-      <geom name="bowl_purple_wall_py" type="box" size="0.07 0.005 0.025" pos="0 0.075 0.025" rgba="0.55 0.22 0.85 1" material="candy_purple" contype="1" conaffinity="14"/>
-      <geom name="bowl_purple_wall_ny" type="box" size="0.07 0.005 0.025" pos="0 -0.075 0.025" rgba="0.55 0.22 0.85 1" material="candy_purple" contype="1" conaffinity="14"/>
+      <geom name="bowl_purple_floor" type="cylinder" size="0.1 0.015" pos="0 0 -0.005" rgba="0.55 0.22 0.85 1" material="candy_purple" contype="1" conaffinity="14" solref="0.02 4"/>
+      <geom name="bowl_purple_wall_px" type="box" size="0.005 0.08 0.025" pos="0.075 0 0.025" rgba="0.55 0.22 0.85 1" material="candy_purple" contype="1" conaffinity="14" solref="0.02 4"/>
+      <geom name="bowl_purple_wall_nx" type="box" size="0.005 0.08 0.025" pos="-0.075 0 0.025" rgba="0.55 0.22 0.85 1" material="candy_purple" contype="1" conaffinity="14" solref="0.02 4"/>
+      <geom name="bowl_purple_wall_py" type="box" size="0.07 0.005 0.025" pos="0 0.075 0.025" rgba="0.55 0.22 0.85 1" material="candy_purple" contype="1" conaffinity="14" solref="0.02 4"/>
+      <geom name="bowl_purple_wall_ny" type="box" size="0.07 0.005 0.025" pos="0 -0.075 0.025" rgba="0.55 0.22 0.85 1" material="candy_purple" contype="1" conaffinity="14" solref="0.02 4"/>
     </body>
     <body name="bowl_green" pos="0.611 0.382 0">
-      <geom name="bowl_green_floor" type="cylinder" size="0.1 0.005" pos="0 0 0.005" rgba="0.38 0.82 0.18 1" material="candy_green" contype="1" conaffinity="14"/>
-      <geom name="bowl_green_wall_px" type="box" size="0.005 0.08 0.025" pos="0.075 0 0.025" rgba="0.38 0.82 0.18 1" material="candy_green" contype="1" conaffinity="14"/>
-      <geom name="bowl_green_wall_nx" type="box" size="0.005 0.08 0.025" pos="-0.075 0 0.025" rgba="0.38 0.82 0.18 1" material="candy_green" contype="1" conaffinity="14"/>
-      <geom name="bowl_green_wall_py" type="box" size="0.07 0.005 0.025" pos="0 0.075 0.025" rgba="0.38 0.82 0.18 1" material="candy_green" contype="1" conaffinity="14"/>
-      <geom name="bowl_green_wall_ny" type="box" size="0.07 0.005 0.025" pos="0 -0.075 0.025" rgba="0.38 0.82 0.18 1" material="candy_green" contype="1" conaffinity="14"/>
+      <geom name="bowl_green_floor" type="cylinder" size="0.1 0.015" pos="0 0 -0.005" rgba="0.38 0.82 0.18 1" material="candy_green" contype="1" conaffinity="14" solref="0.02 4"/>
+      <geom name="bowl_green_wall_px" type="box" size="0.005 0.08 0.025" pos="0.075 0 0.025" rgba="0.38 0.82 0.18 1" material="candy_green" contype="1" conaffinity="14" solref="0.02 4"/>
+      <geom name="bowl_green_wall_nx" type="box" size="0.005 0.08 0.025" pos="-0.075 0 0.025" rgba="0.38 0.82 0.18 1" material="candy_green" contype="1" conaffinity="14" solref="0.02 4"/>
+      <geom name="bowl_green_wall_py" type="box" size="0.07 0.005 0.025" pos="0 0.075 0.025" rgba="0.38 0.82 0.18 1" material="candy_green" contype="1" conaffinity="14" solref="0.02 4"/>
+      <geom name="bowl_green_wall_ny" type="box" size="0.07 0.005 0.025" pos="0 -0.075 0.025" rgba="0.38 0.82 0.18 1" material="candy_green" contype="1" conaffinity="14" solref="0.02 4"/>
     </body>
     <body name="candy_0" pos="0.36 -0.1 0.01">
       <freejoint name="candy_0_free"/>
