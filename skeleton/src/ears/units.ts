@@ -1,6 +1,9 @@
 import { makeDiagnostic, type Diagnostic } from './diagnostics.js';
 import type { Kind, Quantity, SlotKind, Token } from './types.js';
 
+/** The one number pattern of the ears module: optional sign, digits, optional fraction and exponent. */
+export const NUMBER_SOURCE = String.raw`[+-]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?`;
+
 export interface UnitSpec { spelling: string; kind: Kind; factor: number }
 
 const DEG = Math.PI / 180;
@@ -78,20 +81,9 @@ export function quantityFromTokens(
     };
   }
 
-  if (unit !== undefined && unit.type === 'word') {
-    return {
-      diagnostics: [
-        makeDiagnostic(
-          'UNKNOWN_PHRASE',
-          `Unknown unit '${unit.text}'. Accepted units: ${ACCEPTED_UNITS.join(', ')}`,
-          posOf(unit),
-        ),
-      ],
-    };
-  }
-
-  if (unit !== undefined && unit.type === 'unit') {
-    const spec = BY_SPELLING.get(unit.text);
+  if (unit !== undefined && (unit.type === 'word' || unit.type === 'unit')) {
+    // A word, or a unit token that is not in the table, is an unknown unit.
+    const spec = unit.type === 'unit' ? BY_SPELLING.get(unit.text) : undefined;
     if (!spec) {
       return {
         diagnostics: [
@@ -154,7 +146,7 @@ export function quantityFromTokens(
   };
 }
 
-const QUANTITY_TEXT = /^(\s*)([+-]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)( ?)(\S.*?)?(\s*)$/s;
+const QUANTITY_TEXT = new RegExp(String.raw`^(\s*)(${NUMBER_SOURCE})( ?)(\S.*?)?(\s*)$`, 's');
 
 /**
  * Parses text such as `200 N` or `0.20s` into a Quantity. `slot` selects the

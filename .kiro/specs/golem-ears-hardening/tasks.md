@@ -3,7 +3,7 @@
 Conventions: sources in `skeleton/src/ears/`, tests in `skeleton/src/ears/__tests__/`. Each defect task first adds its regression test, runs it and sees it fail, then fixes the code. Commit after each task as `golem-ears-hardening: <n> <what>`, staging only `skeleton/`, `docs/reviews/` and `.kiro/`. Never weaken an assertion; when a test encoded the defect, the commit message says why it changed.
 
 - [x] 0. Write this bugfix spec (bugfix.md, design.md, tasks.md); point the probes at this worktree
-- [ ] 1. Minor items (defect 14)
+- [x] 1. Minor items (defect 14)
   - Remove the BOM, the unused object in `reorder`, the unreachable unit branch; share the number pattern
   - Monitor: reject a signal whose length differs from `t`; per-call signal records, frozen slot records
   - Regression tests: `regress.d14.test.ts`

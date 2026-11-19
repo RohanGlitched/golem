@@ -1,7 +1,7 @@
 // Hand-written tokenizer for one EARS line. Pure: no I/O, no clock, no randomness.
 import { makeDiagnostic, type Diagnostic } from './diagnostics.js';
 import type { Token, TokenType } from './types.js';
-import { ACCEPTED_UNITS } from './units.js';
+import { ACCEPTED_UNITS, NUMBER_SOURCE } from './units.js';
 
 export type { Token, TokenType };
 
@@ -9,7 +9,7 @@ const KEYWORD = /^(?:when|while|if|then|where|the|shall)$/i;
 // Sticky regexes, so each is anchored at lastIndex without slicing the input.
 const ID_R = /R\d+\.(?=\s|$)/y;
 const ID_NUM = /\d+\.\d*(?=\s|$)/y;
-const NUMBER = /[+-]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/y;
+const NUMBER = new RegExp(NUMBER_SOURCE, 'y');
 const WORD = /\p{L}[\p{L}\p{N}_'-]*/uy;
 const WORD_CHAR = /[\p{L}\p{N}_]/u;
 

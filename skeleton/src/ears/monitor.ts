@@ -22,11 +22,16 @@ export function buildMonitor(spec: MonitorSpec): MonitorFn {
   if (state) for (const n of state.predicate.signals) if (!names.includes(n)) names.push(n);
   const count = names.length;
 
-  const scratch: Record<string, number> = {};
-  for (const n of names) scratch[n] = 0;
+  // Signal names of each predicate, and frozen copies of the slot values, so a margin
+  // function that writes to its arguments cannot change a later sample or call.
+  const respNames = [...new Set(predicate.signals)];
+  const stateNames = state ? [...new Set(state.predicate.signals)] : [];
+  const respIdx = respNames.map((n) => names.indexOf(n));
+  const stateIdx = stateNames.map((n) => names.indexOf(n));
+  const respSlots: Record<string, number> = Object.freeze({ ...slots });
   const arrays: Float64Array[] = new Array(count);
   const stateSlots = state ? state.predicate : undefined;
-  const stateSlotValues = state ? state.slots : undefined;
+  const stateSlotValues: Record<string, number> | undefined = state ? Object.freeze({ ...state.slots }) : undefined;
   const useAnchor = pattern === 'event' || pattern === 'unwanted';
   const isEventually = wrapper.kind === 'eventually';
   const duration = wrapper.duration;
@@ -34,14 +39,19 @@ export function buildMonitor(spec: MonitorSpec): MonitorFn {
 
   return (trace: Trace): MonitorResult => {
     const signals = trace.signals;
-    for (let k = 0; k < count; k++) {
-      const arr = signals[names[k]!];
-      if (arr === undefined) return { robustness: NaN, worstAt: 0, unit: 'signal' };
-      arrays[k] = arr;
-    }
     const t = trace.t;
     const n = t.length;
+    for (let k = 0; k < count; k++) {
+      const arr = signals[names[k]!];
+      if (arr === undefined || arr.length !== n) return { robustness: NaN, worstAt: 0, unit: 'signal' };
+      arrays[k] = arr;
+    }
     if (n === 0) return { robustness: NaN, worstAt: 0, unit: 'trace' };
+    // One record per predicate per call (not per sample).
+    const rs: Record<string, number> = {};
+    for (const nm of respNames) rs[nm] = 0;
+    const ss: Record<string, number> = {};
+    for (const nm of stateNames) ss[nm] = 0;
 
     let a = t[0]!;
     if (useAnchor) {
@@ -68,11 +78,12 @@ export function buildMonitor(spec: MonitorSpec): MonitorFn {
     for (let i = lo; i < n; i++) {
       const ti = t[i]!;
       if (ti > b) break;
-      for (let k = 0; k < count; k++) scratch[names[k]!] = arrays[k]![i]!;
-      let m = predicate.margin(scratch, slots);
+      for (let k = 0; k < respNames.length; k++) rs[respNames[k]!] = arrays[respIdx[k]!]![i]!;
+      let m = predicate.margin(rs, respSlots);
       if (m !== m) return { robustness: NaN, worstAt: ti, unit };
       if (stateSlots) {
-        const sm = stateSlots.margin(scratch, stateSlotValues as Record<string, number>);
+        for (let k = 0; k < stateNames.length; k++) ss[stateNames[k]!] = arrays[stateIdx[k]!]![i]!;
+        const sm = stateSlots.margin(ss, stateSlotValues as Record<string, number>);
         if (sm !== sm) return { robustness: NaN, worstAt: ti, unit: stateSlots.unit };
         const ns = -sm;
         if (ns > m) m = ns;

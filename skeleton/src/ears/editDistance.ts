@@ -1,4 +1,4 @@
-﻿import type { CompiledTemplate, Kind, Token } from './types.js';
+import type { CompiledTemplate, Kind, Token } from './types.js';
 import { lookupUnit } from './units.js';
 
 /** A wildcard (slot or quantity) of a given kind, or a word. Words compare case-folded. */

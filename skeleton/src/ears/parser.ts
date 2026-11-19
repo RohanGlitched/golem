@@ -244,14 +244,13 @@ export function parse(
 
 /** Stable key order: id, pattern, condition, robot, response. */
 function reorder(a: ParsedRequirement): ParsedRequirement {
-  const out: ParsedRequirement = { pattern: a.pattern, robot: a.robot, response: a.response };
-  const ordered: ParsedRequirement = {} as ParsedRequirement;
-  if (a.id !== undefined) ordered.id = a.id;
-  ordered.pattern = out.pattern;
-  if (a.condition) ordered.condition = a.condition;
-  ordered.robot = out.robot;
-  ordered.response = out.response;
-  return ordered;
+  return {
+    ...(a.id !== undefined ? { id: a.id } : {}),
+    pattern: a.pattern,
+    ...(a.condition ? { condition: a.condition } : {}),
+    robot: a.robot,
+    response: a.response,
+  };
 }
 
 function reportNoHead(
