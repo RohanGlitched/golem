@@ -73,14 +73,13 @@ sequenceDiagram
   R->>A: files() then load model (FS.writeFile)
   R->>A: initState(ctx, rng) (noise from seed, restores leftovers)
   R->>A: makeController(ctx, rng)
-  loop every Sim_Step (2 ms)
-    R->>P: apply(ctx, t, tTrigger, values)
+  loop every Control_Step (20 ms)
+    R->>S: signals(ctx, out)
     R->>W: step(ctx, t)
-    Note over W: every 10th call: Observation, latency, Policy, target
-    Note over W: every call: PD law to data.ctrl
-    R->>R: mj_step
-    alt every Control_Step (20 ms)
-      R->>S: signals(ctx, out)
+    Note over W: Observation, latency, Policy, target to data.ctrl (first call: Default_Pose)
+    loop 10 Sim_Steps (2 ms)
+      R->>P: apply(ctx, t, tTrigger, values)
+      R->>R: mj_step (PD actuators apply the PD law)
     end
   end
   R->>A: endTrial(ctx) (restore model)
@@ -201,7 +200,7 @@ export class Walker implements Controller {
 **Walker.step(ctx, t) pseudocode.**
 
 ```
-if substep % 10 == 0:
+if calls > 0:
     command := rt.command                    // default (0.5, 0, 0); command perturbation overrides
     buildObservation(qpos, qvel, command, prevAction, t, obs)
     latency.push(obs)
@@ -209,11 +208,13 @@ if substep % 10 == 0:
     policy.step(delayedObs, action)
     actionToTarget(action, target)
     prevAction := action                     // copy
-substep += 1
-pdTorque(target, qpos[7:19], qvel[6:18], ctrl)    // every Sim_Step
+calls += 1
+ctrl := target                               // PD actuators turn the target into torque every Sim_Step
 ```
 
-`qpos[7:19]` and `qvel[6:18]` are read from the live views of `ctx.data`. The PD law runs on every Sim_Step with the latest target, and the policy runs on every tenth call, so the Control_Step is exactly 10 Sim_Steps. The Walker's constructor resets the policy state, previous action, latency buffer, the substep counter, and sets the target to Default_Pose.
+**Revision (implementation).** golem-sim calls `controller.step` once per Control_Step, before its 10 Sim_Steps, and never touches `data.ctrl` between them (golem-sim design, "Control_Step definition"). A TypeScript PD law could therefore only hold one torque for 20 ms. The Robot_MJCF instead declares each leg actuator as a MuJoCo PD actuator (`<general gaintype="fixed" biastype="affine" gainprm="kp" biasprm="0 -kp -kd">`), so MuJoCo computes `(ctrl - q)·kp - qd·kd` with `ctrl = target` at every Sim_Step, which is the PD_Law of the deploy script. `pdTorque` stays as the pure reference law, and a physics test checks `data.actuator_force` against it. Unitree's script evaluates the policy after every 10th Sim_Step from the state and time after that step, and holds Default_Pose for the first 10 Sim_Steps; call k of `step` sees exactly that state at `t = 0.02·k s`, so the first call after construction holds Default_Pose and every later call evaluates the policy. With this schedule the parity run matches the Python reference to 1e-5 m.
+
+`qpos[7:19]` and `qvel[6:18]` are read from the live views of `ctx.data`. The Walker's constructor resets the policy state, previous action, latency buffer and call counter, and sets the target to Default_Pose.
 
 `buildObservation` slices: `[0:3] = 0.25 * qvel[3:6]`; `[3:6] = projectedGravity(qpos[3:7])`; `[6:9] = command .* (2, 2, 0.25)`; `[9:21] = qpos[7:19] - DEFAULT_POSE`; `[21:33] = 0.05 * qvel[6:18]`; `[33:45] = previousAction`; `[45] = sin(2π·phase)`, `[46] = cos(2π·phase)`, with `phase = gaitPhase(time)`. The previous action is all zeros at the first Control_Step because the Walker's constructor zeroes it.
 
@@ -462,9 +463,9 @@ For any finite action, `q` and `qd`, `actionToTarget` gives `action·0.25 + Defa
 
 **Validates: Requirements 8.1, 8.2, 8.3, 8.4, 8.8, 8.9**
 
-### Property 17: The Walker evaluates the Policy every tenth Sim_Step and the PD law every Sim_Step
+### Property 17: The Walker evaluates the Policy once per Control_Step and holds its target in data.ctrl
 
-For any number of Sim_Steps N driven through a Walker with a counting Policy stub, the Policy is called exactly `ceil(N/10)` times, the target changes only on those calls, `ctrl` is rewritten on every call, and the action stored on each Control_Step is the previous action seen by the next Observation.
+For any number of calls N to `Walker.step` (one per Control_Step), the Policy is called exactly `N - 1` times (the first call holds Default_Pose), `ctrl` equals the latest target after every call, and the action stored on each Control_Step is the previous action seen by the next Observation. The PD law itself runs in the model's PD actuators at every Sim_Step (see the Walker revision note).
 
 **Validates: Requirements 8.5, 8.6, 8.7**
 

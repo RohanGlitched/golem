@@ -1,0 +1,209 @@
+{
+  "commit": "276801e46c5d433564f24658bac64f254b7d2d4b",
+  "files": [
+    {
+      "upstream": "LICENSE",
+      "local": "LICENSE"
+    },
+    {
+      "upstream": "resources/robots/g1_description/g1_12dof.xml",
+      "local": "g1_12dof.xml"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/head_link.STL",
+      "local": "meshes/head_link.STL.hull.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/head_link.STL",
+      "local": "meshes/head_link.STL.vis.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/left_ankle_pitch_link.STL",
+      "local": "meshes/left_ankle_pitch_link.STL.hull.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/left_ankle_pitch_link.STL",
+      "local": "meshes/left_ankle_pitch_link.STL.vis.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/left_ankle_roll_link.STL",
+      "local": "meshes/left_ankle_roll_link.STL.vis.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/left_elbow_link.STL",
+      "local": "meshes/left_elbow_link.STL.hull.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/left_elbow_link.STL",
+      "local": "meshes/left_elbow_link.STL.vis.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/left_hip_pitch_link.STL",
+      "local": "meshes/left_hip_pitch_link.STL.hull.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/left_hip_pitch_link.STL",
+      "local": "meshes/left_hip_pitch_link.STL.vis.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/left_hip_roll_link.STL",
+      "local": "meshes/left_hip_roll_link.STL.hull.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/left_hip_roll_link.STL",
+      "local": "meshes/left_hip_roll_link.STL.vis.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/left_hip_yaw_link.STL",
+      "local": "meshes/left_hip_yaw_link.STL.hull.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/left_hip_yaw_link.STL",
+      "local": "meshes/left_hip_yaw_link.STL.vis.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/left_knee_link.STL",
+      "local": "meshes/left_knee_link.STL.hull.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/left_knee_link.STL",
+      "local": "meshes/left_knee_link.STL.vis.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/left_shoulder_pitch_link.STL",
+      "local": "meshes/left_shoulder_pitch_link.STL.vis.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/left_shoulder_roll_link.STL",
+      "local": "meshes/left_shoulder_roll_link.STL.vis.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/left_shoulder_yaw_link.STL",
+      "local": "meshes/left_shoulder_yaw_link.STL.hull.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/left_shoulder_yaw_link.STL",
+      "local": "meshes/left_shoulder_yaw_link.STL.vis.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/left_wrist_roll_rubber_hand.STL",
+      "local": "meshes/left_wrist_roll_rubber_hand.STL.hull.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/left_wrist_roll_rubber_hand.STL",
+      "local": "meshes/left_wrist_roll_rubber_hand.STL.vis.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/logo_link.STL",
+      "local": "meshes/logo_link.STL.hull.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/logo_link.STL",
+      "local": "meshes/logo_link.STL.vis.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/pelvis.STL",
+      "local": "meshes/pelvis.STL.vis.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/pelvis_contour_link.STL",
+      "local": "meshes/pelvis_contour_link.STL.hull.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/pelvis_contour_link.STL",
+      "local": "meshes/pelvis_contour_link.STL.vis.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/right_ankle_pitch_link.STL",
+      "local": "meshes/right_ankle_pitch_link.STL.hull.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/right_ankle_pitch_link.STL",
+      "local": "meshes/right_ankle_pitch_link.STL.vis.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/right_ankle_roll_link.STL",
+      "local": "meshes/right_ankle_roll_link.STL.vis.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/right_elbow_link.STL",
+      "local": "meshes/right_elbow_link.STL.hull.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/right_elbow_link.STL",
+      "local": "meshes/right_elbow_link.STL.vis.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/right_hip_pitch_link.STL",
+      "local": "meshes/right_hip_pitch_link.STL.hull.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/right_hip_pitch_link.STL",
+      "local": "meshes/right_hip_pitch_link.STL.vis.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/right_hip_roll_link.STL",
+      "local": "meshes/right_hip_roll_link.STL.hull.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/right_hip_roll_link.STL",
+      "local": "meshes/right_hip_roll_link.STL.vis.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/right_hip_yaw_link.STL",
+      "local": "meshes/right_hip_yaw_link.STL.hull.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/right_hip_yaw_link.STL",
+      "local": "meshes/right_hip_yaw_link.STL.vis.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/right_knee_link.STL",
+      "local": "meshes/right_knee_link.STL.hull.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/right_knee_link.STL",
+      "local": "meshes/right_knee_link.STL.vis.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/right_shoulder_pitch_link.STL",
+      "local": "meshes/right_shoulder_pitch_link.STL.vis.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/right_shoulder_roll_link.STL",
+      "local": "meshes/right_shoulder_roll_link.STL.vis.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/right_shoulder_yaw_link.STL",
+      "local": "meshes/right_shoulder_yaw_link.STL.hull.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/right_shoulder_yaw_link.STL",
+      "local": "meshes/right_shoulder_yaw_link.STL.vis.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/right_wrist_roll_rubber_hand.STL",
+      "local": "meshes/right_wrist_roll_rubber_hand.STL.hull.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/right_wrist_roll_rubber_hand.STL",
+      "local": "meshes/right_wrist_roll_rubber_hand.STL.vis.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/torso_link_23dof_rev_1_0.STL",
+      "local": "meshes/torso_link_23dof_rev_1_0.STL.hull.stl"
+    },
+    {
+      "upstream": "resources/robots/g1_description/meshes/torso_link_23dof_rev_1_0.STL",
+      "local": "meshes/torso_link_23dof_rev_1_0.STL.vis.stl"
+    },
+    {
+      "upstream": "deploy/pre_train/g1/motion.pt",
+      "local": "policy.bin"
+    },
+    {
+      "upstream": "(generated)",
+      "local": "scene.xml"
+    }
+  ]
+}

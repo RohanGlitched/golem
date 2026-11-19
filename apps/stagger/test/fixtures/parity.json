@@ -1,0 +1,10 @@
+{
+  "description": "Unitree deploy_mujoco.py schedule for g1_12dof at commit 276801e46c5d433564f24658bac64f254b7d2d4b: legs at Default_Pose + noise, pelvis free joint at the MJCF body position, upright, at rest.",
+  "noise": [0.001257302210933933, -0.0013210486329130189, 0.006404226504432821, 0.001049001171530397, -0.005356693731611109, 0.0036159505490948474, 0.013040000451301373, 0.009470809631292421, -0.007037352358069926, -0.012654214710460526, -0.006232744625373522, 0.000413259793472436],
+  "noiseSource": "numpy.random.default_rng(0).normal(0, 0.01, 12)",
+  "basePos": [0, 0, 0.793],
+  "command": [0.5, 0, 0],
+  "duration": 2,
+  "pelvis": [0.79987, -0.02247, 0.76789],
+  "tolerance": 0.001
+}
