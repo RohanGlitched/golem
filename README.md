@@ -80,6 +80,17 @@ The same pack ships as a **Kiro Power** (`skeleton/power`) and a **Kiro Crew app
 | [`apps/stagger`](apps/stagger) | Unitree G1 humanoid running Unitree's published walking policy (it matches Unitree's own reference run to 2.5 µm) | It falls from **62.5 N** pushed from its left at 20% of its stride, yet holds **240 N** from the front right: 4,860 trials, all in `evidence/`. With Kiro's reflex the weakest direction rises to **101.6 N**. |
 | [`apps/candy`](apps/candy) | Franka Panda with a suction cup, sorting Halloween candy while trick-or-treaters reach in | 57 of 228 trials break "keep every link at least 0.10 m from the hand". Its speed-and-separation controller slows and stops the arm by the cup's distance to the hand, and stops too late for the **wrist**: link 7 is the closest link in 48 of the breaks, while the cup is still about 0.14 m away in most of them. |
 
+## Screens
+
+| | |
+|---|---|
+| <img src="docs/screens/hero-unitree.jpg" alt="Top-down view of the hero circle: 36 ghost trials radiate from the robot; two red ghosts lie fallen on the robot's left and the floor cracks through the sentence there."> | <img src="docs/screens/hero-kiro.jpg" alt="The same circle with Kiro's reflex switched on: every ghost stays upright and the ring of text is whole."> |
+| **Unitree's policy.** Requirement 1.3 on the floor, 36 recorded shoves at 100 N. Pushed from its left (80° and 90°) the G1 falls and the floor cracks. | **+ Kiro's reflex.** The same shoves and seeds with the reflex Kiro's `golem-tuner` wrote. All 36 hold; the ring is whole. |
+| <img src="docs/screens/studio-g1.jpg" alt="The G1 studio mid-run: the requirement list on the left, the clay robot and translucent ghosts on the stage, the verdict panel counting trials."> | <img src="docs/screens/rings.jpg" alt="Two polar rings, before and after: the measured push boundary in each direction with the requirement written around it; the before ring cracks red on the left."> |
+| **The studio.** Real MuJoCo in the browser: drag to shove, or summon 64 ghosts on a line and read the verdict. | **Before and after,** from the full 4,860-trial stability map: weakest push 62.5 → 101.6 N. |
+| <img src="docs/screens/candy.jpg" alt="The candy studio: a Franka Panda arm on a table with bowls and a child's hand reaching in."> | |
+| **Candy.** A Franka Panda sorting Halloween candy while a hand reaches in; GOLEM found the wrist too close to it. | |
+
 ## Evidence
 
 Every number here comes from committed raw data in [`evidence/`](evidence), using pre-registered methods ([`PREREG.md`](evidence/PREREG.md)). See [`REPORT.md`](evidence/REPORT.md) for what held, what didn't, and what went wrong.
