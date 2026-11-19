@@ -153,7 +153,8 @@ export async function runTrial(
       if (typeof call.template.begin === 'function') call.template.begin(ctx, call.values);
     }
     refreshIfDetached();
-    const pose = spec.record === 'poses' ? new PoseRecorder(model.nbody as number, req.horizon) : undefined;
+    const pose = spec.record === 'poses' ? new PoseRecorder(model.nbody as number, N * controlDt, simDt) : undefined;
+    const trigIndex = simIndex;
     const traceT = new Float64Array(N + 1);
     const out: Record<string, number> = {};
     const earlyStop = opts.earlyStop;
@@ -180,7 +181,7 @@ export async function runTrial(
         (sigArrs[i] as Float64Array)[k] = out[sigNames[i] as string] as number;
       }
       recorded = k + 1;
-      if (pose !== undefined) pose.maybeRecord(traceT[k] as number, xpos, xquat);
+      if (pose !== undefined && k === 0) pose.recordStep(0, xpos, xquat);
 
       if (earlyStop !== undefined) {
         const r: unknown = earlyStop(traceView, recorded);
@@ -207,6 +208,7 @@ export async function runTrial(
         refreshIfDetached();
         mj.mj_step(model, data);
         if (afterStep('trial')) { diverged = true; break; }
+        if (pose !== undefined) pose.recordStep(simIndex - trigIndex, xpos, xquat); // D5: sim-step schedule
       }
       if (diverged) break;
     }

@@ -297,4 +297,43 @@ describe('defect 6 and improvement 5: full model snapshot and restore', () => {
   });
 });
 
+describe('defect 5: pose frames follow the sim-step schedule and the reported fps', () => {
+  it('records floor(horizon * 30) + 1 frames, frame f being the state at trial step ceil(f / (30 * simDt))', async () => {
+    const states = new Map<number, number[]>();
+    const app: RobotApp = {
+      ...boxDropApp,
+      makeController: (ctx) => ({
+        step: () => {},
+        substep: (_c, tSim) => {
+          const i = Math.round(tSim / 0.002);
+          states.set(i, [...Array.from(ctx.data.xpos as Float64Array), ...Array.from(ctx.data.xquat as Float64Array)]);
+        },
+      }),
+      signals: (ctx, out) => {
+        boxDropApp.signals(ctx, out);
+        const i = Math.round((ctx.data.time as number) / 0.002);
+        states.set(i, [...Array.from(ctx.data.xpos as Float64Array), ...Array.from(ctx.data.xquat as Float64Array)]);
+      },
+    };
+    const horizon = 1.8;
+    const { result } = await run(app, boxReq(horizon, []), { f: 0, a: 0 }, 1, { record: 'poses' });
+    const p = result.poses!;
+    expect(p.fps).toBe(30);
+    const nb = p.nbody;
+    const frames = p.frames.length / (nb * 7);
+    expect(frames).toBe(Math.floor(horizon * 30) + 1); // 55; the old recorder gave 46 (25 fps)
+    for (let f = 0; f < frames; f++) {
+      const s = Math.ceil(f / (30 * 0.002) - 1e-9);
+      expect(Math.abs(s * 0.002 - f / 30)).toBeLessThan(0.002);
+      const st = states.get(100 + s)!;
+      for (let b = 0; b < nb; b++) {
+        const o = (f * nb + b) * 7;
+        expect(p.frames[o]).toBe(Math.fround(st[3 * b]!));
+        expect(p.frames[o + 2]).toBe(Math.fround(st[3 * b + 2]!));
+        expect(p.frames[o + 3]).toBe(Math.fround(st[3 * nb + 4 * b]!));
+      }
+    }
+  });
+});
+
 void makeStoolApp; void shoveCall;

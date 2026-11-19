@@ -41,7 +41,7 @@ Rules for every task:
   - _Bugfix: 6.2–6.5, 5.I1_
 
 - [ ] 8. Pose frames on the sim-step schedule (defect 5)
-  - Test: 2 s at controlDt 0.02 s gives 61 frames, each the state at step `ceil(f/(30·simDt))`. Rewrite P12, which asserted the 25 fps bug.
+  - Test: a 1.8 s horizon at controlDt 0.02 s gives 55 frames (the old recorder gave 46), each the state at step `ceil(f/(30·simDt))`. Rewrite P12, which asserted the 25 fps bug.
   - _Bugfix: 5.2–5.4_
 
 - [ ] 9. Warm-up divergence is a counterexample (defect 8)

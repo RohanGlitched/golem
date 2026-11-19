@@ -228,8 +228,9 @@ describe('runTrial early stop, divergence and poses', () => {
     expect(p.fps).toBe(30);
     expect(p.nbody).toBe(3);
     expect(p.frames.length % (3 * 7)).toBe(0);
-    // 1 s at 50 Hz sampling, frames at least 1/30 s apart: every 2nd sample, so 26 frames.
-    expect(p.frames.length / 21).toBe(26);
+    // 1 s after the trigger on the sim-step schedule: floor(1 * 30) + 1 = 31 frames
+    // (golem-sim-hardening defect 5; this test used to assert 26, the 25 fps bug).
+    expect(p.frames.length / 21).toBe(31);
   });
 });
 

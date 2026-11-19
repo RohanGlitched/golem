@@ -426,34 +426,43 @@ describe('fault properties', () => {
 // ---------------------------------------------------------------- poses and seeds
 
 describe('pose and seed properties', () => {
-  // Feature: golem-sim, Property 12: Pose frame layout
-  it('Property 12: frames hold float32 xpos and xquat at samples at least 1/30 s apart', async () => {
+  // Feature: golem-sim, Property 12: Pose frame layout.
+  // golem-sim-hardening: the old version asserted frames at control samples at least 1/30 s apart, which
+  // is the 25 fps bug. Frames now follow the sim-step schedule; this checks count, timing and content.
+  it('Property 12: frame f holds float32 xpos and xquat of trial step ceil(f/(30*simDt)), within one simDt of f/30', async () => {
     await fc.assert(fc.asyncProperty(arbScenario, arbSeed, arbSteps(40), fc.option(fc.integer({ min: 1, max: 12 }), { nil: undefined }),
       async (sc, seed, steps, stopAt) => {
-        const logs: Array<{ xpos: Float64Array; xquat: Float64Array }> = [];
+        const states = new Map<number, { xpos: Float64Array; xquat: Float64Array }>();
+        const log = (ctx: any, i: number) => states.set(i, { xpos: Float64Array.from(ctx.data.xpos), xquat: Float64Array.from(ctx.data.xquat) });
         const app: RobotApp = {
           ...testApp,
-          signals: (ctx, out) => {
-            testApp.signals(ctx, out);
-            logs.push({ xpos: Float64Array.from(ctx.data.xpos), xquat: Float64Array.from(ctx.data.xquat) });
+          makeController: (ctx, rng) => {
+            const inner = testApp.makeController(ctx, rng);
+            return { step: (c, t) => inner.step(c, t), substep: (c, tSim) => log(c, Math.round(tSim / 0.002)) };
           },
+          signals: (ctx, out) => { testApp.signals(ctx, out); log(ctx, Math.round(ctx.data.time / 0.002)); },
         };
         const hook: EarlyStopHook | undefined = stopAt === undefined ? undefined : (_t, n) => (n === stopAt ? 1 : undefined);
-        const { result, trace } = await runCaptured(app, reqFor(steps), mkSpec(sc, seed, 'poses'), hook);
+        const { result } = await runCaptured(app, reqFor(steps), mkSpec(sc, seed, 'poses'), hook);
         const poses = result.poses;
         if (!poses || poses.fps !== 30 || poses.nbody !== model.nbody) return false;
-        const picked: number[] = [];
-        let last = 0;
-        for (let k = 0; k < trace.t.length; k++) {
-          if (picked.length === 0 || trace.t[k]! - last >= 1 / 30 - 1e-9) { picked.push(k); last = trace.t[k]!; }
+        const lastStep = (stopAt === undefined || stopAt > steps ? steps : stopAt - 1) * 10;
+        const expected: number[] = [];
+        for (let f = 0; ; f++) {
+          const s = Math.ceil(f / (30 * 0.002) - 1e-9);
+          if (s > lastStep) break;
+          expected.push(s);
         }
-        if (picked[0] !== 0 || poses.frames.length !== poses.nbody * 7 * picked.length) return false;
-        for (let f = 0; f < picked.length; f++) {
-          const { xpos, xquat } = logs[picked[f]!]!;
+        if (poses.frames.length !== poses.nbody * 7 * expected.length) return false;
+        for (let f = 0; f < expected.length; f++) {
+          const s = expected[f]!;
+          if (!(Math.abs(s * 0.002 - f / 30) < 0.002)) return false;
+          const st = states.get(100 + s);
+          if (st === undefined) return false;
           for (let b = 0; b < poses.nbody; b++) {
             const o = (f * poses.nbody + b) * 7;
-            const expected = [xpos[3 * b], xpos[3 * b + 1], xpos[3 * b + 2], xquat[4 * b], xquat[4 * b + 1], xquat[4 * b + 2], xquat[4 * b + 3]];
-            for (let i = 0; i < 7; i++) if (!Object.is(poses.frames[o + i], Math.fround(expected[i]!))) return false;
+            const want = [st.xpos[3 * b], st.xpos[3 * b + 1], st.xpos[3 * b + 2], st.xquat[4 * b], st.xquat[4 * b + 1], st.xquat[4 * b + 2], st.xquat[4 * b + 3]];
+            for (let i = 0; i < 7; i++) if (!Object.is(poses.frames[o + i], Math.fround(want[i]!))) return false;
           }
         }
         return true;
