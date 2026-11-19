@@ -111,8 +111,8 @@ Rules that apply to every task:
     - **Property 10: Scenario normalisation**
     - **Validates: Requirements 14.4, 14.5, 14.6, 14.7, 14.8, 6.5, 6.11**
 
-- [ ] 10. Pose recorder
-  - [~] 10.1 Implement `pose-recorder.ts` (`PoseRecorder`)
+- [x] 10. Pose recorder
+  - [x] 10.1 Implement `pose-recorder.ts` (`PoseRecorder`)
     - Allocate `nbody*7*(floor(horizon*30)+2)` float32 values once. `maybeRecord` records the first frame, then frames at least `1/30 - 1e-9` s apart. A capacity guard keeps it safe. `finish()` returns a subarray with `fps: 30`.
     - Example tests: frame layout `(x, y, z, qw, qx, qy, qz)` per body, float32 conversion only, non-finite values stored unchanged, spacing and capacity, `finish()` length equals `nbody*7*frameCount`, and no growth after construction.
     - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 8.8, 8.11_
