@@ -13,6 +13,11 @@ import { KEY_AZIMUTH_DEG, KEY_ELEVATION_DEG, lightDir } from './clay-material.js
 export const POOL_RADIUS = 2.6;
 export const POOL_GAIN = 0.2;
 export const SHADOW_OPACITY = 0.5;
+/** On the light studio backdrop a softer shadow reads as the same contact. */
+export const SHADOW_OPACITY_LIGHT = 0.3;
+/** The shadow light is steeper than the clay's raking key, so the cast shadow stays near the feet. */
+export const SHADOW_ELEVATION_DEG = 56;
+const isLightGround = (hex: string): boolean => { const n = parseInt(hex.replace('#', ''), 16); const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255; return 0.2126 * r + 0.7152 * g + 0.0722 * b > 128; };
 export const SHADOW_HALF = 1.8;
 /** Camera follow time constant (s): critically damped toward the followed point. */
 export const FOLLOW_TAU = 0.5;
@@ -210,12 +215,12 @@ export class Stage {
     this.pool = new T.Mesh(new T.PlaneGeometry(4 * POOL_RADIUS, 4 * POOL_RADIUS), this.poolMat);
     this.pool.position.z = 0.0005; this.pool.renderOrder = 0; this.pool.name = 'golem-lamp-pool';
     this.scene.add(this.pool);
-    this.shadowMat = new T.ShadowMaterial({ opacity: SHADOW_OPACITY, color: new T.Color('#000000'), depthWrite: false, transparent: true });
+    this.shadowMat = new T.ShadowMaterial({ opacity: isLightGround(deps.tokens.ground) ? SHADOW_OPACITY_LIGHT : SHADOW_OPACITY, color: new T.Color('#000000'), depthWrite: false, transparent: true });
     this.catcher = new T.Mesh(new T.PlaneGeometry(4 * SHADOW_HALF, 4 * SHADOW_HALF), this.shadowMat);
     this.catcher.position.z = 0.001; this.catcher.receiveShadow = true; this.catcher.renderOrder = 0; this.catcher.name = 'golem-shadow';
     this.scene.add(this.catcher);
     this.key = new T.DirectionalLight(0xffffff, 1);
-    const kd = lightDir(KEY_AZIMUTH_DEG, Math.max(KEY_ELEVATION_DEG, 38));
+    const kd = lightDir(KEY_AZIMUTH_DEG, Math.max(KEY_ELEVATION_DEG, SHADOW_ELEVATION_DEG));
     this.keyDir = new T.Vector3(kd[0], kd[1], kd[2]).normalize();
     this.key.castShadow = true;
     this.key.shadow.mapSize.set(2048, 2048);
@@ -232,6 +237,7 @@ export class Stage {
       (this.scene.background as THREE_NS.Color).set(t.ground);
       setFloorTheme(this.floor, t);
       (this.poolMat.uniforms['uLight']!.value as THREE_NS.Color).set(t.clay);
+      this.shadowMat.opacity = isLightGround(t.ground) ? SHADOW_OPACITY_LIGHT : SHADOW_OPACITY;
     });
 
     // Visibility_Gate.
