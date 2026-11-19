@@ -10,6 +10,8 @@ export interface CompileOutcome {
   diagnostics: FileDiagnostic[];
   /** Files in listed order, so diagnostics can be sorted by file order. */
   files: string[];
+  /** The text of every file that was read, by path: the one source of the requirements and of the Expectation table. */
+  texts: Record<string, string>;
 }
 
 export interface RunOptions {

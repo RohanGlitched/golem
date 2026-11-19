@@ -5,7 +5,7 @@ import { elapsedSeconds, gateCounter, parseStopPayload, pruneState } from '../ga
 import { judgeOutcomes } from '../expectation.js';
 import { NOTHING_TO_CHECK, buildReason, diagnosticsReason, expectationBlock, redAllowMessage } from '../format.js';
 import {
-  bootstrap, gateStatePath, loadExpectations, reportPath, runGateOnce, writeRunReport, type GateRun,
+  bootstrap, gateStatePath, reportPath, runGateOnce, writeRunReport, type GateRun,
 } from '../service.js';
 import { atomicWriteFile, readGateState, readReport, stableJson, tmpCounter, writeGateState } from '../store.js';
 import type { CommandHandler } from '../run.js';
@@ -42,7 +42,7 @@ export const handler: CommandHandler = async (p, io, deps) => {
   let breakLines = 0;
   let code = 2;
   if (result.kind === 'ran') {
-    const expectations = await loadExpectations(app, deps);
+    const expectations = result.expectations;
     for (const m of expectations.problems) errLine(io, `golem gate: warning: ${m}`);
     const judged = judgeOutcomes(result.outcomes, expectations.byId);
     code = gateExitCode(judged.map((j) => ({ ...j.outcome.verdict, expectation: j.expectation })), false);

@@ -2,7 +2,7 @@
 import { gateExitCode } from '../exit.js';
 import { judgeOutcomes } from '../expectation.js';
 import { NOTHING_TO_CHECK, expectationBlock, gateGroups } from '../format.js';
-import { bootstrap, loadExpectations, runGateOnce, writeRunReport } from '../service.js';
+import { bootstrap, runGateOnce, writeRunReport } from '../service.js';
 import type { CommandHandler } from '../run.js';
 import { appFlag, errLine, line, runFlags, showDiagnostics } from './common.js';
 
@@ -18,7 +18,7 @@ export const handler: CommandHandler = async (p, io, deps) => {
     errLine(io, `golem gate: ${NOTHING_TO_CHECK}`);
     return gateExitCode([], false);
   }
-  const expectations = await loadExpectations(boot.app, deps);
+  const expectations = run.expectations;
   for (const m of expectations.problems) errLine(io, `golem gate: warning: ${m}`);
   const judged = judgeOutcomes(run.outcomes, expectations.byId);
   const verdicts = judged.map((j) => ({ ...j.outcome.verdict, expectation: j.expectation }));

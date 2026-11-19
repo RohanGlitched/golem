@@ -68,6 +68,11 @@ export function mergeExpectations(parts: readonly ParsedExpectations[]): ParsedE
 
 export const expectationOf = (m: ReadonlyMap<string, Expectation>, id: string): Expectation => m.get(id) ?? DEFAULT_EXPECTATION;
 
+/** The table of the files whose text is in `texts`, in `files` order: the only way the kit reads a table. */
+export function readExpectations(texts: Readonly<Record<string, string>>, files: readonly string[]): ParsedExpectations {
+  return mergeExpectations(files.filter((f) => Object.prototype.hasOwnProperty.call(texts, f)).map((f) => parseExpectations(texts[f] as string)));
+}
+
 /** True when the verdict is what the expectation asks for. An `error` verdict meets neither. */
 export function meetsExpectation(status: Verdict['status'], e: Expectation): boolean {
   return e === 'Expected_Break' ? status === 'broken' : status === 'held';

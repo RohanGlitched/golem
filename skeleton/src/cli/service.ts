@@ -3,7 +3,7 @@ import { extractCriteria } from '../ears/index.js';
 import type { FalsifyOptions, FalsifyResult, PinnedSeedEntry } from '../falsify/index.js';
 import type { KitDeps } from './deps.js';
 import { locateApp, type LocatedApp } from './config.js';
-import { mergeExpectations, parseExpectations, type ParsedExpectations } from './expectation.js';
+import { readExpectations, type ParsedExpectations } from './expectation.js';
 import { sortDiagnostics } from './format.js';
 import { relative } from './paths.js';
 import { reportVerdict, createUnitCapture } from './signal-units.js';
@@ -50,6 +50,7 @@ export async function compileAll(app: LocatedApp, robotApp: RobotApp, deps: KitD
   const requirements: CompiledRequirement[] = [];
   const diagnostics: FileDiagnostic[] = [];
   const seen = new Map<string, string>();
+  const texts: Record<string, string> = {};
   for (const file of files) {
     let text: string;
     try {
@@ -58,6 +59,7 @@ export async function compileAll(app: LocatedApp, robotApp: RobotApp, deps: KitD
       if ((e as { code?: string }).code === 'ENOENT') throw new MissingFileError(file);
       throw e;
     }
+    texts[file] = text;
     const r = deps.compileFile(text, robotApp.lexicon);
     for (const d of r.diagnostics) diagnostics.push({ ...d, file });
     if (extractCriteria(text).criteria.length === 0) {
@@ -78,16 +80,26 @@ export async function compileAll(app: LocatedApp, robotApp: RobotApp, deps: KitD
       requirements.push(req);
     }
   }
-  return { requirements, diagnostics: sortDiagnostics(diagnostics, files), files };
+  return { requirements, diagnostics: sortDiagnostics(diagnostics, files), files, texts };
 }
 
-/** The Expectation tables of every listed Requirements_File. A file that cannot be read is skipped (compileAll reports it). */
+/**
+ * The Expectation tables of every listed Requirements_File, read now (used by `test` and the MCP tools; the gate builds
+ * its table from the text it compiled). A file that is absent is skipped, because compileAll reports it; any other read
+ * error is not swallowed.
+ */
 export async function loadExpectations(app: Pick<LocatedApp, 'config'>, deps: Pick<KitDeps, 'fs'>): Promise<ParsedExpectations> {
-  const parts: ParsedExpectations[] = [];
+  const texts: Record<string, string> = {};
+  const files: string[] = [];
   for (const file of app.config.requirements) {
-    try { parts.push(parseExpectations(await deps.fs.readFile(file))); } catch { /* absent file: no table */ }
+    try {
+      texts[file] = await deps.fs.readFile(file);
+      files.push(file);
+    } catch (e) {
+      if ((e as { code?: string }).code !== 'ENOENT') throw e;
+    }
   }
-  return mergeExpectations(parts);
+  return readExpectations(texts, files);
 }
 
 export const hasErrors = (d: readonly FileDiagnostic[]): boolean => d.some((x) => x.severity === 'error');
@@ -206,7 +218,7 @@ export async function withPool<T>(
 export type GateRun =
   | { kind: 'compile-error'; diagnostics: FileDiagnostic[]; compiled: CompileOutcome }
   | { kind: 'empty'; compiled: CompileOutcome }
-  | { kind: 'ran'; outcomes: RequirementOutcome[]; compiled: CompileOutcome; durationS: number; totalTrials: number };
+  | { kind: 'ran'; outcomes: RequirementOutcome[]; compiled: CompileOutcome; expectations: ParsedExpectations; durationS: number; totalTrials: number };
 
 /** One gate pass: compile, then pinned seeds and the quick budget for every requirement, then the pinned rule. */
 export async function runGateOnce(
@@ -217,11 +229,13 @@ export async function runGateOnce(
   const compiled = await compileAll(app, robotApp, deps);
   if (hasErrors(compiled.diagnostics)) return { kind: 'compile-error', diagnostics: compiled.diagnostics, compiled };
   if (compiled.requirements.length === 0) return { kind: 'empty', compiled };
+  // The table comes from the text that was compiled, before the first trial (defect 9).
+  const expectations = readExpectations(compiled.texts, compiled.files);
   const t0 = deps.clock();
   const o: RunOptions = { mode: 'full', budgetKind: 'gate', ...flags, ...(signal !== undefined ? { signal } : {}) };
   const raw = await withPool(deps, app, robotApp, flags.workers, (pool) => runRequirements(app, robotApp, compiled.requirements, o, deps, pool));
   const outcomes = raw.map(applyPinnedRule);
-  return { kind: 'ran', outcomes, compiled, durationS: (deps.clock() - t0) / 1000, totalTrials: outcomes.reduce((n, x) => n + x.verdict.trials, 0) };
+  return { kind: 'ran', outcomes, compiled, expectations, durationS: (deps.clock() - t0) / 1000, totalTrials: outcomes.reduce((n, x) => n + x.verdict.trials, 0) };
 }
 
 // ---------------------------------------------------------------- report

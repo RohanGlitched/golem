@@ -15,10 +15,10 @@ Rules for every task:
   - Save the output of probes 1 to 6 and `mutate.mjs` on the unfixed code in `docs/reviews/gate-hardening-runs/before-*.txt`.
   - _Bugfix: introduction_
 
-- [ ] 2. Read the table once, from the compiled text (defect 9)
+- [x] 2. Read the table once, from the compiled text (defect 9)
   - `compileAll` returns `texts`; `readExpectations(texts, files)` builds the table; `runGateOnce` builds it before any trial and returns it in `ran`; `gate` and `gate --kiro` stop calling `loadExpectations`. `loadExpectations` ignores only `ENOENT`.
   - Test: a file rewritten while the pool runs (the test pool edits the file on its first trial) gives marks of the version that was compiled; an `EACCES` read error is not swallowed.
-  - [ ] 2.1 Property test: for any table text and requirement text, `readExpectations` on `compileAll`'s texts equals `parseExpectations` of the same strings (the table never comes from a different read).
+  - [x] 2.1 Property test: for any table text and requirement text, `readExpectations` on `compileAll`'s texts equals `parseExpectations` of the same strings (the table never comes from a different read).
   - _Bugfix: 9.1 to 9.4_
 
 - [ ] 3. Structured table issues and reconciliation (defect 1, core)
