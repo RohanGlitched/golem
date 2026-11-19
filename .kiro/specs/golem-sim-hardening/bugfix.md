@@ -179,7 +179,7 @@ Supersedes golem-sim 9.13 and Property 11 (`-Infinity`).
 
 ## Improvement 3: trajectory hash
 
-3.I1 THE runner SHALL return `TrialResult.hash`, a 16-hex-digit hash of the IEEE-754 bytes of `qpos` after `mj_forward` and after every sim step (warm-up included), plus `nq` and the step count, computed with 32-bit integer operations only so that every JavaScript engine gives the same digest for the same trajectory.
+3.I1 THE runner SHALL return `TrialResult.hash`, a 16-hex-digit hash of the IEEE-754 bytes of `qpos` in the initial state (after `initState`, `mj_forward` and `makeController`) and after every sim step (warm-up included), plus `nq` and the step count, computed with 32-bit integer operations only so that every JavaScript engine gives the same digest for the same trajectory.
 3.I2 Pose recording and the early-stop hook decision SHALL NOT change the hash of the steps that were run.
 
 ## Improvement 4: sim-rate PD hook and torque saturation
