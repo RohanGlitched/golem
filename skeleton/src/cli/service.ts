@@ -3,6 +3,7 @@ import { extractCriteria } from '../ears/index.js';
 import type { FalsifyOptions, FalsifyResult, PinnedSeedEntry } from '../falsify/index.js';
 import type { KitDeps } from './deps.js';
 import { locateApp, type LocatedApp } from './config.js';
+import { mergeExpectations, parseExpectations, type ParsedExpectations } from './expectation.js';
 import { sortDiagnostics } from './format.js';
 import { relative } from './paths.js';
 import { reportVerdict, createUnitCapture } from './signal-units.js';
@@ -78,6 +79,15 @@ export async function compileAll(app: LocatedApp, robotApp: RobotApp, deps: KitD
     }
   }
   return { requirements, diagnostics: sortDiagnostics(diagnostics, files), files };
+}
+
+/** The Expectation tables of every listed Requirements_File. A file that cannot be read is skipped (compileAll reports it). */
+export async function loadExpectations(app: Pick<LocatedApp, 'config'>, deps: Pick<KitDeps, 'fs'>): Promise<ParsedExpectations> {
+  const parts: ParsedExpectations[] = [];
+  for (const file of app.config.requirements) {
+    try { parts.push(parseExpectations(await deps.fs.readFile(file))); } catch { /* absent file: no table */ }
+  }
+  return mergeExpectations(parts);
 }
 
 export const hasErrors = (d: readonly FileDiagnostic[]): boolean => d.some((x) => x.severity === 'error');

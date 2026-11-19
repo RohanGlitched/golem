@@ -7,7 +7,7 @@ import type { ParsedCommand } from '../cli/args.js';
 import { ConfigError, locateApp } from '../cli/config.js';
 import type { CliIo, KitDeps } from '../cli/deps.js';
 import type { TrialPool } from '../cli/sibling-types.js';
-import { MissingFileError, compileAll } from '../cli/service.js';
+import { MissingFileError, compileAll, loadExpectations } from '../cli/service.js';
 import { withTimeCap } from './cap.js';
 import { FifoQueue, WriteQueue } from './queue.js';
 import { makeToolResult, type ToolResult } from './result.js';
@@ -104,6 +104,7 @@ export async function createGolemServer(o: GolemServerOptions): Promise<GolemSer
           signal, capFired, deps: o.deps, app: o.app, located, robotApp,
           getPool: async () => { usedPool = true; return getPool(); },
           compile: () => compileAll(located, robotApp, o.deps),
+          expectations: () => loadExpectations(located, o.deps),
           runQueue, writeQueue,
         };
         const running = def.handler(valid.value, ctx);

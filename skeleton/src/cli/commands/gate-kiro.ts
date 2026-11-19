@@ -2,9 +2,10 @@
 // error (exit 1, nothing on stdout). A block is one JSON line on stdout; everything else goes to stderr.
 import { gateExitCode } from '../exit.js';
 import { elapsedSeconds, gateCounter, parseStopPayload, pruneState } from '../gate-counter.js';
-import { NOTHING_TO_CHECK, buildReason, diagnosticsReason, gateBlock, redAllowMessage } from '../format.js';
+import { judgeOutcomes } from '../expectation.js';
+import { NOTHING_TO_CHECK, buildReason, diagnosticsReason, expectationBlock, redAllowMessage } from '../format.js';
 import {
-  bootstrap, gateStatePath, reportPath, runGateOnce, writeRunReport, type GateRun,
+  bootstrap, gateStatePath, loadExpectations, reportPath, runGateOnce, writeRunReport, type GateRun,
 } from '../service.js';
 import { atomicWriteFile, readGateState, readReport, stableJson, tmpCounter, writeGateState } from '../store.js';
 import type { CommandHandler } from '../run.js';
@@ -38,17 +39,20 @@ export const handler: CommandHandler = async (p, io, deps) => {
   const blocks: string[] = [];
   const notHeld: { id: string; ears: string }[] = [];
   let green = false;
+  let breakLines = 0;
   let code = 2;
   if (result.kind === 'ran') {
-    const verdicts = result.outcomes.map((o) => o.verdict);
-    code = gateExitCode(verdicts, false);
+    const expectations = await loadExpectations(app, deps);
+    for (const m of expectations.problems) errLine(io, `golem gate: warning: ${m}`);
+    const judged = judgeOutcomes(result.outcomes, expectations.byId);
+    code = gateExitCode(judged.map((j) => ({ ...j.outcome.verdict, expectation: j.expectation })), false);
     green = code === 0;
-    for (const o of result.outcomes) {
-      if (o.verdict.status === 'held') continue;
-      blocks.push(gateBlock(o, o.req.source));
-      notHeld.push({ id: o.verdict.reqId, ears: o.req.source });
-    }
-  } else if (result.kind === 'compile-error') {
+    breakLines = judged.filter((j) => j.expectation === 'Expected_Break').length;
+    for (const j of judged) {
+      if (j.met) continue;
+      blocks.push(expectationBlock(j));
+      notHeld.push({ id: j.outcome.verdict.reqId, ears: j.expectation === 'Expected_Break' ? `${j.outcome.req.source} (${j.miss})` : j.outcome.req.source });
+    }  } else if (result.kind === 'compile-error') {
     blocks.push(diagnosticsReason(result.diagnostics));
     notHeld.push({ id: 'compile', ears: `the requirements do not compile (${result.diagnostics.filter((d) => d.severity === 'error').length} errors)` });
   } else if (result.kind === 'empty') {
@@ -82,7 +86,8 @@ export const handler: CommandHandler = async (p, io, deps) => {
   }
 
   if (green) {
-    if (result.kind === 'ran') errLine(io, `no counterexample found in ${result.totalTrials} trials (${result.outcomes.length} requirements, pinned seeds first, then the quick budget)`);
+    if (result.kind === 'ran' && breakLines > 0) errLine(io, `gate GREEN: every requirement meets its expectation (${result.outcomes.length - breakLines} Expected_Hold held, ${breakLines} Expected_Break broke; ${result.totalTrials} trials)`);
+    else if (result.kind === 'ran') errLine(io, `no counterexample found in ${result.totalTrials} trials (${result.outcomes.length} requirements, pinned seeds first, then the quick budget)`);
     return 0;
   }
   if (!decision.allowStop) {

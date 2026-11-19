@@ -1,6 +1,7 @@
 // Output formatting: one line per requirement, gate blocks, the bounded Kiro reason, Diagnostics.
 // Voice follows product.md: plain and exact, a unit on every physical number.
 import type { Kind } from '../ears/index.js';
+import { expectationTag, type Expectation, type Judged } from './expectation.js';
 import type { ProgressEvent } from '../falsify/index.js';
 import type { CompiledRequirement, Scenario, ScenarioSpace } from './sibling-types.js';
 import type { FileDiagnostic, RequirementOutcome } from './types.js';
@@ -62,7 +63,12 @@ function firstError(o: RequirementOutcome): string {
 }
 
 /** Requirements 4.8, 4.9. */
-export function requirementLine(o: RequirementOutcome): string {
+export function requirementLine(o: RequirementOutcome, expectation?: Expectation): string {
+  const base = requirementLineBase(o);
+  return expectation === undefined ? base : `${base}  ${expectationTag(o.verdict.status, expectation)}`;
+}
+
+function requirementLineBase(o: RequirementOutcome): string {
   const v = o.verdict;
   const head = `${v.reqId}  ${STATUS_WORD[v.status]}`;
   if (v.status === 'error') return `${head}  ${v.trials} trials  ${firstError(o)}`;
@@ -104,6 +110,32 @@ export function gateBlock(o: RequirementOutcome, earsLine: string): string {
   }
   lines.push(`  reproduce: npx golem-spec replay ${id}`);
   return lines.join('\n');
+}
+
+/** The block of a line that does not meet its expectation: the EARS line, what was expected, what happened, how to look. */
+export function expectationBlock(j: Judged): string {
+  const o = j.outcome;
+  const id = o.verdict.reqId;
+  if (j.expectation === 'Expected_Hold' || o.verdict.status === 'error') return gateBlock(o, o.req.source);
+  return [
+    `${id}: ${o.req.source}`,
+    `  ${j.miss}`,
+    `  closest margin: ${formatMargin(o.verdict.closest.robustness, o.unit)} at ${formatScenario(o.req.space, o.verdict.closest.scenario)} (seed ${o.verdict.closest.seed})`,
+    `  look further: npx golem-spec falsify ${id} --budget 200, or move this line to Expected_Hold if the controller now holds it`,
+  ].join('\n');
+}
+
+/** The two groups of a gate run, one line per requirement: `ok` when the verdict is what the spec expects, `FAIL` when not. */
+export function gateGroups(judged: readonly Judged[]): string[] {
+  const out: string[] = [];
+  for (const group of ['Expected_Hold', 'Expected_Break'] as const) {
+    const js = judged.filter((j) => j.expectation === group);
+    out.push(`${group} (${js.length} ${js.length === 1 ? 'line' : 'lines'}${group === 'Expected_Hold' ? ': must hold' : ': must break'})`);
+    if (js.length === 0) out.push('  none');
+    for (const j of js) out.push(`  ${j.met ? 'ok  ' : 'FAIL'}  ${requirementLine(j.outcome)}${j.met ? '' : `  <- ${j.miss}`}`);
+    out.push('');
+  }
+  return out;
 }
 
 /** Joins blocks with one blank line and cuts at a line boundary to at most `max` characters (requirement 8.7). */

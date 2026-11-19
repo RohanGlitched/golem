@@ -1,6 +1,7 @@
 // Tool definitions and a 60-line input validator (no zod, see design D5).
 import type { KitDeps } from '../cli/deps.js';
 import type { LocatedApp } from '../cli/config.js';
+import type { ParsedExpectations } from '../cli/expectation.js';
 import type { RobotApp, TrialPool } from '../cli/sibling-types.js';
 import type { CompileOutcome } from '../cli/types.js';
 import type { FifoQueue, WriteQueue } from './queue.js';
@@ -44,6 +45,8 @@ export interface ToolCtx {
   getPool(): Promise<TrialPool>;
   /** Compiles the Requirements_Files on every call, so edits are seen at once. */
   compile(): Promise<CompileOutcome>;
+  /** The Expectation tables of the Requirements_Files, read on every call (absent row = Expected_Hold). */
+  expectations(): Promise<ParsedExpectations>;
   /** One falsification at a time, in arrival order (12.8). */
   runQueue: FifoQueue;
   /** Serialises proposal writes (14.11). */
