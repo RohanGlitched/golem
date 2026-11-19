@@ -19,10 +19,17 @@ describe('studio CSS', () => {
     expect(css).toMatch(/\.golem-stage::after\{[^}]*radial-gradient/);
     expect(css).not.toMatch(/box-shadow/i);
     // experience.md 1 (binding) supersedes "Gloock for headlines only": the response clause of the selected
-    // requirement is set in Gloock at 39 to 61 px. No other rule uses it.
+    // requirement is set in Gloock. No other rule uses it. In the 380 px column the response is 28 px, so the whole
+    // sentence fits; the 39 to 61 px display size applies only when the tablet is stacked and at least 600 px wide.
     const rules = css.split('}').filter((r) => /Gloock/.test(r)).map((r) => r.trim().split('{')[0]);
     expect(rules).toEqual(['@font-face', '.golem-line-selected .golem-response']);
-    expect(css).toMatch(/\.golem-line-selected \.golem-response\{[^}]*font-size:clamp\(39px,[^,]+,61px\)/);
+    expect(css).toMatch(/\.golem-line-selected \.golem-response\{[^}]*font-size:28px/);
+    expect(css).toMatch(/\.golem-line-selected \.golem-response\{[^}]*overflow-wrap:anywhere/);
+    expect(css).toMatch(/@media \(min-width:600px\) and \(max-width:1023\.98px\)\{\.golem-line-selected \.golem-response\{font-size:clamp\(39px,[^,]+,61px\)\}\}/);
+  });
+  it('keeps the selected sentence at 20 px in the 380 px column, at every desktop width', () => {
+    expect(css).toMatch(/@media \(min-width:1024px\)\{\.golem-sentence\{font-size:16px\}\.golem-line-selected \.golem-sentence\{font-size:20px\}\}/);
+    expect(css).not.toMatch(/@media \(min-width:1440px\)\{\.golem-line-selected/);
   });
   it('makes the stage 56vh in the narrow layout and the tablet 380 px wide otherwise', () => {
     const narrow = css.slice(css.indexOf('@media (max-width:1023.98px)'));

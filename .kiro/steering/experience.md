@@ -7,7 +7,7 @@ fileMatchPattern: ["skeleton/src/ui/**", "apps/**/web/**", "site/**", "skeleton/
 The studio must feel like nothing a judge has seen: a physics instrument where language, matter and sound are one system. Everything stays fast (first frame under 4 s; 60 fps with 64 ghosts on integrated graphics) and premium: cinematic light and real data. Never cartoonish. Each moment below is required unless marked stretch.
 
 ## 1. The living sentence (kinetic EARS)
-- The selected requirement sits large on the tablet: Gloock 39–61 px for the response clause, B612 for the rest.
+- The selected requirement stands out on the tablet: Gloock for the response clause (28 px in the 380 px column, so the whole sentence fits and never overflows; 39-61 px when the tablet is stacked and at least 600 px wide), B612 for the rest.
 - The words are bound to the signals they name, and move **only while a trial plays**:
   - the word "upright" tilts with the robot's torso tilt (CSS transform from the live signal, capped at 12°);
   - "3 s" fills like a fuse over the monitored window;

@@ -16,7 +16,7 @@ function tokenBlock(t: TokenSet): string {
 
 export function studioCss(fontBaseUrl = './fonts/'): string {
   const f = fontBaseUrl.endsWith('/') ? fontBaseUrl : `${fontBaseUrl}/`;
-  const [s13, s16, s20, s25] = TYPE_SCALE;
+  const [s13, s16, s20] = TYPE_SCALE;
   return `
 @font-face{font-family:'B612';src:url('${f}B612-Regular.ttf') format('truetype');font-weight:400;font-display:swap}
 @font-face{font-family:'B612';src:url('${f}B612-Bold.ttf') format('truetype');font-weight:700;font-display:swap}
@@ -67,7 +67,7 @@ export function studioCss(fontBaseUrl = './fonts/'): string {
 .golem-q-input{font:inherit;color:var(--ink);background:var(--ground);border:1px solid var(--clay);border-radius:2px;padding:0 3px}
 .golem-q-msg{display:block;color:var(--break-text);font-size:${s13}px}
 .golem-fracture{position:absolute;left:-4px;right:8%;top:52%;height:1px;background:var(--break);transform:rotate(-1.2deg);transform-origin:left;pointer-events:none}
-.golem-line-selected .golem-response{display:block;margin-top:2px;font-family:'Gloock',Georgia,serif;font-size:clamp(39px,3.4vw,61px);line-height:1.12;letter-spacing:0}
+.golem-line-selected .golem-response{display:block;max-width:100%;margin-top:2px;font-family:'Gloock',Georgia,serif;font-size:28px;line-height:1.15;letter-spacing:0;overflow-wrap:anywhere}
 .golem-line-selected .golem-response .golem-q{min-height:0;text-underline-offset:8px}
 .golem-w.golem-bind-tilt{display:inline-block;transform:rotate(calc(var(--golem-tilt,0) * 1deg));transform-origin:50% 85%}
 .golem-bind{position:relative;display:inline-block}
@@ -135,6 +135,7 @@ export function studioCss(fontBaseUrl = './fonts/'): string {
   .golem-h{font-size:${s20}px}
 }
 @media (min-width:1024px){.golem-sentence{font-size:${s16}px}.golem-line-selected .golem-sentence{font-size:${s20}px}}
-@media (min-width:1440px){.golem-line-selected .golem-sentence{font-size:${s25}px;line-height:1.4}}
+/* The tablet is a 380 px column from 1024 px up, so the selected line stays at 20 px and its response at 28 px: the whole sentence fits the column. When the tablet stacks under the stage and is wide enough, the response goes back to the display size. */
+@media (min-width:600px) and (max-width:1023.98px){.golem-line-selected .golem-response{font-size:clamp(39px,5vw,61px)}}
 `;
 }

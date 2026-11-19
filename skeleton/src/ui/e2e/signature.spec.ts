@@ -206,8 +206,10 @@ test.describe('the living sentence', () => {
     await expect(r).toContainText('stay upright for 3 s');
     const style = await r.evaluate((e) => { const s = getComputedStyle(e); return { family: s.fontFamily, size: parseFloat(s.fontSize) }; });
     expect(style.family).toMatch(/Gloock/);
-    expect(style.size).toBeGreaterThanOrEqual(39);
-    expect(style.size).toBeLessThanOrEqual(61);
+    // the tablet is a 380 px column here: the response is 28 px and never wider than the column
+    expect(style.size).toBe(28);
+    const fits = await r.evaluate((e) => e.scrollWidth <= e.clientWidth && e.getBoundingClientRect().right <= (e.closest('.golem-tablet') as HTMLElement).getBoundingClientRect().right);
+    expect(fits).toBe(true);
   });
 
   test('moves the bound words while the hero is shoved and rests after the fuse', async ({ page }) => {

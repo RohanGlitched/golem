@@ -24,7 +24,7 @@ Out of scope: shove from your phone (6), watch Kiro fix it (7) and aura hover an
 
 #### Acceptance Criteria
 
-1. THE Studio SHALL set the Response_Clause of the Selected_Line in Gloock at 39 px to 61 px, and the rest of the line in B612.
+1. THE Studio SHALL set the Response_Clause of the Selected_Line in Gloock, and the rest of the line in B612. In the 380 px Tablet column the Response_Clause is 28 px (off the type scale on purpose: the whole sentence must fit the column and never overflow it) and the Selected_Line's sentence is 20 px; when the Tablet is stacked under the Stage and is at least 600 px wide, the Response_Clause is 39 px to 61 px.
 2. WHILE Trial_Playing THE Studio SHALL rotate each tilt word ("upright" and the words in `StudioOptions.tiltWords`) by the signed lean of the primary body toward the camera's right, capped at 12°.
 3. WHILE Trial_Playing THE Studio SHALL fill the Fuse_Window quantity from 0 to 1 over the Fuse_Window.
 4. WHILE Trial_Playing THE Studio SHALL grow the underline of the force quantity in proportion to the live push force divided by the line's force, capped at 1.
