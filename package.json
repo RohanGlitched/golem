@@ -1,0 +1,12 @@
+{
+  "name": "golem-monorepo",
+  "private": true,
+  "type": "module",
+  "workspaces": ["skeleton", "apps/stagger", "apps/candy", "site", "evidence"],
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "test": "npm run test --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  }
+}

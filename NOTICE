@@ -1,0 +1,16 @@
+GOLEM
+Copyright 2026 Rohan Borade
+Licensed under the Apache License, Version 2.0.
+
+This product includes software and assets developed by third parties:
+
+- Unitree G1 model and walking policy
+  Copyright Unitree Robotics. Licensed under the BSD-3-Clause license.
+  Used in apps/stagger.
+
+- Franka Emika Panda model from MuJoCo Menagerie
+  Copyright Google DeepMind. Licensed under the Apache License, Version 2.0.
+  Used in apps/candy.
+
+- MuJoCo
+  Copyright Google DeepMind. Licensed under the Apache License, Version 2.0.
