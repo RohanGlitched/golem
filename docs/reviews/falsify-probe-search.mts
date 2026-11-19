@@ -1,7 +1,7 @@
 // Probes 1-3: needle search CEM vs random-only, wrap-around, shrink accuracy.
-import { falsify } from 'file:///I:/Programs/ListofHackathon/hackathons/39-kiroween/golem-wt-earsfix/skeleton/src/falsify/index.ts';
-import { InProcessPool } from 'file:///I:/Programs/ListofHackathon/hackathons/39-kiroween/golem-wt-earsfix/skeleton/src/pool/in-process.ts';
-import type { Scenario, TrialSpec } from 'file:///I:/Programs/ListofHackathon/hackathons/39-kiroween/golem-wt-earsfix/skeleton/src/falsify/contract.ts';
+import { falsify } from '../../skeleton/src/falsify/index.ts';
+import { InProcessPool } from '../../skeleton/src/pool/in-process.ts';
+import type { Scenario, TrialSpec } from '../../skeleton/src/falsify/contract.ts';
 
 type Fn = (s: Scenario, seed: number) => number;
 const angDist = (a: number, lo: number, hi: number): number => {

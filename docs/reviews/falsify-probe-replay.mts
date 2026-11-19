@@ -1,4 +1,4 @@
-const R = 'file:///I:/Programs/ListofHackathon/hackathons/39-kiroween/golem-wt-earsfix/skeleton/src';
+const R = '../../skeleton/src';
 const { falsify } = await import(`${R}/falsify/index.ts`);
 const { InProcessPool } = await import(`${R}/pool/in-process.ts`);
 const space = { dims: [{ name: 'force', kind: 'force', min: 0, max: 250, severity: 'up' }, { name: 'angle', kind: 'angle', min: 0, max: 360, severity: 'none', wrap: true }] };
