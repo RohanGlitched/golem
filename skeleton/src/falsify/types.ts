@@ -8,6 +8,8 @@ export interface SeedReader { read(appId: string, reqId: string): Promise<Pinned
 
 export interface PinnedSeedEntry extends Counterexample {
   classification?: 'robust' | 'seed-sensitive';
+  /** Any verification seed passes at the shrunk scenario (golem-falsify-hardening defect 1). */
+  boundarySensitive?: boolean;
   verificationSeeds?: number[];
   verificationRobustness?: (number | null)[];
 }
@@ -69,8 +71,16 @@ export interface RunMetadata {
   skippedSeedFiles: { path: string; reason: string }[];
   pinnedNotRun: number;
   errors: { phase: 0 | 1 | 2 | 3; message: string; seed?: number }[];
+  /** From the three verification seeds at the original (unshrunk) failure. */
   classification?: 'robust' | 'seed-sensitive';
-  verification?: { seeds: number[]; robustness: (number | null)[]; errors: string[] };
+  /**
+   * True when any verification seed passes at the shrunk scenario. Equal to
+   * `classification === 'seed-sensitive'` when the shrink changed nothing; unset when a trial errored.
+   */
+  boundarySensitive?: boolean;
+  verification?: { scenario: Scenario; seeds: number[]; robustness: (number | null)[]; errors: string[] };
+  /** The same seeds at the shrunk scenario; absent when the shrink changed nothing. */
+  boundaryVerification?: { scenario: Scenario; seeds: number[]; robustness: (number | null)[]; errors: string[] };
 }
 
 export interface FalsifyResult { verdict: Verdict; meta: RunMetadata; pinEntry?: PinnedSeedEntry }

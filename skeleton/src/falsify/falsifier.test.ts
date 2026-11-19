@@ -54,7 +54,7 @@ describe('falsify: Phases 0 and 1', () => {
     expect(r.meta.classification).toBe('robust');
     expect(r.pinEntry?.verificationSeeds).toHaveLength(3);
     expect(r.verdict.trials).toBe(r.meta.phaseTrials.p0 + r.meta.phaseTrials.p1 + r.meta.phaseTrials.p2 + r.meta.phaseTrials.p3);
-    expect(r.meta.p3Detail.verification).toBe(3);
+    expect(r.meta.p3Detail.verification).toBe(6); // 3 at the original failure, 3 at the shrunk point
     expect(r.verdict.closest.robustness).toBeLessThanOrEqual(c.robustness);
   });
 
@@ -194,8 +194,8 @@ describe('falsify: Phase 2, Phase 3, random-only and abort', () => {
     expect(r.verdict.counterexample!.shrunk).toBe(true);
     expect(r.meta.p3Detail.shrink).toBeGreaterThan(0);
     expect(r.meta.p3Detail.shrink).toBeLessThanOrEqual(r.meta.shrinkReserve!);
-    expect(r.meta.p3Detail.verification).toBe(3);
-    expect(r.verdict.trials).toBeLessThanOrEqual(T + r.meta.shrinkReserve! + 3);
+    expect(r.meta.p3Detail.verification).toBe(6); // 3 at the original failure, 3 at the shrunk point
+    expect(r.verdict.trials).toBeLessThanOrEqual(T + r.meta.shrinkReserve! + 6);
     expect(r.meta.phaseTrials.p1 + r.meta.phaseTrials.p2).toBe(T);
   });
 

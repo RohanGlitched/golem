@@ -23,7 +23,7 @@ Rules for every task:
   - Add `removeTempDir` to a pool testkit with `maxRetries: 10, retryDelay: 50`; use it at every call site.
   - _Bugfix: 6.2–6.4_
 
-- [ ] 4. Classify at the original failure (defect 1)
+- [x] 4. Classify at the original failure (defect 1)
   - Test: on `(150 - force)/250 + 0.02·N(0,1)`, at least 28 of 30 runs are `robust`; `boundarySensitive` is set; no extra trials when the shrink changed nothing; the seed-sensitive case stays `seed-sensitive`.
   - Update the trial bound to `T + R + 6` in the accounting property.
   - _Bugfix: 1.2–1.8_

@@ -366,28 +366,54 @@ export async function falsify(
       };
       for (const m of outcome.errors) meta.errors.push({ phase: 3, message: `shrink trial: ${m}` });
 
-      // verification: always runs, even with the budget gone
+      // Verification: always runs, even with the budget gone. The label comes from the original
+      // failure (where the search found it); the shrunk point, whose margin is about 0, is checked
+      // separately and reported as `boundarySensitive` (golem-falsify-hardening defect 1).
       const vSeeds = verificationSeeds(searchSeed, pick.seed);
-      const vSpecs = vSeeds.map((s) => specFor({ ...counterexample!.scenario }, s));
-      const vb = await runBatch(vSpecs);
-      const vGot = ingest(3, vSpecs, vb);
+      const origScenario = { ...pick.scenario };
+      const shrunkScenario = { ...counterexample!.scenario };
+      const needBoundary = space.dims.some((d) => shrunkScenario[d.name] !== origScenario[d.name]);
+      const vSpecs = vSeeds.map((s) => specFor({ ...origScenario }, s));
+      const bSpecs = needBoundary ? vSeeds.map((s) => specFor({ ...shrunkScenario }, s)) : [];
+      const allSpecs = [...vSpecs, ...bSpecs];
+      const vb = await runBatch(allSpecs);
+      const vGot = ingest(3, allSpecs, vb);
       meta.p3Detail.verification += vGot.scenarios.length;
       meta.phaseTrials.p3 += vGot.scenarios.length;
       p3Scen.push(...vGot.scenarios);
       p3Rob.push(...vGot.robustness);
-      const vRob: (number | null)[] = vSpecs.map((_, k) => {
+      const robAt = (k: number): number | null => {
         const r = vb.results[k];
         return r === undefined || Number.isNaN(r.robustness) ? null : r.robustness;
-      });
-      const vErrors: string[] = [];
-      vSpecs.forEach((s, k) => { if (vRob[k] === null) vErrors.push(`seed ${s.seed}: ${vb.rejected !== undefined ? errorMessage(vb.rejected) : 'NaN robustness'}`); });
+      };
+      const errorsFor = (specs: TrialSpec[], offset: number): string[] => {
+        const out: string[] = [];
+        specs.forEach((s, k) => {
+          if (robAt(offset + k) === null) out.push(`seed ${s.seed}: ${vb.rejected !== undefined ? errorMessage(vb.rejected) : 'NaN robustness'}`);
+        });
+        return out;
+      };
+      const vRob = vSpecs.map((_, k) => robAt(k));
       const cls = classify(vRob);
       if (cls !== undefined) meta.classification = cls;
-      meta.verification = { seeds: [...vSeeds], robustness: vRob, errors: vErrors };
+      meta.verification = { scenario: origScenario, seeds: [...vSeeds], robustness: vRob, errors: errorsFor(vSpecs, 0) };
+      let boundarySensitive: boolean | undefined;
+      if (needBoundary) {
+        const bRob = bSpecs.map((_, k) => robAt(vSpecs.length + k));
+        meta.boundaryVerification = {
+          scenario: shrunkScenario, seeds: [...vSeeds], robustness: bRob, errors: errorsFor(bSpecs, vSpecs.length),
+        };
+        const bCls = classify(bRob);
+        if (bCls !== undefined) boundarySensitive = bCls === 'seed-sensitive';
+      } else if (cls !== undefined) {
+        boundarySensitive = cls === 'seed-sensitive';
+      }
+      if (boundarySensitive !== undefined) meta.boundarySensitive = boundarySensitive;
       emit(3, 0, p3Scen, p3Rob);
       pinEntry = {
         ...counterexample,
         ...(cls !== undefined ? { classification: cls } : {}),
+        ...(boundarySensitive !== undefined ? { boundarySensitive } : {}),
         verificationSeeds: [...vSeeds],
         verificationRobustness: vRob,
       };
