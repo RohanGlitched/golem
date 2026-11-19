@@ -8,81 +8,40 @@
 import {
   CANDY_COUNT, CANDY_HALF_HEIGHT, CANDY_MASS_RANGE, CANDY_SPAWN, HAND_ENTRY_FALLBACK, HAND_HEIGHT_RANGE, MAX_TRACKER_LAG, UD,
 } from './constants';
-import type { Dimension, PerturbationTemplate, Quantity, SimContext, Slots } from './contract';
+import type { PerturbationTemplate, SimContext, SlotDimension } from './contract';
 import { candyIds } from './controller/ids';
 import { handPose, resolveOverlaps } from './geometry';
 import { clamp, runtimeFor } from './runtime';
 
-const TWO_PI = 2 * Math.PI;
 /** Widest hand speed that apply accepts (m/s). The studio limits a dragged hand to 3 m/s as well. */
 export const HAND_SPEED_MAX = 3;
 
-// ---------------------------------------------------------------- slot helpers (compile time)
+// ---------------------------------------------------------------- slots
+//
+// golem-ears builds every Dimension from the range written in the line and passes it to `apply` or `begin` under
+// the slot name. A slot the phrase carries ({direction}, {range:speed}, {range:duration}, ...) takes its range from
+// the line. A hidden slot (`range` declared here) is one the phrase does not carry: the hand's entry time and height
+// and the candy placements are part of the scene, not of the requirement text, so the lexicon fixes their ranges.
 
-type Pair = [Quantity, Quantity];
-const isPair = (v: unknown): v is Pair => Array.isArray(v) && v.length === 2;
-const isQuantity = (v: unknown): v is Quantity => typeof v === 'object' && v !== null && !Array.isArray(v) && 'si' in v;
+/** Slots of the hand: `direction` and `speed` come from the line, `entry` and `height` are hidden. */
+export const HAND_SLOTS: Record<string, SlotDimension> = {
+  direction: { dim: 'hand.angle', severity: 'none' },
+  speed: { dim: 'hand.speed', severity: 'up' },
+  entry: { dim: 'hand.entry', severity: 'none', range: { kind: 'duration', min: 0, max: HAND_ENTRY_FALLBACK } },
+  height: { dim: 'hand.height', severity: 'none', range: { kind: 'length', min: HAND_HEIGHT_RANGE.min, max: HAND_HEIGHT_RANGE.max } },
+};
 
-function rangeDim(name: string, v: Slots[string] | undefined, kind: Dimension['kind'], severity: Dimension['severity']): Dimension {
-  if (isPair(v)) return { name, kind, min: v[0].si, max: v[1].si, severity };
-  if (isQuantity(v)) return { name, kind, min: v.si, max: v.si, severity };
-  throw new Error(`${name}: expected a ${kind} or a ${kind} range`);
-}
+/** The tracker lag comes from `{range:duration}`. */
+export const LAG_SLOT: Record<string, SlotDimension> = { duration: { dim: 'tracker.lag', severity: 'up' } };
 
-/** `any direction` = [0, 2 pi), `behind` = [135 deg, 225 deg], a fixed angle otherwise. */
-function directionDim(v: Slots[string] | undefined): Dimension {
-  const base = { name: 'hand.angle', kind: 'angle' as const, severity: 'none' as const };
-  if (v === 'any direction') return { ...base, wrap: true, min: 0, max: TWO_PI };
-  if (v === 'behind') return { ...base, wrap: true, min: (3 * Math.PI) / 4, max: (5 * Math.PI) / 4 };
-  if (isQuantity(v)) return { ...base, min: v.si, max: v.si };
-  throw new Error(`hand.angle: unknown direction '${String(v)}'`);
-}
-
-/** The requirement horizon, if the compiler passed it as the hidden `horizon` slot; the fallback otherwise. */
-function horizonOf(slots: Slots): number {
-  const h = slots['horizon'];
-  return isQuantity(h) && h.si > 0 ? h.si : HAND_ENTRY_FALLBACK;
-}
-
-/**
- * The compiler turns a slot into a perturbation parameter only when a Dimension name ends with the slot name. These
- * Dimensions (hand.angle, hand.entry, hand.height, tracker.lag, candy.<i>.x) have no slot of their own in the phrase,
- * so their values would never reach `apply`. This adds a placeholder slot with the Dimension's short name, which
- * makes the compiler pass the Dimension through. It is a workaround for golem-ears and is harmless once the compiler
- * passes every Dimension itself (see proposals.md).
- */
-function exposeDims(slots: Slots, dims: readonly Dimension[]): void {
-  for (const d of dims) {
-    const short = d.name.slice(d.name.lastIndexOf('.') + 1);
-    const key = /^candy\.\d\.[xy]$/.test(d.name) ? d.name : short;
-    if (!(key in slots)) {
-      try { slots[key] = ''; } catch { /* a frozen slot object: the compiler then has to pass the Dimension itself */ }
-    }
-  }
-}
-
-// ---------------------------------------------------------------- dimensions
-
-export function handDims(slots: Slots): Dimension[] {
-  return [
-    directionDim(slots['direction']),
-    rangeDim('hand.speed', slots['speed'], 'speed', 'up'),
-    { name: 'hand.entry', kind: 'duration', min: 0, max: horizonOf(slots), severity: 'none' },
-    { name: 'hand.height', kind: 'length', min: HAND_HEIGHT_RANGE.min, max: HAND_HEIGHT_RANGE.max, severity: 'none' },
-  ];
-}
-
-export function lagDim(slots: Slots): Dimension {
-  return rangeDim('tracker.lag', slots['duration'], 'duration', 'up');
-}
-
-export function placementDims(): Dimension[] {
-  const dims: Dimension[] = [];
+/** Twelve hidden slots, named like their Dimensions: `candy.<i>.x` and `candy.<i>.y`. */
+export function placementSlots(): Record<string, SlotDimension> {
+  const slots: Record<string, SlotDimension> = {};
   for (let i = 0; i < CANDY_COUNT; i++) {
-    dims.push({ name: `candy.${i}.x`, kind: 'length', min: CANDY_SPAWN.xMin, max: CANDY_SPAWN.xMax, severity: 'none' });
-    dims.push({ name: `candy.${i}.y`, kind: 'length', min: CANDY_SPAWN.yMin, max: CANDY_SPAWN.yMax, severity: 'none' });
+    slots[`candy.${i}.x`] = { dim: `candy.${i}.x`, severity: 'none', range: { kind: 'length', min: CANDY_SPAWN.xMin, max: CANDY_SPAWN.xMax } };
+    slots[`candy.${i}.y`] = { dim: `candy.${i}.y`, severity: 'none', range: { kind: 'length', min: CANDY_SPAWN.yMin, max: CANDY_SPAWN.yMax } };
   }
-  return dims;
+  return slots;
 }
 
 // ---------------------------------------------------------------- apply and begin bodies
@@ -92,7 +51,7 @@ function applyHand(ctx: SimContext, t: number, tTrigger: number, values: Record<
   const rt = runtimeFor(ctx);
   const p = rt.pose;
   handPose(p, t, tTrigger, {
-    angle: values['angle'] ?? values['direction'] ?? 0,
+    angle: values['direction'] ?? 0,
     speed: clamp(values['speed'] ?? 0, 0, HAND_SPEED_MAX),
     entry: clamp(values['entry'] ?? 0, 0, Infinity),
     height: clamp(values['height'] ?? HAND_HEIGHT_RANGE.max, HAND_HEIGHT_RANGE.min, HAND_HEIGHT_RANGE.max),
@@ -104,7 +63,7 @@ function applyHand(ctx: SimContext, t: number, tTrigger: number, values: Record<
 }
 
 function beginLag(ctx: SimContext, values: Record<string, number>): void {
-  runtimeFor(ctx).userdata[UD.lag] = clamp(values['lag'] ?? 0, 0, MAX_TRACKER_LAG);
+  runtimeFor(ctx).userdata[UD.lag] = clamp(values['duration'] ?? 0, 0, MAX_TRACKER_LAG);
 }
 
 /**
@@ -164,20 +123,20 @@ const nothing = (): void => undefined;
 
 export const handReaches: PerturbationTemplate = {
   phrase: 'a hand reaches in from {direction} at {range:speed}',
-  dims: (slots) => { const d = handDims(slots); exposeDims(slots, d); return d; },
+  slots: HAND_SLOTS,
   apply: applyHand,
 };
 
 export const candiesWeigh: PerturbationTemplate = {
   phrase: 'the candies weigh {range:mass}',
-  dims: (slots) => [rangeDim('candy.mass', slots['mass'], 'mass', 'up')],
+  slots: { mass: { dim: 'candy.mass', severity: 'up' } },
   begin: (ctx, values) => setCandyMass(ctx, values['mass'] as number),
   apply: nothing,
 };
 
 export const vacuumWeakens: PerturbationTemplate = {
   phrase: 'the vacuum weakens to {range:ratio}',
-  dims: (slots) => [rangeDim('vacuum.ratio', slots['ratio'], 'ratio', 'down')],
+  slots: { ratio: { dim: 'vacuum.ratio', severity: 'down' } },
   // The ratio is written as given: the suction model clamps it into [0, 1] and records a warning (requirement 3.12).
   begin: (ctx, values) => { runtimeFor(ctx).userdata[UD.vacuum] = values['ratio'] as number; },
   apply: nothing,
@@ -185,14 +144,14 @@ export const vacuumWeakens: PerturbationTemplate = {
 
 export const trackerLags: PerturbationTemplate = {
   phrase: 'the hand tracker lags by {range:duration}',
-  dims: (slots) => { const d = [lagDim(slots)]; exposeDims(slots, d); return d; },
+  slots: LAG_SLOT,
   begin: beginLag,
   apply: nothing,
 };
 
 export const candiesLand: PerturbationTemplate = {
   phrase: 'candies land anywhere on the tray',
-  dims: (slots) => { const d = placementDims(); exposeDims(slots, d); return d; },
+  slots: placementSlots(),
   begin: beginPlacement,
   apply: nothing,
 };
@@ -200,7 +159,7 @@ export const candiesLand: PerturbationTemplate = {
 /** A lagging tracker together with a reaching hand: the lag only matters when a hand comes in. */
 export const trackerLagsAndHandReaches: PerturbationTemplate = {
   phrase: 'the hand tracker lags by {range:duration} and a hand reaches in from {direction} at {range:speed}',
-  dims: (slots) => { const d = [lagDim(slots), ...handDims(slots)]; exposeDims(slots, d); return d; },
+  slots: { ...LAG_SLOT, ...HAND_SLOTS },
   begin: beginLag,
   apply: applyHand,
 };

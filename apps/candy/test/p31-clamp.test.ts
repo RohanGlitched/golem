@@ -28,7 +28,7 @@ const restore = () => {
 describe('clamping', () => {
   it('keeps the hand pose finite and its height inside [0.05, 0.25] m for any value, without throwing', () => {
     fc.assert(fc.property(wild, wild, wild, wild, fc.double({ min: 0, max: 100, noNaN: true }), (angle, speed, entry, height, t) => {
-      expect(() => handReaches.apply(ctx, t, 1.0, { angle, speed, entry, height })).not.toThrow();
+      expect(() => handReaches.apply(ctx, t, 1.0, { direction: angle, speed, entry, height })).not.toThrow();
       const m = ids.handMocap;
       const pos = Array.from((data.mocap_pos as Float64Array).slice(3 * m, 3 * m + 3));
       for (const v of pos) expect(Number.isFinite(v)).toBe(true);
@@ -48,7 +48,7 @@ describe('clamping', () => {
         expect(m).toBeLessThanOrEqual(CANDY_MASS_RANGE.max + 1e-12);
       }
       restore();
-      expect(() => trackerLags.begin!(ctx, { lag })).not.toThrow();
+      expect(() => trackerLags.begin!(ctx, { duration: lag })).not.toThrow();
       expect(data.userdata[UD.lag]).toBeGreaterThanOrEqual(0);
       expect(data.userdata[UD.lag]).toBeLessThanOrEqual(MAX_TRACKER_LAG);
     }), { numRuns: 100 });
@@ -74,9 +74,9 @@ describe('clamping', () => {
   });
 
   it('never throws for a NaN value either', () => {
-    expect(() => handReaches.apply(ctx, 5, 1, { angle: NaN, speed: NaN, entry: NaN, height: NaN })).not.toThrow();
+    expect(() => handReaches.apply(ctx, 5, 1, { direction: NaN, speed: NaN, entry: NaN, height: NaN })).not.toThrow();
     expect(() => candiesWeigh.begin!(ctx, { mass: NaN })).not.toThrow();
     restore();
-    expect(() => trackerLags.begin!(ctx, { lag: NaN })).not.toThrow();
+    expect(() => trackerLags.begin!(ctx, { duration: NaN })).not.toThrow();
   });
 });

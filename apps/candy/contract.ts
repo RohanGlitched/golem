@@ -4,7 +4,7 @@
 import type { Lexicon as BaseLexicon, PerturbationTemplate as BasePerturbation, Quantity, SimContext } from 'golem-spec';
 
 export type {
-  Kind, Quantity, Dimension, Scenario, SimContext, PredicateTemplate, CompiledRequirement, Trace,
+  Kind, Quantity, Dimension, SlotDimension, Scenario, SimContext, PredicateTemplate, CompiledRequirement, Trace,
 } from 'golem-spec';
 
 /** The golem-sim-hardening additions to PerturbationTemplate: begin runs once at the trigger. */

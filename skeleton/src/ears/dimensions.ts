@@ -85,6 +85,15 @@ export function buildDimensions<T extends DimensionTemplate>(
         out.params[s.name] = s.range.min;
       }
     }
+    // Hidden slots: declared with a range, named by no slot of the phrase.
+    const named = new Set(bound.compiled.pattern.flatMap((el) => (typeof el === 'string' ? [] : [(el as MatcherSlot).name])));
+    for (const [slot, spec] of Object.entries(template.slots)) {
+      if (spec.range === undefined || named.has(slot)) continue;
+      const r = spec.range;
+      out.dims.push(toDimension(spec.dim, { kind: r.kind, min: r.min, max: r.max, wrap: r.wrap === true }, spec.severity));
+      out.sources.push(undefined);
+      out.params[slot] = r.min < r.max ? spec.dim : r.min;
+    }
     return out;
   }
 

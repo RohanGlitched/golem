@@ -53,7 +53,20 @@ export type SlotValue = Quantity | [Quantity, Quantity] | string;
  * Declares the scenario Dimension a slot becomes. The compiler builds the Dimension from the
  * range written in the line (kind, min, max and wrap in SI) and takes the name and severity from here.
  */
-export interface SlotDimension { dim: string; severity: 'up' | 'down' | 'none' }
+export interface SlotDimension {
+  dim: string;
+  severity: 'up' | 'down' | 'none';
+  /**
+   * Optional. A declared slot that the phrase does not contain is a hidden slot: the compiler adds
+   * a Dimension with exactly this range (SI) and passes it to `apply` under the slot name. Use it
+   * for what the world does besides what the line says, such as a hand's entry time or where each
+   * candy lands. The line cannot change it. Ignored for a slot that the phrase does contain.
+   */
+  range?: HiddenRange;
+}
+
+/** The SI range of a hidden slot. min === max means fixed. */
+export interface HiddenRange { kind: Kind; min: number; max: number; wrap?: boolean }
 
 /** The parsed SI range of one slot. A fixed value has min === max. */
 export interface SlotRange { kind: Kind; min: number; max: number; wrap: boolean }

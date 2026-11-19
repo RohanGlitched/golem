@@ -6,7 +6,7 @@ import { HandDelay } from '../controller/hand-delay';
 import { trackerLagsAndHandReaches } from '../perturbations';
 import { makeSim } from './helpers/sim';
 
-const values = (lag: number, angle: number) => ({ lag, angle, speed: 0.9, entry: 0.1, height: 0.12 });
+const values = (lag: number, angle: number) => ({ duration: lag, direction: angle, speed: 0.9, entry: 0.1, height: 0.12 });
 
 /** Runs 2.5 s with the hand perturbation and returns the true hand x, y per control step and what the controller read. */
 async function run(lag: number, angle: number) {

@@ -142,7 +142,16 @@ function lintSlots(
   if (declared === undefined && !perturbation) return;
   const decl = declared ?? {};
   const names = new Set(slots.map((s) => s.name));
-  for (const key of Object.keys(decl)) {
+  for (const [key, spec] of Object.entries(decl)) {
+    const r = spec.range;
+    if (r !== undefined) {
+      if (names.has(key)) {
+        add('warning', 'SLOT_IGNORED', `slots.${key} gives a range, but the phrase has a slot of that name, so the range written in the line is used`, t.phrase);
+      } else if (!(Number.isFinite(r.min) && Number.isFinite(r.max) && r.min <= r.max)) {
+        add('error', 'UNKNOWN_SLOT', `slots.${key}.range must have finite bounds with min <= max, found [${String(r.min)}, ${String(r.max)}]`, t.phrase);
+      }
+      continue;
+    }
     if (!names.has(key)) {
       add('error', 'UNKNOWN_SLOT', `slots.${key} names no slot of the phrase; its slots are ${[...names].map((n) => `'${n}'`).join(', ') || 'none'}`, t.phrase);
     }

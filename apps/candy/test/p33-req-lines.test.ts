@@ -52,9 +52,10 @@ describe('requirement lines', () => {
     expect(dims('5.1')).toHaveLength(12);
   });
 
-  it('gives the sorting lines a 45 s horizon and the hand lines the default episode', () => {
+  // golem-ears-hardening (defect 11): an event line with within T is monitored to onset + trigger + 2T, so the hold after the deadline is seen.
+  it('gives the sorting lines a 90 s horizon (2 x 45 s) and the hand lines the default episode', () => {
     const h = (id: string) => compileRequirement(criteria.find((c) => c.id === id)!.text, lexicon).requirement!.horizon;
-    for (const id of ['5.1', '6.1', '7.1']) expect(h(id)).toBe(45);
+    for (const id of ['5.1', '6.1', '7.1']) expect(h(id)).toBe(90);
     for (const id of ['1.1', '2.1', '8.1']) expect(h(id)).toBe(10);
   });
 });
