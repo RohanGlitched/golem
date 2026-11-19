@@ -14,15 +14,35 @@ export interface PinnedSeedEntry extends Counterexample {
   verificationRobustness?: (number | null)[];
 }
 
+/** The distribution one Phase 2 dimension was sampled from; `mu`, `sigma` null for uniform and fixed. */
+export interface CemDimInfo {
+  readonly name: string;
+  readonly kind: 'normal' | 'wrapped' | 'uniform' | 'uniformCircle' | 'fixed';
+  readonly mu: number | null;
+  readonly sigma: number | null;
+}
+
 export interface ProgressEvent {
   readonly phase: 0 | 1 | 2 | 3;
   readonly generation: number;
   readonly scenarios: readonly Readonly<Scenario>[];
+  /** Trial seeds, aligned with `scenarios`. */
+  readonly seeds: readonly number[];
   readonly robustness: readonly number[];
+  /** Minimum robustness so far (Math.min semantics: -0 is below 0). */
   readonly lowestRobustness: number;
   readonly trialsUsed: number;
   readonly trialsRemaining: number | null;
+  /** Milliseconds since the run started, from the run's clock. */
+  readonly elapsedMs: number;
+  /** elapsedMs / maxWallMs; null without a wall limit. */
+  readonly timeFraction: number | null;
+  /** Phase 2 only: the distribution the generation was drawn from, one entry per dimension. */
+  readonly cem?: readonly CemDimInfo[];
 }
+
+/** Second argument of `onResult`. Phase 3: generation 0 = shrink trials, 1 = verification trials. */
+export interface ResultInfo { phase: 0 | 1 | 2 | 3; generation: number; index: number }
 
 export interface FalsifyOptions {
   appId: string;
@@ -44,7 +64,7 @@ export interface FalsifyOptions {
   seedDb?: SeedReader;
   signal?: AbortSignal;
   onProgress?: (e: ProgressEvent) => void | Promise<void>;
-  onResult?: (r: TrialResult) => void;
+  onResult?: (r: TrialResult, info: ResultInfo) => void;
   clock?: () => number;
 }
 

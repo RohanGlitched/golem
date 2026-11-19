@@ -48,7 +48,7 @@ Rules for every task:
   - Tests: the `/proc/cpuinfo` parser counts (physical id, core id) pairs; `defaultNodePoolSize()` equals `physicalCoreCount()` when known.
   - _Bugfix: 8.2–8.4_
 
-- [ ] 10. UI API: progress fields, `ResultInfo`, `replayCounterexample`, `-0` minimum (defect 10, item D)
+- [x] 10. UI API: progress fields, `ResultInfo`, `replayCounterexample`, `-0` minimum (defect 10, item D)
   - Tests: events carry seeds, `elapsedMs`, `timeFraction` and Phase 2 `cem`; `onResult` info matches the generation; a found counterexample replays with `reproduced: true` and poses; `lowestRobustness` is `-0` after `[0, -0]`.
   - _Bugfix: 10.5–10.9, D.1_
 

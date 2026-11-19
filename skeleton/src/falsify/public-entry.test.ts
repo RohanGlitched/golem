@@ -62,7 +62,7 @@ describe('public entry points', () => {
   it('exports everything an app needs from golem-spec and golem-spec/node, so no deep import is required', async () => {
     const main = (await import('../index.js')) as Record<string, unknown>;
     for (const name of [
-      'falsify', 'latinHypercube', 'shrink', 'createSeedDatabase', 'pinCounterexample', 'memoryFileSystem',
+      'falsify', 'latinHypercube', 'shrink', 'createSeedDatabase', 'pinCounterexample', 'memoryFileSystem', 'replayCounterexample',
       'InProcessPool', 'createBrowserPool', 'TrialScheduler',
       'AbortError', 'PoolClosedError', 'CancelledError', 'TrialError', 'TrialCrashError', 'RestartLimitError', 'LoadError', 'SeedDbError',
     ]) expect(typeof main[name], name).toBe('function');
@@ -71,11 +71,13 @@ describe('public entry points', () => {
     const node = (await import('../node.js')) as Record<string, unknown>;
     expect(typeof node['createNodePool']).toBe('function');
     expect(typeof node['nodeFileSystem']).toBe('function');
+    expect(typeof node['physicalCoreCount']).toBe('function');
     const testing = (await import('../testing.js')) as Record<string, unknown>;
     for (const name of ['directPool', 'makeSynthetic', 'syntheticTrialFn', 'fakeWorkerFactory', 'FakeTimers']) expect(typeof testing[name], name).toBe('function');
     expect(main['directPool']).toBeUndefined();
     expect(main['fakeWorkerFactory']).toBeUndefined();
-  });
+    // cold dynamic import of every entry (MCP SDK included): under a full parallel run this took over 5 s
+  }, 30000);
 
   it('maps every package export to a source entry', () => {
     const pkg = JSON.parse(readFileSync(join(skeleton, 'package.json'), 'utf8')) as { exports: Record<string, { default: string }> };

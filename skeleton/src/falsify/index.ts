@@ -4,6 +4,8 @@ export { latinHypercube } from './lhs.js';
 export { shrink, DEFAULT_SHRINK } from './shrink.js';
 export { verificationSeeds, classify } from './classify.js';
 export { failureRateUpper95, clopperPearsonUpper } from './beta.js';
+export { replayCounterexample } from './replay.js';
+export type { ReplayCounterexampleOptions, ReplayedTrial } from './replay.js';
 export { createSeedDatabase, pinCounterexample, canonicalJson, counterexampleEquals } from './seed-db.js';
 export { memoryFileSystem } from './fs.js';
 export {
@@ -11,7 +13,7 @@ export {
 } from './errors.js';
 
 export type {
-  Budget, SeedReader, PinnedSeedEntry, ProgressEvent, FalsifyOptions, ResolvedConfig, RunMetadata, FalsifyResult, ReplayOptions,
+  Budget, SeedReader, PinnedSeedEntry, ProgressEvent, FalsifyOptions, ResolvedConfig, RunMetadata, FalsifyResult, ReplayOptions, ResultInfo, CemDimInfo,
 } from './types.js';
 export type { SeedDatabase } from './seed-db.js';
 export type { FileSystem, MemoryFileSystem, FsMethod, FsCall } from './fs.js';

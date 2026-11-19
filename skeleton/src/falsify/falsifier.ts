@@ -4,7 +4,7 @@
 import { BudgetClock, validateBudget, type SearchPhase } from './budget.js';
 import { failureRateUpper95 } from './beta.js';
 import {
-  initCem, refitCem, sampleGeneration, validateCemParams, type CemParams, type Observed,
+  initCem, refitCem, sampleGeneration, validateCemParams, type CemParams, type CemState, type DimDist, type Observed,
 } from './cem.js';
 import { classify, verificationSeeds } from './classify.js';
 import type {
@@ -16,7 +16,7 @@ import { deriveSeed, SALT } from './prng.js';
 import { ProgressEmitter, safeInvoke } from './progress.js';
 import { shrink, type ShrinkTrialOutcome } from './shrink.js';
 import type {
-  FalsifyOptions, FalsifyResult, PinnedSeedEntry, ReplayOptions, ResolvedConfig, RunMetadata,
+  CemDimInfo, FalsifyOptions, FalsifyResult, PinnedSeedEntry, ReplayOptions, ResolvedConfig, ResultInfo, RunMetadata,
 } from './types.js';
 
 interface Completed { phase: 0 | 1 | 2 | 3; scenario: Scenario; seed: number; robustness: number; run: number }
@@ -107,6 +107,15 @@ function replayOptionsOf(appId: string, searchSeed: number, meta: RunMetadata, c
   };
 }
 
+/** The Phase 2 distribution as shown in progress events (golem-falsify-hardening 10.5). */
+function cemInfo(space: FalsifiableRequirement['space'], state: CemState): CemDimInfo[] {
+  return space.dims.map((d, i) => {
+    const dist = state.dists[i] as DimDist;
+    const ms = dist.kind === 'normal' || dist.kind === 'wrapped' ? { mu: dist.mu, sigma: dist.sigma } : { mu: null, sigma: null };
+    return { name: d.name, kind: dist.kind, ...ms };
+  });
+}
+
 function sameSpec(a: TrialSpec, b: TrialSpec): boolean {
   if (a === b) return true;
   if (a.seed !== b.seed || a.reqId !== b.reqId || a.app !== b.app) return false;
@@ -160,10 +169,17 @@ export async function falsify(
     const r = budget.maxTrials === null ? null : Math.max(0, budget.maxTrials - used());
     return r;
   };
-  const emit = (phase: 0 | 1 | 2 | 3, generation: number, scenarios: Scenario[], robustness: number[]): void => {
+  const emit = (
+    phase: 0 | 1 | 2 | 3, generation: number,
+    got: { scenarios: Scenario[]; seeds: number[]; robustness: number[] }, cem?: CemDimInfo[],
+  ): void => {
     if (aborted()) { emitter.stop(); throw abortError(); }
+    const elapsedMs = budget.elapsedMs();
     emitter.emit({
-      phase, generation, scenarios, robustness, lowestRobustness: lowest, trialsUsed: used(), trialsRemaining: remaining(),
+      phase, generation, scenarios: got.scenarios, seeds: got.seeds, robustness: got.robustness,
+      lowestRobustness: lowest, trialsUsed: used(), trialsRemaining: remaining(),
+      elapsedMs, timeFraction: budget.maxWallMs === null ? null : elapsedMs / budget.maxWallMs,
+      ...(cem !== undefined ? { cem } : {}),
     });
   };
 
@@ -180,18 +196,35 @@ export async function falsify(
     if (closest === undefined || r.robustness < closest.robustness) {
       closest = { robustness: r.robustness, scenario: { ...spec.scenario }, seed: spec.seed };
     }
-    if (r.robustness < lowest) lowest = r.robustness;
+    // Math.min semantics: -0 is below 0 (golem-falsify-hardening 10.8)
+    if (r.robustness < lowest || (r.robustness === 0 && lowest === 0 && Object.is(r.robustness, -0))) lowest = r.robustness;
     if (r.robustness < 0 && phase !== 3) {
       if (failures.length === 0) firstFailAt = trialsRun;
       failures.push(c);
     }
   };
 
-  /** Runs one batch. Throws AbortError on abort. Returns results aligned to specs (undefined = no result). */
-  const runBatch = async (specs: TrialSpec[]): Promise<{ results: (TrialResult | undefined)[]; rejected?: unknown }> => {
+  /**
+   * Runs one batch. Throws AbortError on abort. Returns results aligned to specs (undefined = no result).
+   * `where` labels the results passed to `opts.onResult` (phase, generation, index of the first spec).
+   */
+  const runBatch = async (
+    specs: TrialSpec[], where: { phase: 0 | 1 | 2 | 3; generation: number; offset: number },
+  ): Promise<{ results: (TrialResult | undefined)[]; rejected?: unknown }> => {
     if (aborted()) { emitter.stop(); throw abortError(); }
     const received: TrialResult[] = [];
-    const forward = (r: TrialResult): void => { received.push(r); safeInvoke(opts.onResult, r); };
+    const byIdentity = new Map<TrialSpec, number>(specs.map((s, k) => [s, k]));
+    const told = new Set<number>();
+    const userCb = opts.onResult;
+    const forward = (r: TrialResult): void => {
+      received.push(r);
+      if (userCb === undefined) return;
+      let k = byIdentity.get(r.spec);
+      if (k === undefined || told.has(k)) k = specs.findIndex((s, j) => !told.has(j) && sameSpec(s, r.spec));
+      if (k >= 0) told.add(k);
+      const info: ResultInfo = { phase: where.phase, generation: where.generation, index: where.offset + Math.max(0, k) };
+      safeInvoke((x: TrialResult) => userCb(x, info), r);
+    };
     try {
       const res = await pool.run(specs, forward, signal === undefined ? undefined : { signal });
       if (aborted()) { emitter.stop(); throw abortError(); }
@@ -212,8 +245,9 @@ export async function falsify(
   /** Ingests a batch in input order. Returns arrays for the progress event and whether the batch had an error. */
   const ingest = (
     phase: 0 | 1 | 2 | 3, specs: TrialSpec[], b: { results: (TrialResult | undefined)[]; rejected?: unknown },
-  ): { scenarios: Scenario[]; robustness: number[]; error: boolean; failed: boolean } => {
+  ): { scenarios: Scenario[]; seeds: number[]; robustness: number[]; error: boolean; failed: boolean } => {
     const scenarios: Scenario[] = [];
+    const seeds: number[] = [];
     const robustness: number[] = [];
     let error = false;
     let failed = false;
@@ -224,6 +258,7 @@ export async function falsify(
         const before = failures.length;
         note(phase, spec, r);
         scenarios.push({ ...spec.scenario });
+        seeds.push(spec.seed);
         robustness.push(r.robustness);
         if (Number.isNaN(r.robustness)) error = true;
         if (failures.length > before) failed = true;
@@ -234,6 +269,7 @@ export async function falsify(
         if (phase !== 3) { meta.phaseTrials[`p${phase}` as 'p0' | 'p1' | 'p2'] += 1; errorSeen = true; }
         meta.errors.push({ phase, message: errorMessage(b.rejected), seed: spec.seed });
         scenarios.push({ ...spec.scenario });
+        seeds.push(spec.seed);
         robustness.push(NaN);
       }
     });
@@ -242,7 +278,7 @@ export async function falsify(
       if (phase !== 3) errorSeen = true;
       meta.errors.push({ phase, message: errorMessage(b.rejected) });
     }
-    return { scenarios, robustness, error, failed };
+    return { scenarios, seeds, robustness, error, failed };
   };
 
   const specFor = (scenario: Scenario, seed: number): TrialSpec => ({ app: appId, reqId: req.id, scenario, seed });
@@ -252,10 +288,11 @@ export async function falsify(
   // ---- wall-time estimate (golem-falsify-hardening defect 4): only read the clock under a wall limit
   const timed = budget.maxWallMs !== null;
   const poolSize = Number.isInteger(pool.size) && pool.size >= 1 ? pool.size : 1;
-  const measured = async (specs: TrialSpec[]): Promise<Awaited<ReturnType<typeof runBatch>>> => {
-    if (!timed) return runBatch(specs);
+  type Where = Parameters<typeof runBatch>[1];
+  const measured = async (specs: TrialSpec[], where: Where): Promise<Awaited<ReturnType<typeof runBatch>>> => {
+    if (!timed) return runBatch(specs, where);
     const t0 = now();
-    const b = await runBatch(specs);
+    const b = await runBatch(specs, where);
     budget.observe(countOf(b), now() - t0, poolSize);
     return b;
   };
@@ -268,11 +305,11 @@ export async function falsify(
    * specs that ran, their aligned results, the ingest summary and whether time cut the generation.
    */
   const runGeneration = async (
-    phase: 1 | 2, specs: TrialSpec[], timeLimited: boolean,
+    phase: 1 | 2, generation: number, specs: TrialSpec[], timeLimited: boolean,
   ): Promise<{ ran: TrialSpec[]; results: (TrialResult | undefined)[]; got: Ingested; timeLimited: boolean }> => {
     const split = timed && budget.waveMs() === null && specs.length > poolSize;
     const first = split ? specs.slice(0, poolSize) : specs;
-    const b1: Batch = await measured(first);
+    const b1: Batch = await measured(first, { phase, generation, offset: 0 });
     budget.record(phase, countOf(b1));
     const got1 = ingest(phase, first, b1);
     if (!split || got1.error || got1.failed) {
@@ -283,7 +320,7 @@ export async function falsify(
     const cut = budget.lastGrantTimeLimited || n2 < wanted;
     const second = specs.slice(first.length, first.length + n2);
     if (second.length === 0) return { ran: first, results: b1.results, got: got1, timeLimited: true };
-    const b2: Batch = await measured(second);
+    const b2: Batch = await measured(second, { phase, generation, offset: first.length });
     budget.record(phase, countOf(b2));
     const got2 = ingest(phase, second, b2);
     return {
@@ -291,6 +328,7 @@ export async function falsify(
       results: [...b1.results, ...b2.results],
       got: {
         scenarios: [...got1.scenarios, ...got2.scenarios],
+        seeds: [...got1.seeds, ...got2.seeds],
         robustness: [...got1.robustness, ...got2.robustness],
         error: got2.error, failed: got2.failed,
       },
@@ -318,6 +356,7 @@ export async function falsify(
   });
   const ordered = valid.map((e, i) => ({ e, i })).sort((a, b) => a.e.robustness - b.e.robustness || a.i - b.i).map((x) => x.e);
   const p0Scenarios: Scenario[] = [];
+  const p0Seeds: number[] = [];
   const p0Robustness: number[] = [];
   let p0Error = false;
   let ranP0 = 0;
@@ -326,11 +365,12 @@ export async function falsify(
     if (cfg.maxPinned !== null && ranP0 >= cfg.maxPinned) break;
     if (budget.grant(0, 1) === 0) break;
     const spec = specFor({ ...e.scenario }, e.seed);
-    const b = await measured([spec]);
+    const b = await measured([spec], { phase: 0, generation: 0, offset: ranP0 });
     budget.record(0, countOf(b) || 1);
     ranP0++;
     const got = ingest(0, [spec], b);
     p0Scenarios.push(...got.scenarios);
+    p0Seeds.push(...got.seeds);
     p0Robustness.push(...got.robustness);
     if (got.error) { p0Error = true; continue; }
     const r = got.robustness[0] as number;
@@ -338,7 +378,7 @@ export async function falsify(
     if (got.failed) break;
   }
   meta.pinnedNotRun = ordered.length - ranP0;
-  emit(0, 0, p0Scenarios, p0Robustness);
+  emit(0, 0, { scenarios: p0Scenarios, seeds: p0Seeds, robustness: p0Robustness });
 
   // =========================================================== Phase 1
   const fixedOnly = space.dims.every((d) => d.min === d.max);
@@ -353,7 +393,7 @@ export async function falsify(
       // the generation prefix: a shortened generation is the start of the full-size hypercube (5.5)
       const scenarios = latinHypercube(space, cfg.phase1GenerationSize, searchSeed, g).slice(0, size);
       const specs = scenarios.map((s, k) => specFor(s, deriveSeed(searchSeed, SALT.phase1, i1 + k)));
-      const gen = await runGeneration(1, specs, cutByTime);
+      const gen = await runGeneration(1, g, specs, cutByTime);
       const got = gen.got;
       gen.results.forEach((r, k) => {
         if (r === undefined || Number.isNaN(r.robustness)) return;
@@ -361,7 +401,7 @@ export async function falsify(
         if (r.robustness < 0) phase1Failed++;
         phase1Obs.push({ scenario: gen.ran[k]!.scenario, robustness: r.robustness, index: i1 + k });
       });
-      emit(1, g, got.scenarios, got.robustness);
+      emit(1, g, got);
       if (got.error || got.failed || gen.timeLimited) break;
       g++;
       i1 += gen.ran.length;
@@ -390,9 +430,9 @@ export async function falsify(
         const cutByTime = budget.lastGrantTimeLimited;
         const scenarios = sampleGeneration(space, state, params.genSize, size, params.lhsFraction, searchSeed, g);
         const specs = scenarios.map((s, k) => specFor(s, deriveSeed(searchSeed, SALT.phase2, i2 + k)));
-        const gen = await runGeneration(2, specs, cutByTime);
+        const gen = await runGeneration(2, g, specs, cutByTime);
         const got = gen.got;
-        emit(2, g, got.scenarios, got.robustness);
+        emit(2, g, got, cemInfo(space, state));
         if (got.error || got.failed || gen.timeLimited) break;
         const obs: Observed[] = gen.ran.map((s, k) => ({
           scenario: s.scenario, robustness: (gen.results[k] as TrialResult).robustness, index: runOffset + i2 + k,
@@ -416,6 +456,7 @@ export async function falsify(
     };
     if (!errorSeen) {
       const p3Scen: Scenario[] = [];
+      const p3Seeds: number[] = [];
       const p3Rob: number[] = [];
       let abortedInShrink = false;
       const outcome = await shrink(
@@ -427,7 +468,7 @@ export async function falsify(
             const spec = specFor(cand, pick.seed);
             let b: Awaited<ReturnType<typeof runBatch>>;
             try {
-              b = await measured([spec]);
+              b = await measured([spec], { phase: 3, generation: 0, offset: meta.p3Detail.shrink });
             } catch (e) {
               if (e instanceof AbortError) { abortedInShrink = true; return { error: 'aborted' }; }
               throw e;
@@ -437,6 +478,7 @@ export async function falsify(
             meta.phaseTrials.p3++;
             const got = ingest(3, [spec], b);
             p3Scen.push(...got.scenarios);
+            p3Seeds.push(...got.seeds);
             p3Rob.push(...got.robustness);
             const r = b.results[0];
             if (r === undefined) return { error: errorMessage(b.rejected) };
@@ -461,11 +503,12 @@ export async function falsify(
       const vSpecs = vSeeds.map((s) => specFor({ ...origScenario }, s));
       const bSpecs = needBoundary ? vSeeds.map((s) => specFor({ ...shrunkScenario }, s)) : [];
       const allSpecs = [...vSpecs, ...bSpecs];
-      const vb = await runBatch(allSpecs);
+      const vb = await runBatch(allSpecs, { phase: 3, generation: 1, offset: 0 });
       const vGot = ingest(3, allSpecs, vb);
       meta.p3Detail.verification += vGot.scenarios.length;
       meta.phaseTrials.p3 += vGot.scenarios.length;
       p3Scen.push(...vGot.scenarios);
+      p3Seeds.push(...vGot.seeds);
       p3Rob.push(...vGot.robustness);
       const robAt = (k: number): number | null => {
         const r = vb.results[k];
@@ -494,7 +537,7 @@ export async function falsify(
         boundarySensitive = cls === 'seed-sensitive';
       }
       if (boundarySensitive !== undefined) meta.boundarySensitive = boundarySensitive;
-      emit(3, 0, p3Scen, p3Rob);
+      emit(3, 0, { scenarios: p3Scen, seeds: p3Seeds, robustness: p3Rob });
       pinEntry = {
         ...counterexample,
         ...(cls !== undefined ? { classification: cls } : {}),

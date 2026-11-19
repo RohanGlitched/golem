@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { ProgressEmitter, buildProgressEvent, safeInvoke, type ProgressInput } from './progress.js';
 
 const input = (over: Partial<ProgressInput> = {}): ProgressInput => ({
-  phase: 1, generation: 0, scenarios: [{ f: 1 }], robustness: [0.5], lowestRobustness: 0.5,
-  trialsUsed: 1, trialsRemaining: null, ...over,
+  phase: 1, generation: 0, scenarios: [{ f: 1 }], seeds: [7], robustness: [0.5], lowestRobustness: 0.5,
+  trialsUsed: 1, trialsRemaining: null, elapsedMs: 3, timeFraction: null, ...over,
 });
 
 describe('progress', () => {
