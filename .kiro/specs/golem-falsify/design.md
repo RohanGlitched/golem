@@ -1,5 +1,7 @@
 # Design Document: golem-falsify
 
+> Revised by `golem-falsify-hardening` (Nov 2026): CEM elites and fallback (section 4), shrinker sweep and second pass (5), classification points (6), budget clock and time-aware grants (7), replay options and UI fields (8), Clopper-Pearson tolerance (9), Node pool size (13), defaults table and data models. The requirements text is unchanged; `.kiro/specs/golem-falsify-hardening/bugfix.md` lists the criteria it supersedes.
+
 ## Overview
 
 `golem-falsify` turns one `CompiledRequirement` into one `Verdict`. It is two modules:
@@ -221,43 +223,39 @@ For each non-fixed dimension `d` (independent of every other dimension, 4.5):
 
 **Coverage invariant**: for every non-fixed dimension, `{ floor((v_i - min) / width * n) : i < n }` is a permutation of `0..n-1`. Wrap dimensions partition the circle with the same strata, and `max` is treated as `min` (4.4). A degenerate `width = 0` is a fixed dimension.
 
-**How generations combine.** Each generation `g` is its own Latin hypercube batch of size `n_g`, seeded with `generation = g`. A run with `n` Phase 1 trials and generation size `G` has `ceil(n / G)` generations with sizes `G, G, ..., n mod G` (last one smaller). Batches are not merged into one big hypercube, so stratification holds inside a generation and the union is only stratified per generation. Phase 1 trial `i` (global, 0-based) gets `deriveSeed(searchSeed, 1, i)`.
+**How generations combine.** Each generation `g` is its own Latin hypercube batch of nominal size `G` (`phase1GenerationSize`), seeded with `generation = g`. A generation shortened by the quota or by the time left is the **prefix** of the full size-`G` batch (golem-falsify-hardening 5.5), so a run with `n` Phase 1 trials has `ceil(n / G)` generations, the last one holding the first `n mod G` scenarios of `latinHypercube(space, G, searchSeed, g)`. Batches are not merged into one big hypercube, so stratification holds inside a full generation; a shortened last generation is a uniform sample but not stratified. Phase 1 trial `i` (global, 0-based) gets `deriveSeed(searchSeed, 1, i)`.
 
-**Random-only prefix (Requirement 10.7).** Full mode uses `n1 = quota1` Phase 1 trials and random-only uses `n1' >= n1`. Both split into generations of size `G`. Every complete generation has identical scenarios and seeds in both modes. The first `n1` trials are therefore identical when `n1` is a multiple of `G` or when `n1 = n1'`, which is the stated condition (same generation size and same Phase 1 size `n`). When `n1` is not a multiple of `G` and `n1' > n1`, only the trials of complete generations are guaranteed to match. The test fixes `n`.
+**Random-only prefix (Requirement 10.7).** Full mode uses `n1 = quota1` Phase 1 trials and random-only uses `n1' >= n1`. Because shortened generations are prefixes, the first `n1` trials of both modes are identical for every `n1` (Property 5).
 
 ### 4. Cross-entropy search (`cem.ts`)
 
-```ts
-interface DimDist { kind: 'normal'; mu: number; sigma: number }
-                  | { kind: 'wrapped'; mu: number; sigma: number }
-                  | { kind: 'uniformCircle' }      // degenerate wrap fit
-                  | { kind: 'fixed' }
-interface CemState { dists: DimDist[] }             // one per space.dims entry
-interface CemParams { genSize: number; eliteFraction: number; smoothing: number }  // defaults 16, 0.25, 1
-interface Observed { scenario: Scenario; robustness: number; index: number }       // index = input index
+Revised by golem-falsify-hardening defect 2 (tie-aware elites, uniform fallback, elitism, LHS mix).
 
+```ts
+type DimDist = { kind: 'normal'; mu: number; sigma: number }
+             | { kind: 'wrapped'; mu: number; sigma: number }
+             | { kind: 'uniform' }            // no information, interval dimension
+             | { kind: 'uniformCircle' }      // no information or degenerate wrap fit
+             | { kind: 'fixed' }
+interface CemState { dists: DimDist[]; carried: Observed[] }   // carried: best observations so far
+interface CemParams { genSize: number; eliteFraction: number; smoothing: number; lhsFraction: number }  // DEFAULT_CEM: 32, 0.25, 1, 0.2
+interface Observed { scenario: Scenario; robustness: number; index: number }   // index = run order
+
+function selectElites(obs: Observed[], rho: number): Observed[]            // first ceil(rho*m) in the total order
+function eliteSet(obs: Observed[], slots: number): { elites: Observed[]; informative: boolean }
 function initCem(space, phase1: Observed[], p: CemParams): CemState
 function refitCem(space, prev: CemState, gen: Observed[], p: CemParams): CemState
 function sampleCem(space, state, n, searchSeed, generation): Scenario[]
+function sampleGeneration(space, state, G, n, lhsFraction, searchSeed, generation): Scenario[]
 ```
 
-**Elite selection (all fits).** For `m` observed trials (error and NaN trials removed beforehand, 5.15):
+**Total order.** Robustness ascending, then `index` ascending. `index` is the run order: Phase 1 trial `i`, then `n1 + j` for Phase 2 trial `j`, so observations carried across generations stay totally ordered and completion order never matters (19.4). NaN and error trials are removed first (5.15).
 
-```
-e = ceil(rho * m)                                   // rho = eliteFraction in (0, 1)
-sort by (robustness ascending, index ascending)     // lower input index wins ties (19.4)
-elites = first e
-```
+**Tie-aware elites.** With `γ` the robustness of the `slots`-th observation in the total order, the elites are every observation with robustness `<= γ`. Ties at `γ` enter together, so the index never decides membership. `informative = false` when every observation has the same robustness: then there is nothing to fit.
 
-`index` is the input index inside the generation for refits, and the global Phase 1 trial index for initialisation. Sorting uses a total order, so the result does not depend on completion order.
+**Initial distribution.** From all Phase 1 observations: `eliteSet(phase1, ceil(rho * n1))`. Uninformative, `n1 < 2` or fewer than 2 elites give the uniform distribution (`uniform` for interval dimensions, `uniformCircle` for wrap dimensions). Otherwise each dimension is fitted from the elites as below. `carried` starts as the top `ceil(rho * genSize)` Phase 1 observations.
 
-**Initial distribution (5.1).** From all Phase 1 trials (`m = n1`, `e = ceil(rho * n1)`).
-
-- If `n1 = 0` or `e < 2`: every non-fixed dimension gets `mu = min + width / 2`, `sigma = 0.25 * width` (wrap dimensions too: `kind: 'wrapped'`).
-- Otherwise fit each dimension from the elites as below.
-
-**Refit per generation (5.5).** After a generation with `g` trials and no failing trial: `e = ceil(rho * g)`. If `e < 2`, keep the previous state unchanged (5.13). Otherwise fit each non-fixed dimension from the elites and apply smoothing: `mu' = alpha * mu_fit + (1 - alpha) * mu_prev`, `sigma' = alpha * sigma_fit + (1 - alpha) * sigma_prev`, with `alpha = 1` by default (D3). Smoothing applies only to `normal` and `wrapped` pairs of the same kind. For a wrapped `mu`, blend on the circle (shortest arc). If the generation size `g` is 0 (budget gone), no refit.
-
+**Refit per generation.** `pool = carried ∪ generation`; fewer than 2 usable observations keep the previous state. `slots = ceil(rho * genSize)`; `{ elites, informative } = eliteSet(pool, slots)`. Uninformative gives the uniform distribution; fewer than 2 elites keep the previous state; otherwise fit and smooth: `mu' = alpha * mu_fit + (1 - alpha) * mu_prev`, `sigma' = alpha * sigma_fit + (1 - alpha) * sigma_prev`, `alpha = smoothing` (default 1), for `normal`/`wrapped` pairs of the same kind, wrapped `mu` blended along the shortest arc. `carried` becomes the first `slots` of `pool`. If the budget gives a generation of size 0, no refit.
 **Non-wrap fit** over elite values `x_1..x_e`:
 
 ```
@@ -280,16 +278,16 @@ mu       = min + (mu_theta / (2*pi)) * width               // in [min, max)
 
 `atan2(sum sin, sum cos)` is used instead of an arithmetic mean so that elites on both sides of the seam (for example 358 deg and 2 deg) give a mean near 0 deg, not near 180 deg.
 
-**Sampling (5.2 to 5.4, 5.12).** One stream per generation `rng = mulberry32(deriveSeed(searchSeed, 5, g))`. Draw dimension-major in `space.dims` order, `n` draws per dimension:
+**Sampling a generation (5.2 to 5.4, 5.12).** A generation of nominal size `G` holds `m = round(lhsFraction * G)` Latin-hypercube draws and `G - m` CEM draws; when every dimension is `uniform`, `uniformCircle` or `fixed`, `m = G` (the whole generation is LHS, the distribution random-only search uses). Position `i` is an LHS draw iff `floor((i+1)*m/G) > floor(i*m/G)` (interleaved). The LHS draws are `latinHypercube(space, m, deriveSeed(searchSeed, 6, 0), g)`. The CEM draws come from one stream per generation `rng = mulberry32(deriveSeed(searchSeed, 5, g))`, dimension-major in `space.dims` order, `G - m` draws per dimension:
 
 - `fixed`: `min`, no draw.
 - `normal`: `drawTruncatedNormal(mu, sigma, min, max, rng())`.
 - `wrapped`: normal draw wrapped into `[min, max)` as in section 2.
+- `uniform`: `min + rng() * width`, clamped to `max`.
 - `uniformCircle`: `min + rng() * width`, guarded `< max`.
 
-The Phase 2 trial seed is `deriveSeed(searchSeed, 2, j)` with `j` the Phase 2 trial index, so scenarios and seeds depend only on `(searchSeed, state, j)`.
-
-**Parameter validation (5.6, 5.7).** Generation size must be an integer `>= 2` and `eliteFraction` in `(0, 1)`. Otherwise Phase 2 runs zero trials and the falsifier returns `status: 'error'` unless a failing trial exists (the phase is entered, the options are checked at Phase 2 start, and the error is recorded in `meta.errors`).
+A generation shortened by the quota or the time left is the prefix (first `n`) of the full size-`G` mix, as in Phase 1. The Phase 2 trial seed is `deriveSeed(searchSeed, 2, j)` with `j` the Phase 2 trial index, so scenarios and seeds depend only on `(searchSeed, state, j)`.
+**Parameter validation (5.6, 5.7).** Generation size must be an integer `>= 2`, `eliteFraction` in `(0, 1)`, `smoothing` in `(0, 1]` and `lhsFraction` in `[0, 1)`. Otherwise Phase 2 runs zero trials and the falsifier returns `status: 'error'` unless a failing trial exists (the phase is entered, the options are checked at Phase 2 start, and the error is recorded in `meta.errors`).
 
 ### 5. Shrinker (`shrink.ts`)
 
@@ -314,23 +312,29 @@ Severity coordinate for a `Severity_Dimension` `d` with `width = max - min`:
 
 A wrap dimension with severity `'up'` or `'down'` is shrunk toward `min` in the `[min, max)` coordinate and the interval never crosses the seam. `'none'` and fixed dimensions are never touched.
 
-Procedure, for each Severity_Dimension in `space.dims` order, with the seed fixed to the original seed:
+Procedure for one Severity_Dimension, with the seed fixed to the original seed (sweep added by golem-falsify-hardening defect 7):
 
 ```
 hi = s(current value)       hiValue = current value (kept exactly, no round trip)
 lo = 0                      (milder end, untested)
-if hi == 0: next dimension
-1. test the milder end: trial at s = 0.     failing -> hi = 0, hiValue = v(0), accept, next dimension
+if hi == 0: done
+1. test the milder end: trial at s = 0.     failing -> hi = 0, hiValue = v(0), accept, done
                                              not failing -> lo = 0 (now a tested passing point)
-2. while (hi - lo) > tolerance * width and trialsUsed < maxTrials:
+2. coarse sweep, SWEEP = 8: for k = 1 .. 7, mildest first, while (hi - lo) > tolerance * width:
+       s = k * top / 8   (top = hi at the start of the sweep);  trial at v(s)
+       failing -> hi = s, accept the candidate scenario, end the sweep
+       otherwise -> lo = s
+3. while (hi - lo) > tolerance * width and trialsUsed < maxTrials:
        mid = (lo + hi) / 2 ;  trial at v(mid)
        failing (robustness < 0) -> hi = mid, hiValue = v(mid), accept the candidate scenario
        otherwise                -> lo = mid
 ```
 
+Pass 1 runs this for every Severity_Dimension in `space.dims` order. Pass 2 runs it again for each dimension `d` such that another dimension changed after `d` was last shrunk (only such a change can make a milder value of `d` fail); a single severity dimension never gets a second pass. A half-space costs about `1 + k + log2((hi / 8) / (tolerance * width))` trials, 11 in the audit probe. The sweep finds a failing window below a passing stretch when the window is at least `hi / 8` wide.
+
 A trial that errors or returns NaN counts as not failing (6.13) and is logged in `errors`. `runTrial` returns `null` when the Budget is exhausted, which stops shrinking and returns the scenario accepted so far (6.9). The shrink trial limit is global across dimensions, not per dimension (6.8). Every accepted candidate was confirmed by a trial with robustness below zero, and the input scenario was a failing trial under the same seed. The output scenario is always one of those, so it still fails under the original seed (6.4).
 
-**Soundness without monotonicity.** The failing set of a real robot is not monotone in severity. The bisection assumes it is, only to choose where to look next. If the assumption is wrong, the result is a local answer: the mildest failing value found along that line, not the global mildest. Correctness does not depend on it, because (a) every accepted value is confirmed failing and (b) a candidate is only ever tried at `s < hi`, so severity never increases (6.5). The test generators include non-monotone synthetic functions for this reason.
+**Soundness without monotonicity.** The failing set of a real robot is not monotone in severity. The sweep and the bisection assume it is, only to choose where to look next. If the assumption is wrong, the result is a local answer: the mildest failing value found along that line, not the global mildest. Correctness does not depend on it, because (a) every accepted value is confirmed failing and (b) a candidate is only ever tried at `s < hi`, so severity never increases (6.5). The test generators include non-monotone synthetic functions for this reason.
 
 `shrunk = true` iff the output differs from the input in at least one dimension (6.11). When every Severity_Dimension is already at its milder end the function returns the input and runs no trial (6.12).
 
@@ -341,42 +345,51 @@ function verificationSeeds(searchSeed: number, originalSeed: number): [number, n
 function classify(robustness: (number | null)[]): 'robust' | 'seed-sensitive' | undefined
 ```
 
-The shrunk scenario runs once under each of the three verification seeds in one `pool.run` of 3 specs. `null` marks an error or NaN. Rule: any `null` gives `undefined` (7.5). Otherwise all three `< 0` gives `'robust'`, any `>= 0` gives `'seed-sensitive'`. These trials run even when the Budget is exhausted and are counted in Phase 3 (7.8). The counterexample's `scenario`, `seed` and `robustness` are not changed by classification (7.9).
+Revised by golem-falsify-hardening defect 1. The **original failure** (the failing search trial Phase 3 started from) runs once under each of the three verification seeds; that gives `classification`. When the shrunk scenario differs from the original, the same three seeds also run at the shrunk scenario, in the same `pool.run` (6 specs), and give `boundarySensitive` (true when any of them is `>= 0`, unset on an error); otherwise `boundarySensitive = classification === 'seed-sensitive'` and no extra trial runs. The shrunk point sits on the failure boundary, where the margin is about 0, so a label computed there is close to a coin flip (the audit saw 23 of 30 robust failures labelled seed-sensitive).
+
+`null` marks an error or NaN. Rule: any `null` gives `undefined` (7.5). Otherwise all three `< 0` gives `'robust'`, any `>= 0` gives `'seed-sensitive'`. These trials run even when the Budget is exhausted and are counted in Phase 3 (7.8). The counterexample's `scenario`, `seed` and `robustness` are not changed by classification (7.9). `meta.verification` and `meta.boundaryVerification` record the scenario, seeds, robustness and errors of each set.
 
 ### 7. Budget and clock (`budget.ts`)
 
 ```ts
 class BudgetClock {
-  constructor(budget: Budget, now: () => number)    // now defaults to performance.now
-  started(): void;  elapsedMs(): number
-  trialsUsed: number
-  remainingTrials(): number | null                  // null when no maxTrials
-  trialsExhausted(): boolean;  timeExhausted(): boolean
-  canStartGeneration(phaseQuota?: number, phaseDeadlineMs?: number): boolean
-  grant(wanted: number, phaseQuota?: number): number    // trials allowed for the next generation
-  record(n: number): void
+  constructor(budget: Budget, cfg: BudgetConfig, now?: () => number)   // now defaults to performance.now
+  readonly maxTrials: number | null
+  readonly maxWallMs: number | null
+  readonly shrinkReserve: number | null              // null without maxTrials
+  lastGrantTimeLimited: boolean                      // the last grant was cut by the time left
+  timeStopped: boolean                               // the last grant was cut or refused by the wall limit
+  start(): void;  elapsedMs(): number
+  phaseUsed(p: SearchPhase): number
+  remainingSearch(): number                          // Infinity without maxTrials
+  remainingForProgress(): number | null
+  trialsExhausted(): boolean;  timeExhausted(phase: SearchPhase | 3): boolean
+  observe(n: number, ms: number, poolSize: number): void   // one measured batch
+  waveMs(): number | null                            // estimated ms per wave; null before a batch or without maxWallMs
+  grant(phase: SearchPhase, wanted: number, poolSize?: number): number   // trials for the next generation
+  record(phase: SearchPhase, n: number): void
+  grantShrink(): number;  recordShrink(n: number): void
 }
 ```
 
 **Validation (8.6, 8.7, 8.9).** Run before any trial: at least one of `maxTrials`, `maxWallMs`; `maxTrials` a positive integer; `maxWallMs` a positive finite number; `phase1Fraction` and `phase2Fraction` in [0, 1] with sum `<= 1`. Errors are `RangeError` objects that name the field and the value (or both fractions and their sum).
 
-**Phase quotas (8.8, 8.10, 8.11).** Let `T = maxTrials`, `f1 = phase1Fraction` (default 0.4) and `f2 = phase2Fraction` (default `1 - f1`).
+**Phase quotas (8.8; 8.10 and 8.11 revised by golem-falsify-hardening defect 5).** Let `T = maxTrials`, `f1 = phase1Fraction` (default 0.2, item E) and `f2 = phase2Fraction` (default `1 - f1`), `ε = 1e-9`.
 
 ```
-phase 0:  cap = T                                   // counts against T
-phase 1:  quota1 = min(remaining, floor(f1 * T))    // random-only mode: quota1 = remaining
-phase 2:  quota2 = min(remaining, floor(f2 * T) + (quota1 - used1))   // unused Phase 1 budget carries forward
+phase 0:  cap = T, and at most maxPinned trials          // counts against T
+phase 1:  quota1 = min(T - used0, floor(f1 * T + ε))      // random-only mode: quota1 = T - used0
+phase 2:  quota2 = min(T - used0 - used1, floor((f1 + f2) * T + ε) - used1)   // cumulative cap: unused Phase 1 trials carry forward
 phase 3:  shrink trials come from a separate reserve R = max(reserveMin, ceil(reserveFraction * T)), defaults 12 and 0.15, on top of T; verification seeds always run
 ```
 
-Phase 2 leftover is not carried anywhere (8.11). With a wall limit, Phase 1 stops starting generations at `start + f1 * maxWallMs` and Phase 2 at `start + min(1, f1 + f2) * maxWallMs` (carry-forward of unused Phase 1 time is automatic because Phase 2 shares the clock). Both limits can be active, and the earlier one wins (8.2).
+The cumulative cap means no trial is lost to two separate floors (`T = 7` runs 7 search trials), and `ε` makes a fraction `p / T` give back exactly `p` (used by `meta.replayOptions`). With a wall limit, Phase 1 stops starting generations at `start + f1 * maxWallMs`, Phase 2 at `start + min(1, f1 + f2) * maxWallMs` and shrink trials at `start + (1 + reserveFraction) * maxWallMs`. Both limits can be active, and the earlier one wins (8.2).
 
-`grant(wanted)` returns `min(wanted, quota left, T - used)`. A grant of 0 ends the phase. The last generation shrinks to the grant (5.11, 9.4). Wall time is checked before each generation and before each shrink trial (8.4). A generation already submitted is allowed to finish (8.5).
+**Time-aware grants (golem-falsify-hardening defect 4).** Under a wall limit the falsifier measures every batch and calls `observe(n, ms, pool.size)`; the estimate of the time per wave (`pool.size` trials at once) is an exponential average with weight 0.5 of `ms / ceil(n / pool.size)`. `grant(phase, wanted, poolSize)` returns `min(wanted, quota left, T - used, fit)` with `fit = floor((deadline(phase) - elapsed) / waveMs) * poolSize` (no time fit before the first measurement or without `maxWallMs`). When `fit` is the binding term, `lastGrantTimeLimited` is set and that generation is the last of its phase. Without an estimate, the first wave of a generation runs alone and the rest of the generation is granted after measuring it. `grantShrink()` returns 1 only when one more wave fits before the shrink deadline and the reserve is not used up. Without `maxWallMs` no decision reads the clock (19.5). A generation already submitted is allowed to finish (8.5).
 
 **Shrink reserve (approved change).** The shrink trials no longer come from what the search left over, so a counterexample found in the last generation of an exhausted budget is still shrunk. `shrink.maxTrials` still caps a single shrink.
 
-**Resulting invariant**: `n0 + n1 + n2 <= T`, `n3_shrink <= R`, and `trials <= T + R + 3`.
-
+**Resulting invariant**: `n0 + n1 + n2 <= T`, `n3_shrink <= R`, and `trials <= T + R + 6` (3 verification trials at the original failure, 3 at the shrunk scenario when it differs).
 ### 8. Falsifier orchestrator (`falsifier.ts`)
 
 ```ts
@@ -388,11 +401,11 @@ Steps:
 
 1. Validate `opts` (budget, fractions, generation sizes, tolerance, shrink limit). Throw before any trial.
 2. Start the clock. Record `searchSeed`, `mode`, `budget` in `meta`.
-3. **Phase 0.** Read `opts.seedDb?.read(appId, req.id)`. A read error (invalid JSON, invalid entry) becomes a `skippedSeedFiles` item and Phase 0 runs zero trials (3.6). Each entry is checked against `req.space`: every space dimension present, no extra dimension, each value inside `[min, max]`. Invalid entries go to `skippedPinned` with the reason. Valid entries are stably sorted by stored `robustness` ascending (ties keep file order, 3.2). The first `grant(count)` entries run as one generation; the rest are counted in `pinnedNotRun` (3.8). A pinned entry with robustness `< 0` is a failing trial. One with `>= 0` is added to `resolvedPinned`. An errored pinned trial is logged in `meta.errors` and ignored (3.7). Emit the phase 0 progress event, even for zero entries (9.5).
-4. **Phase 1** (skipped after a Phase 0 failure). Loop generations of `min(G1, grant)` using `latinHypercube(space, size, searchSeed, g)` with trial seeds `deriveSeed(searchSeed, 1, i)`. After each generation: update the log and emit the progress event. Stop when a generation had a failing trial, when the quota or time share is gone, or when an error occurred. A space whose dimensions are all fixed still runs here: the sampler returns the fixed scenario each time and only the seeds differ (1.8).
-5. **Phase 2** (full mode, no failure, space has at least one non-fixed dimension, budget remains). `state = initCem(...)`. Loop: `size = grant(G2)`; stop if 0; `sampleCem`; run; emit progress; stop if a generation had a failing trial; else `refitCem`.
-6. **Phase 3** (only when a failing trial exists). Choose the failing trial with lowest robustness, ties to the earliest run (global trial order). `foundAfter = trials before that generation + (first failing index in the generation) + 1`. Run `shrink` with each candidate trial submitted as a one-spec `pool.run`. Then run the three verification trials. Emit one phase 3 progress event with the shrink and verification trials.
-7. Assemble `Verdict` and `RunMetadata`. Build `pinEntry` when `status === 'broken'`.
+3. **Phase 0.** Read `opts.seedDb?.read(appId, req.id)`. A read error (invalid JSON, invalid entry) becomes a `skippedSeedFiles` item and Phase 0 runs zero trials (3.6). Each entry is checked against `req.space`: every space dimension present, no extra dimension, each value inside `[min, max]`. Invalid entries go to `skippedPinned` with the reason. Valid entries are stably sorted by stored `robustness` ascending (ties keep file order, 3.2). Entries run one at a time while `grant(0, 1)` allows and fewer than `maxPinned` have run; the rest are counted in `pinnedNotRun` (3.8). A pinned entry with robustness `< 0` is a failing trial. One with `>= 0` is added to `resolvedPinned`. An errored pinned trial is logged in `meta.errors` and ignored (3.7). Emit the phase 0 progress event, even for zero entries (9.5).
+4. **Phase 1** (skipped after a Phase 0 failure). Loop generations of `grant(1, G1, pool.size)` trials: the prefix of `latinHypercube(space, G1, searchSeed, g)`, with trial seeds `deriveSeed(searchSeed, 1, i)`. After each generation: update the log and emit the progress event. Stop when a generation had a failing trial, when the quota or time share is gone, when time cut the generation (section 7), or when an error occurred. A space whose dimensions are all fixed still runs here: the sampler returns the fixed scenario each time and only the seeds differ (1.8).
+5. **Phase 2** (full mode, no failure, space has at least one non-fixed dimension, budget remains). `state = initCem(...)`. Loop: `size = grant(2, G2, pool.size)`; stop if 0; `sampleGeneration` (prefix of the size-`G2` CEM and LHS mix); run; emit progress; stop if a generation had a failing trial or was cut by time; else `refitCem` with run-order indices.
+6. **Phase 3** (only when a failing trial exists). Choose the failing trial with lowest robustness, ties to the earliest run (global trial order). `foundAfter = trials before that generation + (first failing index in the generation) + 1`. Run `shrink` with each candidate trial submitted as a one-spec `pool.run`. Then run the verification trials of section 6 (3 at the original failure, plus 3 at the shrunk scenario when it differs) as one `pool.run`. Emit one phase 3 progress event with the shrink and verification trials.
+7. Assemble `Verdict` and `RunMetadata` (including `replayOptions`). Build `pinEntry` when `status === 'broken'`.
 
 **Failure and error handling inside a generation.** Results are collected through the `onResult` callback and through the resolved array. If `pool.run` resolves, the array (input order) is authoritative. If it rejects with an `AbortError`, `falsify` rejects with an `AbortError` and writes nothing. If it rejects for another reason, or a result has `NaN` robustness, the falsifier records an error, counts the results received plus one for the failing trial, and stops starting trials (1.12, 2.2). If a failing trial was seen before the error, `status` is `'broken'` (2.1), Phase 3 is skipped, `shrunk` is false, and classification is unset.
 
@@ -401,14 +414,14 @@ Steps:
 - `trials = n0 + n1 + n2 + n3` and `randomTrials = n1`, `guidedTrials = n2` (1.5).
 - `closest`: lowest robustness among completed trials, earliest-run on equality (1.6). If no trial completed, `closest = { robustness: Infinity, scenario: {}, seed: 0 }` and `meta.errors` says so. Report serialisation writes `null` for infinite values.
 - `status`: `'broken'` iff some trial had robustness `< 0`. Else `'error'` if a trial error occurred, or if no trial completed. Else `'held'` (2.1, 2.3, 2.4).
-- `failureRateUpper95` from Phase 1 only (section 9). Undefined when Phase 1 ran zero completed trials (2.9).
+- `failureRateUpper95` from Phase 1 only (section 9), and beside it `failureRateUpper95Exact`, the exact Clopper-Pearson bound for the same counts (golem-falsify-hardening item C). Both undefined when Phase 1 ran zero completed trials (2.9).
 - `ms` from the injected clock (1.7).
 
-**Progress events (Req 9).** `emitProgress(event)` runs after all results of a generation arrived and before the next generation is submitted. It builds a deep-frozen copy (9.11), calls the callback inside `try`, ignores a throw, and attaches a `.catch(() => {})` to a returned promise without awaiting it (9.8, 9.9). No event is emitted after an abort has been observed (17.6). Calls are issued in phase order and generation order, never concurrently (9.7), because the falsifier is a single sequential async function.
+**Progress events (Req 9).** `emitProgress(event)` runs after all results of a generation arrived and before the next generation is submitted. It builds a deep-frozen copy (9.11), calls the callback inside `try`, ignores a throw, and attaches a `.catch(() => {})` to a returned promise without awaiting it (9.8, 9.9). No event is emitted after an abort has been observed (17.6). Each event carries the scenarios, seeds and robustness of the generation, `lowestRobustness` (Math.min semantics, so `-0` is below `0`), `elapsedMs`, `timeFraction` (null without `maxWallMs`) and, in Phase 2, the `cem` distribution the generation was drawn from (golem-falsify-hardening defect 10). Calls are issued in phase order and generation order, never concurrently (9.7), because the falsifier is a single sequential async function.
 
-**onResult forwarding (9.12, 9.13).** The falsifier passes the pool a wrapper that records the result, then calls `opts.onResult` inside `try/catch`. The user callback's errors never reach the pool.
+**onResult forwarding (9.12, 9.13).** The falsifier passes the pool a wrapper that records the result, then calls `opts.onResult(result, { phase, generation, index })` inside `try/catch` (Phase 3: generation 0 = shrink, 1 = verification). The user callback's errors never reach the pool.
 
-**Determinism.** Random choices come only from `mulberry32` streams derived from `searchSeed`. `Math.random()` is never called (19.1). Without `maxWallMs`, no decision reads the clock (19.5). With `maxWallMs`, `meta.phaseTrials` records what ran so the run can be repeated with an equivalent `maxTrials` (19.8).
+**Determinism.** Random choices come only from `mulberry32` streams derived from `searchSeed`. `Math.random()` is never called (19.1). Without `maxWallMs`, no decision reads the clock (19.5). `meta.replayOptions` (golem-falsify-hardening defect 5) holds the options that rerun any run, timed or not, trial for trial without a clock: `maxTrials = p0 + p1 + p2`, `phase1Fraction = p1 / T`, `phase2Fraction = p2 / T`, `maxPinned = p0`, and a shrink limited to the `k` shrink trials that ran (`maxTrials = max(1, k)`, `reserveMin = k`, `reserveFraction = 0`). It works because every generation but the last of a phase is full size and the last is a prefix of the same draw (19.8).
 
 **Abort.** `opts.signal` is passed to every `pool.run` and checked before each generation and trial. On abort the function rejects with an error whose `name` is `'AbortError'`.
 
@@ -426,7 +439,7 @@ function lnGamma(x: number): number
 - `k = n`: `1`.
 - `1 <= k < n`: `p_U` = the 0.95 quantile of Beta(`k+1`, `n-k`), i.e. the unique `x` in `(k/n, 1)` with `I_x(k+1, n-k) = 0.95`.
 
-`I_x(a, b) = x^a (1-x)^b / (a * B(a,b)) * betacf(x; a, b)`, with `ln B = lnGamma(a) + lnGamma(b) - lnGamma(a+b)`. When `x > (a+1)/(a+b+2)` use `I_x(a,b) = 1 - I_{1-x}(b,a)`. `betacf` is the modified Lentz continued fraction with `tiny = 1e-300`, `eps = 1e-15`, at most 10,000 iterations (enough for `n <= 10,000`). The root is found by bisection on `[k/n, 1]` for 200 iterations or until the bracket is below `1e-12`. `I_x` is increasing in `x`, so bisection always converges. The stopping tolerance on `x` is 1e-9 and the accuracy target is 1e-6 absolute (2.7).
+`I_x(a, b) = x^a (1-x)^b / (a * B(a,b)) * betacf(x; a, b)`, with `ln B = lnGamma(a) + lnGamma(b) - lnGamma(a+b)`. When `x > (a+1)/(a+b+2)` use `I_x(a,b) = 1 - I_{1-x}(b,a)`. `betacf` is the modified Lentz continued fraction with `tiny = 1e-300`, `eps = 1e-15`, at most 10,000 iterations (enough for `n <= 10,000`). The root is found by bisection on `[k/n, 1]` for at most 200 iterations or until the bracket is below `CP_TOLERANCE = 1e-13`. `I_x` is increasing in `x`, so bisection always converges. The accuracy target is 1e-6 absolute (2.7); the audit measured 6.7e-12 relative error against exact binomial inversion. For `k = 0` the function returns the exact `1 - (1 - confidence)^(1/n)`, which the Verdict reports as `failureRateUpper95Exact` beside the rule of three.
 
 **Cross-checks.** For `k = n - 1`, Beta(`n`, 1) has CDF `x^n`, so `p_U = 0.95^(1/n)` exactly. For `k = n`, `p_U = 1`. For `k = 0`, the exact `1 - 0.05^(1/n)` is used to check `3/n >= exact`. A small table of `(n, k, p_U)` values computed offline with `qbeta(0.95, k+1, n-k)` is committed as test constants.
 
@@ -587,12 +600,30 @@ stateDiagram-v2
 
 **`InProcessPool` (Req 13).** `size = 1`. For each spec in order: check the signal, then `await` the trial function, then call `onResult`. Between trials it yields to the macrotask queue (`setTimeout(0)` or `MessageChannel`) every `yieldEvery` trials (default 1) so an abort fired from a timer is seen. An abort rejects with `AbortError` and calls `onResult` only for finished trials (13.4 to 13.6). A throw rejects with `TrialError` naming the spec (app, reqId, scenario, seed) with the original as `cause`, and stops that run (13.7, 13.8). It uses no Worker and no `Math.random()`.
 
-**`createNodePool(options)`** (`skeleton/src/pool/node.ts`, exported from `golem-spec/node` only). `size` defaults to `max(1, os.availableParallelism() - 1)`; an explicit `size` must be an integer `>= 1` (14.2). The factory creates `new Worker(new URL('./node-entry.js', import.meta.url))` and wraps it as `WorkerLike` (`message`, `error` and `exit` events map to `onMessage` and `onCrash`). It posts structured-clone data and passes `transferList`, so `poses.frames` moves without a copy (14.6). It makes no network calls (14.8).
+**`createNodePool(options)`** (`skeleton/src/pool/node.ts`, exported from `golem-spec/node` only). `size` defaults to the physical core count (`physicalCoreCount()` in `pool/cores.ts`: `/proc/cpuinfo` on Linux, `sysctl hw.physicalcpu` on macOS, `Win32_Processor.NumberOfCores` on Windows, probed once), or `max(1, os.availableParallelism() - 1)` when it cannot be probed (golem-falsify-hardening defect 8); an explicit `size` must be an integer `>= 1` (14.2). The factory creates `new Worker(new URL('./node-entry.js', import.meta.url))` and wraps it as `WorkerLike` (`message`, `error` and `exit` events map to `onMessage` and `onCrash`). It posts structured-clone data and passes `transferList`, so `poses.frames` moves without a copy (14.6). It makes no network calls (14.8).
 
 **`createBrowserPool(options)`** (`skeleton/src/pool/browser.ts`). `size` defaults to `clamp(navigator.hardwareConcurrency - 1, 1, 8)`, and to 1 when `hardwareConcurrency` is not a positive integer (15.1, 15.2). An explicit size must be an integer in 1..8 (15.4). The factory creates `new Worker(new URL('./browser-entry.js', import.meta.url), { type: 'module' })`. Static assets are fetched by URL from `assetBase`. Transfer works through `postMessage(msg, transfer)` (15.7).
 
 Both adapters pass the same `SchedulerOptions`, so dispatch order, error types and restart behaviour match (15.9).
 
+### Defaults (checked by `design-doc.test.ts`)
+
+| Setting | Value | Where |
+|---|---|---|
+| `phase1Fraction` | `0.2` | `DEFAULT_PHASE1_FRACTION`, falsifier.ts (0.4 before golem-falsify-hardening item E) |
+| `phase1GenerationSize` | `32` | `DEFAULT_PHASE1_GENERATION_SIZE`, falsifier.ts |
+| `cem.generationSize` | `32` | `DEFAULT_CEM`, cem.ts (16 before defect 2) |
+| `cem.eliteFraction` | `0.25` | `DEFAULT_CEM` |
+| `cem.smoothing` | `1` | `DEFAULT_CEM` |
+| `cem.lhsFraction` | `0.2` | `DEFAULT_CEM` |
+| `shrink.tolerance` | `0.01` | `DEFAULT_SHRINK`, shrink.ts |
+| `shrink.maxTrials` | `60` | `DEFAULT_SHRINK` |
+| `shrink.reserveFraction` | `0.15` | `DEFAULT_SHRINK_RESERVE`, falsifier.ts |
+| `shrink.reserveMin` | `12` | `DEFAULT_SHRINK_RESERVE` |
+| `shrink sweep points` | `8` | `SWEEP`, shrink.ts |
+| `Clopper-Pearson bisection tolerance` | `1e-13` | `CP_TOLERANCE`, beta.ts |
+| `wave estimate weight` | `0.5` | `WAVE_EMA_WEIGHT`, budget.ts |
+| `quota epsilon` | `1e-9` | `QUOTA_EPSILON`, budget.ts |
 ## Data Models
 
 ```ts
@@ -604,15 +635,16 @@ interface FalsifyOptions {
   budget: Budget
   searchSeed: number                     // uint32
   mode?: 'full' | 'random-only'          // default 'full'
-  phase1Fraction?: number                // default 0.4 (random-only forces 1)
+  phase1Fraction?: number                // default 0.2 (random-only forces 1)
   phase2Fraction?: number                // default 1 - phase1Fraction
   phase1GenerationSize?: number          // default 32, positive integer
-  cem?: { generationSize?: number; eliteFraction?: number; smoothing?: number }   // 16, 0.25, 1
-  shrink?: { tolerance?: number; maxTrials?: number }                             // 0.01, 60
+  maxPinned?: number                     // cap on Phase 0 trials, default none
+  cem?: { generationSize?: number; eliteFraction?: number; smoothing?: number; lhsFraction?: number }   // 32, 0.25, 1, 0.2
+  shrink?: { tolerance?: number; maxTrials?: number; reserveFraction?: number; reserveMin?: number } // 0.01, 60, 0.15, 12
   seedDb?: SeedReader                    // read-only; the falsifier never writes (D2)
   signal?: AbortSignal
   onProgress?: (e: ProgressEvent) => void | Promise<void>
-  onResult?: (r: TrialResult) => void
+  onResult?: (r: TrialResult, info: { phase: 0 | 1 | 2 | 3; generation: number; index: number }) => void
   clock?: () => number                   // injectable, default performance.now
 }
 
@@ -621,15 +653,20 @@ interface ProgressEvent {
   readonly phase: 0 | 1 | 2 | 3
   readonly generation: number            // zero-based inside the phase; phases 0 and 3 use 0
   readonly scenarios: readonly Readonly<Scenario>[]
+  readonly seeds: readonly number[]      // same length and order as scenarios
   readonly robustness: readonly number[] // same length and order as scenarios
-  readonly lowestRobustness: number      // lowest seen so far in the run (Infinity before any trial)
+  readonly lowestRobustness: number      // lowest seen so far in the run (Infinity before any trial; -0 below 0)
   readonly trialsUsed: number
   readonly trialsRemaining: number | null   // null without maxTrials
+  readonly elapsedMs: number
+  readonly timeFraction: number | null   // elapsedMs / maxWallMs, null without maxWallMs
+  readonly cem?: readonly { name: string; kind: string; mu: number | null; sigma: number | null }[]   // Phase 2 only
 }
 
 // ---------- pinned seeds ----------
 interface PinnedSeedEntry extends Counterexample {
-  classification?: 'robust' | 'seed-sensitive'
+  classification?: 'robust' | 'seed-sensitive'   // at the original failure
+  boundarySensitive?: boolean            // any verification seed passes at the shrunk scenario
   verificationSeeds?: number[]           // length 3
   verificationRobustness?: (number | null)[]   // null = trial error
 }
@@ -651,7 +688,10 @@ interface RunMetadata {
   pinnedNotRun: number
   errors: { phase: 0 | 1 | 2 | 3; message: string; seed?: number }[]
   classification?: 'robust' | 'seed-sensitive'
-  verification?: { seeds: number[]; robustness: (number | null)[]; errors: string[] }
+  boundarySensitive?: boolean
+  verification?: { scenario: Scenario; seeds: number[]; robustness: (number | null)[]; errors: string[] }
+  boundaryVerification?: { scenario: Scenario; seeds: number[]; robustness: (number | null)[]; errors: string[] }
+  replayOptions: ReplayOptions           // rerun this run trial for trial (section 8)
 }
 
 interface FalsifyResult { verdict: Verdict; meta: RunMetadata; pinEntry?: PinnedSeedEntry }
@@ -723,7 +763,7 @@ For any `(searchSeed, phase)` and any distinct trial indices `i != j` below 2^20
 
 ### Property 5: Random-only Phase 1 prefix equals full-mode Phase 1
 
-For any Search_Seed, ScenarioSpace, generation size `G` and Phase 1 size `n`, the first `n` Phase 1 trials (scenarios and seeds) are bit-identical in `full` and `random-only` mode.
+For any Search_Seed, ScenarioSpace, generation size `G` and trial budget, the full-mode Phase 1 trials (scenarios and seeds) are a bit-identical prefix of the random-only Phase 1 trials, whatever the Phase 1 size (shortened generations are prefixes, golem-falsify-hardening 5.5).
 
 **Validates: Requirements 10.7, 4.9**
 
@@ -735,7 +775,7 @@ For any list of observed trials (including ties on robustness) and any `rho` in 
 
 ### Property 7: CEM fit clamps and keeps previous state
 
-For any non-fixed non-wrap dimension and any elite set with at least 2 trials, the fitted `mu` equals the elite mean, lies in `[min, max]`, and the fitted `sigma` equals `max(populationStd, 0.01 * width)`. Fixed dimensions stay fixed. When fewer than 2 elites exist, the refit returns the previous state unchanged. When Phase 1 has zero trials or fewer than 2 elites, the initial state has `mu = min + width / 2` and `sigma = 0.25 * width`.
+For any non-fixed non-wrap dimension and any elite set with at least 2 trials, the fitted `mu` equals the elite mean, lies in `[min, max]`, and the fitted `sigma` equals `max(populationStd, 0.01 * width)`. Fixed dimensions stay fixed. Elites are tie-aware (every observation at or below the slot threshold). When fewer than 2 usable observations exist, the refit returns the previous state unchanged. When every observation has the same robustness, or Phase 1 has fewer than 2 trials or gives fewer than 2 elites, the state is uniform on every non-fixed dimension (golem-falsify-hardening defect 2).
 
 **Validates: Requirements 5.1, 5.2, 5.8, 5.13**
 
@@ -795,7 +835,7 @@ For any synthetic function, space, Budget and Search_Seed, `Verdict.status` is `
 
 ### Property 17: Trial accounting
 
-For any run, `Verdict.trials = n0 + n1 + n2 + n3`, `randomTrials = n1`, `guidedTrials = n2` (0 in random-only mode), `foundAfter` is at least 1 and at most `n0 + n1 + n2`, and `n0 + n1 + n2 + shrinkTrials <= maxTrials` when a trial limit is set, so that `trials <= maxTrials + 3`.
+For any run, `Verdict.trials = n0 + n1 + n2 + n3`, `randomTrials = n1`, `guidedTrials = n2` (0 in random-only mode), `foundAfter` is at least 1 and at most `n0 + n1 + n2`, `n0 + n1 + n2 <= maxTrials` and `shrinkTrials <= shrinkReserve` when a trial limit is set, and the verification trials number 3, or 6 when the shrunk scenario differs from the original failure, so that `trials <= maxTrials + shrinkReserve + 6`.
 
 **Validates: Requirements 1.5, 5.14, 6.14, 8.3, 8.10, 8.11, 10.2**
 
@@ -849,7 +889,7 @@ For any Budget or fraction pair that violates the rules (no limits, non-positive
 
 ### Property 26: Progress events
 
-For any run, exactly one progress event is emitted per Phase 0 execution, per Phase 1 and 2 generation, and per Phase 3, in phase order and ascending generation order. In each event `scenarios.length = robustness.length` equals the trials actually run, `trialsRemaining` is `maxTrials - trialsUsed` or `null` without a trial limit, and the event is not changed by later activity. A throwing or rejecting callback does not change the Verdict. A slow async callback adds no wall time.
+For any run, exactly one progress event is emitted per Phase 0 execution, per Phase 1 and 2 generation, and per Phase 3, in phase order and ascending generation order. In each event `scenarios.length = seeds.length = robustness.length` equals the trials actually run, `trialsRemaining` is `maxTrials - trialsUsed` or `null` without a trial limit, and the event is not changed by later activity. A throwing or rejecting callback does not change the Verdict. A slow async callback adds no wall time.
 
 **Validates: Requirements 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 9.7, 9.8, 9.9, 9.11**
 

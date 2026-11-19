@@ -65,7 +65,10 @@ describe('shrink', () => {
     const runner: ShrinkRunner = (s) =>
       Promise.resolve((s['force'] as number) === 0 ? { error: 'boom' } : { robustness: (s['force'] as number) > 100 ? -1 : 1 });
     const out = await shrink({ scenario: start, seed: 1, robustness: -1 }, space, runner, limits);
-    expect(out.errors).toEqual(['boom']);
+    // golem-falsify-hardening defect 7: speed changes after force, so force gets a second pass and its
+    // milder end (the erroring candidate) is tried once per pass.
+    expect(out.errors).toEqual(['boom', 'boom']);
+    expect(out.trials.filter((t) => t.error !== undefined).map((t) => t.scenario['force'])).toEqual([0, 0]);
     expect(out.scenario['force']).toBeGreaterThan(100);
   });
   it('treats a NaN candidate as not failing and logs it', async () => {

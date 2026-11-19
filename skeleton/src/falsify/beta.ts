@@ -52,13 +52,16 @@ export function regularizedIncBeta(x: number, a: number, b: number): number {
   return 1 - (front * betacf(1 - x, b, a)) / b;
 }
 
+/** Bisection stops when the bracket on x is narrower than this. */
+export const CP_TOLERANCE = 1e-13;
+
 /** Upper confidence bound on a failure rate: k failures in n trials. */
 export function clopperPearsonUpper(n: number, k: number, confidence = 0.95): number {
   if (k >= n) return 1;
   if (k <= 0) return 1 - Math.pow(1 - confidence, 1 / n);
   let lo = k / n;
   let hi = 1;
-  for (let i = 0; i < 200 && hi - lo > 1e-13; i++) {
+  for (let i = 0; i < 200 && hi - lo > CP_TOLERANCE; i++) {
     const mid = (lo + hi) / 2;
     if (regularizedIncBeta(mid, k + 1, n - k) < confidence) lo = mid; else hi = mid;
   }

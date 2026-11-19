@@ -74,6 +74,13 @@ export function makeSynthetic(spec: SynthSpec): RobustnessFn {
   }
 }
 
+/** Deterministic standard-normal draw from a trial seed (Box-Muller on two fmix32 outputs). */
+export function gaussianNoise(seed: number): number {
+  const u1 = (fmix32(seed >>> 0) + 0.5) / 4294967296;
+  const u2 = (fmix32((seed ^ 0x5bd1e995) >>> 0) + 0.5) / 4294967296;
+  return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+}
+
 export function syntheticTrialFn(fn: RobustnessFn, unit = 'm'): (spec: TrialSpec) => TrialResult {
   return (spec) => ({ spec, robustness: fn(spec.scenario, spec.seed), worstAt: 1, unit, wallMs: 0 });
 }

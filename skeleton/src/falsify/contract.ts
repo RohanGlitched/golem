@@ -29,6 +29,8 @@ export interface Verdict {
   closest: { robustness: number; scenario: Scenario; seed: number };
   counterexample?: Counterexample;
   failureRateUpper95?: number;
+  /** Exact one-sided 95% Clopper-Pearson bound for the same counts; set whenever failureRateUpper95 is. */
+  failureRateUpper95Exact?: number;
   ms: number;
 }
 

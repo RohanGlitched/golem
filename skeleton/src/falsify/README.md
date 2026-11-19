@@ -13,18 +13,42 @@ through any `TrialPool`.
 | Phase | What runs | Budget |
 |---|---|---|
 | 0 | Pinned seeds from `.golem/seeds/<app>/<reqId>.json`, lowest stored robustness first | taken from the total as they run |
-| 1 | Latin hypercube random sampling, generations of 32 | 40% of `maxTrials` (`phase1Fraction`) |
-| 2 | Cross-entropy search toward the lowest margin, generations of 16, elite fraction 0.25 | the rest (`phase2Fraction`), plus what Phase 1 left unused |
-| 3 | Shrinking toward the mildest failing scenario, then 3 verification seeds | a separate shrink reserve: `max(12, ceil(0.15 * maxTrials))`, on top of `maxTrials` |
+| 1 | Latin hypercube random sampling, generations of 32 | 20% of `maxTrials` (`phase1Fraction`) |
+| 2 | Cross-entropy search toward the lowest margin: generations of 32, tie-aware elites (fraction 0.25) carried across generations, 20% of each generation by Latin hypercube; uniform (all Latin hypercube) while every trial ties | the rest (`phase2Fraction`), plus what Phase 1 left unused |
+| 3 | Shrinking toward the mildest failing scenario, then 3 verification seeds at the original failure (and 3 at the shrunk scenario) | a separate shrink reserve: `max(12, ceil(0.15 * maxTrials))`, on top of `maxTrials` |
 
 The first failing trial ends the search. Its generation still finishes, because the falsifier submits
-a generation as one `run` call. Phase 3 then bisects each dimension whose `severity` is `'up'` or
-`'down'` toward its milder end, keeping the seed fixed, until the interval is at most 1% of the
-dimension width (`shrink.tolerance`) or 60 shrink trials have run (`shrink.maxTrials`). Dimensions with
+a generation as one `run` call. Phase 3 then shrinks each dimension whose `severity` is `'up'` or
+`'down'` toward its milder end, keeping the seed fixed: it tries the milder end, then 7 evenly spaced
+severities from mild to harsh (stopping at the first failure), then bisects until the interval is at most
+1% of the dimension width (`shrink.tolerance`) or 60 shrink trials have run (`shrink.maxTrials`). A
+second pass revisits each dimension that another dimension changed after it. Dimensions with
 `severity: 'none'` and fixed dimensions are not changed. Because the shrink reserve is separate, a
 counterexample found in the last generation is still shrunk.
 
 `mode: 'random-only'` runs Phase 0 and Phase 1 only, with the whole budget, as a baseline.
+
+Under `maxWallMs` the falsifier measures each batch and grants a generation only the whole waves
+(`pool.size` trials at once) that fit in the time left, so a run ends within about one wave of the
+limit; the 3 or 6 verification trials may still run past it.
+
+After a failure, `meta.classification` says whether the failure needs a lucky seed: `robust` when all 3
+verification seeds fail at the original failing scenario. `meta.boundarySensitive` says the same about
+the shrunk scenario, which sits on the boundary (margin about 0), so it is often `true` even for a robust
+failure.
+
+## Choosing the Phase 1 fraction
+
+The default is 0.2 (it was 0.4 until golem-falsify-hardening). At equal trial budgets, over 300 search
+seeds per case (`docs/reviews/falsify-bench.mts`), 0.2 found every needle at least as often as 0.4 and
+found graded needles sooner: the 0.11% needle at 400 trials in 300/300 runs either way, with a median
+of 140 trials against 208. On a flat robustness function (no gradient to follow) both behave like
+random sampling.
+
+The cost is the failure-rate bound. `failureRateUpper95` and `failureRateUpper95Exact` come from the
+Phase 1 random trials only, because only those are an unbiased sample of the scenario space. A held run
+of 400 trials reports 3/80 = 3.75% at 0.2 against 3/160 = 1.9% at 0.4. When the bound is what you
+publish, set `phase1Fraction` higher (or use `mode: 'random-only'`, which spends the whole budget on it).
 
 ## What a verdict means
 
@@ -33,7 +57,8 @@ counterexample found in the last generation is still shrunk.
   robustness `-0.04 m`.
 - `held`: **no counterexample was found in N trials**, where N is `verdict.trials`. This is never a
   proof that the requirement holds. `failureRateUpper95` is the 95% upper bound on the failure rate
-  from the Phase 1 random trials only (with 0 failures in 100 trials it is about 3%, the rule of three).
+  from the Phase 1 random trials only (with 0 failures in 100 trials it is 3%, the rule of three);
+  `failureRateUpper95Exact` is the exact Clopper-Pearson bound for the same counts (2.95% there).
 - `error`: the pool failed or no trial completed. `meta.errors` says why.
 
 A verdict is a pure function of the requirement, budget, search seed, configuration and trial results.
@@ -42,7 +67,10 @@ The pool kind, the pool size and the completion order do not change it.
 ## Reproducing a counterexample
 
 A trial is a pure function of `(app, reqId, scenario, seed)`. To reproduce a counterexample, run one
-`TrialSpec` with exactly those four values. The CLI does this with `golem replay`.
+`TrialSpec` with exactly those four values. `replayCounterexample(pool, cx)` does this with pose recording
+on (`record: 'poses'`) and returns the TrialResult with `reproduced: true` when the robustness is the same.
+The CLI does this with `golem replay`. To rerun a whole search, timed or not, pass `meta.replayOptions`
+to `falsify`: it fixes the trial counts per phase, so the same trials run in the same order.
 
 ```ts
 import { falsify, InProcessPool, createSeedDatabase, memoryFileSystem } from 'golem-spec';
@@ -91,8 +119,9 @@ await pool.close();
 `.golem/seeds/<app>/<reqId>.json` holds a JSON array of `Counterexample` objects, written in canonical
 form: sorted keys, 2-space indent, one trailing newline. Writes go to a temporary file first and are
 renamed into place, so a failed write leaves the previous file intact. Entries may also carry
-`classification` (`'robust'` or `'seed-sensitive'`, from the 3 verification seeds), `verificationSeeds`
-and `verificationRobustness`.
+`classification` (`'robust'` or `'seed-sensitive'`, from the 3 verification seeds at the original failure),
+`boundarySensitive` (any of those seeds passes at the shrunk scenario), `verificationSeeds` and
+`verificationRobustness`.
 
 ```json
 [
@@ -116,12 +145,13 @@ lists the path and reason in `meta.skippedSeedFiles` or `meta.skippedPinned`, an
 | Option | Default | Allowed |
 |---|---|---|
 | `budget.maxTrials` / `budget.maxWallMs` | none (one is required) | positive integer / positive ms |
-| `phase1Fraction`, `phase2Fraction` | 0.4, remainder | each in [0, 1], sum at most 1 |
+| `phase1Fraction`, `phase2Fraction` | 0.2, remainder | each in [0, 1], sum at most 1 |
 | `phase1GenerationSize` | 32 | integer ≥ 1 |
-| `cem` | `{ generationSize: 16, eliteFraction: 0.25, smoothing: 1 }` | |
+| `cem` | `{ generationSize: 32, eliteFraction: 0.25, smoothing: 1, lhsFraction: 0.2 }` | lhsFraction in [0, 1) |
+| `maxPinned` | no limit | integer ≥ 0; caps Phase 0 |
 | `shrink` | `{ tolerance: 0.01, maxTrials: 60, reserveFraction: 0.15, reserveMin: 12 }` | tolerance in (0, 1) |
 | `signal` | none | `AbortSignal`; `falsify` rejects with `AbortError` and touches no file |
-| `onProgress`, `onResult` | none | callback errors are ignored |
+| `onProgress`, `onResult` | none | callback errors are ignored; `onResult(r, { phase, generation, index })` |
 
 Invalid options throw a `RangeError` that names the field and the value, before any trial runs.
 Error classes have a stable `name`: `AbortError`, `TrialError`, `TrialCrashError`, `RestartLimitError`,

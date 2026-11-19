@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -10,6 +10,7 @@ import { createSeedDatabase } from '../falsify/seed-db.js';
 import { InProcessPool } from './in-process.js';
 import { createNodePool, defaultNodePoolSize } from './node.js';
 import { nodeFileSystem } from './node-fs.js';
+import { removeTempDir } from './temp-dir.testkit.js';
 import { buildWorkerEntry, syntheticTrialModule, type WorkerBuild } from './worker-build.testkit.js';
 // @ts-expect-error plain .mjs fixture without types
 import { createTrialFn } from './fixtures/synthetic-trial.mjs';
@@ -71,7 +72,7 @@ describe('createNodePool', () => {
       expect((err as Error).message).toContain('cannot import mujoco');
       await Promise.all(workers.map(exited));
     } finally {
-      rmSync(dir, { recursive: true, force: true });
+      removeTempDir(dir);
     }
   }, 60000);
 
@@ -114,7 +115,7 @@ describe('createNodePool', () => {
     }
   });
 
-  it('defaults size to the available cores minus one, at least 1', () => {
+  it('defaults size to at least 1 worker (physical cores, see cores.test.ts)', () => {
     expect(defaultNodePoolSize()).toBeGreaterThanOrEqual(1);
   });
 });
@@ -131,7 +132,7 @@ describe('nodeFileSystem', () => {
       await expect(nodeFileSystem().readFile(join(dir, 'missing.json'))).rejects.toMatchObject({ code: 'ENOENT' });
       await nodeFileSystem().remove(join(dir, 'missing.json'));
     } finally {
-      rmSync(dir, { recursive: true, force: true });
+      removeTempDir(dir);
     }
   });
 });

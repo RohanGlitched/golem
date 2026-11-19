@@ -1,4 +1,4 @@
-const R = 'file:///I:/Programs/ListofHackathon/hackathons/39-kiroween/golem-wt-earsfix/skeleton/src';
+const R = '../../skeleton/src';
 const { falsify } = await import(`${R}/falsify/index.ts`);
 const { InProcessPool } = await import(`${R}/pool/in-process.ts`);
 const space = { dims: [{ name: 'force', kind: 'force', min: 0, max: 250, severity: 'up' }, { name: 'angle', kind: 'angle', min: 0, max: 360, severity: 'none', wrap: true }] };
@@ -11,3 +11,11 @@ const b = await falsify({ id: 'R1', space }, mk(0, lb), { appId: 'a', budget: { 
 const c = await falsify({ id: 'R1', space }, mk(0, lc), { appId: 'a', budget: { maxTrials: T }, searchSeed: 9, phase1Fraction: a.meta.phaseTrials.p1 / T, phase2Fraction: a.meta.phaseTrials.p2 / T });
 const same = (x: string[], y: string[]) => x.length === y.length && x.every((v, i) => v === y[i]);
 console.log(`time run phases ${JSON.stringify(a.meta.phaseTrials)} status ${a.verdict.status}; replay maxTrials=${T} default fractions: phases ${JSON.stringify(b.meta.phaseTrials)} status ${b.verdict.status} identical=${same(la, lb)}; with fractions p1/T: identical=${same(la, lc)} status ${c.verdict.status}`);
+// Added by golem-falsify-hardening (defect 5): replay with the options the run reports, when it reports them.
+if (a.meta.replayOptions !== undefined) {
+  const ld: string[] = [];
+  const d = await falsify({ id: 'R1', space }, mk(0, ld), a.meta.replayOptions);
+  console.log(`meta.replayOptions: budget ${JSON.stringify(a.meta.replayOptions.budget)} phases ${JSON.stringify(d.meta.phaseTrials)} status ${d.verdict.status} identical=${same(la, ld)}`);
+} else {
+  console.log('meta.replayOptions: not reported');
+}

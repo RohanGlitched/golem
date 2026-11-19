@@ -37,6 +37,8 @@ export function entryProblem(e: unknown): string | undefined {
   if (typeof o['foundAfter'] !== 'number' || !Number.isFinite(o['foundAfter'])) return 'foundAfter must be a number';
   const c = o['classification'];
   if (c !== undefined && c !== 'robust' && c !== 'seed-sensitive') return 'classification must be robust or seed-sensitive';
+  const bs = o['boundarySensitive'];
+  if (bs !== undefined && typeof bs !== 'boolean') return 'boundarySensitive must be a boolean';
   const vs = o['verificationSeeds'];
   if (vs !== undefined && !(Array.isArray(vs) && vs.length === 3 && vs.every((x) => typeof x === 'number' && Number.isFinite(x)))) {
     return 'verificationSeeds must be an array of 3 numbers';

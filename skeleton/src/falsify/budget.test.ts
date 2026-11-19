@@ -95,4 +95,28 @@ describe('BudgetClock', () => {
     t = 1100; expect(b.grantShrink()).toBe(1); // wall reserve of 15%
     t = 1150; expect(b.grantShrink()).toBe(0);
   });
+  it('grants only the whole waves that fit before the deadline once a wave was measured', () => {
+    let t = 0;
+    const b = new BudgetClock({ maxWallMs: 1000 }, cfg(), () => t);
+    b.start();
+    expect(b.waveMs()).toBeNull();
+    expect(b.grant(1, 64, 4)).toBe(64); // no estimate yet
+    b.observe(8, 20, 4); // 2 waves of 10 ms
+    expect(b.waveMs()).toBe(10);
+    t = 350; // 50 ms left in Phase 1: 5 waves of 4
+    expect(b.grant(1, 64, 4)).toBe(20);
+    expect(b.lastGrantTimeLimited).toBe(true);
+    expect(b.grant(1, 8, 4)).toBe(8);
+    expect(b.lastGrantTimeLimited).toBe(false);
+    b.observe(4, 30, 4); // average of 10 and 30
+    expect(b.waveMs()).toBe(20);
+    t = 1140; // 10 ms left of the 15% shrink reserve: less than one wave
+    expect(b.grantShrink()).toBe(0);
+  });
+  it('never uses the wave estimate without a wall limit', () => {
+    const b = new BudgetClock({ maxTrials: 100 }, cfg(), () => { throw new Error('clock read'); });
+    b.observe(4, 1e9, 1);
+    expect(b.waveMs()).toBeNull();
+    expect(b.grant(1, 32, 1)).toBe(32);
+  });
 });

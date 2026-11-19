@@ -1,6 +1,6 @@
 // Progress events: deep-frozen copies, callbacks that can never affect the run.
 import type { Scenario } from './contract.js';
-import type { ProgressEvent } from './types.js';
+import type { CemDimInfo, ProgressEvent } from './types.js';
 
 function deepFreeze<T>(x: T): T {
   if (typeof x === 'object' && x !== null && !Object.isFrozen(x)) {
@@ -14,11 +14,15 @@ export interface ProgressInput {
   phase: 0 | 1 | 2 | 3;
   generation: number;
   scenarios: readonly Scenario[];
+  seeds: readonly number[];
   robustness: readonly number[];
   lowestRobustness: number;
   trialsUsed: number;
   /** Null when the budget has no trial limit. */
   trialsRemaining: number | null;
+  elapsedMs: number;
+  timeFraction: number | null;
+  cem?: readonly CemDimInfo[];
 }
 
 /** A deep-frozen copy: later changes to the source cannot alter a delivered event. */
@@ -27,10 +31,14 @@ export function buildProgressEvent(i: ProgressInput): ProgressEvent {
     phase: i.phase,
     generation: i.generation,
     scenarios: i.scenarios.map((s) => ({ ...s })),
+    seeds: [...i.seeds],
     robustness: [...i.robustness],
     lowestRobustness: i.lowestRobustness,
     trialsUsed: i.trialsUsed,
     trialsRemaining: i.trialsRemaining,
+    elapsedMs: i.elapsedMs,
+    timeFraction: i.timeFraction,
+    ...(i.cem !== undefined ? { cem: i.cem.map((d) => ({ ...d })) } : {}),
   });
 }
 
