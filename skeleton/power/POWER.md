@@ -24,8 +24,8 @@ The `golem` MCP server exposes eight tools:
 
 ## Install
 
-The MCP server runs through `npx golem-spec mcp`, so the `golem` binary does not need to be on the path. Run `golem init` in an app directory to install the hooks, steering, agents and skills into its `.kiro/`.
+The MCP server runs through `npx golem-spec mcp`, so the `golem` binary does not need to be on the path. Run `npx --no-install golem-spec init` in an app directory to install the hooks, steering, agents and skills into its `.kiro/`.
 
 ## Loop
 
-Falsify a red requirement, read the counterexample, explain the margin, fix the controller, re-run, and repeat until `golem gate` exits with code 0. Requirements are never edited to make a test pass: propose a change with `propose_requirement`.
+Falsify a red requirement, read the counterexample, explain the margin, fix the controller, re-run, and repeat until `npx --no-install golem-spec gate` exits with code 0. Requirements are never edited to make a test pass: propose a change with `propose_requirement`.

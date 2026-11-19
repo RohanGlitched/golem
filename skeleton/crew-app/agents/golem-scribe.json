@@ -20,8 +20,10 @@
   },
   "mcpServers": {
     "golem": {
-      "command": "golem",
+      "command": "npx",
       "args": [
+        "--no-install",
+        "golem-spec",
         "mcp"
       ]
     }
@@ -65,6 +67,6 @@
   "kiroUpgrade": {
     "revision": 3,
     "fingerprint": "sha256:1a816c28674296d54675372fa4d72999112c4172cc933562440f4a263a188a4c",
-    "source": "sha256:311a992c95f03f206f03d6f7997e80c5c15dbca97ce0e68819bd7d72a7e94a06"
+    "source": "sha256:00aff14d6ebf152f44ca9501de2a70bc87bbde997e6ba0ac99ae1dd3f2abf22f"
   }
 }

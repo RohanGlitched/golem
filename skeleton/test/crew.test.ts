@@ -13,7 +13,7 @@ describe('Crew app', () => {
     for (const k of ['name', 'version', 'displayName', 'description', 'author', 'iconPath', 'agents', 'skills', 'mcpServers', 'schedule', 'permissions']) expect(app[k], k).toBeDefined();
     expect(app['agents']).toEqual(['agents/golem-tuner.json', 'agents/golem-skeptic.json', 'agents/golem-scribe.json']);
     expect(app['skills']).toEqual(['skills/robot-ears', 'skills/falsify-and-fix']);
-    expect(app['mcpServers']).toEqual({ golem: { command: 'golem', args: ['mcp'] } });
+    expect(app['mcpServers']).toEqual({ golem: { command: 'npx', args: ['--no-install', 'golem-spec', 'mcp'] } });
   });
 
   it('fires once per day: five cron fields with a fixed minute and a fixed hour, and an IANA time zone', () => {

@@ -103,7 +103,7 @@ describe('golem init', () => {
     expect(h.io.stdoutText()).toContain('merged .kiro/settings/mcp.json: golem entry added');
     const j = JSON.parse(h.fs.text(h.path('.kiro/settings/mcp.json')) as string);
     expect(j.mcpServers.other).toEqual({ command: 'x' });
-    expect(j.mcpServers.golem).toEqual({ command: 'golem', args: ['mcp'] });
+    expect(j.mcpServers.golem).toEqual({ command: 'npx', args: ['--no-install', 'golem-spec', 'mcp'] });
     expect(j.note).toBe(1);
   });
 });
@@ -141,7 +141,7 @@ describe('init engine', () => {
     expect(mergeMcpSettings(added.text, MCP_TEMPLATE, false)).toEqual({ text: added.text, outcome: 'kept' });
     const edited = '{"mcpServers":{"golem":{"command":"mine"}}}';
     expect(mergeMcpSettings(edited, MCP_TEMPLATE, false)).toEqual({ text: edited, outcome: 'kept' });
-    expect(JSON.parse(mergeMcpSettings(edited, MCP_TEMPLATE, true).text).mcpServers.golem.command).toBe('golem');
+    expect(JSON.parse(mergeMcpSettings(edited, MCP_TEMPLATE, true).text).mcpServers.golem.command).toBe('npx');
   });
 
   it('prints through the say callback in manifest order', async () => {

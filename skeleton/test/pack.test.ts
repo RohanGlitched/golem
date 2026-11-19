@@ -31,7 +31,7 @@ describe('steering/golem-ears.md', () => {
   it('names propose_requirement, the proposals path, golem check, the ranges and the no-edit rule', () => {
     expect(t).toContain('propose_requirement');
     expect(t).toContain('.kiro/specs/<robot>/proposals.md');
-    expect(t).toContain('golem check');
+    expect(t).toContain('npx --no-install golem-spec check');
     expect(t).toMatch(/Ranges in triggers define the search space/);
     expect(t).toMatch(/Never edit a requirement to make a test pass/);
     expect(t).toContain('Every number carries a unit');
@@ -39,7 +39,7 @@ describe('steering/golem-ears.md', () => {
 
   it('states every hook timeout with its reason and shows the npx replacement for the MCP entry', () => {
     for (const s of ['30 s', '300 s', '1800 s']) expect(t).toContain(s);
-    expect(t).toContain('"command": "npx", "args": ["golem-spec", "mcp"]');
+    expect(t).toContain('{ "command": "npx", "args": ["--no-install", "golem-spec", "mcp"] }');
     expect(t).toContain('once per user turn');
   });
 });
@@ -75,7 +75,7 @@ describe('skills', () => {
     const steps = ['1. Falsify.', '2. Read the counterexample.', '3. Explain the margin.', '4. Fix.', '5. Re-run.', '6. Gate.'].map((s) => t.indexOf(s));
     expect(steps.every((i) => i >= 0)).toBe(true);
     expect([...steps].sort((a, b) => a - b)).toEqual(steps);
-    expect(t).toContain('until `golem gate` exits with code 0');
+    expect(t).toContain('until `npx --no-install golem-spec gate` exits with code 0');
     expect(t).toContain('Requirement files are never edited to make a test pass');
     expect(t).toContain('The controller is changed instead');
   });
@@ -86,7 +86,7 @@ describe('settings/mcp.json', () => {
     const j = packJson('settings/mcp.json');
     expect(Object.keys(j)).toEqual(['mcpServers']);
     expect(Object.keys(j.mcpServers)).toEqual(['golem']);
-    expect(j.mcpServers.golem).toEqual({ command: 'golem', args: ['mcp'] });
+    expect(j.mcpServers.golem).toEqual({ command: 'npx', args: ['--no-install', 'golem-spec', 'mcp'] });
     expect(packFile('settings/mcp.json')).not.toContain('://');
   });
 });
@@ -105,7 +105,7 @@ describe('workflows/falsify-and-fix.workflow.json', () => {
   it('runs the tuner then the gate once each per iteration, both as golem-tuner, the gate without --kiro', () => {
     expect(repeat.nodes.map((n: { id: string; agent: string }) => [n.id, n.agent])).toEqual([['tune', 'golem-tuner'], ['gate', 'golem-tuner']]);
     const gate = repeat.nodes[1].prompt as string;
-    expect(gate).toContain('`golem gate`');
+    expect(gate).toContain('`npx --no-install golem-spec gate`');
     expect(gate).toContain('without --kiro');
     expect(gate).toMatch(/exits 1[^.]*stop and report the output unchanged/);
   });

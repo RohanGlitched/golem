@@ -15,7 +15,7 @@ export const tool: ToolDef = {
     if (entry === undefined) return makeToolResult(`no counterexample is pinned for ${reqId}`, { reqId, counterexample: null });
     const unit = (await reportEntry(ctx, reqId))?.unit;
     return makeToolResult(
-      `${reqId}: pinned counterexample ${scenarioWithUnits(found.req, entry.scenario)} (seed ${entry.seed}), margin ${formatMargin(entry.robustness, unit)}; reproduce: golem replay ${reqId}`,
+      `${reqId}: pinned counterexample ${scenarioWithUnits(found.req, entry.scenario)} (seed ${entry.seed}), margin ${formatMargin(entry.robustness, unit)}; reproduce: npx golem-spec replay ${reqId}`,
       { reqId, counterexample: { scenario: entry.scenario, seed: entry.seed, robustness: entry.robustness, unit: unit ?? null, shrunk: entry.shrunk, foundAfter: entry.foundAfter } },
     );
   },

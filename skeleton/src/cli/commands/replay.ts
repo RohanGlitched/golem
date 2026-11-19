@@ -26,7 +26,7 @@ export const handler: CommandHandler = async (p, io, deps) => {
   const seed = flagNumber(p, 'seed');
   const target = selectReplay(pinned, closest !== undefined ? { scenario: closest.scenario, seed: closest.seed } : undefined, { cli: true, ...(seed !== undefined ? { seed } : {}) });
   if (!target.ok) {
-    errLine(io, `golem: no counterexample is pinned for ${id}; run "golem falsify ${id}" to look for one`);
+    errLine(io, `golem: no counterexample is pinned for ${id}; run "npx golem-spec falsify ${id}" to look for one`);
     return 1;
   }
 

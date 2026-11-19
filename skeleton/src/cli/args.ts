@@ -27,30 +27,30 @@ const budgetFlags: FlagSpec[] = [
 
 export const COMMANDS: Record<CommandName, CommandSpec> = {
   check: {
-    name: 'check', usage: 'golem check [file] [--app <dir>] [--json]',
+    name: 'check', usage: 'npx golem-spec check [file] [--app <dir>] [--json]',
     positionals: [{ name: 'file', required: false }], flags: [],
   },
   test: {
-    name: 'test', usage: 'golem test [--req <id>] [--budget <n>] [--time <s>] [--workers <n>] [--search-seed <n>] [--app <dir>] [--json]',
+    name: 'test', usage: 'npx golem-spec test [--req <id>] [--budget <n>] [--time <s>] [--workers <n>] [--search-seed <n>] [--app <dir>] [--json]',
     positionals: [], flags: [{ name: 'req', kind: 'string' }, ...budgetFlags],
   },
   falsify: {
-    name: 'falsify', usage: 'golem falsify <reqId> [--budget <n>] [--time <s>] [--workers <n>] [--search-seed <n>] [--app <dir>] [--json]',
+    name: 'falsify', usage: 'npx golem-spec falsify <reqId> [--budget <n>] [--time <s>] [--workers <n>] [--search-seed <n>] [--app <dir>] [--json]',
     positionals: [{ name: 'reqId', required: true }], flags: [...budgetFlags],
   },
   replay: {
-    name: 'replay', usage: 'golem replay <reqId> [--seed <n>] [--app <dir>] [--json]',
+    name: 'replay', usage: 'npx golem-spec replay <reqId> [--seed <n>] [--app <dir>] [--json]',
     positionals: [{ name: 'reqId', required: true }], flags: [{ name: 'seed', kind: 'posint' }],
   },
   gate: {
-    name: 'gate', usage: 'golem gate [--kiro] [--budget <n>] [--time <s>] [--workers <n>] [--search-seed <n>] [--app <dir>] [--json]',
+    name: 'gate', usage: 'npx golem-spec gate [--kiro] [--budget <n>] [--time <s>] [--workers <n>] [--search-seed <n>] [--app <dir>] [--json]',
     positionals: [], flags: [{ name: 'kiro', kind: 'bool' }, ...budgetFlags],
   },
   init: {
-    name: 'init', usage: 'golem init [dir] [--force]',
+    name: 'init', usage: 'npx golem-spec init [dir] [--force]',
     positionals: [{ name: 'dir', required: false }], flags: [{ name: 'force', kind: 'bool' }],
   },
-  mcp: { name: 'mcp', usage: 'golem mcp [--app <dir>]', positionals: [], flags: [] },
+  mcp: { name: 'mcp', usage: 'npx golem-spec mcp [--app <dir>]', positionals: [], flags: [] },
 };
 
 export const COMMAND_NAMES = Object.keys(COMMANDS) as CommandName[];

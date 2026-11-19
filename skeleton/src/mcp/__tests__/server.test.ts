@@ -47,7 +47,7 @@ describe('server factory', () => {
     const m = await createMcpHarness({ tools: dummy, seed: false });
     const r = await m.call('no_pool');
     expect(r.isError).toBe(true);
-    expect(r.summary).toContain('golem init');
+    expect(r.summary).toContain('npx golem-spec init');
     expect(m.spies.createPool).toBe(0);
   });
 

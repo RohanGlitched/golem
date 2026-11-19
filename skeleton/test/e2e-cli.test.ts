@@ -34,7 +34,7 @@ describe('CLI end to end', () => {
     // 4. gate (no --kiro) is red: exit 2, with the reproduction command
     h.clearOutput();
     expect(await h.run('gate')).toBe(2);
-    expect(h.io.stdoutText()).toContain('reproduce: golem replay 1.2');
+    expect(h.io.stdoutText()).toContain('reproduce: npx golem-spec replay 1.2');
 
     // 5. gate --kiro blocks with exit 0 while red, and follows the counter cycle with the dedupe window
     const stop = async (gapMs: number): Promise<{ code: number; out: string; err: string }> => {

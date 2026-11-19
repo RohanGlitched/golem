@@ -18,7 +18,7 @@ export function verdictSummary(o: RequirementOutcome): string {
     const ce = v.counterexample;
     const scen = formatScenario(o.req.space, ce?.scenario ?? v.closest.scenario);
     return `${id} broken: margin ${formatMargin(ce?.robustness ?? v.closest.robustness, o.unit)} at ${scen} (seed ${ce?.seed ?? v.closest.seed}), `
-      + `${v.trials} trials${ce?.shrunk === true ? ', shrunk' : ''}; reproduce: golem replay ${id}`;
+      + `${v.trials} trials${ce?.shrunk === true ? ', shrunk' : ''}; reproduce: npx golem-spec replay ${id}`;
   }
   return `${id} held: no counterexample found in ${v.trials} trials (closest margin ${formatMargin(v.closest.robustness, o.unit)})`;
 }

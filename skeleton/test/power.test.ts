@@ -27,7 +27,7 @@ describe('Power', () => {
 
   it('runs the golem server through npx as a stdio server', () => {
     const j = JSON.parse(readFileSync(join(POWER, 'mcp.json'), 'utf8')) as { mcpServers: Record<string, unknown> };
-    expect(j.mcpServers).toEqual({ golem: { type: 'stdio', command: 'npx', args: ['golem-spec', 'mcp'] } });
+    expect(j.mcpServers).toEqual({ golem: { type: 'stdio', command: 'npx', args: ['--no-install', 'golem-spec', 'mcp'] } });
   });
 
   it('has POWER.md with front matter and an overview that names every MCP tool', () => {

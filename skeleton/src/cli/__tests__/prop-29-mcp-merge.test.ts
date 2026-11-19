@@ -4,7 +4,7 @@ import { mergeMcpSettings } from '../init.js';
 import { MCP_TEMPLATE } from '../../../test/support/pack-fixture.js';
 import { propConfig } from '../../../test/support/prop.js';
 
-const GOLEM = { command: 'golem', args: ['mcp'] };
+const GOLEM = { command: 'npx', args: ['--no-install', 'golem-spec', 'mcp'] };
 const server = fc.record({ command: fc.string({ minLength: 1, maxLength: 8 }), args: fc.array(fc.string({ maxLength: 5 }), { maxLength: 3 }) });
 const name = fc.stringMatching(/^[a-z]{1,6}$/).filter((n) => n !== 'golem');
 const arbSettings = fc.record({

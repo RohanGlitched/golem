@@ -66,7 +66,7 @@ describe('locateApp', () => {
     const fs = createMemoryFs({ '/p/golem.config.json': valid, '/p/a/x': '' });
     const e = await err(locateApp('/p', 'a', fs));
     expect(e.message).toContain('/p/a');
-    expect(e.message).toContain('golem init');
+    expect(e.message).toContain('npx golem-spec init');
   });
 
   it('keeps an absolute path in the config unchanged', async () => {
@@ -79,7 +79,7 @@ describe('locateApp', () => {
   it('names the start directory and suggests golem init when nothing is found', async () => {
     const e = await err(locateApp('/x/y', undefined, createMemoryFs()));
     expect(e.message).toContain('/x/y');
-    expect(e.message).toContain('golem init');
+    expect(e.message).toContain('npx golem-spec init');
   });
 
   it('works with a Windows drive path', async () => {

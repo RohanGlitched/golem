@@ -23,7 +23,7 @@ describe('golem gate --kiro', () => {
       const j = JSON.parse(r.stdout);
       expect(j.decision).toBe('block');
       expect(j.reason).toContain('1.2: WHEN the base is pushed with up to 200 N');
-      expect(j.reason).toContain('reproduce: golem replay 1.2');
+      expect(j.reason).toContain('reproduce: npx golem-spec replay 1.2');
       expect(state(h)['s1']?.count).toBe(i);
     }
   });
