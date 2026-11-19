@@ -2,5 +2,13 @@
   "name": "golem-evidence",
   "version": "0.1.0",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "test": "vitest --run --passWithNoTests",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "falsifier": "vite-node scripts/cli.ts -- falsifier",
+    "map-g1": "vite-node scripts/cli.ts -- map-g1",
+    "agent-gate": "vite-node scripts/cli.ts -- agent-gate",
+    "report": "vite-node scripts/cli.ts -- report"
+  }
 }

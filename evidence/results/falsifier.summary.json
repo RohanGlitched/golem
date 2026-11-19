@@ -1,0 +1,225 @@
+{
+  "meta": {
+    "apps": {
+      "stagger": {
+        "expectedBreakIds": [
+          "1.2",
+          "1.3",
+          "4.2",
+          "6.2"
+        ],
+        "poolSize": 6
+      }
+    },
+    "budget": 96,
+    "commit": "923737284f50c583f2503ae1a2d37a819e03e3de",
+    "engineDirty": false,
+    "generated": "2026-11-19T13:12:14.992Z",
+    "logicalCores": 12,
+    "node": "v21.7.0",
+    "searchSeeds": 20,
+    "seconds": 854.3
+  },
+  "summary": [
+    {
+      "app": "stagger",
+      "excluded": 0,
+      "guided": {
+        "ci95": {
+          "hi": 1,
+          "lo": 0.8315665290168397
+        },
+        "found": 20,
+        "n": 20,
+        "rate": 1,
+        "sevIqr": 0.09479268929817442,
+        "sevMedian": 0.9142449118441945,
+        "sevShrunkMedian": 0.8553285507787223,
+        "trialsIqr": 15.25,
+        "trialsMedian": 16,
+        "wallMsMedian": 4391.5
+      },
+      "pairs": 20,
+      "random": {
+        "ci95": {
+          "hi": 1,
+          "lo": 0.8315665290168397
+        },
+        "found": 20,
+        "n": 20,
+        "rate": 1,
+        "sevIqr": 0.11643972159617988,
+        "sevMedian": 0.905882815921359,
+        "sevShrunkMedian": 0.8553285507787223,
+        "trialsIqr": 14.75,
+        "trialsMedian": 16,
+        "wallMsMedian": 4275.5
+      },
+      "reqId": "1.2",
+      "sevTest": {
+        "n": 10,
+        "p": 1,
+        "pBonferroni": 1,
+        "wMinus": 28,
+        "wPlus": 27
+      },
+      "trialsTest": {
+        "n": 6,
+        "p": 0.46875,
+        "pBonferroni": 1,
+        "wMinus": 6.5,
+        "wPlus": 14.5
+      }
+    },
+    {
+      "app": "stagger",
+      "excluded": 0,
+      "guided": {
+        "ci95": {
+          "hi": 0.6394574126929626,
+          "lo": 0.1911900607250061
+        },
+        "found": 8,
+        "n": 20,
+        "rate": 0.4,
+        "sevIqr": 0.15347508346297645,
+        "sevMedian": 1,
+        "sevShrunkMedian": 0.7233708930652335,
+        "trialsIqr": 60.5,
+        "trialsMedian": 97,
+        "wallMsMedian": 4654
+      },
+      "pairs": 20,
+      "random": {
+        "ci95": {
+          "hi": 0.5921885345332782,
+          "lo": 0.15390920478429848
+        },
+        "found": 7,
+        "n": 20,
+        "rate": 0.35,
+        "sevIqr": 0.11763445117503579,
+        "sevMedian": 1,
+        "sevShrunkMedian": 0.7323146577330135,
+        "trialsIqr": 49.75,
+        "trialsMedian": 97,
+        "wallMsMedian": 4436.5
+      },
+      "reqId": "1.3",
+      "sevTest": {
+        "n": 7,
+        "p": 0.578125,
+        "pBonferroni": 1,
+        "wMinus": 18,
+        "wPlus": 10
+      },
+      "trialsTest": {
+        "n": 7,
+        "p": 0.8125,
+        "pBonferroni": 1,
+        "wMinus": 16,
+        "wPlus": 12
+      }
+    },
+    {
+      "app": "stagger",
+      "excluded": 0,
+      "guided": {
+        "ci95": {
+          "hi": 1,
+          "lo": 0.8315665290168397
+        },
+        "found": 20,
+        "n": 20,
+        "rate": 1,
+        "sevIqr": 0.03436369311384624,
+        "sevMedian": 0.7849793591012713,
+        "sevShrunkMedian": 0.7675688614801857,
+        "trialsIqr": 3.25,
+        "trialsMedian": 3,
+        "wallMsMedian": 4713.5
+      },
+      "pairs": 20,
+      "random": {
+        "ci95": {
+          "hi": 1,
+          "lo": 0.8315665290168397
+        },
+        "found": 20,
+        "n": 20,
+        "rate": 1,
+        "sevIqr": 0.020638535075704567,
+        "sevMedian": 0.7753562783109373,
+        "sevShrunkMedian": 0.7674689318302512,
+        "trialsIqr": 3.25,
+        "trialsMedian": 3,
+        "wallMsMedian": 5119
+      },
+      "reqId": "4.2",
+      "sevTest": {
+        "n": 5,
+        "p": 0.0625,
+        "pBonferroni": 0.25,
+        "wMinus": 0,
+        "wPlus": 15
+      },
+      "trialsTest": {
+        "n": 0,
+        "p": 1,
+        "pBonferroni": 1,
+        "wMinus": 0,
+        "wPlus": 0
+      }
+    },
+    {
+      "app": "stagger",
+      "excluded": 0,
+      "guided": {
+        "ci95": {
+          "hi": 1,
+          "lo": 0.8315665290168397
+        },
+        "found": 20,
+        "n": 20,
+        "rate": 1,
+        "sevIqr": 0.025295650308180484,
+        "sevMedian": 0.5350559298713051,
+        "sevShrunkMedian": 0.5037558775946138,
+        "trialsIqr": 1,
+        "trialsMedian": 1,
+        "wallMsMedian": 4773.5
+      },
+      "pairs": 20,
+      "random": {
+        "ci95": {
+          "hi": 1,
+          "lo": 0.8315665290168397
+        },
+        "found": 20,
+        "n": 20,
+        "rate": 1,
+        "sevIqr": 0.01727446786753717,
+        "sevMedian": 0.5174421749688918,
+        "sevShrunkMedian": 0.504031031158064,
+        "trialsIqr": 1,
+        "trialsMedian": 1,
+        "wallMsMedian": 5831.5
+      },
+      "reqId": "6.2",
+      "sevTest": {
+        "n": 11,
+        "p": 0.0009765625,
+        "pBonferroni": 0.00390625,
+        "wMinus": 0,
+        "wPlus": 66
+      },
+      "trialsTest": {
+        "n": 0,
+        "p": 1,
+        "pBonferroni": 1,
+        "wMinus": 0,
+        "wPlus": 0
+      }
+    }
+  ]
+}
