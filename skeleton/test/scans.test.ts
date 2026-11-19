@@ -53,7 +53,7 @@ describe('package scans', () => {
 
   it('has no skeleton/src import specifier in any file under kiro-pack, power or crew-app (requirement 27.8)', () => {
     for (const d of [PACK_DIR, join(SKELETON_DIR, 'power'), join(SKELETON_DIR, 'crew-app')]) {
-      for (const f of walk(d, (p) => !p.endsWith('.png'))) {
+      for (const f of walk(d, (p) => !/\.(png|jpg)$/.test(p))) {
         expect(readFileSync(f, 'utf8'), relative(SKELETON_DIR, f)).not.toContain('skeleton/src');
       }
     }

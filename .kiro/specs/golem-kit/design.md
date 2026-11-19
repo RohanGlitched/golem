@@ -215,14 +215,14 @@ Checked against the Kiro documentation, the Agent Plugins specification, and (fo
 | Workflow recipe file name `<name>.workflow.json` under `.kiro/workflows/`. Repeat node: `{ "type": "repeat", "id", "maxIterations", "onMaxIterations": "pause", "stopCondition": { "fileCheck": { "path", "jsonPath", "value" } } }`. An unknown field such as `until` is dropped silently. | Partly (third-party article) | [Kiro workflows](https://kiro.dev/docs/workflows/), [recipe article](https://www.jpmti2016.com/articles/kiro-workflows-recipes-automate-pipeline) |
 | Workflow step node shape and a node that runs a shell command | Not verified. Assumption W1. | |
 | Agent Plugins 1.0: `plugin.json` at the plugin root with a closed schema. Permitted top-level fields are `$schema, name, version, description, author, homepage, repository, license, keywords, extensions`. Skills live in `skills/<name>/SKILL.md`. MCP servers live in `mcp.json` with `$schema` and `mcpServers`; a stdio entry has `type: "stdio"`, `command`, `args`. | Verified | [Agent Plugins specification](https://agent-plugins.org/specification), [Kiro blog](https://kiro.dev/blog/powers-supports-plugins/) |
-| Crew app `app.json`: `name, version, displayName, description, author, iconPath, agents[] (paths), skills[] (paths), ui?, permissions { api, events, cron, network, ... }`. | Verified for these fields | [Crew app kit](https://github.com/kirodotdev/KiroCrew/blob/main/docs/app-kit/getting-started.md) |
-| Crew `mcpServers` and `schedule { cron, timezone }` in `app.json` | Not verified. Assumption C1. | |
+| Crew app `app.json`: required `name, version, displayName, description`; `author, license, tags`; `agents[], skills[], mcpServers`; `repo, iconPath, screenshots[], highlights[]`; `crons[] { name, every or cron_expr, message, agent?, enabled? }`; `permissions { api, events, mcpTools, storage, cron, memory, network, jobs }`. There is no `schedule` field and no time-zone field. Icon: PNG with transparency, at least 256 x 256. Screenshots: PNG or JPG, 1200 px wide, 16:9, at most 5. | Verified (read 2026-11) | [Manifest reference](https://kiro.dev/docs/crew/apps/manifest/), [Build your first app](https://kiro.dev/docs/crew/apps/build-first-app/), [Publishing](https://kiro.dev/docs/crew/apps/publishing/) |
+| Whether a Crew gateway reads our agent JSON files and skill front matter, and which time zone it reads `cron_expr` in | Not verified. Assumption C1. | |
 | MCP SDK 1.32.2 installed in the repo exports `InMemoryTransport.createLinkedPair()` from `@modelcontextprotocol/sdk/inMemory.js`, and `Server`, `StdioServerTransport`, `Client`. | Verified (read `node_modules/.../inMemory.d.ts`) | local |
 
 Assumptions that remain after this table:
 
 - **W1** the workflow uses steps `{ "type": "step", "id", "agent", "prompt" }` and the gate step is an agent step whose agent runs `golem gate` through its shell tool. The repeat stop condition reads `.golem/report.json`, path `meta.lastGateExitCode`, value `0` (A13). The `jsonPath` syntax is unverified.
-- **C1** `app.json` carries `mcpServers` and `schedule: { cron, timezone }` as extra fields, next to the verified ones.
+- **C1** a Crew gateway accepts the Kiro agent files and the skills of the pack as they are, and reads `cron_expr` in its own host time zone. The manifest fields themselves are verified. No gateway was available to install the app.
 - **K1** an upgraded Agent_File may carry `permissions`, `model` and `kiroUpgrade` (V3_Fields) next to V2_Fields, and its `hooks` may be in object or array form. The structural test accepts exactly that set (OQ3).
 
 ### Decisions on the research conflicts (X1 to X7)
@@ -868,17 +868,18 @@ power/
 ```json
 {
   "name": "golem-night-watch", "version": "0.1.0", "displayName": "GOLEM Night Watch",
-  "description": "Runs the skeptic overnight and posts a summary of proposals.",
-  "author": "golem", "iconPath": "assets/icon.png",
+  "description": "Runs the skeptic overnight and writes a summary of the proposals it made.",
+  "author": "Rohan Borade", "license": "Apache-2.0", "tags": ["robotics", "requirements", "testing", "ears", "mujoco"],
+  "repo": "golem", "iconPath": "assets/icon.png", "screenshots": ["assets/screenshot-1.jpg"], "highlights": ["..."],
   "agents": ["agents/golem-tuner.json", "agents/golem-skeptic.json", "agents/golem-scribe.json"],
   "skills": ["skills/robot-ears", "skills/falsify-and-fix"],
-  "mcpServers": { "golem": { "command": "golem", "args": ["mcp"] } },
-  "schedule": { "cron": "0 3 * * *", "timezone": "Europe/Berlin" },
-  "permissions": { "cron": true, "network": false }
+  "mcpServers": { "golem": { "command": "npx", "args": ["--no-install", "golem-spec", "mcp"] } },
+  "crons": [{ "name": "night-watch", "cron_expr": "0 3 * * *", "agent": "golem-skeptic", "message": "Run once. ..." }],
+  "permissions": { "network": false }
 }
 ```
 
-`mcpServers` and `schedule` are C1. The cron fixes minute and hour so the job fires once per 24 h (26.4). The nightly prompt runs `golem-skeptic` only, and the summary lists proposals written with their requirement ids, requirement ids whose latest verdict is `broken`, and the budget as trials run and wall seconds (26.5). A failure posts the failure and the number of proposals already written (26.9). The job writes only through `propose_requirement`, so it cannot touch a Requirements_File or `controller/` (26.6). The only files are `app.json`, the referenced agent and skill copies and the icon (26.7). It holds no secret and no network address (26.8). The agent and skill copies are generated by `sync-power.ts` from the finalized pack agents.
+Every field is defined by the Manifest reference, and `skeleton/crew-app/README.md` records the doc page of each field kept and each field dropped (`schedule`, its time zone, and `permissions.cron`). The `cron_expr` fixes minute and hour so the job fires once per 24 h (26.4). The nightly prompt runs `golem-skeptic` only, and the summary lists proposals written with their requirement ids, requirement ids whose latest verdict is `broken`, and the budget as trials run and wall seconds (26.5). A failure ends the run with the failure and the number of proposals already written (26.9). The summary is text in the run's output, so `permissions.network` stays `false` (26.8). The job writes only through `propose_requirement`, so it cannot touch a Requirements_File or `controller/` (26.6). The only files are `app.json`, `README.md`, the referenced agent and skill copies, the icon and the screenshot (26.7, 26.10); `scripts/make-crew-assets.ts` regenerates the two images. It holds no secret and no network address (26.8). The agent and skill copies are generated by `sync-power.ts` from the finalized pack agents.
 
 ### `workflows/falsify-and-fix.workflow.json`
 
@@ -1330,7 +1331,7 @@ skeleton/test/
   agents.test.ts          Properties 43, 44, 45, 46, build-script examples (fake runner)
   pack.test.ts            JSON validity of every shipped file, steering and skill content, workflow shape pin
   power.test.ts           Properties 47, 48, 49, no scripts, no executable bit
-  crew.test.ts            app.json fields, cron fixes hour and minute
+  crew.test.ts            app.json against the documented manifest fields, cron fixes hour and minute, icon and screenshot sizes, README names the doc pages
   scans.test.ts           no `Math.random` in cli and mcp sources, no network, only SDK and tech.md dependencies
   kiro-cli.test.ts        runs `kiro-cli agent validate --path` on each agent and a second `kiro-cli agent upgrade` on a temp copy when installed; otherwise one skip line naming kiro-cli
 ```

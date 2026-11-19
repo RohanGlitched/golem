@@ -68,11 +68,12 @@ describe('kiro formats', () => {
     } finally { rmSync(root, { recursive: true, force: true }); }
   });
 
-  it('the Manual trigger, the workflow fields and the Crew schedule keep their documented shape', () => {
+  it('the Manual trigger, the workflow fields and the Crew cron keep their documented shape', () => {
     expect(hookFile().hooks.find((h) => h['name'] === 'Summon the ghosts')).toMatchObject({ trigger: 'Manual' });
     expect(packJson('workflows/falsify-and-fix.workflow.json').nodes[0]).toMatchObject({ type: 'repeat', maxIterations: 6, onMaxIterations: 'pause', stopCondition: { fileCheck: { jsonPath: 'meta.lastGateExitCode', value: 0 } } });
     const app = JSON.parse(readFileSync(join(SKELETON_DIR, 'crew-app', 'app.json'), 'utf8'));
-    expect(app.schedule).toMatchObject({ cron: expect.stringMatching(/^\d+ \d+ \* \* \*$/), timezone: expect.any(String) });
+    expect(app.crons[0]).toMatchObject({ cron_expr: expect.stringMatching(/^\d+ \d+ \* \* \*$/), agent: 'golem-skeptic' });
+    expect(app.schedule).toBeUndefined();
   });
 
   it('the README records the open follow-ups OQ6 and OQ7 and the once-per-turn Stop behaviour', () => {

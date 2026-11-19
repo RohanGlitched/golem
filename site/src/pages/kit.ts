@@ -114,7 +114,7 @@ export function kitPage(d: SiteData): PageSpec {
   const ts = parseTranscript(d.transcriptMd);
   const byName = (n: string): TranscriptSection | undefined => ts.find((x) => x.command === `golem ${n}` || x.command.startsWith(`golem ${n} `));
   const wf = readRepoText('skeleton/kiro-pack/workflows/falsify-and-fix.workflow.json').trim();
-  const crew = readRepoJson<{ displayName: string; description: string; schedule: { cron: string; timezone: string; agent: string } }>('skeleton/crew-app/app.json');
+  const crew = readRepoJson<{ displayName: string; description: string; crons: { cron_expr: string; agent: string }[]; permissions: { network: boolean } }>('skeleton/crew-app/app.json');
   const power = frontMatter(readRepoText('skeleton/power/POWER.md'));
   const steer = readRepoText('skeleton/kiro-pack/steering/golem-ears.md').length;
   section(ts, 'golem gate');
@@ -158,7 +158,7 @@ ${skillsTable()}
 <p>The <code>falsify-and-fix</code> workflow repeats the tuner and <code>golem gate</code> up to 6 times and pauses if the gate is still red. The kit README marks its file format as the least verified part of the pack.</p>
 ${codeBlock(wf, 'the workflow file')}
 <h3>Crew app</h3>
-<p><b>${esc(crew.displayName)}</b>: ${esc(crew.description)} It runs the agent <code>${esc(crew.schedule.agent)}</code> on the cron schedule <code>${esc(crew.schedule.cron)}</code> (${esc(crew.schedule.timezone)}) with network access off. The schedule fields of <code>app.json</code> are not verified against a live Crew install.</p>
+<p><b>${esc(crew.displayName)}</b>: ${esc(crew.description)} It runs the agent <code>${esc(crew.crons[0]!.agent)}</code> on the cron expression <code>${esc(crew.crons[0]!.cron_expr)}</code> with network permission ${crew.permissions.network ? 'on' : 'off'}, and ends each run with a summary in the run’s output. The manifest follows the documented Crew fields (<code>crons</code>, <code>permissions</code>, store assets). It has not been installed on a live Crew gateway.</p>
 
 <h2 id="ears">The EARS dialect</h2>
 <p>GOLEM accepts Kiro's five EARS patterns. Every number carries a unit; a line that matches no phrase fails <code>golem check</code> with the closest phrase as the suggestion. The tables below are generated from the two <code>lexicon.ts</code> files.</p>

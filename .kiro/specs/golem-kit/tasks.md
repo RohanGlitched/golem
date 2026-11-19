@@ -591,8 +591,8 @@ This revision follows the current requirements and design:
     - **Validates: Requirements 25.1, 28.7**
 
   - [x] 12.5 Write the Crew app definition
-    - Create `skeleton/crew-app/app.json` with `agents`, `skills`, `mcpServers` and `schedule` (cron fixing minute and hour, IANA time zone), `permissions` with `network` false, and `assets/icon.png`. The agent and skill copies come from the sync script (12.6).
-    - Test: field presence, cron has five fields with fixed minute and hour, no secret or network address, `agents` names the three agents and `skills` names `robot-ears` and `falsify-and-fix`.
+    - Create `skeleton/crew-app/app.json` with `agents`, `skills`, `mcpServers` and `crons` (one entry, `cron_expr` fixing minute and hour), `permissions` with `network` false, the store fields, `README.md`, `assets/icon.png` (512 px, transparent) and `assets/screenshot-1.jpg` (1200 x 675, made by `npm run crew:assets`). The agent and skill copies come from the sync script (12.6).
+    - Test: every field is one the manifest reference defines, required fields and name and version formats, cron has five fields with fixed minute and hour, the cron agent exists, no secret or network address, icon size and alpha, screenshot size, README names the doc page of each field, `agents` names the three agents and `skills` names `robot-ears` and `falsify-and-fix`.
     - _Requirements: 26.1, 26.2, 26.3, 26.4, 26.5, 26.8, 28.7_
 
   - [x] 12.6 Implement the Power and Crew sync script

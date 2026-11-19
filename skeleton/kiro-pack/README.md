@@ -43,7 +43,7 @@ The counter of `npx --no-install golem-spec gate --kiro` is kept as designed: at
 | A file with a byte order mark is rejected by the upgrade. The build writes UTF-8 without BOM. | Verified |
 | Workflow recipe `<name>.workflow.json`, repeat node with `maxIterations`, `onMaxIterations`, `stopCondition.fileCheck`. | Partly (third-party article) |
 | Agent Plugins 1.0 `plugin.json`: closed schema, `$schema, name, version, description, author, homepage, repository, license, keywords, extensions`. | Verified (specification) |
-| Crew `app.json` `mcpServers` and `schedule { cron, timezone }`. | Not verified (C1) |
+| Crew `app.json` fields, `crons[]` and the store assets. | Verified against the Crew manifest reference; install on a gateway not tried (C1) |
 
 ## Decisions X1 to X7
 
@@ -68,7 +68,7 @@ The counter of `npx --no-install golem-spec gate --kiro` is kept as designed: at
 ## Assumptions
 
 - W1: workflow steps have the shape `{ "type": "step", "id", "agent", "prompt" }` and the gate step runs `npx --no-install golem-spec gate` through the agent's shell tool. The `jsonPath` syntax of the stop condition is unverified.
-- C1: the Crew `app.json` carries `mcpServers` and `schedule`. This kit also puts the nightly `agent` and `prompt` inside `schedule`.
+- C1: a Crew gateway accepts the pack's agent files and skills as they are and reads `cron_expr` in its host time zone. The nightly job is `crons[0]` (`cron_expr`, `agent`, `message`); see `crew-app/README.md` for the doc page of each manifest field.
 - K1: an upgraded agent file may carry the V3 fields (`permissions`, `kiroUpgrade`, `model`) next to the V2 fields.
 
 ## Still open

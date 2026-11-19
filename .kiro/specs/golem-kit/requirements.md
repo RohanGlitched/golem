@@ -57,7 +57,7 @@ Out of scope: EARS parsing and monitors, the MuJoCo episode runner, the search a
 - **Plugin_Manifest**: `plugin.json` in the Power, in Agent Plugins 1.0 format, a closed schema whose permitted top-level fields are `$schema`, `name`, `version`, `description`, `author`, `homepage`, `repository`, `license`, `keywords` and `extensions`. Skills (`skills/<name>/SKILL.md`) and MCP servers (`mcp.json`) are found by convention, not by paths in the manifest.
 - **Legacy_Power_File**: `POWER.md` in the Power, with its steering files.
 - **Crew_App**: The Kiro Crew app in `skeleton/crew-app`, defined by `app.json`.
-- **Nightly_Job**: The cron entry of the Crew_App that runs the Skeptic_Agent and posts a summary.
+- **Nightly_Job**: The `crons` entry of the Crew_App that runs the Skeptic_Agent and ends with a summary in the run's output.
 - **Tiny_Test_App**: A small `RobotApp` defined inline in tests, with a synthetic trial function and no MuJoCo, used to test the CLI and MCP_Server.
 - **In_Memory_Transport**: The MCP SDK transport pair that connects a client and the MCP_Server inside one process.
 
@@ -496,15 +496,16 @@ Out of scope: EARS parsing and monitors, the MuJoCo episode runner, the search a
 
 #### Acceptance Criteria
 
-1. THE Crew_App SHALL contain `app.json` with the fields `agents`, `skills`, `mcpServers` and `schedule`, where `schedule` holds one five-field cron expression and one IANA time-zone name.
+1. THE Crew_App SHALL contain `app.json` with the fields `agents`, `skills`, `mcpServers` and `crons`, where `crons` holds one entry with a five-field `cron_expr`, a `message` and the `agent` to run. THE `app.json` SHALL contain only fields defined by the Kiro Crew manifest reference (https://kiro.dev/docs/crew/apps/manifest/), so it has no `schedule` block and no time-zone field.
 2. THE `agents` field SHALL reference the Tuner_Agent, the Skeptic_Agent and the Scribe_Agent, and THE `skills` field SHALL reference `robot-ears` and `falsify-and-fix`.
 3. THE `mcpServers` field SHALL register the `golem` MCP server.
-4. THE Nightly_Job SHALL run the Skeptic_Agent exactly once per 24 h, at the time given by the cron expression in the named time zone, and the cron expression SHALL fix both the hour and the minute.
-5. WHEN the Nightly_Job completes, THE Crew_App SHALL post a summary that lists the number of proposals written and their requirement IDs, the IDs of the requirements whose Verdict status is `broken`, and the budget used as the number of trials run and the wall time in seconds.
+4. THE Nightly_Job SHALL run the Skeptic_Agent exactly once per 24 h, at the time given by `cron_expr`, and the expression SHALL fix both the hour and the minute. The manifest reference has no time-zone field, so the zone is the one the Crew gateway uses.
+5. WHEN the Nightly_Job completes, THE Crew_App SHALL end the run with a summary in the run's output that lists the number of proposals written and their requirement IDs, the IDs of the requirements whose Verdict status is `broken`, and the budget used as the number of trials run and the wall time in seconds.
 6. THE Nightly_Job SHALL write only to the Proposals_File, and SHALL not create, modify or delete any Requirements_File or any file under `controller/`.
 7. THE Crew_App SHALL contain no file beyond `app.json` and the files it references, so that it stays small.
-8. THE `app.json` SHALL contain no secret and no network address beyond those of the Kiro services.
-9. IF the Nightly_Job fails before completing, THEN THE Crew_App SHALL post a summary that states the failure and the number of proposals written before the failure, and SHALL leave every Requirements_File and controller file unchanged.
+8. THE `app.json` SHALL contain no secret and no network address beyond those of the Kiro services, and SHALL set `permissions.network` to `false`. The summary in 26.5 is text in the run's output and is not a network request. THE `permissions` object SHALL declare only what the app uses, so it has no `cron` permission.
+9. IF the Nightly_Job fails before completing, THEN THE Crew_App SHALL end the run with a summary in the run's output that states the failure and the number of proposals written before the failure, and SHALL leave every Requirements_File and controller file unchanged.
+10. THE Crew_App SHALL contain README.md, an icon PNG of at least 256 x 256 px with transparency, and one screenshot 1200 px wide at 16:9, and README.md SHALL name the Crew documentation page that defines each pp.json field kept and each field dropped.
 
 ### Requirement 27: Determinism, network, licence and horizons
 
