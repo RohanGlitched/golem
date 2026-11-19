@@ -198,7 +198,7 @@ export class Stage {
     // Lamp pool, shadow catcher and the shadow-casting key light. The clay shader does its own
     // lighting; the light exists only to cast the robot's shadow onto the floor.
     const sm = (this.renderer as unknown as { shadowMap?: { enabled: boolean; type: number } }).shadowMap;
-    if (sm && !(globalThis as { __golemNoShadow?: boolean }).__golemNoShadow) { sm.enabled = true; sm.type = T.PCFSoftShadowMap; }
+    if (sm) { sm.enabled = true; sm.type = T.PCFSoftShadowMap; }
     this.poolMat = new T.ShaderMaterial({
       vertexShader: POOL_VERT, fragmentShader: POOL_FRAG,
       uniforms: {
