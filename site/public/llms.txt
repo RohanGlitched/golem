@@ -17,7 +17,7 @@
 
 ## Install
 npm i -D golem-spec
-npx golem init
+npx golem-spec init
 
 ## Links
 - Source: https://github.com/RohanGlitched/golem (Apache-2.0)

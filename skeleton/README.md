@@ -6,10 +6,10 @@ Live demo, with a Unitree G1 you can shove in the browser: https://d23v187fnxad7
 
 ```bash
 npm i -D golem-spec
-npx golem init        # installs Kiro hooks, agents, MCP server, skills and steering into .kiro/
-npx golem check       # compile every EARS line (no trials)
-npx golem test        # falsify every requirement: random, then guided, then shrink
-npx golem gate        # exit 0 only if every requirement holds (2 if any is broken)
+npx golem-spec init        # installs Kiro hooks, agents, MCP server, skills and steering into .kiro/
+npx golem-spec check       # compile every EARS line (no trials)
+npx golem-spec test        # falsify every requirement: random, then guided, then shrink
+npx golem-spec gate        # exit 0 only if every requirement holds (2 if any is broken)
 ```
 
 ## A requirement is a test

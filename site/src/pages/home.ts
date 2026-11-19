@@ -80,9 +80,9 @@ export function homePage(d: SiteData): PageSpec {
 <h2 id="npm-h">One npm package runs everything on this site</h2>
 <p>Both robots here run on <a href="https://www.npmjs.com/package/golem-spec"><code>golem-spec</code></a>, the same package any Kiro project can install. It ships the EARS compiler, the MuJoCo test runner, the falsifier, the <code>golem</code> CLI, an MCP server, and a Kiro pack of hooks, agents, skills and steering.</p>
 ${codeBlock(`npm i -D golem-spec     # the package
-npx golem init          # installs the Kiro hooks, agents, MCP server and skills into .kiro/
-npx golem test          # falsify every EARS requirement in .kiro/specs
-npx golem gate          # exit 0 only if every requirement holds`, 'install the npm package')}
+npx golem-spec init          # installs the Kiro hooks, agents, MCP server and skills into .kiro/
+npx golem-spec test          # falsify every EARS requirement in .kiro/specs
+npx golem-spec gate          # exit 0 only if every requirement holds`, 'install the npm package')}
 <p class="small muted"><a href="https://www.npmjs.com/package/golem-spec">golem-spec on npm</a> · <a href="${REPO_URL}">source on GitHub</a> · Apache-2.0</p>
 </section>
 

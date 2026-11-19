@@ -33,9 +33,9 @@ The engine is MuJoCo 4 compiled to WebAssembly, identical in Node and the browse
 
 ```bash
 npm i -D golem-spec
-npx golem init        # installs hooks, agents, MCP, skills, steering and a workflow into .kiro/
-npx golem test        # falsify every requirement
-npx golem gate        # exit 0 only if everything holds
+npx golem-spec init        # installs hooks, agents, MCP, skills, steering and a workflow into .kiro/
+npx golem-spec test        # falsify every requirement
+npx golem-spec gate        # exit 0 only if everything holds
 ```
 
 | What lands in `.kiro/` | What it does |
