@@ -13,6 +13,43 @@ import { ringStats, ringSvg, sideName } from '../figures/rings';
 export interface Headline {
   weakDir: number; weakN: number; weakPhase: number; strongDir: number; strongN: number;
   candyBroken: number; candyTrials: number; candyWorstM: number; candyLink7: number; candyCup: number;
+  hover: HoverHeadline;
+}
+
+/** The hover numbers, read from site/data/hover.json (which gen-hover.mjs wrote from the committed CLI output). */
+export interface HoverHeadline {
+  lines: number; expectedBreaks: number; budget: number; runs: number;
+  /** Line 1.3: the gust it asks to survive (N), the ball it must stay in (m), and the smallest gust that broke it (N). */
+  askN: number; ballM: number; breakN: number;
+  /** Line 1.1: the gust (N), the ball (m) and the smallest margin over the runs (m). */
+  smallN: number; smallBallM: number; smallMarginM: number;
+  /** Line 3.2: the lag it asks to survive (s) and the smallest lag that broke it (s). */
+  lagAskS: number; lagBreakS: number;
+}
+
+const need = (v: RegExpExecArray | null, what: string): number => {
+  if (!v) throw new Error('site/data/hover.json: cannot read ' + what);
+  return Number(v[1]);
+};
+const sig = (n: number): number => Number(n.toPrecision(3));
+
+export function hoverNumbers(d: SiteData): HoverHeadline {
+  const line = (id: string) => {
+    const l = d.hover.lines.find((x) => x.id === id);
+    if (!l) throw new Error('site/data/hover.json has no line ' + id + '. Run: node site/scripts/gen-hover.mjs');
+    return l;
+  };
+  const l11 = line('1.1'), l13 = line('1.3'), l32 = line('3.2');
+  return {
+    lines: d.hover.lines.length, expectedBreaks: d.hover.lines.filter((l) => l.expectation === 'Expected_Break').length,
+    budget: d.hover.budget, runs: d.hover.runs.length,
+    askN: need(/up to ([\d.]+) N/.exec(l13.source), 'the gust of line 1.3'), ballM: need(/within ([\d.]+) m/.exec(l13.source), 'the ball of line 1.3'),
+    breakN: sig(Math.min(...l13.counterexamples.map((c) => need(/gust\.force = ([\d.]+) N/.exec(c), 'a gust of line 1.3')))),
+    smallN: need(/up to ([\d.]+) N/.exec(l11.source), 'the gust of line 1.1'), smallBallM: need(/within ([\d.]+) m/.exec(l11.source), 'the ball of line 1.1'),
+    smallMarginM: l11.marginMin,
+    lagAskS: need(/lags by up to ([\d.]+) s/.exec(l32.source), 'the lag of line 3.2'),
+    lagBreakS: sig(Math.min(...l32.counterexamples.map((c) => need(/estimate\.lag = ([\d.]+) s/.exec(c), 'a lag of line 3.2')))),
+  };
 }
 
 /** The numbers the home page quotes, drawn from the evidence files (never typed in). */
@@ -22,6 +59,7 @@ export function headlineNumbers(d: SiteData): Headline {
     weakDir: m.weakest.dirDeg, weakN: m.weakest.minHeldN, weakPhase: m.weakest.weakestPhase, strongDir: m.strongest.dirDeg, strongN: m.strongest.minHeldN,
     candyBroken: d.candy.broken, candyTrials: d.candy.trials, candyWorstM: d.candy.worstMinDistanceM,
     candyLink7: d.candy.closestLinkAtBreak['link7'] ?? 0, candyCup: d.candy.closestLinkAtBreak['cup'] ?? 0,
+    hover: hoverNumbers(d),
   };
 }
 
@@ -138,7 +176,7 @@ ${hero.kiroFellDeg !== undefined ? `<div class="circle-toggle" role="group" aria
 <section class="npm-card" aria-labelledby="npm-h">
 <a class="npm-badge" href="https://www.npmjs.com/package/golem-spec">npm · golem-spec</a>
 <h2 id="npm-h">One package runs everything on this site</h2>
-<p>Both robots here run on <a href="https://www.npmjs.com/package/golem-spec"><code>golem-spec</code></a>, the package any Kiro project can install. It ships the EARS compiler, the MuJoCo test runner, the counterexample search, the <code>golem</code> CLI, an MCP server with eight tools, and a Kiro pack of hooks, agents, skills and steering.</p>
+<p>All three robots here run on <a href="https://www.npmjs.com/package/golem-spec"><code>golem-spec</code></a>, the package any Kiro project can install. It ships the EARS compiler, the MuJoCo test runner, the counterexample search, the <code>golem</code> CLI, an MCP server with eight tools, and a Kiro pack of hooks, agents, skills and steering.</p>
 ${codeBlock(`npm i -D golem-spec      # the package
 npx golem-spec init      # hooks, agents, MCP server and skills into .kiro/
 npx golem-spec test      # try to break every EARS line in .kiro/specs
@@ -166,10 +204,11 @@ ${ringsSection(d)}
 <p class="alt">All six figures use files committed in this repository: the G1 requirements, the stability map, a pinned seed and the output of <code>golem gate</code>.</p>
 </div></section>
 
-<h2 id="robots">Two robots, one package</h2>
+<h2 id="robots">Three robots, one package</h2>
 <div class="cards wide">
 <article class="card"><h3>Stagger: a Unitree G1</h3><p>A humanoid walking under Unitree’s published policy. ${g1?.lines.length ?? 0} requirement lines cover pushes, speed tracking, slopes, payload, slipping and sensor latency. ${expectedBreaks} of them are marked Expected_Break: the spec says they must break, and the gate checks that they do.</p><p><a class="btn" href="/stagger/">Open the G1 studio</a></p></article>
 <article class="card"><h3>Candy: a Franka Panda</h3><p>A suction cup sorts Halloween candy into bowls while a trick-or-treater’s hand reaches into the workspace. ${candy?.lines.length ?? 0} lines cover task success and keeping the arm clear of hands.</p><p><a class="btn" href="/candy/">Open the candy studio</a></p></article>
+<article class="card"><h3>Hover: a Skydio X2</h3><p>A quadrotor holds a point in the wind. ${h.hover.lines} lines cover gusts, a sagging battery and a late position estimate; ${h.hover.expectedBreaks} are marked Expected_Break. Line 1.3 asks it to stay within ${fmt(h.hover.ballM)} m in a gust of up to ${fmt(h.hover.askN)} N, and it breaks from ${fmt(h.hover.breakN, 2)} N. The same skeleton, a lexicon and a controller, and nothing else.</p><p><a class="btn" href="/hover/">Open the hover studio</a></p></article>
 </div>
 
 <h2 id="results">Measured results</h2>
@@ -178,6 +217,7 @@ ${ringsSection(d)}
 <div class="stat"><b class="break">${fmt(h.weakN)} N</b><span>The G1’s weakest direction on Unitree’s policy: ${h.weakDir}°, a push from ${sideName(h.weakDir)}, at stride phase ${h.weakPhase}.</span><a href="/evidence/#map">The stability map</a></div>
 <div class="stat"><b class="hold">${fmt(h.strongN)} N</b><span>Its strongest: ${h.strongDir}°, from ${sideName(h.strongDir)}. A factor of ${fmt(h.strongN / h.weakN)} between the two.</span><a href="/evidence/#map">The stability map</a></div>
 <div class="stat"><b>${h.candyBroken} of ${h.candyTrials}</b><span>Candy trials that break “keep every link 0.10 m from the hand”. The closest link is the wrist in ${h.candyLink7}, the cup in ${h.candyCup}.</span><a href="/evidence/#candy">The candy measurement</a></div>
+<div class="stat"><b>${fmt(h.hover.breakN, 2)} N</b><span>The gust that carries the Skydio X2 out of a ${fmt(h.hover.ballM)} m ball around its hover point. Line 1.3 asks for ${fmt(h.hover.askN)} N and breaks. A ${fmt(h.hover.smallN)} N gust holds within ${fmt(h.hover.smallBallM, 2)} m with at least ${fmt(h.hover.smallMarginM, 4)} m to spare. A position estimate that lags by ${fmt(h.hover.lagBreakS, 3)} s breaks line 3.2 (it asks for ${fmt(h.hover.lagAskS, 2)} s). Search budget ${h.hover.budget} trials, ${h.hover.runs} search seeds.</span><a href="https://github.com/RohanGlitched/golem/blob/main/apps/hover/docs/cli-transcript.md">The CLI transcript</a></div>
 <div class="stat"><b>${r12.guided.found}/${r12.guided.n} vs ${r12.random.found}/${r12.random.n}</b><span>Line 1.2 found by guided search and by random sampling at budget ${budget}. On the G1 lines, guided search is no better than random.</span><a href="/evidence/#benchmark">The benchmark</a></div>
 </div>
 

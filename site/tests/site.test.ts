@@ -97,6 +97,42 @@ describe('evidence data', () => {
     expect(h.strongN).toBeCloseTo(240.6, 1);
     expect(h.candyBroken).toBe(data.candy.broken);
   });
+  it('draws the hover numbers from site/data/hover.json, which is read from the committed CLI output', () => {
+    const h = headlineNumbers(data).hover;
+    const l13 = data.hover.lines.find((l) => l.id === '1.3')!;
+    expect(h.lines).toBe(data.hover.lines.length);
+    expect(h.expectedBreaks).toBe(data.hover.lines.filter((l) => l.expectation === 'Expected_Break').length);
+    expect(h.expectedBreaks).toBeGreaterThan(0);
+    // the smallest gust that broke line 1.3 is below the gust that line 1.3 asks the drone to survive
+    expect(h.breakN).toBeLessThan(h.askN);
+    expect(l13.counterexamples.some((c) => c.includes(String(h.breakN)))).toBe(true);
+    expect(h.lagBreakS).toBeLessThan(h.lagAskS);
+    expect(h.smallMarginM).toBeGreaterThan(0);
+    expect(data.hover.lines.every((l) => l.expectationMet)).toBe(true);
+  });
+  it('has a hover.json that matches the transcript and the spec it names', () => {
+    const transcript = readFileSync(path.join(REPO_ROOT, data.hover.source.transcript), 'utf8');
+    const spec = readFileSync(path.join(REPO_ROOT, data.hover.source.spec), 'utf8');
+    for (const l of data.hover.lines) {
+      expect(spec).toContain(l.source);
+      expect(spec).toContain(`| ${l.id} |`);
+      expect(spec).toMatch(new RegExp(`\\|\\s*${l.id.replace('.', '\\.')}\\s*\\|[^|]*\\|\\s*${l.expectation}\\s*\\|`));
+      for (const r of data.hover.runs) {
+        const res = r.results[l.id]!;
+        // the verdict line of that run, in the transcript, carries the same status and margin
+        const text = `margin ${res.margin > 0 ? '+' : ''}${res.margin} ${res.unit} `;
+        expect(transcript.split('\n').some((row) => row.startsWith(`${l.id}  ${res.status.toUpperCase()}  `) && row.includes(text)), `${l.id} ${text}`).toBe(true);
+      }
+    }
+  });
+  it('reports the hover numbers that the repository README quotes', () => {
+    const readme = readFileSync(path.join(REPO_ROOT, 'README.md'), 'utf8');
+    const row = readme.split('\n').find((l) => l.startsWith('| [`apps/hover`]'));
+    expect(row).toBeDefined();
+    const h = headlineNumbers(data).hover;
+    expect(row).toContain(String(h.breakN) + ' N');
+    expect(row).toContain(String(h.askN) + ' N');
+  });
   it('reads the needle rows: GOLEM 30/30 against random 7/30 at 0.11 %', () => {
     const rows = parseNeedle(data.needleRuns);
     const hard = rows.find((r) => r.margin === 'graded' && r.budget === 400);
@@ -114,7 +150,7 @@ describe('pages', () => {
     expect(after).toContain('tools/call falsify');
     expect(after).toMatch(/Expected_(Hold|Break)/);
   });
-  const ids = ['home', 'kit', 'evidence', 'how-kiro', 'notfound', 'stagger', 'candy'];
+  const ids = ['home', 'kit', 'evidence', 'how-kiro', 'notfound', 'stagger', 'candy', 'hover'];
   it.each(ids)('renders %s with one h1 and no stray placeholder', (id) => {
     const html = renderPage(id, data).body;
     expect((html.match(/<h1[ >]/g) ?? []).length).toBe(1);
@@ -150,7 +186,7 @@ describe.skipIf(!existsSync(path.join(dist, 'index.html')))('built site', () => 
     }
   });
   it('ships both studios and the 404 page', () => {
-    for (const f of ['stagger/index.html', 'candy/index.html', '404.html', 'og.png', 'favicon.svg', 'fonts/Gloock-Regular.ttf']) expect(existsSync(path.join(dist, f)), f).toBe(true);
+    for (const f of ['stagger/index.html', 'candy/index.html', 'hover/index.html', 'hover/robot/scene.xml', 'hover/robot/LICENSE.txt', '404.html', 'og.png', 'favicon.svg', 'fonts/Gloock-Regular.ttf']) expect(existsSync(path.join(dist, f)), f).toBe(true);
     void REPO_ROOT;
   });
 });

@@ -5,6 +5,7 @@
 ## What a visitor can do on this site
 - /stagger/ : a live Unitree G1 humanoid (Unitree's published walking policy) in the browser. Drag it to shove it. Click "Summon 64 ghosts" on a requirement to run 64 simulated trials; trials that fall turn red; the verdict shows the smallest push that breaks the requirement and a replay.
 - /candy/ : a Franka Panda arm with a suction cup sorting Halloween candy while a child's hand reaches in; safety requirements for speed and separation near the hand.
+- /hover/ : a Skydio X2 quadrotor holding a hover point 1.0 m up in wind gusts, with a sagging battery and a lagging position estimate; its measured margins are in apps/hover/docs/cli-transcript.md.
 - /kit/ : the npm package and its CLI (`golem init | check | test | falsify | replay | gate | mcp`), MCP server tools, Kiro hooks, agents, skills, Power and Crew app.
 - /evidence/ : measured results with raw data, methods and limits.
 - /how-kiro/ : how Kiro built GOLEM (specs, steering, hooks, agents, MCP, audits, what went wrong).
