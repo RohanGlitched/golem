@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { BOWLS, HAND_START, TABLE, TRAY } from '../constants';
 import {
-  bowlAt, chooseCandy, classifyCandies, handPose, inTray, inWorkspace, makeCandyStates, nearestBowl, resolveOverlaps, tableEdgePoint,
+  bowlAt, chooseCandy, classifyCandies, doorstepAzimuth, doorstepEntryPoint, handPose, inTray, inWorkspace, makeCandyStates,
+  nearestBowl, resolveOverlaps,
   type CandyCounts,
 } from '../geometry';
 
@@ -46,38 +47,55 @@ describe('classifyCandies', () => {
 });
 
 describe('handPose', () => {
-  const v = { angle: Math.PI / 2, speed: 0.8, entry: 0.5, height: 0.15 };
+  // hand.angle = pi is the +y end of the doorstep arc (azimuth +60 deg): the hand enters at the corner (1.0, 0.6)
+  const v = { angle: Math.PI, speed: 0.8, entry: 0.5, height: 0.15 };
   it('holds the start pose before the entry time', () => {
     expect(pose(0, v)).toEqual([HAND_START.x, HAND_START.y, HAND_START.z, HAND_START.yaw]);
     expect(pose(1.49, v)).toEqual([HAND_START.x, HAND_START.y, HAND_START.z, HAND_START.yaw]);
   });
-  it('appears on the Table edge at the entry time and heads for the nearest bowl', () => {
+  it('appears on the doorstep edge at the entry time and heads for the nearest bowl', () => {
     const p = pose(1.5, v);
-    expect(p[0]).toBeCloseTo(0.55, 9);            // from the workspace centre along +y: x stays 0.55
+    expect(p[0]).toBeCloseTo(TABLE.xMax, 9);
     expect(p[1]).toBeCloseTo(TABLE.yMax, 9);
     expect(p[2]).toBe(0.15);
-    expect(p[3]).toBe(Math.PI / 2);
+    // the forearm trails behind the palm, back toward the entry point
+    expect(p[3]).toBeCloseTo(Math.atan2(TABLE.yMax - BOWLS[2]!.y, TABLE.xMax - BOWLS[2]!.x), 9);
     const q = pose(1.5 + 0.25, v);
-    const moved = Math.hypot(q[0]! - p[0]!, q[1]! - p[1]!);
-    expect(moved).toBeCloseTo(0.8 * 0.25, 9);
+    expect(Math.hypot(q[0]! - p[0]!, q[1]! - p[1]!)).toBeCloseTo(0.8 * 0.25, 9);
   });
   it('holds at the bowl centre after arriving', () => {
     const p = pose(100, v);
     expect(p[0]).toBeCloseTo(BOWLS[2]!.x, 9);
     expect(p[1]).toBeCloseTo(BOWLS[2]!.y, 9);
   });
-  it('enters from the side toward the green bowl for +y and the orange bowl for -y', () => {
-    const e = new Float64Array(2);
-    tableEdgePoint(Math.PI / 2, e);
-    expect(nearestBowl(e[0]!, e[1]!)).toBe(2);
-    tableEdgePoint(-Math.PI / 2, e);
-    expect(nearestBowl(e[0]!, e[1]!)).toBe(0);
-    tableEdgePoint(0, e);
-    expect(e[0]).toBeCloseTo(TABLE.xMax, 9);
-    expect(nearestBowl(e[0]!, e[1]!)).toBe(1);
-  });
 });
 
+describe('doorstep', () => {
+  const entry = (angle: number) => { const e = new Float64Array(2); doorstepEntryPoint(doorstepAzimuth(angle), e); return Array.from(e); };
+  it('spans 120 degrees: -60 deg at hand.angle 0, 0 deg at 90 deg, +60 deg at 180 deg, back to -60 deg at 360 deg', () => {
+    expect(doorstepAzimuth(0)).toBeCloseTo(-Math.PI / 3, 12);
+    expect(doorstepAzimuth(Math.PI / 2)).toBeCloseTo(0, 12);
+    expect(doorstepAzimuth(Math.PI)).toBeCloseTo(Math.PI / 3, 12);
+    expect(doorstepAzimuth(1.5 * Math.PI)).toBeCloseTo(0, 12);
+    expect(doorstepAzimuth(2 * Math.PI)).toBeCloseTo(-Math.PI / 3, 12);
+  });
+  it('enters on the edge facing away from the base, at the two corners for the ends of the arc', () => {
+    expect(entry(0)[0]).toBe(TABLE.xMax);
+    expect(entry(0)[1]).toBeCloseTo(TABLE.yMin, 9);
+    expect(entry(Math.PI)[1]).toBeCloseTo(TABLE.yMax, 9);
+    expect(entry(Math.PI / 2)[1]).toBeCloseTo(0, 12);
+  });
+  it('sends a straight-on hand to the purple bowl and the two ends to the orange and green bowls', () => {
+    for (const [angle, bowl] of [[0, 0], [Math.PI / 2, 1], [Math.PI, 2]] as const) {
+      const e = entry(angle);
+      expect(nearestBowl(e[0]!, e[1]!)).toBe(bowl);
+    }
+  });
+  it('treats a non-finite angle as 0', () => {
+    expect(doorstepAzimuth(NaN)).toBe(doorstepAzimuth(0));
+    expect(doorstepAzimuth(Infinity)).toBe(doorstepAzimuth(0));
+  });
+});
 describe('resolveOverlaps', () => {
   it('spreads six candies from one point so that the last ends at x <= 0.59 m, inside the tray', () => {
     const xy = new Float64Array(12);

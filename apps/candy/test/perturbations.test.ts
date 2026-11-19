@@ -137,7 +137,8 @@ describe('compiled calls', () => {
   });
 });
 describe('hand perturbation', () => {
-  const values = { direction: Math.PI / 2, speed: 0.8, entry: 0.5, height: 0.15 };
+  // hand.angle = pi: the +y end of the doorstep arc, entering at the corner (1.0, 0.6) and heading for the green bowl
+  const values = { direction: Math.PI, speed: 0.8, entry: 0.5, height: 0.15 };
   const mocap = () => Array.from((data.mocap_pos as Float64Array).slice(3 * ids.handMocap, 3 * ids.handMocap + 3));
   it('keeps the hand at its start pose before the entry time', () => {
     handReaches.apply(ctx, 1.2, 1.0, values);
@@ -145,15 +146,16 @@ describe('hand perturbation', () => {
   });
   it('moves the hand from the table edge at the entry time and writes a unit quaternion for the yaw', () => {
     handReaches.apply(ctx, 1.5, 1.0, values);
+    expect(mocap()[0]).toBeCloseTo(1.0, 9);
     expect(mocap()[1]).toBeCloseTo(0.6, 9);
     handReaches.apply(ctx, 1.75, 1.0, values);
-    // 0.2 m along the line from the edge (0.55, 0.6) to the green bowl centre (0.611, 0.382)
-    const len = Math.hypot(0.611 - 0.55, 0.382 - 0.6);
-    expect(mocap()[0]).toBeCloseTo(0.55 + 0.2 * (0.611 - 0.55) / len, 9);
+    // 0.2 m along the line from the doorstep corner (1.0, 0.6) to the green bowl centre (0.611, 0.382)
+    const len = Math.hypot(0.611 - 1.0, 0.382 - 0.6);
+    expect(mocap()[0]).toBeCloseTo(1.0 + 0.2 * (0.611 - 1.0) / len, 9);
     expect(mocap()[1]).toBeCloseTo(0.6 + 0.2 * (0.382 - 0.6) / len, 9);
     const q = Array.from((data.mocap_quat as Float64Array).slice(4 * ids.handMocap, 4 * ids.handMocap + 4));
     expect(Math.hypot(...q)).toBeCloseTo(1, 12);
-    expect(2 * Math.atan2(q[3]!, q[0]!)).toBeCloseTo(Math.PI / 2, 12);
+    expect(2 * Math.atan2(q[3]!, q[0]!)).toBeCloseTo(Math.atan2(0.6 - 0.382, 1.0 - 0.611), 12);
   });
   it('holds the hand at the nearest bowl centre after arrival', () => {
     handReaches.apply(ctx, 30, 1.0, values);

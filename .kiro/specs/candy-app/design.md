@@ -434,6 +434,8 @@ The slot `{duration}` of the first phrase is the window length that the monitor 
 
 The path depends only on `t`, `tTrigger`, and the values.
 
+**Amendment (proposal P8, supersedes steps 1, 4 and 5 above).** Trick-or-treaters stand on the doorstep side of the Table, so a Hand enters only through the Table edge that faces away from the Panda base (`x = 1.00 m`), across an arc of 120° (azimuth -60° to +60° about +x, measured from `(0.6536, 0)` so that the ends of the arc are the two corners of that edge). `hand.angle` keeps the Dimension the compiler builds from the line (`from any direction` is 0 to 2π, wrapped). The app reads it as a position across the arc: `u = hand.angle mod 2π`, `s = u` for `u ≤ π` and `2π - u` otherwise, azimuth `= -60° + 120°·s/π`. The map is continuous across the wrap and reaches every azimuth of the arc. `E = (1.00, (1.00 - 0.6536)·tan(azimuth))`, `T` and the motion are as in steps 2 to 4, and the yaw is `atan2(E.y - T.y, E.x - T.x)`, so the forearm trails behind the palm, outside the Table. The path never nears the base: every point has `x ≥ 0.611 m`. The `hand.entry` and `hand.height` Dimensions are hidden slots of the template (a `range` on `slots`, see `interfaces.md`), since no phrase carries them.
+
 **Candy placement and overlap rule.** For candy `i` in order 0 … 5, start at `(x_i, y_i)`. While some earlier candy `j < i` has a horizontal centre distance below `D_OV = 0.036 m`, add 0.01 m to `x_i`. The rule uses the already-shifted positions of earlier candies and nothing else. With all six at the same point, the shifts are 0.04 m each, so the last candy ends at `x ≤ 0.39 + 5 × 0.04 = 0.59 m`, 0.03 m inside the Tray's `x = 0.62 m` edge.
 
 ### `app.ts`: the RobotApp

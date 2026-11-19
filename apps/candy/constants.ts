@@ -7,8 +7,12 @@ export const TRAY = { xMin: 0.34, xMax: 0.62, yMin: -0.16, yMax: 0.16 } as const
 export const WORKSPACE = { xMin: 0.15, xMax: 0.90, yMin: -0.55, yMax: 0.55, zMin: 0, zMax: 0.50 } as const;
 /** Floor height below the Table surface. */
 export const FLOOR_Z = -0.40;
-/** Origin of the hand-entry rays. */
-export const WORKSPACE_CENTRE = { x: 0.55, y: 0 } as const;
+/**
+ * The doorstep side. Trick-or-treaters stand beyond the Table edge that faces away from the Panda base (x = xMax), so a hand
+ * enters only there. halfAngle is half of the 120 degree arc of entry directions, measured at originX on the base axis:
+ * the arc ends at the two corners of that edge, so every entry point lies on it.
+ */
+export const DOORSTEP = { halfAngle: Math.PI / 3, originX: TABLE.xMax - TABLE.yMax / Math.tan(Math.PI / 3) } as const;
 
 /** Bowls in colour order: index 0 orange, 1 purple, 2 green. */
 export const BOWLS: readonly { name: string; x: number; y: number }[] = [

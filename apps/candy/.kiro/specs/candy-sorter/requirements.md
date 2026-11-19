@@ -15,6 +15,8 @@ Lines are never edited to make a failing run pass. A broken line leads to a cont
 - **arm / robot / Panda**: The simulated Franka Panda with the suction cup.
 - **Hand**: A mocap hand with a palm sphere (0.05 m radius) and a forearm capsule (0.04 m radius, 0.30 m long) that collides with nothing.
 - **Link**: Any of the Panda links `link0` to `link7` and the suction cup. The distance to the hand is measured from the collision geoms of these links.
+- **Doorstep**: The side of the Table that faces away from the Panda base (the edge at x = 1.00 m). Trick-or-treaters stand there, so a Hand enters only through that edge.
+- **from any direction**: In this app, every direction a trick-or-treater can come from: an arc of 120° on the Doorstep side, from -60° to +60° about straight out from the base. A Hand enters on the Doorstep edge, reaches toward the bowl nearest to its entry point at 0.05 m to 0.25 m above the Table, and never passes the base column. The compiler gives `from any direction` the range 0° to 360° for `hand.angle`; the app reads it as the position across the arc (0° is the -60° end, 90° is straight on, 180° is the +60° end, 360° is the -60° end again), so a counterexample's `hand.angle` is not a compass bearing. `from behind` has no meaning here and is folded onto the same arc.
 - **Tip**: The `tip` site at the end of the suction cup. SSM_v1 reads the distance from the Tip to the hand.
 - **Sorted**: A candy that rests (below 0.05 m/s) inside the bowl of its colour.
 - **Dropped outside**: A candy that lies low (below 0.04 m) outside every bowl and the tray, including the floor.
