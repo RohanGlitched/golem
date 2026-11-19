@@ -248,9 +248,14 @@ export function compileRequirement(
 
   const wrapper: TemporalWrapper = resp.wrapper ?? { kind: 'always' };
   const episode = options.episodeSeconds ?? lexicon.episodeSeconds ?? DEFAULT_EPISODE_SECONDS;
-  const horizon = (pattern === 'event' || pattern === 'unwanted') && wrapper.duration !== undefined
-    ? wrapper.duration + triggerDur
-    : episode;
+  const timed = pattern === 'event' || pattern === 'unwanted';
+  let horizon = episode;
+  if (wrapper.kind === 'eventually') {
+    // F-then-G needs room after the deadline to show the hold: at least T more.
+    horizon = timed ? triggerDur + 2 * wrapper.duration : Math.max(episode, 2 * wrapper.duration);
+  } else if (timed && wrapper.duration !== undefined) {
+    horizon = wrapper.duration + triggerDur;
+  }
 
   const spec: Parameters<typeof buildMonitor>[0] = {
     // A perturbation state is applied throughout, so its response is monitored as ubiquitous.

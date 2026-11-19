@@ -1,4 +1,4 @@
-// Monitor builder: robustness semantics for always / eventually / state.
+// Monitor builder: robustness semantics for always (G), within (F then G) and state.
 // The sample loop uses indices and scalar locals only; the scratch record and
 // the signal-array list are allocated once per buildMonitor call. Trace is never written.
 
@@ -33,7 +33,8 @@ export function buildMonitor(spec: MonitorSpec): MonitorFn {
   const stateSlots = state ? state.predicate : undefined;
   const stateSlotValues: Record<string, number> | undefined = state ? Object.freeze({ ...state.slots }) : undefined;
   const useAnchor = pattern === 'event' || pattern === 'unwanted';
-  const isEventually = wrapper.kind === 'eventually';
+  // A WHILE state is checked at every instant; the compiler rejects `within` on it.
+  const isEventually = wrapper.kind === 'eventually' && pattern !== 'state';
   const duration = wrapper.duration;
   const windowed = pattern !== 'state' && duration !== undefined;
 
@@ -62,7 +63,9 @@ export function buildMonitor(spec: MonitorSpec): MonitorFn {
       }
       if (!found) return { robustness: NaN, worstAt: 0, unit: 'trace' };
     }
-    const b = windowed ? a + (duration as number) : t[n - 1]!;
+    // F-then-G (`within T`): reach by the deadline, then hold to the last sample.
+    const deadline = isEventually ? a + (duration as number) : 0;
+    const b = windowed && !isEventually ? a + (duration as number) : t[n - 1]!;
 
     // First index with t[i] >= a.
     let lo = 0;
@@ -72,9 +75,13 @@ export function buildMonitor(spec: MonitorSpec): MonitorFn {
       if (t[mid]! < a) lo = mid + 1; else hi = mid;
     }
     if (lo >= n || t[lo]! > b) return { robustness: NaN, worstAt: 0, unit: 'trace' };
+    if (isEventually && t[lo]! > deadline) return { robustness: NaN, worstAt: 0, unit: 'trace' };
 
-    let best = isEventually ? -Infinity : Infinity;
+    // Always: the minimum and its first time. F-then-G: the minimum from the last sample at or
+    // before the deadline to the end, and the time of the last sample with a margin <= 0.
+    let best = Infinity;
     let bestAt = t[lo]!;
+    let lastViolation = -Infinity;
     for (let i = lo; i < n; i++) {
       const ti = t[i]!;
       if (ti > b) break;
@@ -88,8 +95,13 @@ export function buildMonitor(spec: MonitorSpec): MonitorFn {
         const ns = -sm;
         if (ns > m) m = ns;
       }
-      if (isEventually ? m > best : m < best) { best = m; bestAt = ti; }
+      if (isEventually) {
+        if (m <= 0) lastViolation = ti;
+        // Until the deadline, each sample restarts the hold window.
+        if (ti <= deadline || m < best) { best = m; bestAt = ti; }
+      } else if (m < best) { best = m; bestAt = ti; }
     }
+    if (isEventually && lastViolation !== -Infinity) bestAt = lastViolation;
     return { robustness: best, worstAt: bestAt, unit };
   };
 }
