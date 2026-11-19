@@ -10,7 +10,10 @@ describe('parseRangePhrase', () => {
   it('parses up to 200 N as force 0 to 200', () => {
     const r = parse('up to 200 N');
     expect(r.diagnostics).toEqual([]);
-    expect(r.range).toMatchObject({ kind: 'force', min: 0, max: 200, wrap: false, fixed: false });
+    expect(r.range).toEqual({
+      kind: 'force', min: 0, max: 200, wrap: false, fixed: false, text: 'up to 200 N',
+      span: { start: 0, end: 11, line: 1, column: 1 },
+    });
     expect(r.next).toBe(4);
   });
 
@@ -21,7 +24,10 @@ describe('parseRangePhrase', () => {
   });
 
   it('parses 150 to 250 N and equal bounds', () => {
-    expect(parse('150 to 250 N').range).toMatchObject({ min: 150, max: 250 });
+    expect(parse('150 to 250 N').range).toEqual({
+      kind: 'force', min: 150, max: 250, wrap: false, fixed: false, text: '150 to 250 N',
+      span: { start: 0, end: 12, line: 1, column: 1 },
+    });
     const eq = parse('5 N to 5 N');
     expect(eq.diagnostics).toEqual([]);
     expect(eq.range).toMatchObject({ min: 5, max: 5, fixed: true });

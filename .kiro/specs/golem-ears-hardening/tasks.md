@@ -8,7 +8,7 @@ Conventions: sources in `skeleton/src/ears/`, tests in `skeleton/src/ears/__test
   - Monitor: reject a signal whose length differs from `t`; per-call signal records, frozen slot records
   - Regression tests: `regress.d14.test.ts`
   - _Bugfix: 14.1–14.13_
-- [ ] 2. Range text with a borrowed unit (defect 3)
+- [x] 2. Range text with a borrowed unit (defect 3)
   - Regression test `regress.d3.test.ts`; fix `make()`; tighten the `ranges.test.ts` and `compile.test.ts` checks to exact text
   - _Bugfix: 3.1–3.3_
 - [ ] 3. Quote source text as written (defect 12)

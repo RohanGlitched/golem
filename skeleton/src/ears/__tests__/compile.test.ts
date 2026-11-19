@@ -69,7 +69,7 @@ describe('compileRequirement', () => {
     expect(r.diagnostics).toEqual([]);
     expect(r.requirement!.id).toBe('4.1');
     expect(r.requirement!.pattern).toBe('unwanted');
-    expect(r.requirement!.space.dims[0]).toMatchObject({ min: 150, max: 250 });
+    expect(r.requirement!.space.dims[0]).toEqual({ name: 'push.force', kind: 'force', min: 150, max: 250, severity: 'up' });
     expect(r.requirement!.horizon).toBeCloseTo(2.1, 12);
   });
 
