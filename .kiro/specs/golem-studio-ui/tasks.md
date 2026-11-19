@@ -303,45 +303,45 @@ Conventions for every task:
 - [x] 8. Checkpoint - Pure logic complete
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 9. Stage
-  - [ ] 9.1 Implement `stage/stage-builder.ts`
+- [x] 9. Stage
+  - [x] 9.1 Implement `stage/stage-builder.ts`
     - `buildStage(modelLike, THREE, material)` for geom group 2 only, with box, sphere, capsule, cylinder, ellipsoid, mesh and plane, geometry baking per the design table, body groups keyed by `geom_bodyid`, `geom_pos` and `geom_quat` (wxyz to xyzw), `skipped`, `warnings`, `meshCount`, `geomInfo`. Read arrays once; keep no view into WASM memory.
     - Example tests: unsupported type warns once with geom id and type, zero-face mesh warns once with geom id, `meshCount` equals `meshes.length`.
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 2.10, 2.11, 2.12, 2.13, 2.14_
 
-  - [ ] 9.2 Write property test for stage mesh count and group filter
+  - [x] 9.2 Write property test for stage mesh count and group filter
     - **Property 1: Stage mesh count and group filter**
     - **Validates: Requirements 2.1, 2.2, 2.7, 2.11, 2.12, 2.13**
 
-  - [ ] 9.3 Write property test for primitive extents
+  - [x] 9.3 Write property test for primitive extents
     - **Property 2: Primitive extents match MuJoCo**
     - **Validates: Requirements 2.3, 2.4, 2.5, 2.6**
 
-  - [ ]* 9.4 Write property test for stage build determinism
+  - [x]* 9.4 Write property test for stage build determinism
     - **Property 3: Stage build is deterministic**
     - **Validates: Requirements 2.14**
 
-  - [ ] 9.5 Implement `stage/clay-material.ts`
+  - [x] 9.5 Implement `stage/clay-material.ts`
     - `CLAY_VERT`, `CLAY_FRAG`, `createClayMaterial(tokens)` as a `ShaderMaterial` with the uniforms from the design: key light at 35° azimuth and 15° elevation, fill ratio 0.33, grain amplitude 0.06, procedural noise, no texture, no time uniform.
     - Example tests: source strings contain no `sampler2D` and no time uniform, key elevation constant is at most 20°, fill to key ratio is at most 0.35, grain amplitude is at most 0.06.
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.8_
 
-  - [ ] 9.6 Implement `stage/floor.ts`
+  - [x] 9.6 Implement `stage/floor.ts`
     - `createFloor` as a `MeshBasicMaterial` plane in `--ground` with extent `max(size, 20)` m, no grid, no reflection, no texture, and the fog that fades to `--ground` at the edge.
     - Example tests: extent for a small plane declaration is 20 m, colour equals the `--ground` token.
     - _Requirements: 2.6, 3.5, 3.7_
 
-  - [ ] 9.7 Implement `stage/orbit.ts`
+  - [x] 9.7 Implement `stage/orbit.ts`
     - `createOrbit` wrapping three's `OrbitControls`: damping 0.12 (off under Reduced_Motion), polar limit above the floor, zoom limits from the bounding radius, touch rotate and pinch zoom, Shift plus arrow rotates 5°, `transition` reason acquired on `change` and released when travel is below 0.1 mm for one frame, no orbit when the press starts on a robot body.
     - Example tests: Shift plus ArrowLeft rotates 5°, `transition` is released after settling.
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 26.8_
 
-  - [ ] 9.8 Implement `stage/stage.ts`
+  - [x] 9.8 Implement `stage/stage.ts`
     - `Stage` with renderer creation (injected `createRenderer`), camera (z-up, 40°), pixel ratio `min(devicePixelRatio, 1.5)`, `setModel`, `setTheme` (clay, floor, fog, background, ghost and aura uniforms, one render), `resize` (renderer size, camera aspect, one render), Visibility_Gate (`IntersectionObserver` and `visibilitychange` calling `scheduler.setVisible` and `hero.pause`), WebGL loss and restore messages, canvas `tabindex="0"`, `role="application"`, accessible name and the push instructions text, the "Loading the robot" message, and `dispose`.
     - Example tests with a fake renderer: theme change updates tokens and requests one render, resize requests one render, hidden stage stops frames, context loss shows "The 3D view was lost".
     - _Requirements: 3.6, 3.7, 5.5, 5.6, 5.7, 5.8, 5.9, 8.1, 8.10, 26.6, 27.7, 27.8, 29.3_
 
-  - [ ]* 9.9 Write property test for pixel ratio cap
+  - [x]* 9.9 Write property test for pixel ratio cap
     - **Property 12: Pixel ratio cap**
     - **Validates: Requirements 5.5**
 
