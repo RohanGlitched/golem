@@ -366,14 +366,16 @@ class BudgetClock {
 phase 0:  cap = T                                   // counts against T
 phase 1:  quota1 = min(remaining, floor(f1 * T))    // random-only mode: quota1 = remaining
 phase 2:  quota2 = min(remaining, floor(f2 * T) + (quota1 - used1))   // unused Phase 1 budget carries forward
-phase 3:  shrink trials come from remaining; verification seeds always run
+phase 3:  shrink trials come from a separate reserve R = max(reserveMin, ceil(reserveFraction * T)), defaults 12 and 0.15, on top of T; verification seeds always run
 ```
 
 Phase 2 leftover is not carried anywhere (8.11). With a wall limit, Phase 1 stops starting generations at `start + f1 * maxWallMs` and Phase 2 at `start + min(1, f1 + f2) * maxWallMs` (carry-forward of unused Phase 1 time is automatic because Phase 2 shares the clock). Both limits can be active, and the earlier one wins (8.2).
 
 `grant(wanted)` returns `min(wanted, quota left, T - used)`. A grant of 0 ends the phase. The last generation shrinks to the grant (5.11, 9.4). Wall time is checked before each generation and before each shrink trial (8.4). A generation already submitted is allowed to finish (8.5).
 
-**Resulting invariant**: `n0 + n1 + n2 + n3_shrink <= T`, and `trials <= T + 3`.
+**Shrink reserve (approved change).** The shrink trials no longer come from what the search left over, so a counterexample found in the last generation of an exhausted budget is still shrunk. `shrink.maxTrials` still caps a single shrink.
+
+**Resulting invariant**: `n0 + n1 + n2 <= T`, `n3_shrink <= R`, and `trials <= T + R + 3`.
 
 ### 8. Falsifier orchestrator (`falsifier.ts`)
 
@@ -943,7 +945,7 @@ For any pool state, `close` resolves, can be called repeatedly without error, a 
 
 Error classes carry a stable `name` (`AbortError`, `PoolClosedError`, `CancelledError`, `TrialError`, `TrialCrashError`, `RestartLimitError`, `LoadError`, `SeedDbError`) and keep the original error in `cause`. Messages follow the product voice: plain, exact, with units and identifiers, for example `trial R2 seed 2780164117 crashed two workers`.
 
-Two interpretations are worth stating. First, generation atomicity (D1) means a failing trial inside a generation does not cancel its siblings, so a run can use up to `generationSize - 1` more trials than a per-trial stop would. Second, when the failing trial is found in the last generation of an exhausted budget, Phase 3 has no budget for shrinking, so `shrunk` is false, and only the three verification trials run (7.8).
+Two interpretations are worth stating. First, generation atomicity (D1) means a failing trial inside a generation does not cancel its siblings, so a run can use up to `generationSize - 1` more trials than a per-trial stop would. Second, when the failing trial is found in the last generation of an exhausted budget, Phase 3 still shrinks, using the separate shrink reserve (approved change; previously `shrunk` was false in this case).
 
 ## Testing Strategy
 

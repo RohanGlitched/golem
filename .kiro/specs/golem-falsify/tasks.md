@@ -289,12 +289,12 @@ Test rules for every task (`testing.md`):
     - The test uses the public trial entry of `skeleton/src/sim` and a small bundled model. Guard it with `describe.skipIf` only for "MuJoCo package or sim trial entry not installed", and print the skip reason so it cannot pass silently.
     - _Requirements: 12.5, 14.6, 19.7, 20.4, 20.8, 21.17_
 
-- [ ] 21. Public entry points and docs
-  - [~] 21.1 Wire public exports and add import-graph smoke tests
+- [x] 21. Public entry points and docs
+  - [x] 21.1 Wire public exports and add import-graph smoke tests
     - Export from `golem-spec`: `falsify`, `latinHypercube`, `shrink`, `SeedDatabase`, `createSeedDatabase`, `pinCounterexample`, `memoryFileSystem`, `InProcessPool`, `createBrowserPool`, `TrialScheduler` and every type of this spec. Export `createNodePool` and `nodeFileSystem` only from `golem-spec/node`. Export the test helpers from a separate test-only entry.
     - Write smoke tests: the import graph of `skeleton/src/falsify` and of the `golem-spec` entry contains no `node:` module, no deep import of `skeleton/src/...` is needed by an app, the `skeleton/package.json` dependency list matches `tech.md`, and `Math.random` does not appear in engine code (grep-style test).
     - _Requirements: 20.1, 20.2, 20.9_
-  - [~] 21.2 Write module docs for the falsifier and pools
+  - [x] 21.2 Write module docs for the falsifier and pools
     - Add `skeleton/src/falsify/README.md` and `skeleton/src/pool/README.md`: phases, budget split, verdict meaning ("no counterexample found in N trials", never a proof), seed file format, pool options, error types, and how to inject a synthetic trial function. Include examples with units and the reproduction rule.
     - Write a test that every code block marked `ts` in both READMEs type-checks against the public exports.
     - _Requirements: 2.11, 11.1, 12.13, 20.6_
