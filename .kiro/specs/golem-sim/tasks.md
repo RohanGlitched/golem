@@ -95,8 +95,8 @@ Rules that apply to every task:
     - **Property 18: Helpers delete exactly once**
     - **Validates: Requirements 10.1, 10.2, 10.3, 10.4, 10.6, 10.7, 10.8, 10.9, 10.10, 10.11**
 
-- [ ] 8. Context builder
-  - [~] 8.1 Implement `context.ts` (`buildContext`)
+- [x] 8. Context builder
+  - [x] 8.1 Implement `context.ts` (`buildContext`)
     - Resolve names with `mj.mj_name2id(model, mj.mjtObj.<type>.value, name)`. Fill `ctx.ids` as `<type>:<name>` from `app.names`. Throw on an empty name without calling `mj_name2id`, on an unknown name, and on a name of the wrong type. Return the same `mj`, `model` and `data` references plus `lookup`.
     - Example tests (fake `Mj`): ids in range, the same name twice gives the same id, an empty name makes no `mj_name2id` call, a wrong-type name throws naming the requested type, an unknown declared name throws and leaves `ctx.ids` unchanged, and the object references are identical.
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.9, 4.10, 4.11_
