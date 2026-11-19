@@ -1,5 +1,6 @@
 // `golem gate --kiro`: the Stop hook protocol (requirement 8). Every outcome exits 0 except a usage or Config_File
 // error (exit 1, nothing on stdout). A block is one JSON line on stdout; everything else goes to stderr.
+import { confirmSummary } from '../confirm.js';
 import { gateExitCode } from '../exit.js';
 import { elapsedSeconds, gateCounter, overrideIds, parseStopPayload, pruneState } from '../gate-counter.js';
 import { formatIssue, judgeOutcomes, markChangeText, tableErrors } from '../expectation.js';
@@ -11,7 +12,7 @@ import { atomicWriteFile, readGateState, readReport, stableJson, tmpCounter, wri
 import type { CommandHandler } from '../run.js';
 import type { GateOverride, ReportFile } from '../types.js';
 import type { Verdict } from '../sibling-types.js';
-import { appFlag, errLine, runFlags } from './common.js';
+import { appFlag, errLine, gateFlags } from './common.js';
 
 type Result = GateRun | { kind: 'failed'; message: string };
 
@@ -31,7 +32,7 @@ export const handler: CommandHandler = async (p, io, deps) => {
 
   let result: Result;
   try {
-    result = await runGateOnce(app, boot.robotApp, deps, runFlags(p));
+    result = await runGateOnce(app, boot.robotApp, deps, gateFlags(p));
   } catch (e) {
     result = { kind: 'failed', message: (e as Error).message };
   }
@@ -102,7 +103,7 @@ export const handler: CommandHandler = async (p, io, deps) => {
     : undefined;
   const warn = (m: string): void => errLine(io, m);
   if (result.kind === 'ran') {
-    await writeRunReport(deps, app, result.outcomes, 'all', result.durationS, warn, { lastGateExitCode: code, expectations: result.expectations.byId, expectationChanges: result.changes, ...(override !== undefined ? { gateOverride: override } : {}) });
+    await writeRunReport(deps, app, result.outcomes, 'all', result.durationS, warn, { lastGateExitCode: code, expectations: result.expectations.byId, expectationChanges: result.changes, confirm: result.confirm, ...(override !== undefined ? { gateOverride: override } : {}) });
   } else if (override !== undefined) {
     await appendOverrideOnly(deps, app, override, warn);
   }
@@ -110,8 +111,10 @@ export const handler: CommandHandler = async (p, io, deps) => {
   if (green) {
     if (result.kind === 'ran' && breakLines > 0) errLine(io, `gate GREEN: every requirement meets its expectation (${result.outcomes.length - breakLines} Expected_Hold held, ${breakLines} Expected_Break broke; ${result.totalTrials} trials)`);
     else if (result.kind === 'ran') errLine(io, `no counterexample in ${result.totalTrials} trials (${result.outcomes.length} requirements, pinned seeds first, then the quick budget)`);
+    if (result.kind === 'ran' && (result.confirm.status === 'confirmed' || result.confirm.status === 'skipped')) errLine(io, confirmSummary(result.confirm, result.totalTrials));
     return 0;
   }
+  if (result.kind === 'ran' && result.confirm.status === 'broke') errLine(io, confirmSummary(result.confirm, result.totalTrials));
   if (!decision.allowStop) {
     const reason = buildReason(blocks, reportPath(app).replace(`${app.appDir}/`, ''));
     io.stdout.write(`${JSON.stringify({ decision: 'block', reason })}\n`);

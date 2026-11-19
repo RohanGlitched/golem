@@ -43,8 +43,8 @@ export const COMMANDS: Record<CommandName, CommandSpec> = {
     positionals: [{ name: 'reqId', required: true }], flags: [{ name: 'seed', kind: 'posint' }],
   },
   gate: {
-    name: 'gate', usage: 'npx golem-spec gate [--kiro] [--budget <n>] [--time <s>] [--workers <n>] [--search-seed <n>] [--app <dir>] [--json]',
-    positionals: [], flags: [{ name: 'kiro', kind: 'bool' }, ...budgetFlags],
+    name: 'gate', usage: 'npx golem-spec gate [--kiro] [--budget <n>] [--time <s>] [--workers <n>] [--search-seed <n>] [--confirm-budget <n>] [--no-confirm] [--app <dir>] [--json]',
+    positionals: [], flags: [{ name: 'kiro', kind: 'bool' }, ...budgetFlags, { name: 'confirm-budget', kind: 'posint' }, { name: 'no-confirm', kind: 'bool' }],
   },
   init: {
     name: 'init', usage: 'npx golem-spec init [dir] [--force] [--no-starter]',

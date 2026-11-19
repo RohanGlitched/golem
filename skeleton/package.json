@@ -1,6 +1,6 @@
 {
   "name": "golem-spec",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Turn the EARS acceptance criteria of a Kiro spec into MuJoCo physics property tests: falsify, shrink, pin seeds, and gate the AI agent until every requirement holds.",
   "keywords": [
     "kiro",

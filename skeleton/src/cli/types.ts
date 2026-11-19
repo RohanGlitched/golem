@@ -1,6 +1,7 @@
 // Outcome and report shapes shared by the CLI and the MCP server. Types only.
 import type { Diagnostic } from '../ears/index.js';
 import type { PinnedSeedEntry, ProgressEvent, RunMetadata } from '../falsify/index.js';
+import type { ConfirmInfo } from './confirm.js';
 import type { Expectation, MarkChange } from './expectation.js';
 import type { CompiledRequirement, Verdict } from './sibling-types.js';
 
@@ -24,7 +25,7 @@ export interface RunOptions {
   searchSeed?: number;
   mode: 'full' | 'random-only';
   /** Selects defaults and the pinned-seed arithmetic (assumption A1). */
-  budgetKind: 'test' | 'gate' | 'gate-retry' | 'mcp-run' | 'mcp-falsify';
+  budgetKind: 'test' | 'gate' | 'gate-retry' | 'gate-confirm' | 'mcp-run' | 'mcp-falsify';
   signal?: AbortSignal;
   onProgress?: (e: ProgressEvent, req: CompiledRequirement) => void;
   /** Called after each requirement finished (and was pinned), so commands can print its line at once. */
@@ -42,6 +43,17 @@ export interface RequirementOutcome {
   pinEntry?: PinnedSeedEntry;
   /** Number of pinned seeds that were valid for this run. */
   pinnedValid: number;
+  /** Set by the gate on a line that was searched again with the second search seed. */
+  confirmation?: Confirmation;
+}
+
+/** One Expected_Hold line searched again by the gate with a second search seed. When secondStatus is not 'held' the outcome is the second run. */
+export interface Confirmation {
+  firstSeed: number; secondSeed: number;
+  firstTrials: number; secondTrials: number;
+  /** First run: always 'held'. */
+  firstStatus: 'held';
+  secondStatus: Verdict['status'];
 }
 
 // ---------------------------------------------------------------- stored files
@@ -56,10 +68,12 @@ export interface ReportMeta {
   lastGateExitCode?: number;
   /** Marks of the Expectation table that differ from HEAD, written by the gate. Omitted when none moved. */
   expectationChanges?: MarkChange[];
+  /** What the gate's confirmation pass did (seeds, budget, lines, trials); status: 'skipped' when --no-confirm turned it off. */
+  confirm?: ConfirmInfo;
 }
 
 /** Additive fields (A5): `unit` of the monitor, `ears` source line; `expectation` and `met` from the Expectation table. */
-export interface ReportVerdict extends Verdict { unit?: string; ears?: string; partial?: boolean; expectation?: Expectation; met?: boolean }
+export interface ReportVerdict extends Verdict { unit?: string; ears?: string; partial?: boolean; expectation?: Expectation; met?: boolean; confirmation?: Confirmation }
 
 /**
  * A stop allowed on a red gate. 'unmetReqIds': every id that did not meet its expectation, plus 'compile', 'config', 'run'

@@ -107,6 +107,12 @@ export function progressLine(
 export function gateBlock(o: RequirementOutcome, earsLine: string): string {
   const id = o.verdict.reqId;
   const lines = [`${id}: ${earsLine}`];
+  const c = o.confirmation;
+  const confirmed = c !== undefined && c.secondStatus !== 'held';
+  if (confirmed) {
+    const second = c.secondStatus === 'error' ? `ended in an error under confirmation seed ${c.secondSeed}` : `broke under confirmation seed ${c.secondSeed}`;
+    lines.push(`  held under search seed ${c.firstSeed} (${c.firstTrials} trials) and ${second} (${c.secondTrials} trials)`);
+  }
   if (o.verdict.status === 'error') {
     lines.push(`  error: ${firstError(o)}`);
   } else {
@@ -116,6 +122,11 @@ export function gateBlock(o: RequirementOutcome, earsLine: string): string {
     lines.push(`  margin: ${formatMargin(ce?.robustness ?? o.verdict.closest.robustness, o.unit)}`);
   }
   lines.push(`  reproduce: npx golem-spec replay ${id}`);
+  if (confirmed && c.secondStatus === 'broken') {
+    const n = o.meta.budget.maxTrials;
+    lines.push(`  search again: npx golem-spec falsify ${id} --search-seed ${c.secondSeed}${n !== undefined ? ` --budget ${n}` : ''}`);
+    lines.push('  pinned: the counterexample is saved as a regression seed in .golem/seeds');
+  }
   return lines.join('\n');
 }
 

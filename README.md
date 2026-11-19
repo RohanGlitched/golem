@@ -35,7 +35,7 @@ at any point in its stride, THE robot SHALL stay upright for 3 s
    - a *scenario space*: force 0–100 N, angle 0–360°, gait phase 0–1;
    - a *monitor* with quantitative semantics: a signed margin in physical units. It prints the compiled formula too: `G[t₀, t₀+3 s] margin("stay upright") > 0 m`.
 2. **Falsify.** It re-runs pinned seeds first, then random Latin-hypercube trials, then a cross-entropy search toward the lowest margin. It **shrinks** each failure to the mildest push that still breaks the line, then re-checks it on fresh seeds and at half the timestep, so a solver artefact isn't reported as a robot failure.
-3. **Gate.** Kiro hooks run `golem check` when a requirements file is saved, and `golem test` when a controller is saved. A **Stop hook runs `golem gate`**, so the agent can't finish while a requirement is red, and a guard stops the tuning agent editing the requirement instead of the robot.
+3. **Gate.** Kiro hooks run `golem check` when a requirements file is saved, and `golem test` when a controller is saved. A **Stop hook runs `golem gate`**, so the agent can't finish while a requirement is red. A green is confirmed: the gate searches every `Expected_Hold` line a second time with a second search seed derived from the first, so one lucky 24-trial search cannot pass it. A guard stops the tuning agent editing the requirement instead of the robot.
 
 The engine is MuJoCo 4 compiled to WebAssembly, the same build in Node and the browser. Every trial is reproducible from its scenario and seed.
 
@@ -58,7 +58,7 @@ The agent's session log is in [`evidence/results/tuner/`](evidence/results/tuner
 npm i -D golem-spec
 npx golem-spec init        # installs hooks, agents, MCP, skills, steering and a workflow into .kiro/
 npx golem-spec test        # falsify every requirement
-npx golem-spec gate        # exit 0 only if everything holds
+npx golem-spec gate        # exit 0 only if everything holds, under two search seeds
 ```
 
 Use `npx golem-spec`, not `npx golem`: a bare `npx golem` resolves to an unrelated npm package.

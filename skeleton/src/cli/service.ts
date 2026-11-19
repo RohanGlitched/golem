@@ -2,6 +2,7 @@
 import { extractCriteria } from '../ears/index.js';
 import type { FalsifyOptions, FalsifyResult, PinnedSeedEntry } from '../falsify/index.js';
 import type { KitDeps } from './deps.js';
+import { confirmSeed, type ConfirmInfo } from './confirm.js';
 import { locateApp, type LocatedApp } from './config.js';
 import {
   diffExpectations, expectationOf, meetsExpectation, readExpectations, tableErrors, type Expectation, type MarkChange, type ParsedExpectations,
@@ -160,6 +161,13 @@ export function toFalsifyOptions(
     case 'mcp-falsify':
       budget.maxTrials = (o.budget ?? MCP_DEFAULT_TRIALS) + pinnedValid;
       break;
+    case 'gate-confirm':
+      // The confirmation pass: the budget of the first pass (or --confirm-budget) as searched trials for each line,
+      // on top of the pinned seeds, which always re-run first and do not use up the search.
+      if (o.budget !== undefined) budget.maxTrials = o.budget + pinnedValid;
+      if (o.timeS !== undefined) budget.maxWallMs = o.timeS * 1000;
+      if (!flagged) budget.maxTrials = GATE_QUICK_TRIALS + pinnedValid;
+      break;
     case 'gate-retry':
       // A held Expected_Break line, run again at 4 times the budget of the first pass (defect 8).
       if (o.budget !== undefined) budget.maxTrials = RETRY_FACTOR * o.budget;
@@ -242,17 +250,26 @@ export async function withPool<T>(
   }
 }
 
+/** Flags of one gate pass: the run flags, and the confirmation pass (on unless confirm is false). */
+export interface GateFlags { budget?: number; timeS?: number; workers?: number; searchSeed?: number; confirm?: boolean; confirmBudget?: number }
+
+/** The search seed of a run: --search-seed, else the Config_File's searchSeed, else 1. */
+export const effectiveSearchSeed = (app: Pick<LocatedApp, 'config'>, flagSeed: number | undefined): number => flagSeed ?? app.config.searchSeed ?? 1;
+
 export type GateRun =
   | { kind: 'compile-error'; diagnostics: FileDiagnostic[]; compiled: CompileOutcome }
   | { kind: 'empty'; compiled: CompileOutcome }
   | { kind: 'table-error'; expectations: ParsedExpectations; changes: MarkChange[]; compiled: CompileOutcome }
-  | { kind: 'ran'; outcomes: RequirementOutcome[]; compiled: CompileOutcome; expectations: ParsedExpectations; changes: MarkChange[]; durationS: number; totalTrials: number };
+  | { kind: 'ran'; outcomes: RequirementOutcome[]; compiled: CompileOutcome; expectations: ParsedExpectations; changes: MarkChange[]; durationS: number; totalTrials: number; confirm: ConfirmInfo };
 
-/** One gate pass: compile, then pinned seeds and the quick budget for every requirement, then the pinned rule. */
+/**
+ * One gate pass: compile, then pinned seeds and the quick budget for every requirement, then the pinned rule, then the
+ * confirmation pass. The confirmation runs only when every line already meets its expectation: each Expected_Hold line
+ * that held is searched again with a second search seed derived from the first (`confirmSeed`), so that a green gate
+ * is not the luck of one seed. A line that does not hold the second time replaces its first verdict and is pinned.
+ */
 export async function runGateOnce(
-  app: LocatedApp, robotApp: RobotApp, deps: KitDeps,
-  flags: { budget?: number; timeS?: number; workers?: number; searchSeed?: number },
-  signal?: AbortSignal,
+  app: LocatedApp, robotApp: RobotApp, deps: KitDeps, flags: GateFlags, signal?: AbortSignal,
 ): Promise<GateRun> {
   const compiled = await compileAll(app, robotApp, deps);
   if (hasErrors(compiled.diagnostics)) return { kind: 'compile-error', diagnostics: compiled.diagnostics, compiled };
@@ -263,7 +280,12 @@ export async function runGateOnce(
   const changes = await markChanges(deps, compiled, expectations);
   if (tableErrors(expectations).length > 0) return { kind: 'table-error', expectations, changes, compiled };
   const t0 = deps.clock();
-  const o: RunOptions = { mode: 'full', budgetKind: 'gate', ...flags, ...(signal !== undefined ? { signal } : {}) };
+  const { confirm: wantConfirm, confirmBudget, ...runFlags } = flags;
+  const o: RunOptions = { mode: 'full', budgetKind: 'gate', ...runFlags, ...(signal !== undefined ? { signal } : {}) };
+  const firstSeed = effectiveSearchSeed(app, flags.searchSeed);
+  const secondSeed = confirmSeed(firstSeed);
+  let confirm: ConfirmInfo = { status: 'none', firstSeed, secondSeed, budget: {}, reqIds: [], failedIds: [], trials: 0 };
+  let firstPassTrials = 0;
   const outcomes = await withPool(deps, app, robotApp, flags.workers, async (pool) => {
     const first = (await runRequirements(app, robotApp, compiled.requirements, o, deps, pool)).map(applyPinnedRule);
     // A line marked Expected_Break that held is a claim about the search, and the quick budget can miss (defect 8):
@@ -275,17 +297,51 @@ export async function runGateOnce(
       const again = await runRequirements(app, robotApp, [x.req], { ...retryOpts, req: x.verdict.reqId }, deps, pool);
       out.push(...again.map(applyPinnedRule));
     }
-    return out;
+    firstPassTrials = out.reduce((n, x) => n + x.verdict.trials, 0);
+    const allMet = out.every((x) => meetsExpectation(x.verdict.status, expectationOf(expectations.byId, x.verdict.reqId)));
+    const holdLines = out.filter((x) => expectationOf(expectations.byId, x.verdict.reqId) === 'Expected_Hold');
+    if (wantConfirm === false) { confirm = { ...confirm, status: 'skipped' }; return out; }
+    if (!allMet) { confirm = { ...confirm, status: 'unmet' }; return out; }
+    if (holdLines.length === 0) return out;
+    // The confirmation: the first pass's budget (or --confirm-budget) as searched trials, with the derived seed.
+    const confirmOpts: RunOptions = { mode: 'full', budgetKind: 'gate-confirm', searchSeed: secondSeed, ...(signal !== undefined ? { signal } : {}) };
+    if (confirmBudget !== undefined) confirmOpts.budget = confirmBudget;
+    else {
+      if (flags.budget !== undefined) confirmOpts.budget = flags.budget;
+      if (flags.timeS !== undefined) confirmOpts.timeS = flags.timeS;
+    }
+    const budget: ConfirmInfo['budget'] = confirmOpts.budget === undefined && confirmOpts.timeS === undefined
+      ? { maxTrials: GATE_QUICK_TRIALS }
+      : { ...(confirmOpts.budget !== undefined ? { maxTrials: confirmOpts.budget } : {}), ...(confirmOpts.timeS !== undefined ? { maxWallMs: confirmOpts.timeS * 1000 } : {}) };
+    const failedIds: string[] = [];
+    let trials = 0;
+    const result: RequirementOutcome[] = [];
+    for (const x of out) {
+      if (!holdLines.includes(x)) { result.push(x); continue; }
+      const [second] = (await runRequirements(app, robotApp, [x.req], { ...confirmOpts, req: x.verdict.reqId }, deps, pool)).map(applyPinnedRule);
+      if (second === undefined) { result.push(x); continue; }
+      trials += second.verdict.trials;
+      const confirmation = {
+        firstSeed, secondSeed, firstTrials: x.verdict.trials, secondTrials: second.verdict.trials,
+        firstStatus: 'held' as const, secondStatus: second.verdict.status,
+      };
+      if (second.verdict.status === 'held') { result.push({ ...x, confirmation }); continue; }
+      failedIds.push(x.verdict.reqId);
+      result.push({ ...second, confirmation });
+    }
+    confirm = { ...confirm, status: failedIds.length > 0 ? 'broke' : 'confirmed', budget, reqIds: holdLines.map((x) => x.verdict.reqId), failedIds, trials };
+    return result;
   });
-  return { kind: 'ran', outcomes, compiled, expectations, changes, durationS: (deps.clock() - t0) / 1000, totalTrials: outcomes.reduce((n, x) => n + x.verdict.trials, 0) };
+  // A line whose first run was replaced by its confirmation still counts the trials of that first run.
+  const totalTrials = firstPassTrials + confirm.trials;
+  return { kind: 'ran', outcomes, compiled, expectations, changes, durationS: (deps.clock() - t0) / 1000, totalTrials, confirm };
 }
-
 // ---------------------------------------------------------------- report
 
 /** The verdicts as stored; with the table's marks each also records its expectation and whether it was met. */
 export const toReportVerdicts = (outcomes: readonly RequirementOutcome[], marks?: ReadonlyMap<string, Expectation>): ReportVerdict[] =>
   outcomes.map((o) => {
-    const v = reportVerdict(o.verdict, o.unit, o.req.source);
+    const v: ReportVerdict = { ...reportVerdict(o.verdict, o.unit, o.req.source), ...(o.confirmation !== undefined ? { confirmation: o.confirmation } : {}) };
     if (marks === undefined) return v;
     const expectation = expectationOf(marks, o.verdict.reqId);
     return { ...v, expectation, met: meetsExpectation(o.verdict.status, expectation) };
@@ -298,6 +354,8 @@ export async function writeRunReport(
     lastGateExitCode?: number; gateOverride?: ReportFile['gateOverrides'][number];
     /** The marks of the table (its byId map): every verdict then records its expectation. */
     expectations?: ReadonlyMap<string, Expectation>; expectationChanges?: readonly MarkChange[];
+    /** What the confirmation pass of the gate did; recorded in meta.confirm. */
+    confirm?: ConfirmInfo;
   } = {},
 ): Promise<ReportFile | undefined> {
   const path = reportPath(app);
@@ -311,6 +369,7 @@ export async function writeRunReport(
     searchSeed: first?.meta.searchSeed ?? app.config.searchSeed ?? 1,
     ...(extra.lastGateExitCode !== undefined ? { lastGateExitCode: extra.lastGateExitCode } : {}),
     ...(extra.expectationChanges !== undefined && extra.expectationChanges.length > 0 ? { expectationChanges: [...extra.expectationChanges] } : {}),
+    ...(extra.confirm !== undefined ? { confirm: extra.confirm } : {}),
   };
   let report = mergeReport(prev.report, toReportVerdicts(outcomes, extra.expectations), meta, scope);
   if (extra.gateOverride !== undefined) report = { ...report, gateOverrides: [...report.gateOverrides, extra.gateOverride] };

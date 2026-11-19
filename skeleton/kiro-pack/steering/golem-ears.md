@@ -46,6 +46,14 @@ Put the harshest believable value in the trigger. The falsifier finds the bounda
 - `npx --no-install golem-spec replay <id>` re-runs the pinned counterexample and writes `.golem/replays/<id>.csv`.
 - `npx --no-install golem-spec gate` exits 0 only when every requirement meets its expectation (see below) and no pinned seed fails, exits 2 otherwise, and exits 1 when it cannot run (a usage error, a line that does not compile, or an error in the Expectation table).
 
+## The gate confirms a green
+
+A quick green is one search of 24 trials per line, and one search can miss a failure that another finds (an agent trusted such a green, and an independent gate with another search seed broke the line). So when every line meets its expectation, `gate` searches each `Expected_Hold` line again before it prints green. The second search uses a second search seed derived from the first (`fmix32(seed XOR 0xC0DEF57A)`, the same every time) and the same budget, on top of the pinned seeds. The first seed is 1 unless `--search-seed` or `searchSeed` in `golem.config.json` says otherwise.
+
+- Green output names both seeds and the total trials: `confirmed: 3 Expected_Hold lines searched again with a second, independent search seed (search seed 1, then confirmation seed 588244584; ...; 144 in total)`.
+- If the second search finds a counterexample, the gate is red. The block says the line held under the first seed and broke under the second, gives both seeds and `reproduce: npx --no-install golem-spec replay <id>`, and pins the counterexample. Fix the controller. Do not run `--no-confirm` to get past it, and do not search for a seed that passes.
+- `--confirm-budget <n>` sets the searched trials per line of the second search (default: the budget of the first). `--no-confirm` skips the second search, prints `NOT confirmed (--no-confirm)` instead of the confirmation, and is recorded in `.golem/report.json` as `meta.confirm.status: "skipped"`. Use it only to time the first pass.
+- Passing both seeds still means no counterexample was found within 2 searches. It is not a proof.
 ## The Expectation table
 
 A `requirements.md` may say which lines are known to break. Each criterion is `Expected_Hold` unless a row says otherwise: the gate is red when an `Expected_Hold` line breaks and also when an `Expected_Break` line holds.
@@ -79,7 +87,7 @@ When a requirement fails, change the controller. Do not weaken, delete or reword
 |---|---|---|
 | Check requirements on save | 30 s | Compile only; no trial runs. |
 | Falsify controller on save | 300 s | 24 trials per requirement at up to 2 s of simulated time each. |
-| Gate the agent (Stop) | 300 s | Pinned seeds plus the 24-trial quick budget. |
+| Gate the agent (Stop) | 300 s | Pinned seeds, the 24-trial quick budget, then the same budget again with the confirmation seed (a gate with a slow app can need up to twice the time of 0.1.1). |
 | Test after spec task | 300 s | The default of 64 trials per requirement. |
 | Summon the ghosts (manual) | 1800 s | 256 trials per requirement. |
 

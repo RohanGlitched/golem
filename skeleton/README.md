@@ -50,7 +50,7 @@ An app describes its robot once: an MJCF scene, a controller, the signals it mea
 
 ## Run GOLEM in CI
 
-`golem-spec gate` exits 0 only when every requirement meets its expectation, 2 when one does not, and 1 when it cannot run. A GitHub Action wraps it, so a pull request is red while a requirement is red:
+`golem-spec gate` exits 0 only when every requirement meets its expectation, 2 when one does not, and 1 when it cannot run. Before it prints green it searches every `Expected_Hold` line a second time with a second search seed derived from the first (`--confirm-budget <n>` sets that budget, `--no-confirm` skips it and says so); a line that holds under the first seed and breaks under the second makes the gate red, with both seeds and the reproduce command. A GitHub Action wraps it, so a pull request is red while a requirement is red:
 
 ```yaml
 # .github/workflows/golem.yml
