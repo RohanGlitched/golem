@@ -100,9 +100,11 @@ Supersedes golem-falsify 8.10 and 8.11 (separate floors) and design section 3 "t
 
 ### Current Behavior
 6.1 WHEN a Node pool test removes its temp directory on Windows while a terminated worker still holds a handle THEN `rmSync` can throw `EBUSY` or `ENOTEMPTY`, failing a test that passed.
+6.1a WHEN `node.test.ts` and `mujoco.integration.test.ts` build the worker entry in the same millisecond from the same process id THEN both write to one `golem-pool-test-<pid>-<ms>` directory, and the first file's cleanup deletes the other file's build while it is in use (seen during this work: `ENOTEMPTY ... golem-pool-test-9400-1795088384954\pool`, with the `sim/` files of the other build still inside).
 
 ### Expected Behavior
 6.2 Pool tests and testkits SHALL remove temp directories through one helper that calls `rmSync` with `recursive`, `force`, `maxRetries: 10` and `retryDelay: 50`.
+6.2a `buildWorkerEntry` SHALL create its output directory with `mkdtempSync`, so every build has its own directory.
 6.3 A hygiene test SHALL fail when a test file or testkit under `skeleton/src/pool` calls `rmSync` directly.
 
 ### Unchanged Behavior
