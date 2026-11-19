@@ -9,7 +9,9 @@
   },
   "files": [
     "dist",
-    "kiro-pack"
+    "kiro-pack",
+    "power",
+    "crew-app"
   ],
   "exports": {
     ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
@@ -19,13 +21,16 @@
     "./testing": { "types": "./dist/testing.d.ts", "default": "./dist/testing.js" }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.build.json",
     "test": "vitest run --passWithNoTests",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "demo": "node ui-demo/fetch-fonts.mjs && vite --config ui-demo/vite.config.ts",
     "demo:shots": "node ui-demo/fetch-fonts.mjs && node ui-demo/shots.mjs",
     "e2e": "playwright test -c ui-demo/playwright.config.ts",
-    "e2e:perf": "playwright test -c ui-demo/playwright.config.ts --grep @perf"
+    "e2e:perf": "playwright test -c ui-demo/playwright.config.ts --grep @perf",
+    "pack:build": "vite-node scripts/build-pack.ts",
+    "pack:sync": "vite-node scripts/sync-power.ts",
+    "pack:check": "vite-node scripts/sync-power.ts -- --check"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
@@ -56,9 +61,17 @@
     "three": ">=0.160.0"
   },
   "peerDependenciesMeta": {
-    "fast-check": { "optional": true },
-    "react": { "optional": true },
-    "react-dom": { "optional": true },
-    "three": { "optional": true }
+    "fast-check": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    },
+    "three": {
+      "optional": true
+    }
   }
 }

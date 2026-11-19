@@ -1,0 +1,8 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "golem",
+  "version": "0.1.0",
+  "description": "Turns the EARS acceptance criteria of a Kiro spec into physics property tests for robot controllers: compile, falsify, replay and gate.",
+  "license": "Apache-2.0",
+  "keywords": ["robotics", "ears", "falsification"]
+}

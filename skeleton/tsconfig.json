@@ -1,11 +1,11 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "dist",
-    "rootDir": "src",
+    "rootDir": ".",
+    "noEmit": true,
     "types": ["node"],
     "jsx": "react-jsx"
   },
-  "include": ["src"],
+  "include": ["src", "test", "scripts"],
   "exclude": ["src/ui/e2e"]
 }
