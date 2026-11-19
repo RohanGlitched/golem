@@ -14,7 +14,7 @@ The safety function is deliberately incomplete. Speed-and-separation monitoring 
 - `test/`: Vitest and fast-check tests
 - `.kiro/specs/candy-sorter/requirements.md`: the app's own requirements
 - `web/`: the studio page (`index.html`, `main.ts`, `worker.ts`, `vite.config.ts`)
-- `.kiro/hooks/gate.json`: a `Stop` hook that runs `golem gate --kiro`
+- `.kiro/hooks/golem.json`: the hooks of the GOLEM pack (installed by `npx golem-spec init`), including the one `Stop` hook that runs `golem-spec gate --kiro`
 
 ## Studio
 
