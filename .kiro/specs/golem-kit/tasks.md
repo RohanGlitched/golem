@@ -469,100 +469,100 @@ This revision follows the current requirements and design:
 - [x] 10. Checkpoint - CLI and MCP server
   - Run `vitest --run` for `skeleton`. Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 11. Kiro pack
-  - [ ] 11.1 Implement the hook-file checker
+- [x] 11. Kiro pack
+  - [x] 11.1 Implement the hook-file checker
     - Create `skeleton/scripts/pack-checks/hooks.ts` with `checkHookFile(file, minTimeoutS)` (version `v1`, exactly five hooks, unique names ignoring case, allowed triggers with exact casing, `action.type` `command` with non-empty `command`, a regex matcher that compiles on each PostFileSave hook, the timeout floor, no PreToolUse and no guard reference) and `matcherAccepts`.
     - Test with examples: each invariant violated once is reported, a valid file gives no violations.
     - _Requirements: 17.1, 17.7, 17.8, 17.9, 17.10_
 
-  - [ ] 11.2 Write `hooks/golem.json`
+  - [x] 11.2 Write `hooks/golem.json`
     - Create the Hook_File in real v1 format with five hooks and the exact names, triggers, regex matchers, `action` objects and timeouts in the design table (`PostFileSave` with `(^|[\\/])requirements\.md$` and `(^|[\\/])controller[\\/]`, `Stop`, `PostTaskExec`, `Manual`), and put each timeout with its reason in the hook `description`.
     - No PreToolUse hook and no mention of the guard script.
     - Test: the file parses, `checkHookFile` reports nothing, the regex matchers accept and reject the sample paths of Requirement 28.24 (`requirements.md`, `specs/a/requirements.md`, `specs\a\requirements.md`, `my-requirements.md`, `requirements.md.bak`, `apps/x/controller/a.ts`, `controller\a.ts`, `apps/x/my-controller/a.ts`, `controller.ts`), every timeout is at least the measured Quick_Budget wall time on the Tiny_Test_App.
     - _Requirements: 17.1, 17.2, 17.3, 17.4, 17.5, 17.6, 17.7, 17.8, 17.9, 17.10, 28.24_
 
-  - [ ] 11.3 Write property test for hook matchers
+  - [x] 11.3 Write property test for hook matchers
     - **Property 41: Hook matchers select exactly the intended paths**
     - Generate paths from segments (with `/` or `\` separators, decoys such as `my-requirements.md`, `requirements.md.bak`, `my-controller`, `controller.ts`); assert each shipped matcher accepts a path if and only if its final segment is `requirements.md`, or it has a `controller` directory segment, respectively.
     - fast-check, at least 100 runs, file `skeleton/test/prop-41-hook-matchers.test.ts`.
     - **Validates: Requirements 17.2, 17.3, 28.24**
 
-  - [ ] 11.4 Write property test for hook file invariants
+  - [x] 11.4 Write property test for hook file invariants
     - **Property 42: Hook file invariants**
     - Apply `checkHookFile` to the shipped file and to generated mutations (version, hook count, duplicate names differing by case, trigger casing, empty `command`, missing or invalid matcher, low timeout, a PreToolUse hook, a guard reference); assert it accepts if and only if all invariants hold.
     - fast-check, at least 100 runs, file `skeleton/test/prop-42-hook-file.test.ts`.
     - **Validates: Requirements 17.1, 17.2, 17.3, 17.4, 17.5, 17.6, 17.7, 17.8, 17.9, 17.10, 28.7, 28.20**
 
-  - [ ] 11.5 Write the steering file
+  - [x] 11.5 Write the steering file
     - Create `steering/golem-ears.md` with `inclusion: fileMatch`, `fileMatchPattern: "**/requirements.md"`, the five EARS patterns with one example each, units on every number, ranges in triggers, `golem check`, the rule that a requirement is never edited to make a test pass, `propose_requirement` and the Proposals_File path, the exact unit list, the hook timeouts and reasons, and the `npx` replacement for the MCP entry.
     - Test: front matter fields, all five patterns present, the unit list equals exactly `N, kN, m, cm, mm, s, ms, m/s, cm/s, deg, °, rad, kg, g, %`, mentions of `propose_requirement` and the `npx` entry.
     - _Requirements: 16.1, 16.2, 16.3, 16.4, 17.10, 22.6_
 
-  - [ ] 11.6 Write the two skills
+  - [x] 11.6 Write the two skills
     - Create `skills/robot-ears/SKILL.md` and `skills/falsify-and-fix/SKILL.md` with `name` equal to the directory name and a description of at most 500 characters that names a trigger situation.
     - `robot-ears` shows at least three examples over three different patterns; `falsify-and-fix` lists the six steps in order, ends the loop at `golem gate` exit 0 and forbids editing requirements.
     - Test: compile every `robot-ears` example against the Tiny_Test_App lexicon with zero errors across at least three patterns; check step order and description limits.
     - _Requirements: 23.1, 23.2, 23.3, 23.4, 23.5_
 
-  - [ ] 11.7 Write `settings/mcp.json`
+  - [x] 11.7 Write `settings/mcp.json`
     - Create the template with exactly one `golem` entry (`command` `golem`, `args` `["mcp"]`, no `env`, no `url`, no `://`).
     - Test: exact shape and no URL or secret.
     - _Requirements: 22.1, 22.2, 22.3_
 
-  - [ ] 11.8 Write the workflow file
+  - [x] 11.8 Write the workflow file
     - Create `workflows/falsify-and-fix.workflow.json` with exactly one repeat node (`maxIterations` 6, `onMaxIterations` `pause`, `stopCondition.fileCheck` on `.golem/report.json`, `meta.lastGateExitCode` equal to 0), a tuner step then a gate step per iteration, agent name `golem-tuner`, and a gate step prompt that runs `golem gate` without `--kiro` and pauses on exit 1.
     - Test: the structural pin of exactly these fields, and a hand-written interpreter example for gate exit codes 0, 1 and 2.
     - _Requirements: 24.1, 24.2, 24.3, 24.4, 24.5, 24.6, 24.7_
 
-  - [ ] 11.9 Implement the agent checkers
+  - [x] 11.9 Implement the agent checkers
     - Create `skeleton/scripts/pack-checks/agents.ts` with `V2_FIELDS`, `V3_FIELDS`, `finalizeAgent`, `effectiveWriteAllow`, `isWriteAllowed`, `checkAgent(role, file, form)` and `findAbsolutePaths`, as in the design.
     - `finalizeAgent` appends exactly one `fs_write` Deny_Rule on `**` with `exclude` set to the allowed set for the tuner and scribe, appends nothing when the allowed set is empty or an equal rule exists, and changes nothing else. `checkAgent` accepts V3_Fields `permissions`, `kiroUpgrade` and `model`, and both `hooks` forms.
     - Test with examples: each role valid, a missing Deny_Rule, an extra pre-approved write path, a guard hook on the wrong agent, an absolute path and a home directory path are each reported.
     - _Requirements: 18.11, 19.2, 19.8, 20.1, 20.6, 20.12, 21.1, 21.6, 21.8_
 
-  - [ ] 11.10 Write property test for absolute path detection
+  - [x] 11.10 Write property test for absolute path detection
     - **Property 43: Absolute path and home directory detector**
     - Generate string values that start with `/`, `\`, `~` or a drive letter and colon, contain `/home/`, `/Users/` or `\Users\`, or are plain relative text, nested at any depth; assert `findAbsolutePaths` reports exactly the offending values.
     - fast-check, at least 100 runs, file `skeleton/test/prop-43-abs-path.test.ts`.
     - **Validates: Requirements 19.8, 21.6**
 
-  - [ ] 11.11 Write property test for finalizeAgent
+  - [x] 11.11 Write property test for finalizeAgent
     - **Property 44: finalizeAgent adds one Deny_Rule and changes nothing else**
     - Generate upgraded agent objects and allowed sets; assert the result equals the input plus exactly one Deny_Rule when the set is non-empty, nothing else changes, the input is not mutated, and applying `finalizeAgent` twice equals applying it once.
     - fast-check, at least 100 runs, file `skeleton/test/prop-44-finalize-agent.test.ts`.
     - **Validates: Requirements 19.2, 20.6, 21.5, 21.8**
 
-  - [ ] 11.12 Write property test for agent write policy
+  - [x] 11.12 Write property test for agent write policy
     - **Property 45: Agent write policy equals its allowed set**
     - Generate permission rule lists and paths; assert `isWriteAllowed` follows deny over allow with `*` and `**` glob semantics and `exclude`, `effectiveWriteAllow` equals the union of allow `fs_write` matches, and the finalized tuner, scribe and skeptic shapes allow exactly their set.
     - fast-check, at least 100 runs, file `skeleton/test/prop-45-write-policy.test.ts`.
     - **Validates: Requirements 19.2, 20.1, 20.6, 21.8, 28.21**
 
-  - [ ] 11.13 Write the V2 agent source templates
+  - [x] 11.13 Write the V2 agent source templates
     - Create `skeleton/kiro-pack/agent-src/golem-tuner.json`, `golem-skeptic.json` and `golem-scribe.json` in V2_Fields only (`name`, `description`, `prompt`, `tools`, `allowedTools`, `toolsSettings`, `mcpServers`, plus the tuner `hooks` and `resources`), prompts inline per the design outlines, no absolute path, UTF-8 without a byte order mark.
     - The tuner registers an agent-scoped `preToolUse` hook (`node .kiro/hooks/golem-guard-requirements.mjs`) and a `stop` hook (`golem gate --kiro`), and allows writes to `controller/**` and `tuning/**`. The skeptic has no write tool and `deniedPaths: ["**"]`. The scribe allows exactly `.kiro/specs/*/proposals.md`.
     - Test with `checkAgent(role, file, 'source')` and prompt content: loop order, never edit requirements, `held` is not a proof, five revisions, proposals only, units on every number.
     - _Requirements: 19.1, 19.2, 19.3, 19.4, 19.5, 19.6, 19.7, 19.8, 20.1, 20.2, 20.3, 20.4, 20.5, 20.6, 20.7, 20.8, 20.9, 20.10, 20.11, 21.1_
 
-  - [ ] 11.14 Implement the agent build pipeline with kiro-cli skip
+  - [x] 11.14 Implement the agent build pipeline with kiro-cli skip
     - Create `skeleton/scripts/build-pack.ts` with `buildPack(options, srcDir, outDir)`: write the sources to a temp directory, run `kiro-cli agent upgrade <dir> --no-backup`, check every file gained `permissions` and `kiroUpgrade`, run the deterministic `finalizeAgent` with the allowed set of each source, write 2-space JSON with a trailing newline, run `kiro-cli agent validate --path <file>` on each file, copy results to `kiro-pack/agents/`. Never edit a finalized file by hand.
     - A non-zero upgrade exit prints the file name and stderr, leaves that Agent_File unchanged and exits 1. A non-zero validate exit prints the file name and stderr and exits 1. When `kiro-cli` is missing, skip upgrade, validate and the idempotence check with one line that names `kiro-cli` as missing, keep the committed files unchanged, and still run the structural checks.
     - Test with the fake runner: pipeline order, upgrade failure, validate failure, missing `kiro-cli`, a second run is byte-identical, a second upgrade of a finalized file is reported as skipped and leaves bytes unchanged.
     - _Requirements: 21.2, 21.3, 21.4, 21.5, 21.7, 21.8, 21.9_
 
-  - [ ] 11.15 Generate and commit the upgraded, finalized agents
+  - [x] 11.15 Generate and commit the upgraded, finalized agents
     - Run `buildPack` with the real `kiro-cli` to write `skeleton/kiro-pack/agents/golem-tuner.json`, `golem-skeptic.json` and `golem-scribe.json`. The committed files are the upgrade output plus the `finalizeAgent` Deny_Rule and nothing else.
     - Add `skeleton/test/kiro-cli.test.ts`: when `kiro-cli` is installed run `kiro-cli agent validate --path <file>` on every agent and a second `kiro-cli agent upgrade` on a temp copy and assert every byte is unchanged; otherwise report one skip line that names `kiro-cli` as missing.
     - If `kiro-cli` is not available where this task runs, stop and record in the task result that the agents must be generated on a machine that has it; do not hand-write the upgraded files.
     - _Requirements: 21.2, 21.3, 21.4, 21.5, 21.9_
 
-  - [ ] 11.16 Write property test for agent structural invariants
+  - [x] 11.16 Write property test for agent structural invariants
     - **Property 46: Agent structural invariants**
     - Apply `checkAgent` to the three committed agents and to generated mutations (guard hook on another agent, missing Stop hook on the tuner, a write tool on the skeptic, an extra pre-approved write path, a missing or wrong-`exclude` Deny_Rule, a field outside V2 and V3 fields); assert it accepts if and only if all invariants hold.
     - fast-check, at least 100 runs, file `skeleton/test/prop-46-agent-structure.test.ts`.
     - **Validates: Requirements 18.11, 19.3, 19.4, 19.9, 20.1, 20.2, 20.7, 20.12, 21.1, 28.7, 28.21**
 
-  - [ ] 11.17 Generate the pack manifest and validate every shipped file
+  - [x] 11.17 Generate the pack manifest and validate every shipped file
     - Extend `build-pack.ts` to write `kiro-pack/manifest.json` (path, sha256, kind) for every file except `agent-src/` and `README.md`.
     - Add `skeleton/test/pack.test.ts` that parses every shipped JSON file (hooks, `settings/mcp.json`, three agents, workflow) and checks each required field, and runs the real `golem init` on a memory project with the real pack, asserting every written file, including the guard and the steering file, is byte-identical to its pack file.
     - _Requirements: 9.1, 9.11, 9.15, 9.16, 16.5, 28.3, 28.7, 28.22_
