@@ -1,7 +1,7 @@
 // Render scheduler: the only requestAnimationFrame that draws the stage.
 import type { Reason } from '../types.js';
 
-const BIT: Record<Reason, number> = { simulating: 1, dragging: 2, replaying: 4, 'ghosts-running': 8, transition: 16 };
+const BIT: Record<Reason, number> = { simulating: 1, dragging: 2, replaying: 4, 'ghosts-running': 8, transition: 16, following: 32 };
 const NAMES = Object.keys(BIT) as Reason[];
 
 export class RenderScheduler {

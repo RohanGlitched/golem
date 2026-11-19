@@ -324,6 +324,7 @@ export class ShoveController {
       const v = this.d.hero.views, b = this.d.primaryBody;
       ex = v.xipos[3 * b] as number; ey = v.xipos[3 * b + 1] as number; ez = v.xipos[3 * b + 2] as number;
       sx = ex - 0.3 * this.keyDir[0]; sy = ey - 0.3 * this.keyDir[1]; sz = ez - 0.3 * this.keyDir[2];
+      this.setLabel(KEY_PUSH_FORCE);
     } else if (this.previewBody >= 0) {
       const v = this.d.hero.views, b = this.previewBody, L = this.previewLength, pd = this.previewDir;
       ex = v.xipos[3 * b] as number; ey = v.xipos[3 * b + 1] as number; ez = v.xipos[3 * b + 2] as number;

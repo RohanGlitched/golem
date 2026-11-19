@@ -1,4 +1,4 @@
-// Emet_Decal: the word "emet" incised on the head, as two planes that share one canvas texture. The first "e"
+// Emet_Decal: the word "emet" incised on the head, as one plane with a canvas texture. The first "e"
 // crumbles with a value-noise dissolve and 28 falling grains, all computed in shaders from one uniform, so an
 // animating frame writes one number and allocates nothing.
 import type * as THREE_NS from 'three';
@@ -20,13 +20,15 @@ void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(
 const FRAG = /* glsl */ `
 uniform sampler2D uMap;
 uniform float uCrumble;
+uniform float uSplit;
 uniform vec3 uInk;
 varying vec2 vUv;
 float h(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 void main() {
   vec4 t = texture2D(uMap, vUv);
   float n = h(floor(vUv * vec2(160.0, 40.0)));
-  float edge = uCrumble * 1.2 - 0.1;
+  // Only the first letter (u < uSplit) crumbles.
+  float edge = vUv.x < uSplit ? uCrumble * 1.2 - 0.1 : -1.0;
   if (n < edge) discard;
   float rim = smoothstep(edge, edge + 0.12, n);
   float a = t.a * (0.25 + 0.75 * rim);
@@ -71,8 +73,11 @@ export class EmetDecal {
   word: EmetWord = 'emet';
   crumble = 0;
   private readonly texture: THREE_NS.Texture | undefined;
-  private readonly matE: THREE_NS.ShaderMaterial;
-  private readonly matMet: THREE_NS.ShaderMaterial;
+  private readonly mat: THREE_NS.ShaderMaterial;
+  private readonly grains: THREE_NS.Points;
+  /** Centres (plane x, m) of the first "e" and of "met". */
+  readonly eCentreX: number;
+  readonly metCentreX: number;
   private readonly grainMat: THREE_NS.ShaderMaterial;
   private readonly geos: THREE_NS.BufferGeometry[] = [];
   private lastMs = 0;
@@ -87,28 +92,23 @@ export class EmetDecal {
     this.texture = canvas ? new T.CanvasTexture(canvas) : undefined;
     if (this.texture) { this.texture.colorSpace = T.SRGBColorSpace; this.texture.anisotropy = 4; }
     const ink = new T.Color(d.tokens.clay).multiplyScalar(0.42);
-    const mk = (crumble: boolean): THREE_NS.ShaderMaterial => new T.ShaderMaterial({
+    this.mat = new T.ShaderMaterial({
       vertexShader: VERT, fragmentShader: FRAG, transparent: true, depthWrite: false,
       polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2,
-      uniforms: { uMap: { value: this.texture ?? null }, uCrumble: { value: crumble ? 0 : 0 }, uInk: { value: ink.clone() } },
+      uniforms: { uMap: { value: this.texture ?? null }, uCrumble: { value: 0 }, uSplit: { value: split }, uInk: { value: ink.clone() } },
     });
-    this.matE = mk(true);
-    this.matMet = mk(false);
     // The word spans u0..u1 of the 512 × 128 canvas; W is its width on the head.
     const W = d.spot.width, H = (W * 128) / ((u1 - u0) * 512);
     const wE = (W * (split - u0)) / (u1 - u0), wM = W - wE;
-    const plane = (w: number, a: number, b: number, cx: number, first: boolean): THREE_NS.Mesh => {
-      const g = new T.PlaneGeometry(w, H);
-      const uv = g.getAttribute('uv') as THREE_NS.BufferAttribute;
-      for (let i = 0; i < uv.count; i++) uv.setX(i, a + (b - a) * (uv.getX(i) as number));
-      g.translate(cx, 0, 0);
-      this.geos.push(g);
-      return new T.Mesh(g, first ? this.matE : this.matMet);
-    };
-    const e = plane(wE, u0, split, -W / 2 + wE / 2, true);
-    e.name = 'golem-emet-e';
-    const met = plane(wM, split, u1, -W / 2 + wE + wM / 2, false);
-    met.name = 'golem-emet-met';
+    // One plane (one draw call): the shader crumbles only u < split, the first "e".
+    const g = new T.PlaneGeometry(W, H);
+    const uv = g.getAttribute('uv') as THREE_NS.BufferAttribute;
+    for (let i = 0; i < uv.count; i++) uv.setX(i, u0 + (u1 - u0) * (uv.getX(i) as number));
+    this.geos.push(g);
+    const word = new T.Mesh(g, this.mat);
+    word.name = 'golem-emet-word';
+    this.eCentreX = -W / 2 + wE / 2;
+    this.metCentreX = -W / 2 + wE + wM / 2;
     // Grains: seeded positions inside the "e".
     const rng = deriveStream(7, 'emet-grains');
     const pos = new Float32Array(3 * GRAINS), seed = new Float32Array(3 * GRAINS);
@@ -126,9 +126,11 @@ export class EmetDecal {
     });
     const grains = new T.Points(gg, this.grainMat);
     grains.frustumCulled = false;
-    for (const m of [e, met]) m.renderOrder = 5;
+    grains.visible = false;
+    word.renderOrder = 5;
     grains.renderOrder = 6;
-    this.group.add(e, met, grains);
+    this.grains = grains;
+    this.group.add(word, grains);
     // Orient: plane x → right (up × normal), plane y → up (body z), plane z → the normal.
     const nrm = new T.Vector3(...d.spot.normal).normalize();
     const up = new T.Vector3(0, 0, 1);
@@ -155,8 +157,10 @@ export class EmetDecal {
     const c = stepCrumble(this.crumble, this.word, Math.min(dt, CRUMBLE_S), this.d.reduced());
     if (c === this.crumble) return false;
     this.crumble = c;
-    this.matE.uniforms['uCrumble']!.value = c;
+    this.mat.uniforms['uCrumble']!.value = c;
     this.grainMat.uniforms['uCrumble']!.value = this.d.reduced() ? 0 : c;
+    // The grains draw only while they fall.
+    this.grains.visible = !this.d.reduced() && c > 0 && c < 1;
     return c !== (this.word === 'met' ? 1 : 0);
   }
 
@@ -164,7 +168,7 @@ export class EmetDecal {
 
   setTheme(t: TokenSet): void {
     const ink = new this.d.THREE.Color(t.clay).multiplyScalar(0.42);
-    for (const m of [this.matE, this.matMet, this.grainMat]) (m.uniforms['uInk']!.value as THREE_NS.Color).copy(ink);
+    for (const m of [this.mat, this.grainMat]) (m.uniforms['uInk']!.value as THREE_NS.Color).copy(ink);
   }
 
   private maybeHint(): void {
@@ -186,7 +190,7 @@ export class EmetDecal {
     this.hint?.remove();
     this.group.removeFromParent();
     for (const g of this.geos) g.dispose();
-    this.matE.dispose(); this.matMet.dispose(); this.grainMat.dispose();
+    this.mat.dispose(); this.grainMat.dispose();
     this.texture?.dispose();
   }
 }

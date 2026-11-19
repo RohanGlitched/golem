@@ -7776,6 +7776,209 @@
   ]
  },
  {
+  "file": "golem-signature/requirements.md",
+  "criteria": [
+   {
+    "id": "1.1",
+    "line": 27,
+    "compiled": false,
+    "first": "UNKNOWN_ROBOT 27:8 Unknown robot 'Studio'; allowed names: golem, G1, robot, Unitree G1"
+   },
+   {
+    "id": "1.2",
+    "line": 28,
+    "compiled": false,
+    "first": "UNKNOWN_ROBOT 28:28 Unknown robot 'Studio'; allowed names: golem, G1, robot, Unitree G1"
+   },
+   {
+    "id": "1.3",
+    "line": 29,
+    "compiled": false,
+    "first": "UNKNOWN_ROBOT 29:28 Unknown robot 'Studio'; allowed names: golem, G1, robot, Unitree G1"
+   },
+   {
+    "id": "1.4",
+    "line": 30,
+    "compiled": false,
+    "first": "UNKNOWN_ROBOT 30:28 Unknown robot 'Studio'; allowed names: golem, G1, robot, Unitree G1"
+   },
+   {
+    "id": "1.5",
+    "line": 31,
+    "compiled": false,
+    "first": "UNKNOWN_ROBOT 31:28 Unknown robot 'Studio'; allowed names: golem, G1, robot, Unitree G1"
+   },
+   {
+    "id": "2.1",
+    "line": 39,
+    "compiled": false,
+    "first": "UNKNOWN_ROBOT 39:100 Unknown robot 'Studio'; allowed names: golem, G1, robot, Unitree G1"
+   },
+   {
+    "id": "2.2",
+    "line": 40,
+    "compiled": false,
+    "first": "UNKNOWN_ROBOT 40:47 Unknown robot 'Studio'; allowed names: golem, G1, robot, Unitree G1"
+   },
+   {
+    "id": "3.1",
+    "line": 46,
+    "compiled": false,
+    "first": "UNKNOWN_ROBOT 46:57 Unknown robot 'Studio'; allowed names: golem, G1, robot, Unitree G1"
+   },
+   {
+    "id": "3.2",
+    "line": 47,
+    "compiled": false,
+    "first": "UNKNOWN_ROBOT 47:8 Unknown robot 'Studio'; allowed names: golem, G1, robot, Unitree G1"
+   },
+   {
+    "id": "3.3",
+    "line": 48,
+    "compiled": false,
+    "first": "UNKNOWN_ROBOT 48:47 Unknown robot 'Studio'; allowed names: golem, G1, robot, Unitree G1"
+   },
+   {
+    "id": "4.1",
+    "line": 54,
+    "compiled": false,
+    "first": "UNKNOWN_ROBOT 54:8 Unknown robot 'Studio'; allowed names: golem, G1, robot, Unitree G1"
+   },
+   {
+    "id": "4.2",
+    "line": 55,
+    "compiled": false,
+    "first": "UNKNOWN_ROBOT 55:41 Unknown robot 'Studio'; allowed names: golem, G1, robot, Unitree G1"
+   },
+   {
+    "id": "4.3",
+    "line": 56,
+    "compiled": false,
+    "first": "PATTERN_MISMATCH 56:82 Unexpected character ';' (U+003B)"
+   },
+   {
+    "id": "4.4",
+    "line": 57,
+    "compiled": false,
+    "first": "UNKNOWN_ROBOT 57:67 Unknown robot 'Studio'; allowed names: golem, G1, robot, Unitree G1"
+   },
+   {
+    "id": "4.5",
+    "line": 58,
+    "compiled": false,
+    "first": "UNKNOWN_ROBOT 58:42 Unknown robot 'Studio'; allowed names: golem, G1, robot, Unitree G1"
+   },
+   {
+    "id": "5.1",
+    "line": 64,
+    "compiled": false,
+    "first": "UNKNOWN_ROBOT 64:52 Unknown robot 'Studio'; allowed names: golem, G1, robot, Unitree G1"
+   },
+   {
+    "id": "5.2",
+    "line": 65,
+    "compiled": false,
+    "first": "UNKNOWN_ROBOT 65:42 Unknown robot 'Studio'; allowed names: golem, G1, robot, Unitree G1"
+   },
+   {
+    "id": "5.3",
+    "line": 66,
+    "compiled": false,
+    "first": "UNKNOWN_ROBOT 66:37 Unknown robot 'Studio'; allowed names: golem, G1, robot, Unitree G1"
+   },
+   {
+    "id": "6.1",
+    "line": 72,
+    "compiled": false,
+    "first": "UNKNOWN_ROBOT 72:31 Unknown robot 'Studio'; allowed names: golem, G1, robot, Unitree G1"
+   },
+   {
+    "id": "6.2",
+    "line": 73,
+    "compiled": false,
+    "first": "UNKNOWN_ROBOT 73:35 Unknown robot 'Studio'; allowed names: golem, G1, robot, Unitree G1"
+   },
+   {
+    "id": "6.3",
+    "line": 74,
+    "compiled": false,
+    "first": "PATTERN_MISMATCH 74:76 Second SHALL: a requirement has exactly one SHALL, so remove this one or split the line"
+   },
+   {
+    "id": "6.4",
+    "line": 75,
+    "compiled": false,
+    "first": "PATTERN_MISMATCH 75:9 Unexpected character '\"' (U+0022)"
+   },
+   {
+    "id": "7.1",
+    "line": 81,
+    "compiled": false,
+    "first": "PATTERN_MISMATCH 81:9 Unexpected character '\"' (U+0022)"
+   },
+   {
+    "id": "7.2",
+    "line": 82,
+    "compiled": false,
+    "first": "UNKNOWN_ROBOT 82:8 Unknown robot 'Studio'; allowed names: golem, G1, robot, Unitree G1"
+   },
+   {
+    "id": "7.3",
+    "line": 83,
+    "compiled": false,
+    "first": "PATTERN_MISMATCH 83:9 Unexpected character '\"' (U+0022)"
+   },
+   {
+    "id": "8.1",
+    "line": 89,
+    "compiled": false,
+    "first": "PATTERN_MISMATCH 89:46 Unexpected character '\"' (U+0022)"
+   },
+   {
+    "id": "8.2",
+    "line": 90,
+    "compiled": false,
+    "first": "UNKNOWN_ROBOT 90:26 Unknown robot 'Studio'; allowed names: golem, G1, robot, Unitree G1"
+   },
+   {
+    "id": "8.3",
+    "line": 91,
+    "compiled": false,
+    "first": "UNKNOWN_ROBOT 91:46 Unknown robot 'Studio'; allowed names: golem, G1, robot, Unitree G1"
+   },
+   {
+    "id": "8.4",
+    "line": 92,
+    "compiled": false,
+    "first": "UNKNOWN_ROBOT 92:51 Unknown robot 'Studio'; allowed names: golem, G1, robot, Unitree G1"
+   },
+   {
+    "id": "8.5",
+    "line": 93,
+    "compiled": false,
+    "first": "UNKNOWN_ROBOT 93:8 Unknown robot 'Studio'; allowed names: golem, G1, robot, Unitree G1"
+   },
+   {
+    "id": "9.1",
+    "line": 99,
+    "compiled": false,
+    "first": "UNKNOWN_ROBOT 99:8 Unknown robot 'Studio'; allowed names: golem, G1, robot, Unitree G1"
+   },
+   {
+    "id": "9.2",
+    "line": 100,
+    "compiled": false,
+    "first": "PATTERN_MISMATCH 100:13 Closest pattern is ubiquitous; expected SHALL after the robot name but found ','"
+   },
+   {
+    "id": "9.3",
+    "line": 101,
+    "compiled": false,
+    "first": "UNKNOWN_ROBOT 101:8 Unknown robot 'Studio'; allowed names: golem, G1, robot, Unitree G1"
+   }
+  ]
+ },
+ {
   "file": "golem-sim/requirements.md",
   "criteria": [
    {

@@ -276,6 +276,7 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
     },
   });
   let replayLine = '';
+  let following = false;
   let replayPush = { forceN: 0, durS: 0 };
 
   const tick = (ts: number): void => {
@@ -313,7 +314,9 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
         const ax = c ? c[0] : root ? root.position.x : 0, ay = c ? c[1] : root ? root.position.y : 0;
         if (Math.abs(aura.group.position.x - ax) > 1e-3 || Math.abs(aura.group.position.y - ay) > 1e-3) aura.setCentre(ax, ay);
       }
-      if (stage.stepFollow(now(), reduced())) scheduler.requestOnce();
+      // The camera follow holds its own render reason while it moves, so "no reason" means no more frames.
+      const moving = stage.stepFollow(now(), reduced());
+      if (moving !== following) { following = moving; if (moving) scheduler.acquire('following'); else scheduler.release('following'); }
     }
     stage?.orbit.update();
     stage?.render();
