@@ -14,7 +14,7 @@ Lines are never edited to make a failing run pass. Discussion about a line goes 
 
 - **G1 / robot / golem**: The simulated Unitree G1 with the walking policy.
 - **Upright**: Pelvis at least 0.5 m above the floor and tilted no more than 60 deg from vertical.
-- **Push direction**: Measured from the robot's heading at the trigger; `from behind` covers 135 deg to 225 deg.
+- **Push direction**: The side the push comes from, counterclockwise from the robot's heading at the trigger: 0 deg from the front, 90 deg from its left, 180 deg from behind, 270 deg from its right. `from behind` covers 135 deg to 225 deg. The force points away from that side.
 - **Stride point**: The gait phase (0 to 1 over the 0.8 s gait period) at which a push starts.
 - **Expected_Hold**: A line the controller is expected to satisfy within the search budget.
 - **Expected_Break**: A line for which the falsifier is expected to find a counterexample.

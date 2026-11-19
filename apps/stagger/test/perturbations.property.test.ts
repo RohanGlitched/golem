@@ -37,11 +37,11 @@ describe('Feature: stagger-app, Property 24: Push force magnitude and window', (
 });
 
 describe('Feature: stagger-app, Property 25: Push direction follows the latched Heading', () => {
-  it('equals the Heading rotated by push.angle', () => {
+  it('points away from the side the push comes from: the Heading rotated by push.angle + 180 deg', () => {
     fc.assert(fc.property(d(1, 500), d(0, 2 * Math.PI), unitHeading, (f, a, h) => {
       const out = new Float64Array(3);
       pushForce(0.1, 0, 0.2, f, h, a, out);
-      expect(angDiff(Math.atan2(out[1]!, out[0]!), Math.atan2(h[1]!, h[0]!) + a)).toBeLessThanOrEqual(1e-9);
+      expect(angDiff(Math.atan2(out[1]!, out[0]!), Math.atan2(h[1]!, h[0]!) + a + Math.PI)).toBeLessThanOrEqual(1e-9);
     }), { numRuns: 300 });
   });
   it('keeps the direction latched at the trigger when the pelvis turns later', () => {
@@ -55,7 +55,7 @@ describe('Feature: stagger-app, Property 25: Push direction follows the latched 
       push.apply(ctx, 2.1, 2, values);
       const fx = ctx.data.xfrc_applied[6]!, fy = ctx.data.xfrc_applied[7]!;
       expect(Math.hypot(fx, fy)).toBeCloseTo(100, 9);
-      expect(angDiff(Math.atan2(fy, fx), yaw0 + a)).toBeLessThanOrEqual(1e-9);
+      expect(angDiff(Math.atan2(fy, fx), yaw0 + a + Math.PI)).toBeLessThanOrEqual(1e-9);
     }), { numRuns: 100 });
   });
 });

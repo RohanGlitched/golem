@@ -30,15 +30,17 @@ export function pushStartOffset(pushPhase: number, triggerPhase: number): number
 }
 
 /**
- * Horizontal push force. Inside [start, start + duration) writes force * (heading rotated by angle)
- * into out[0], out[1] and 0 into out[2]; outside it writes zeros.
+ * Horizontal push force. `angle` is the side the push comes FROM, counterclockwise from the heading:
+ * 0 = from the front, 90 deg = from the robot's left, 180 deg = from behind, 270 deg = from its right.
+ * The force points the opposite way, -(heading rotated by angle). Inside [start, start + duration)
+ * it is written to out[0], out[1] (out[2] = 0); outside it writes zeros.
  */
 export function pushForce(
   t: number, start: number, duration: number, force: number,
   head: ArrayLike<number>, angle: number, out: Float64Array,
 ): void {
   if (t < start || t >= start + duration) { out[0] = 0; out[1] = 0; out[2] = 0; return; }
-  const c = Math.cos(angle), s = Math.sin(angle);
+  const c = -Math.cos(angle), s = -Math.sin(angle);
   const hx = head[0] as number, hy = head[1] as number;
   out[0] = force * (c * hx - s * hy);
   out[1] = force * (s * hx + c * hy);
@@ -149,7 +151,8 @@ function geomId(ctx: SimContext, name: string): number {
 
 /**
  * Push. The Heading and the start time latch on the first call of the Active Phase (the trigger).
- * The force direction is the latched Heading rotated by push.angle: 0 deg pushes along the Heading.
+ * push.angle is the side the push comes from (0 deg = the front, 90 deg = the robot's left, 180 deg =
+ * behind); the force points away from that side, so `from behind` pushes the robot forward.
  */
 export const push: PerturbationTemplate = {
   phrase: 'the pelvis is pushed with {range:force} for {duration} from {direction} at {phase}',
@@ -176,7 +179,7 @@ export const push: PerturbationTemplate = {
       }
       // `direction` carries a fixed angle; `angle` carries a searched push.angle
       const angle = (values['angle'] ?? values['direction'] ?? 0) as number;
-      const c = Math.cos(angle), s = Math.sin(angle);
+      const c = -Math.cos(angle), s = -Math.sin(angle);
       const hx = rt.trigger.heading[0] as number, hy = rt.trigger.heading[1] as number;
       p.dirX = c * hx - s * hy;
       p.dirY = s * hx + c * hy;
@@ -196,7 +199,7 @@ export const push: PerturbationTemplate = {
   visual(values) {
     const f = values['force'] ?? 0;
     const a = values['angle'] ?? values['direction'] ?? 0;
-    return { force: [f * Math.cos(a), f * Math.sin(a), 0], at: PUSH_BODY };
+    return { force: [-f * Math.cos(a), -f * Math.sin(a), 0], at: PUSH_BODY };
   },
 };
 

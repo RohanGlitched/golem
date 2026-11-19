@@ -5,19 +5,19 @@ import { pushForce, pushStartOffset, slopeGravity, validateRatio } from '../pert
 describe('perturbation helpers', () => {
   const h = Float64Array.from([0.6, 0.8]);
 
-  it('pushes along the Heading at 0 deg', () => {
+  it('pushes against the Heading at 0 deg (a push from the front)', () => {
     const out = new Float64Array(3);
     pushForce(2.1, 2, 0.2, 100, h, 0, out);
-    expect(out[0]).toBeCloseTo(60, 12);
-    expect(out[1]).toBeCloseTo(80, 12);
+    expect(out[0]).toBeCloseTo(-60, 12);
+    expect(out[1]).toBeCloseTo(-80, 12);
     expect(out[2]).toBe(0);
   });
 
-  it('pushes against the Heading at 180 deg', () => {
+  it('pushes along the Heading at 180 deg (a push from behind)', () => {
     const out = new Float64Array(3);
     pushForce(2.1, 2, 0.2, 100, h, Math.PI, out);
-    expect(out[0]).toBeCloseTo(-60, 12);
-    expect(out[1]).toBeCloseTo(-80, 12);
+    expect(out[0]).toBeCloseTo(60, 12);
+    expect(out[1]).toBeCloseTo(80, 12);
   });
 
   it('applies no force outside the push window', () => {
