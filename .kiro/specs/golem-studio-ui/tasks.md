@@ -28,7 +28,7 @@ Conventions for every task:
 ## Tasks
 
 - [ ] 1. Package and entry scaffolding
-  - [ ] 1.1 Create the `golem-spec/ui` entry point, studio-local types and test support
+  - [x] 1.1 Create the `golem-spec/ui` entry point, studio-local types and test support
     - Create the directory layout from the design (`core/`, `stage/`, `hero/`, `ghosts/`, `aura/`, `run/`, `tablet/`, `reel/`, `verdict/`, `layout/`, `__tests__/`, `e2e/`).
     - Create `index.ts` exporting `mountStudio`, `StudioOptions`, `StudioHandle` and `PerturbationVisual` (a stub `mountStudio` that throws "not implemented" until task 19), and `types.ts` with the studio-local types from Data Models, including `TokenSet`, `LineModel`, `StudioState`, `Budget`, `FalsifyFn` and the additive optional `PerturbationTemplate.visual` field.
     - Add the `golem-spec/ui` export map entry to `skeleton/package.json`, add `react@18`, `react-dom@18`, `three`, `@testing-library/react` and `@axe-core/playwright` as needed per `tech.md`, and extend `skeleton/tsconfig.json` and `skeleton/vitest.config.ts` for `.tsx` and the `ui` folder.
