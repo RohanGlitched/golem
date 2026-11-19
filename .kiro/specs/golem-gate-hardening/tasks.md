@@ -74,9 +74,9 @@ Rules for every task:
   - [x] 10.2 Property test (T.3.4): permuting rows with distinct ids gives an equal `byId`.
   - _Bugfix: 10.1 to 10.8_
 
-- [ ] 11. Hygiene, committed-spec corpus and the remaining examples (defect 11, T.1, T.4)
+- [x] 11. Hygiene, committed-spec corpus and the remaining examples (defect 11, T.1, T.4)
   - Split `}  } else if`; `hygiene.test.ts`; `real-specs.test.ts` over the stagger and candy files; fill any T.1 example not yet written.
-  - [ ] 11.1 Property test (T.3.2): adding `Expected_Hold` rows for every id changes neither the exit code nor the verdict list.
+  - [x] 11.1 Property test (T.3.2): adding `Expected_Hold` rows for every id changes neither the exit code nor the verdict list.
   - _Bugfix: 11.1, 11.3, 11.4, T.1, T.4_
 
 - [ ] 12. Spec text, kit steering, reinstall the pack (defects 3 and 5)

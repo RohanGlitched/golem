@@ -57,7 +57,8 @@ export const handler: CommandHandler = async (p, io, deps) => {
         id: j.outcome.verdict.reqId, status: j.outcome.verdict.status,
         ears: j.expectation === 'Expected_Break' ? `${j.outcome.req.source} (${j.miss})` : j.outcome.req.source,
       });
-    }  } else if (result.kind === 'compile-error') {
+    }
+  } else if (result.kind === 'compile-error') {
     blocks.push(diagnosticsReason(result.diagnostics));
     notHeld.push({ id: 'compile', status: 'error', ears: `the requirements do not compile (${result.diagnostics.filter((d) => d.severity === 'error').length} errors)` });
   } else if (result.kind === 'table-error') {
