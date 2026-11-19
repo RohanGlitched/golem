@@ -72,6 +72,11 @@ export function patchPanda(xml, meshFile) {
     cupXml(),
     '<body name="attachment"> holding <site name="attachment_site"/>',
   );
+  // The arm compensates its own weight, as a real Franka does: without it the position actuators sag by up to 1 cm
+  // at full reach, which would swamp the 1 cm guards of the pick-and-place machine.
+  let compensated = 0;
+  out = out.replace(/<body name="(link[0-7]|cup)"/g, (m) => { compensated++; return `${m} gravcomp="1"`; });
+  if (compensated === 0) throw new AnchorError('patch anchor not found in panda_nohand.xml: <body name="link0"> to <body name="link7">');
   // A keyframe with 7 values would not fit the scene (candies add free joints).
   out = edit(out, /\s*<keyframe>[\s\S]*?<\/keyframe>/, '', '<keyframe> block');
   assertNoGripper(out);

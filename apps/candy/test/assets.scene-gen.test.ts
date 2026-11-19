@@ -113,6 +113,12 @@ describe('panda patch', () => {
     const out = patchPanda(stubPandaXml(), naming);
     expect(out).toMatch(/name="cup_collision" type="cylinder" size="0.02 0.05" pos="0 0 0.05" mass="0.1" group="3" contype="8" conaffinity="5"/);
   });
+  it('compensates gravity on the link and cup bodies', () => {
+    const out = patchPanda(stubPandaXml(), naming);
+    expect(out).toContain('<body name="link0" gravcomp="1" childclass="panda">');
+    expect(out).toContain('<body name="link7" gravcomp="1"');
+    expect(out).toContain('<body name="cup" gravcomp="1"');
+  });
   it('adds no actuator for the cup', () => {
     const out = patchPanda(stubPandaXml(), naming);
     expect((out.match(/<general /g) ?? []).length).toBe(1);

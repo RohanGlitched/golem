@@ -39,6 +39,11 @@ describe('scene.xml', () => {
     expect(id('body', 'left_finger')).toBe(-1);
     expect(id('body', 'right_finger')).toBe(-1);
   });
+  it('compensates the weight of the links and the cup, so the position actuators do not sag', () => {
+    for (let i = 1; i <= 7; i++) expect(model.body_gravcomp[id('body', `link${i}`)], `link${i}`).toBe(1);
+    expect(model.body_gravcomp[id('body', 'cup')]).toBe(1);
+    expect(model.body_gravcomp[id('body', 'candy_0')]).toBe(0);
+  });
   it('loads in under 4 s', () => {
     console.log(`scene load + compile: ${loadMs.toFixed(0)} ms CPU, ${wallMs.toFixed(0)} ms wall`);
     expect(loadMs).toBeLessThan(4000);
