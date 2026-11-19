@@ -1,0 +1,157 @@
+name: GOLEM gate
+description: >-
+  Run `golem-spec gate` on a robot app, write one row per requirement to the job summary, upload the report, and
+  fail the job exactly when the gate exits non-zero (2 when a requirement misses its expectation, 1 when it cannot run).
+
+inputs:
+  app-dir:
+    description: Directory of the app (the one with golem.config.json and golem-spec installed), relative to the workspace.
+    required: false
+    default: '.'
+  budget:
+    description: Trials per requirement, passed as `--budget`. Pinned seeds run first and count inside it.
+    required: false
+    default: '24'
+  search-seed:
+    description: Optional `--search-seed`, a positive integer. Leave empty to use golem.config.json, else 1.
+    required: false
+    default: ''
+  node-version:
+    description: Node.js version for actions/setup-node.
+    required: false
+    default: '20'
+  install:
+    description: >-
+      'true' (default) runs `npm ci` in the directory that holds package-lock.json (app-dir, or the nearest parent inside
+      the workspace) when there is one. Use 'false' when your workflow has already installed and built.
+    required: false
+    default: 'true'
+  artifact-name:
+    description: >-
+      Name of the uploaded artifact. Artifact names must be unique within a run, so give each use of this action
+      in one workflow a different name.
+    required: false
+    default: golem-gate
+
+outputs:
+  exit-code:
+    description: Exit code of `golem-spec gate`. 0 green, 2 a requirement misses its expectation, 1 the gate could not run.
+    value: ${{ steps.gate.outputs.exit-code }}
+  report-path:
+    description: Path of .golem/report.json, relative to the workspace.
+    value: ${{ steps.gate.outputs.report-path }}
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+
+    - name: Find package-lock.json
+      id: lock
+      shell: bash
+      env:
+        APP_DIR: ${{ inputs.app-dir }}
+      run: |
+        set -euo pipefail
+        ws="$(cd "$GITHUB_WORKSPACE" && pwd)"
+        d="$(cd "$GITHUB_WORKSPACE/$APP_DIR" && pwd)"
+        case "$d" in "$ws"|"$ws"/*) ;; *) echo "::error::app-dir must be inside the workspace"; exit 1 ;; esac
+        found=""
+        while :; do
+          if [ -f "$d/package-lock.json" ]; then found="$d"; break; fi
+          [ "$d" = "$ws" ] && break
+          d="$(dirname "$d")"
+        done
+        if [ -n "$found" ]; then
+          rel="${found#"$ws"}"; rel="${rel#/}"
+          echo "dir=${rel:-.}" >> "$GITHUB_OUTPUT"
+          echo "file=${rel:+$rel/}package-lock.json" >> "$GITHUB_OUTPUT"
+        else
+          echo "dir=" >> "$GITHUB_OUTPUT"
+          echo "file=" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Cache npm downloads
+      if: inputs.install == 'true' && steps.lock.outputs.file != ''
+      uses: actions/cache@v4
+      with:
+        path: ~/.npm
+        key: golem-npm-${{ runner.os }}-node${{ inputs.node-version }}-${{ hashFiles(steps.lock.outputs.file) }}
+        restore-keys: |
+          golem-npm-${{ runner.os }}-node${{ inputs.node-version }}-
+
+    - name: Install dependencies (npm ci)
+      if: inputs.install == 'true' && steps.lock.outputs.dir != ''
+      shell: bash
+      working-directory: ${{ steps.lock.outputs.dir }}
+      run: npm ci --no-audit --no-fund
+
+    - name: Run golem-spec gate
+      id: gate
+      shell: bash
+      working-directory: ${{ inputs.app-dir }}
+      env:
+        BUDGET: ${{ inputs.budget }}
+        SEED: ${{ inputs.search-seed }}
+        APP_DIR: ${{ inputs.app-dir }}
+      run: |
+        # The step never fails itself: the exit code is recorded, the summary and artifact are written, and the last step
+        # of this action fails the job with that code.
+        case "$BUDGET" in ''|*[!0-9]*|0) echo "::error::budget must be a positive integer, got '$BUDGET'"; exit 1 ;; esac
+        case "$SEED" in *[!0-9]*) echo "::error::search-seed must be a positive integer, got '$SEED'"; exit 1 ;; esac
+        out="${RUNNER_TEMP:-/tmp}/golem-gate-$$"
+        mkdir -p "$out"
+        args=(gate --json --budget "$BUDGET")
+        if [ -n "$SEED" ]; then args+=(--search-seed "$SEED"); fi
+        echo "npx --no-install golem-spec ${args[*]}  (in $APP_DIR)"
+        set +e
+        npx --no-install golem-spec "${args[@]}" > "$out/gate.json" 2> "$out/gate.stderr.txt"
+        code=$?
+        set -e
+        echo "::group::gate output"
+        cat "$out/gate.stderr.txt"
+        cat "$out/gate.json"
+        echo "::endgroup::"
+        echo "golem-spec gate exited with code $code"
+        echo "exit-code=$code" >> "$GITHUB_OUTPUT"
+        echo "out=$out" >> "$GITHUB_OUTPUT"
+        rel="${APP_DIR%/}/.golem/report.json"
+        echo "report-path=${rel#./}" >> "$GITHUB_OUTPUT"
+
+    - name: Write job summary
+      if: always() && steps.gate.outputs.out != ''
+      shell: bash
+      working-directory: ${{ inputs.app-dir }}
+      env:
+        OUT: ${{ steps.gate.outputs.out }}
+        CODE: ${{ steps.gate.outputs.exit-code }}
+        BUDGET: ${{ inputs.budget }}
+        SEED: ${{ inputs.search-seed }}
+        APP_DIR: ${{ inputs.app-dir }}
+      run: |
+        node "$GITHUB_ACTION_PATH/summary.mjs" \
+          --gate "$OUT/gate.json" --report .golem/report.json --stderr "$OUT/gate.stderr.txt" \
+          --exit-code "$CODE" --app-dir "$APP_DIR" --budget "$BUDGET" --search-seed "$SEED"
+
+    - name: Upload report and replays
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: |
+          ${{ inputs.app-dir }}/.golem/report.json
+          ${{ inputs.app-dir }}/.golem/replays/
+        include-hidden-files: true
+        if-no-files-found: warn
+
+    - name: Fail the job when the gate failed
+      if: always()
+      shell: bash
+      env:
+        CODE: ${{ steps.gate.outputs.exit-code }}
+      run: |
+        if [ -z "$CODE" ]; then echo "::error::the GOLEM gate did not run to completion"; exit 1; fi
+        if [ "$CODE" != "0" ]; then echo "::error::golem-spec gate exited with code $CODE"; exit "$CODE"; fi

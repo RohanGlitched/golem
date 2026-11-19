@@ -1,0 +1,99 @@
+name: golem
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: golem-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # The skeleton's own checks: strict typecheck, the unit and property tests, and the action's summary writer.
+  skeleton:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Typecheck
+        run: npm run typecheck -w skeleton
+      - name: Unit and property tests
+        run: npx vitest run
+        working-directory: skeleton
+      - name: Test the gate action's summary writer
+        run: npx vitest run --root .github/actions/golem-gate
+
+  # What a new user does in the first minute: install the packed tarball into an empty project, then init, check,
+  # test and gate. The gate must exit 2 on line 1.2: the starter's motor gives 15 N, so that line breaks on purpose.
+  starter:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Build and pack the skeleton
+        run: |
+          npm run build -w skeleton
+          npm pack -w skeleton --pack-destination "$RUNNER_TEMP/pack"
+      - name: Install the tarball in a fresh project and run init, check, test, gate
+        run: node .github/scripts/starter-smoke.mjs "$RUNNER_TEMP/pack"
+
+  # The gate as a CI step, on the Unitree G1 app. Unitree's policy alone breaks line 1.3 (an Expected_Hold line), so
+  # that run must fail; with Kiro's balance reflex (GOLEM_REFLEX=kiro) the same gate must pass.
+  stagger-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Build the skeleton and link its bin
+        run: |
+          npm run build -w skeleton
+          npm rebuild golem-spec
+
+      - name: Gate, Unitree's policy alone (must fail)
+        id: unitree
+        continue-on-error: true
+        uses: ./.github/actions/golem-gate
+        with:
+          app-dir: apps/stagger
+          budget: '24'
+          install: 'false'
+          artifact-name: golem-gate-stagger-unitree
+      - name: Assert the Unitree run failed with exit code 2
+        env:
+          OUTCOME: ${{ steps.unitree.outcome }}
+          CODE: ${{ steps.unitree.outputs.exit-code }}
+        run: |
+          echo "outcome=$OUTCOME exit-code=${CODE:-unknown}"
+          if [ "$OUTCOME" != "failure" ]; then echo "::error::the gate on Unitree's policy should fail (line 1.3 breaks) but its outcome was $OUTCOME"; exit 1; fi
+          if [ -n "$CODE" ] && [ "$CODE" != "2" ]; then echo "::error::expected gate exit code 2 (a requirement misses its expectation), got $CODE"; exit 1; fi
+          echo "The red gate above is expected: Unitree's policy alone breaks 1.3, and the job asserts it." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Gate, with Kiro's balance reflex (must pass)
+        uses: ./.github/actions/golem-gate
+        env:
+          GOLEM_REFLEX: kiro
+        with:
+          app-dir: apps/stagger
+          budget: '24'
+          install: 'false'
+          artifact-name: golem-gate-stagger-reflex
