@@ -203,16 +203,16 @@ Test rules for every task (`testing.md`):
     - **Property 5: Random-only Phase 1 prefix equals full-mode Phase 1**
     - **Validates: Requirements 10.7, 4.9**
 
-- [ ] 14. Worker protocol, runner and fake workers
-  - [~] 14.1 Implement the worker protocol types and `transferList`
+- [x] 14. Worker protocol, runner and fake workers
+  - [x] 14.1 Implement the worker protocol types and `transferList`
     - `HostMessage`, `WorkerMessage`, `WorkerConfig`, and `transferList` returning `[result.poses.frames.buffer]` when present.
     - Write example tests for the transfer list with and without poses and for structured-clone safety of every message type.
     - _Requirements: 12.1, 14.6, 15.7_
-  - [~] 14.2 Implement `WorkerRunner` and `HandleTracker`
+  - [x] 14.2 Implement `WorkerRunner` and `HandleTracker`
     - Transport-independent `handle(msg, post)`: load once through `createTrialFn(appId, config)`, post `ready` or `loadError`, run trials and post `result` or `trialError`, `.delete()` every tracked handle in `finally`, answer `probe` with the live handle count, no network use after load, no MuJoCo load when `trialModule` supplies a synthetic function.
     - Write example tests: handles released after success, throw and cancel, probe count equal after the 1st and the 100th trial, a synthetic `trialModule` never loading MuJoCo.
     - _Requirements: 12.10, 14.3, 15.6, 20.3, 20.4, 20.5, 20.7, 20.8_
-  - [~] 14.3 Implement `FakeWorker` and `FakeWorkerFactory`
+  - [x] 14.3 Implement `FakeWorker` and `FakeWorkerFactory`
     - In `skeleton/src/pool/testing.ts`: `WorkerLike` over the real `WorkerRunner` and an injected `TrialFn`, with a per-slot and per-job script (completion delay and shuffled order from a seed, crash, load failure, trial error, never answering), transferred buffers marked detached, and fake timers for grace periods.
     - Write example tests for each script action and for detached buffers after transfer.
     - _Requirements: 20.6, 20.7, 21.14, 21.15_

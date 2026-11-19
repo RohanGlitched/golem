@@ -1,4 +1,5 @@
 import type { TrialResult, TrialSpec } from '../falsify/contract.js';
+import type { HandleTracker } from './worker-runner.js';
 
 export type { RunOptions, TrialPool } from '../falsify/contract.js';
 
@@ -12,4 +13,5 @@ export interface PoolOptions {
   abortGraceMs?: number;
 }
 
-export type TrialFn = (spec: TrialSpec) => TrialResult | Promise<TrialResult>;
+/** The optional second argument is a per-trial handle tracker (worker pools); in-process pools omit it. */
+export type TrialFn = (spec: TrialSpec, tracker?: HandleTracker) => TrialResult | Promise<TrialResult>;
