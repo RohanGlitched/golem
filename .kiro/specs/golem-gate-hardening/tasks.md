@@ -48,10 +48,10 @@ Rules for every task:
   - [x] 6.1 Property test: for any set of verdicts and marks, `unmetReqIds` is exactly the ids with `met === false`, `brokenReqIds` is a subset of it, and a `held` verdict is never in `brokenReqIds`.
   - _Bugfix: 4.1 to 4.5, 5.1, 5.3, 5.4, 5.7_
 
-- [ ] 7. Re-run a held `Expected_Break` line at 4 times the budget (defect 8)
+- [x] 7. Re-run a held `Expected_Break` line at 4 times the budget (defect 8)
   - `budgetKind: 'gate-retry'`; `runGateOnce` retries; the message states the deciding budget.
   - Tests: a line that holds at 24 trials and breaks at 96 turns green and pins its seed; a line that holds at 96 stays red and says 96; lines without the mark run once (spy counts trials).
-  - [ ] 7.1 Property test: over random marks and statuses, the retry set is exactly the lines marked `Expected_Break` whose first verdict is `held`, and the verdicts of every other line are unchanged.
+  - [x] 7.1 Property test: over random marks and statuses, the retry set is exactly the lines marked `Expected_Break` whose first verdict is `held`, and the verdicts of every other line are unchanged.
   - _Bugfix: 8.1 to 8.5_
 
 - [ ] 8. Markdown structure: fences, indentation, header aliases (defect 6)

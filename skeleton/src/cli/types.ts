@@ -24,7 +24,7 @@ export interface RunOptions {
   searchSeed?: number;
   mode: 'full' | 'random-only';
   /** Selects defaults and the pinned-seed arithmetic (assumption A1). */
-  budgetKind: 'test' | 'gate' | 'mcp-run' | 'mcp-falsify';
+  budgetKind: 'test' | 'gate' | 'gate-retry' | 'mcp-run' | 'mcp-falsify';
   signal?: AbortSignal;
   onProgress?: (e: ProgressEvent, req: CompiledRequirement) => void;
   /** Called after each requirement finished (and was pinned), so commands can print its line at once. */

@@ -15,6 +15,8 @@ import type { CompileOutcome, FileDiagnostic, ReportFile, ReportMeta, ReportVerd
 
 export const DEFAULT_TEST_TRIALS = 64;
 export const GATE_QUICK_TRIALS = 24;
+/** A held Expected_Break line is searched again with this many times the budget before the gate calls its mark unmet. */
+export const RETRY_FACTOR = 4;
 export const MCP_DEFAULT_TRIALS = 24;
 
 export const reportPath = (app: Pick<LocatedApp, 'appDir'>): string => `${app.appDir}/.golem/report.json`;
@@ -158,6 +160,12 @@ export function toFalsifyOptions(
     case 'mcp-falsify':
       budget.maxTrials = (o.budget ?? MCP_DEFAULT_TRIALS) + pinnedValid;
       break;
+    case 'gate-retry':
+      // A held Expected_Break line, run again at 4 times the budget of the first pass (defect 8).
+      if (o.budget !== undefined) budget.maxTrials = RETRY_FACTOR * o.budget;
+      if (o.timeS !== undefined) budget.maxWallMs = RETRY_FACTOR * o.timeS * 1000;
+      if (!flagged) budget.maxTrials = RETRY_FACTOR * GATE_QUICK_TRIALS + pinnedValid;
+      break;
   }
   const out: FalsifyOptions = {
     appId, budget, mode: o.mode, searchSeed: o.searchSeed ?? app.config.searchSeed ?? 1,
@@ -256,8 +264,19 @@ export async function runGateOnce(
   if (tableErrors(expectations).length > 0) return { kind: 'table-error', expectations, changes, compiled };
   const t0 = deps.clock();
   const o: RunOptions = { mode: 'full', budgetKind: 'gate', ...flags, ...(signal !== undefined ? { signal } : {}) };
-  const raw = await withPool(deps, app, robotApp, flags.workers, (pool) => runRequirements(app, robotApp, compiled.requirements, o, deps, pool));
-  const outcomes = raw.map(applyPinnedRule);
+  const outcomes = await withPool(deps, app, robotApp, flags.workers, async (pool) => {
+    const first = (await runRequirements(app, robotApp, compiled.requirements, o, deps, pool)).map(applyPinnedRule);
+    // A line marked Expected_Break that held is a claim about the search, and the quick budget can miss (defect 8):
+    // run it once more with a larger budget, and let that run decide.
+    const retryOpts: RunOptions = { ...o, budgetKind: 'gate-retry' };
+    const out: RequirementOutcome[] = [];
+    for (const x of first) {
+      if (expectationOf(expectations.byId, x.verdict.reqId) !== 'Expected_Break' || x.verdict.status !== 'held') { out.push(x); continue; }
+      const again = await runRequirements(app, robotApp, [x.req], { ...retryOpts, req: x.verdict.reqId }, deps, pool);
+      out.push(...again.map(applyPinnedRule));
+    }
+    return out;
+  });
   return { kind: 'ran', outcomes, compiled, expectations, changes, durationS: (deps.clock() - t0) / 1000, totalTrials: outcomes.reduce((n, x) => n + x.verdict.trials, 0) };
 }
 
