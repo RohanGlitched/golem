@@ -35,11 +35,11 @@ Rules for every task:
   - [x] 4.2 Property test (T.3.6): `--kiro` stdout is empty or one JSON line with `decision: 'block'`, `reason` of at most 4000 characters, exit 0.
   - _Bugfix: 1.6, 1.8 (check), 2.1 to 2.9_
 
-- [ ] 5. Record the marks and show the moves (defect 3)
+- [x] 5. Record the marks and show the moves (defect 3)
   - `ReportVerdict.expectation` and `met`; `meta.expectationChanges`; `KitDeps.readCommitted` with the default `git show HEAD:./<file>`; `markChanges`; changes on stdout, in `--json`, in the Stop reason and in the report; `test` and the MCP run tools write the fields.
   - Tests: no table gives exit 2 and adding one row gives exit 0 plus the change line (probe 2 B5, probe 3 section 3); the report names `Expected_Break` next to `broken`; no `readCommitted` or a throwing one gives no change.
-  - [ ] 5.1 Property test: for any two tables over the same ids, the changes listed are exactly the ids whose effective expectation differs, each once, in file order; identical tables give none.
-  - [ ] 5.2 Property test (T.3.1): flipping one row between `Expected_Hold` and `Expected_Break` flips `met` of that line and no other line, for a `held` and for a `broken` verdict.
+  - [x] 5.1 Property test: for any two tables over the same ids, the changes listed are exactly the ids whose effective expectation differs, each once, in file order; identical tables give none.
+  - [x] 5.2 Property test (T.3.1): flipping one row between `Expected_Hold` and `Expected_Break` flips `met` of that line and no other line, for a `held` and for a `broken` verdict.
   - _Bugfix: 3.1 to 3.8_
 
 - [ ] 6. The Stop reason offers a remedy the agent may take; override fields (defects 4 and 5)

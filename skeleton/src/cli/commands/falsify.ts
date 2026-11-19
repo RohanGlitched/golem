@@ -1,5 +1,6 @@
 // `golem falsify <reqId>`: one requirement with a progress line per generation.
 import { testExitCode } from '../exit.js';
+import { readExpectations } from '../expectation.js';
 import { phaseLabel, progressLine, requirementLine } from '../format.js';
 import { bootstrap, runRequirements, withPool, writeRunReport } from '../service.js';
 import type { CommandHandler } from '../run.js';
@@ -30,7 +31,7 @@ export const handler: CommandHandler = async (p, io, deps) => {
   const t0 = deps.clock();
   const outcomes = await withPool(deps, boot.app, boot.robotApp, o.workers, (pool) => runRequirements(boot.app, boot.robotApp, c.compiled.requirements, o, deps, pool));
   const seconds = (deps.clock() - t0) / 1000;
-  await writeRunReport(deps, boot.app, outcomes, { reqId: id }, seconds, (m) => errLine(io, m));
+  await writeRunReport(deps, boot.app, outcomes, { reqId: id }, seconds, (m) => errLine(io, m), { expectations: readExpectations(c.compiled.texts, c.compiled.files, { reconcile: false }).byId });
   const out = outcomes[0];
   if (out !== undefined) line(io, json ? JSON.stringify({ type: 'verdict', verdict: out.verdict }) : requirementLine(out));
   return testExitCode(outcomes.map((x) => x.verdict));

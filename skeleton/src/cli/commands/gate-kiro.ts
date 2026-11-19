@@ -2,8 +2,8 @@
 // error (exit 1, nothing on stdout). A block is one JSON line on stdout; everything else goes to stderr.
 import { gateExitCode } from '../exit.js';
 import { elapsedSeconds, gateCounter, parseStopPayload, pruneState } from '../gate-counter.js';
-import { formatIssue, judgeOutcomes, tableErrors } from '../expectation.js';
-import { NOTHING_TO_CHECK, buildReason, diagnosticsReason, expectationBlock, redAllowMessage, tableErrorBlock, tableNotesBlock } from '../format.js';
+import { formatIssue, judgeOutcomes, markChangeText, tableErrors } from '../expectation.js';
+import { NOTHING_TO_CHECK, buildReason, diagnosticsReason, expectationBlock, markChangesBlock, redAllowMessage, tableErrorBlock, tableNotesBlock } from '../format.js';
 import {
   bootstrap, displayPath, gateStatePath, reportPath, runGateOnce, writeRunReport, type GateRun,
 } from '../service.js';
@@ -75,6 +75,11 @@ export const handler: CommandHandler = async (p, io, deps) => {
   const notes = table?.issues.filter((i) => i.severity === 'warning') ?? [];
   if (!green && blocks.length > 0 && notes.length > 0) blocks.push(tableNotesBlock(notes, (f) => displayPath(io.cwd, f)));
 
+  // A mark that moved is shown to whoever reads the output, and first in the reason (a spec change, not a fix).
+  const changes = result.kind === 'ran' || result.kind === 'table-error' ? result.changes : [];
+  for (const c of changes) errLine(io, `golem gate: ${markChangeText(c)}`);
+  if (!green && blocks.length > 0 && changes.length > 0) blocks.unshift(markChangesBlock(changes));
+
   const before = Object.prototype.hasOwnProperty.call(state, sessionId) ? state[sessionId] : undefined;
   const elapsedS = elapsedSeconds(state, sessionId, startMs);
   const decision = gateCounter(state, sessionId, green, nowIso, elapsedS);
@@ -92,7 +97,7 @@ export const handler: CommandHandler = async (p, io, deps) => {
     : undefined;
   const warn = (m: string): void => errLine(io, m);
   if (result.kind === 'ran') {
-    await writeRunReport(deps, app, result.outcomes, 'all', result.durationS, warn, { lastGateExitCode: code, ...(override !== undefined ? { gateOverride: override } : {}) });
+    await writeRunReport(deps, app, result.outcomes, 'all', result.durationS, warn, { lastGateExitCode: code, expectations: result.expectations.byId, expectationChanges: result.changes, ...(override !== undefined ? { gateOverride: override } : {}) });
   } else if (override !== undefined) {
     await appendOverrideOnly(deps, app, override, warn);
   }

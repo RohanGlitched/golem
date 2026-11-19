@@ -199,6 +199,24 @@ export function readExpectations(
 
 export const expectationOf = (m: ReadonlyMap<string, Expectation>, id: string): Expectation => m.get(id) ?? DEFAULT_EXPECTATION;
 
+/** A requirement whose effective expectation (a row, or the default) differs between two versions of the tables. */
+export interface MarkChange { id: string; from: Expectation; to: Expectation }
+
+/** `1.2: Expected_Hold -> Expected_Break (uncommitted)`. */
+export const markChangeText = (c: MarkChange): string => `${c.id}: ${c.from} -> ${c.to} (uncommitted)`;
+
+/** The ids whose effective expectation differs, each once: ids of `after` in file order, then ids only `before` names. */
+export function diffExpectations(before: Pick<ParsedExpectations, 'byId' | 'rows'>, after: Pick<ParsedExpectations, 'byId' | 'rows'>): MarkChange[] {
+  const ids = [...new Set([...after.rows.map((r) => r.id), ...before.rows.map((r) => r.id)])];
+  const out: MarkChange[] = [];
+  for (const id of ids) {
+    const from = expectationOf(before.byId, id);
+    const to = expectationOf(after.byId, id);
+    if (from !== to) out.push({ id, from, to });
+  }
+  return out;
+}
+
 /** True when the verdict is what the expectation asks for. An `error` verdict meets neither. */
 export function meetsExpectation(status: Verdict['status'], e: Expectation): boolean {
   return e === 'Expected_Break' ? status === 'broken' : status === 'held';

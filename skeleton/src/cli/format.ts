@@ -1,7 +1,7 @@
 // Output formatting: one line per requirement, gate blocks, the bounded Kiro reason, Diagnostics.
 // Voice follows product.md: plain and exact, a unit on every physical number.
 import type { Kind } from '../ears/index.js';
-import { expectationTag, formatIssue, type Expectation, type Judged, type TableIssue } from './expectation.js';
+import { expectationTag, formatIssue, markChangeText, type Expectation, type Judged, type MarkChange, type TableIssue } from './expectation.js';
 import { heldWording, type ProgressEvent } from '../falsify/index.js';
 import type { CompiledRequirement, Scenario, ScenarioSpace } from './sibling-types.js';
 import type { FileDiagnostic, RequirementOutcome } from './types.js';
@@ -161,6 +161,10 @@ export function tableErrorBlock(errors: readonly TableIssue[], show: (file: stri
 export function tableNotesBlock(warnings: readonly TableIssue[], show: (file: string) => string): string {
   return ['Expectation table notes:', ...warnings.map((i) => `  ${formatIssue(i, show)}`)].join('\n');
 }
+
+/** The Stop reason block that says a mark moved: a changed mark is a spec change, not a fix. */
+export const markChangesBlock = (changes: readonly MarkChange[]): string =>
+  ['Expectation marks changed since the last commit (a changed mark is a spec change, not a fix):', ...changes.map((c) => `  ${markChangeText(c)}`)].join('\n');
 
 /** Joins blocks with one blank line and cuts at a line boundary to at most `max` characters (requirement 8.7). */
 export function buildReason(blocks: readonly string[], reportPath: string, max = REASON_MAX): string {

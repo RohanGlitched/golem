@@ -64,6 +64,11 @@ export interface KitDeps {
   createPool(o: CreatePoolOptions): Promise<TrialPool>;
   runTraced(app: RobotApp, req: CompiledRequirement, spec: TrialSpec): Promise<TracedRun>;
   gitCommit(appDir: string): Promise<string | undefined>;
+  /**
+   * The text of a requirements file as committed at `HEAD`, or `undefined` outside a repository, for a file that is not
+   * tracked, and on any git error. Optional: without it the gate reports no mark change.
+   */
+  readCommitted?(file: string): Promise<string | undefined>;
   /** Releases what the default deps hold (the cached MuJoCo models of `runTraced`). Called once at the end of `main`. */
   dispose?(): Promise<void>;
 }
@@ -142,6 +147,16 @@ export function createDefaultDeps(): KitDeps {
         const { execFile } = await import('node:child_process');
         return await new Promise<string | undefined>((resolve) => {
           execFile('git', ['rev-parse', '--short', 'HEAD'], { cwd: appDir, timeout: 3000, windowsHide: true }, (err, out) => resolve(err !== null ? undefined : out.trim() || undefined));
+        });
+      } catch { return undefined; }
+    },
+    async readCommitted(file) {
+      try {
+        const { execFile } = await import('node:child_process');
+        const { dirname, basename } = await import('node:path');
+        return await new Promise<string | undefined>((resolve) => {
+          // `./name` is relative to the working directory, so the file is looked up in the directory it lives in.
+          execFile('git', ['show', `HEAD:./${basename(file)}`], { cwd: dirname(file), timeout: 3000, windowsHide: true, maxBuffer: 16 * 1024 * 1024 }, (err, out) => resolve(err !== null ? undefined : out));
         });
       } catch { return undefined; }
     },

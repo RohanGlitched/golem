@@ -72,6 +72,10 @@ export interface TestDepsOptions {
   /** The synthetic controller's droop (m/N), read at every trial. Change it to improve the controller. */
   droop?: () => number;
   commit?: string | undefined;
+  /** The text of requirements files at HEAD, by absolute path. Absent: the deps have no eadCommitted. */
+  committed?: Record<string, string>;
+  /** Replaces eadCommitted (to make it throw, for example). */
+  readCommitted?: KitDeps['readCommitted'];
 }
 
 export interface TestDeps {
@@ -151,6 +155,7 @@ export function createTestDeps(o: TestDepsOptions = {}): TestDeps {
       return tinyTrial(req, spec, droop());
     },
     async gitCommit() { return o.commit; },
+    ...(o.readCommitted !== undefined ? { readCommitted: o.readCommitted } : o.committed !== undefined ? { readCommitted: async (file: string) => o.committed?.[file] } : {}),
   };
   return { deps, fs, spies, clock };
 }
