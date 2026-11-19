@@ -117,8 +117,8 @@ Rules that apply to every task:
     - Example tests: frame layout `(x, y, z, qw, qx, qy, qz)` per body, float32 conversion only, non-finite values stored unchanged, spacing and capacity, `finish()` length equals `nbody*7*frameCount`, and no growth after construction.
     - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 8.8, 8.11_
 
-- [ ] 11. Test_App
-  - [~] 11.1 Implement `test-app.ts` (`testApp`, `makeTestRequirement`, `makeAlwaysHook`, `makeEventuallyHook`)
+- [x] 11. Test_App
+  - [x] 11.1 Implement `test-app.ts` (`testApp`, `makeTestRequirement`, `makeAlwaysHook`, `makeEventuallyHook`)
     - Inline MJCF from the design under `scene.xml` (`files()` returns exactly one entry). `simDt` 0.002 s, `controlDt` 0.02 s, `warmup` 0.2 s. `names` for `box`, `bob`, `hinge`, `drive`. Signals `box.z`, `bob.angle`, `bob.speed`. PD controller clamped to `ctrlrange`, reading only hinge angle and speed. `initState` makes exactly one PRNG draw within Â±0.1 rad. The `push` template writes `xfrc_applied` only inside `[tTrigger, tTrigger + duration)` and writes nothing at 0 N. Hand-built `CompiledRequirement` fixtures with no dependency on `ears`.
     - Example tests (real MuJoCo, no trial loop): model compiles through the loader, writer and `buildContext` in 2 s or less (the CI budget), contains `box` with a free joint, `bob`, `hinge` and `drive`, timings match, `mj timestep === simDt`, signals finite, the torque is clamped, `initState` draws once and stays within 0.1 rad, `push` is zero outside its window, and a 0 N push leaves `xfrc_applied` zero.
     - The app imports nothing outside `skeleton/src/sim` except `@mujoco/mujoco` types and contract types.
