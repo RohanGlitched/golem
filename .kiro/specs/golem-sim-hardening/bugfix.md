@@ -49,7 +49,7 @@ Supersedes golem-sim 7.11 (NaN-only check).
 
 ### Expected Behavior
 3.2 WHERE `controller.substep` is defined THE runner SHALL call `controller.substep(ctx, tSim)` before every `mj_step`, warm-up included, with `tSim` equal to the simulated time before that step (`simIndex * simDt`).
-3.3 WITHIN a trial step THE runner SHALL call, in order: clear `xfrc_applied`, `controller.substep`, each perturbation's `apply`, `mj_step`. Perturbations therefore get the last word on the inputs of the step.
+3.3 WITHIN every sim step (warm-up and trial) THE runner SHALL call, in order: clear `xfrc_applied`, `controller.substep`, each perturbation's `apply` (trial steps only), `mj_step`. Perturbations therefore get the last word on the inputs of the step.
 3.4 THE total number of `substep` calls in a full trial SHALL equal `round(warmup/simDt) + round(horizon/controlDt) * n`.
 
 ### Unchanged Behavior

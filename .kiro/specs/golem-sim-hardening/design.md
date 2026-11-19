@@ -48,7 +48,7 @@ apply RunOptions.numerics (timestep, integrator) // I2
 data = new MjData; ctx; initState; mj_forward // D4
 hash.update(qpos)                             // I3
 controller = makeController
-warm-up: for each control step: step(); for each sim step: substep(); mj_step; check(); hash
+warm-up: for each control step: step(); for each sim step: xfrc = 0; substep(); mj_step; check(); hash
    check fails -> warm-up divergence result (D8)
 trigger: xfrc = 0; template.begin() in order  // D7
 for k = 0..N:

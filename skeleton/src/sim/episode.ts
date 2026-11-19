@@ -171,11 +171,14 @@ export async function runTrial(
       return true;
     };
 
-    // ---- warm-up: no perturbation, no sample, xfrc stays zero
+    // ---- warm-up: no perturbation, no sample; xfrc is cleared before every step
+    const hasSubstep = typeof controller.substep === 'function';
     for (let c = 0; c < v.warmupControlSteps; c++) {
       controller.step(ctx, simIndex * simDt);
       refreshIfDetached();
       for (let j = 0; j < n; j++) {
+        xfrc.fill(0);
+        if (hasSubstep) { controller.substep!(ctx, simIndex * simDt); refreshIfDetached(); }
         mj.mj_step(model, data);
         if (afterStep('warmup')) {
           throw new SimError(`Simulation diverged during warm-up at t = ${simIndex * simDt} s`);
@@ -232,6 +235,7 @@ export async function runTrial(
       for (let j = 0; j < n; j++) {
         xfrc.fill(0);
         const tSim = simIndex * simDt;
+        if (hasSubstep) { controller.substep!(ctx, tSim); refreshIfDetached(); }
         for (let c = 0; c < nCalls; c++) {
           const call = calls[c] as (typeof calls)[number];
           call.template.apply(ctx, tSim, warmup, call.values);

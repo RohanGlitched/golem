@@ -146,4 +146,63 @@ describe('defect 4: mj_forward after initState', () => {
   });
 });
 
+describe('defect 3 and improvement 4: Controller.substep at the sim rate, and the saturation meter', () => {
+  it('calls substep before every mj_step, warm-up included, with tSim = simIndex * simDt', async () => {
+    const calls: Array<{ t: number; time: number }> = [];
+    const app: RobotApp = {
+      ...boxDropApp,
+      makeController: (ctx) => ({
+        step: () => {},
+        substep: (_c, tSim) => { calls.push({ t: tSim, time: ctx.data.time as number }); },
+      }),
+    };
+    await run(app, boxReq(0.5, []));
+    expect(calls).toHaveLength(100 + 25 * 10);
+    calls.forEach((c, i) => {
+      expect(c.t).toBe(i * 0.002);
+      expect(Math.abs(c.time - c.t)).toBeLessThan(1e-12);
+    });
+  });
+
+  it('calls substep after xfrc is cleared and before every perturbation apply', async () => {
+    const order: string[] = [];
+    const spy = { phrase: 'spy', name: 'spy', dims: () => [], apply: () => { order.push('apply'); } };
+    const app: RobotApp = {
+      ...boxDropApp,
+      lexicon: { ...boxDropApp.lexicon, perturbations: [spy] },
+      makeController: (ctx) => ({
+        step: () => { order.push('step'); },
+        substep: () => {
+          const x = ctx.data.xfrc_applied as Float64Array;
+          order.push(x.every((v) => v === 0) ? 'substep' : 'substep-dirty');
+          x[8] = 1; // a controller may write xfrc; the next step clears it again
+        },
+      }),
+    };
+    await run(app, alwaysAbove({ signal: 'box.z', bound: 0, horizon: 0.04, perturbations: [{ template: 'spy', params: {} }] }));
+    const trial = order.slice(order.indexOf('apply') - 1);
+    expect(trial.slice(0, 4)).toEqual(['substep', 'apply', 'substep', 'apply']);
+    expect(order).not.toContain('substep-dirty');
+    expect(order.filter((o) => o === 'step')).toHaveLength(10 + 2);
+  });
+
+  it('keeps the stool standing with a 500 Hz PD in substep; without torque it collapses', async () => {
+    const req = alwaysAbove({ signal: 'torso.z', bound: 0.25, horizon: 1.5 });
+    const held = await run(stoolApp, req, { f: 0, a: 0 }, 3);
+    expect(held.result.robustness).toBeGreaterThan(0.02);
+    const limp = await run(makeStoolApp('none'), req, { f: 0, a: 0 }, 3);
+    expect(limp.result.robustness).toBeLessThan(0);
+  });
+
+  it('logs torque saturation as a signal: below 1 at rest, at least 1 while a shove saturates the hips', async () => {
+    const req = alwaysAbove({ signal: 'torso.z', bound: 0, horizon: 1, perturbations: [shoveCall(0.3)] });
+    const calm = await run(stoolApp, req, { f: 0, a: 0 }, 3);
+    const sat = calm.trace.signals['saturation']!;
+    expect(sat.length).toBe(calm.trace.t.length);
+    expect(Math.max(...sat.slice(10))).toBeLessThan(1);
+    const shoved = await run(stoolApp, req, { f: 800, a: 0 }, 3);
+    expect(Math.max(...shoved.trace.signals['saturation']!)).toBeGreaterThanOrEqual(1);
+  });
+});
+
 void makeStoolApp; void shoveCall;

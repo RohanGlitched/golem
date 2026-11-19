@@ -1,6 +1,7 @@
 // Contact-rich test models for the runner tests. Test-only, not exported from index.ts.
 // boxDropApp: boxes dropped on a plane (contacts from the first warm-up steps).
 // stoolApp: a torso on four hinged legs held by PD control, plus a free crate on the floor.
+import { createSaturationMeter } from './helpers.js';
 import type {
   CompiledRequirement, Controller, Dimension, PerturbationCall, PerturbationTemplate, RobotApp, SimContext, Trace,
 } from './types.js';
@@ -170,7 +171,9 @@ export const STOOL_KP = 60;
 export const STOOL_KD = 1.5;
 
 /** Per-trial stool runtime: joint addresses and the policy's target angles. */
-interface StoolRt { qadr: number[]; dadr: number[]; act: number[]; target: Float64Array }
+interface StoolRt {
+  qadr: number[]; dadr: number[]; act: number[]; target: Float64Array; saturation: (ctrl: ArrayLike<number>) => number;
+}
 const STOOL_RT = new WeakMap<SimContext, StoolRt>();
 export function stoolRuntime(ctx: SimContext): StoolRt {
   let rt = STOOL_RT.get(ctx);
@@ -182,6 +185,7 @@ export function stoolRuntime(ctx: SimContext): StoolRt {
       dadr: joints.map((j) => m.jnt_dofadr[j] as number),
       act: LEGS.map((l) => ctx.ids[`actuator:m_${l}`] as number),
       target: new Float64Array(LEGS.length),
+      saturation: createSaturationMeter(m),
     };
     STOOL_RT.set(ctx, rt);
   }
@@ -237,6 +241,7 @@ export function makeStoolApp(pd: 'substep' | 'step' | 'none' = 'substep'): Robot
     signals(ctx, out) {
       out['torso.z'] = (ctx.data.xpos as Float64Array)[3 * (ctx.ids['body:torso'] as number) + 2] as number;
       out['contacts'] = ctx.data.ncon as number;
+      out['saturation'] = stoolRuntime(ctx).saturation(ctx.data.ctrl as Float64Array);
     },
   };
 }

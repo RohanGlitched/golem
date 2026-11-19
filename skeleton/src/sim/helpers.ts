@@ -69,3 +69,34 @@ export function readWarnings(mj: Mj, data: any): Record<string, number> {
   }
   return out;
 }
+/**
+ * Torque-saturation meter (golem-sim-hardening improvement 4). Copies `actuator_ctrlrange` and
+ * `actuator_ctrllimited` once (call it per trial, after domain randomisation), and returns a function of
+ * `ctrl` giving max_i |2 ctrl_i - (lo_i + hi_i)| / (hi_i - lo_i) over ctrl-limited actuators: 0 at the
+ * middle of every range, 1 at a limit, above 1 past it. 0 when no actuator is ctrl-limited; NaN when a
+ * limited command is NaN. The returned function does not allocate.
+ */
+export function createSaturationMeter(model: any): (ctrl: ArrayLike<number>) => number {
+  const nu = model.nu as number;
+  const range: ArrayLike<number> = model.actuator_ctrlrange;
+  const limited: ArrayLike<number> = model.actuator_ctrllimited;
+  const ids: number[] = [];
+  for (let i = 0; i < nu; i++) {
+    if ((limited[i] as number) !== 0 && (range[2 * i + 1] as number) > (range[2 * i] as number)) ids.push(i);
+  }
+  const idx = Int32Array.from(ids);
+  const mid = new Float64Array(ids.length);
+  const span = new Float64Array(ids.length);
+  ids.forEach((i, j) => {
+    mid[j] = (range[2 * i] as number) + (range[2 * i + 1] as number);
+    span[j] = (range[2 * i + 1] as number) - (range[2 * i] as number);
+  });
+  return (ctrl) => {
+    let s = 0;
+    for (let j = 0; j < idx.length; j++) {
+      const r = Math.abs(2 * (ctrl[idx[j] as number] as number) - (mid[j] as number)) / (span[j] as number);
+      if (!(r <= s)) s = r;
+    }
+    return s;
+  };
+}
