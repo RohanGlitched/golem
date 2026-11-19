@@ -2,7 +2,7 @@
 // Voice follows product.md: plain and exact, a unit on every physical number.
 import type { Kind } from '../ears/index.js';
 import { expectationTag, type Expectation, type Judged } from './expectation.js';
-import type { ProgressEvent } from '../falsify/index.js';
+import { heldWording, type ProgressEvent } from '../falsify/index.js';
 import type { CompiledRequirement, Scenario, ScenarioSpace } from './sibling-types.js';
 import type { FileDiagnostic, RequirementOutcome } from './types.js';
 
@@ -68,6 +68,11 @@ export function requirementLine(o: RequirementOutcome, expectation?: Expectation
   return expectation === undefined ? base : `${base}  ${expectationTag(o.verdict.status, expectation)}`;
 }
 
+/** The held part of a line: the bound is from the uniformly random trials only, and the text says so. */
+export function heldText(v: { trials: number; randomTrials: number; failureRateUpper95?: number }): string {
+  return heldWording(v.trials, v.randomTrials, v.failureRateUpper95 !== undefined ? `${sig3(v.failureRateUpper95 * 100)} %` : undefined);
+}
+
 function requirementLineBase(o: RequirementOutcome): string {
   const v = o.verdict;
   const head = `${v.reqId}  ${STATUS_WORD[v.status]}`;
@@ -79,8 +84,7 @@ function requirementLineBase(o: RequirementOutcome): string {
     const how = ce !== undefined ? `(${ce.shrunk ? 'shrunk' : 'not shrunk'}, seed ${ce.seed})` : '';
     return `${head}  margin ${margin}  ${v.trials} trials  ${scen}  ${how}`.trimEnd();
   }
-  const rate = v.failureRateUpper95 !== undefined ? ` (failure rate below ${sig3(v.failureRateUpper95 * 100)} % at 95 % confidence)` : '';
-  return `${head}  closest margin ${formatMargin(v.closest.robustness, o.unit)}  no counterexample found in ${v.trials} trials${rate}`;
+  return `${head}  closest margin ${formatMargin(v.closest.robustness, o.unit)}  ${heldText(v)}`;
 }
 
 export function phaseLabel(phase: 0 | 1 | 2 | 3): 'pinned' | 'random' | 'guided' | 'shrink' {

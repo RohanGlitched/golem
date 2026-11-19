@@ -1,7 +1,7 @@
 // Shared by `run_requirement` and `falsify`: one falsification at a time, pin and report before returning,
 // and a partial verdict built from the trial stream when the time cap ends the run (assumption A12).
 import { expectationMiss, expectationTag, type Expectation } from '../../cli/expectation.js';
-import { formatMargin, formatScenario } from '../../cli/format.js';
+import { formatMargin, formatScenario, heldText } from '../../cli/format.js';
 import { writeRunReport } from '../../cli/service.js';
 import type { RequirementOutcome, RunOptions } from '../../cli/types.js';
 import { runRequirements } from '../../cli/service.js';
@@ -16,15 +16,16 @@ interface Seen { trials: number; lowest: number; scenario: Record<string, number
  * so the 200-character summary limit cannot cut it off; a held line that was meant to break also says why at the end.
  */
 export function verdictSummary(o: RequirementOutcome, expectation?: Expectation): string {
-  const base = verdictSentence(o);
-  if (expectation === undefined) return base;
+  if (expectation === undefined) return verdictSentence(o, true);
+  const miss = expectationMiss(o.verdict.status, expectation, o.verdict.trials);
+  // a held line with a miss leaves out the failure-rate bound (it is in the JSON block) so the 200-character limit keeps the reason
+  const base = verdictSentence(o, !(o.verdict.status === 'held' && miss !== ''));
   const at = base.indexOf(':');
   const tagged = `${base.slice(0, at)} ${expectationTag(o.verdict.status, expectation)}${base.slice(at)}`;
-  const miss = expectationMiss(o.verdict.status, expectation, o.verdict.trials);
   return o.verdict.status === 'held' && miss !== '' ? `${tagged}; ${miss}` : tagged;
 }
 
-function verdictSentence(o: RequirementOutcome): string {
+function verdictSentence(o: RequirementOutcome, withBound: boolean): string {
   const v = o.verdict;
   const id = v.reqId;
   if (v.status === 'error') return `${id} error: ${o.meta.errors[0]?.message ?? 'the run failed without a message'}`;
@@ -34,7 +35,7 @@ function verdictSentence(o: RequirementOutcome): string {
     return `${id} broken: margin ${formatMargin(ce?.robustness ?? v.closest.robustness, o.unit)} at ${scen} (seed ${ce?.seed ?? v.closest.seed}), `
       + `${v.trials} trials${ce?.shrunk === true ? ', shrunk' : ''}; reproduce: npx golem-spec replay ${id}`;
   }
-  return `${id} held: no counterexample found in ${v.trials} trials (closest margin ${formatMargin(v.closest.robustness, o.unit)})`;
+  return `${id} held: ${heldText(withBound ? v : { trials: v.trials, randomTrials: v.randomTrials })} (closest margin ${formatMargin(v.closest.robustness, o.unit)})`;
 }
 
 export function verdictJson(o: RequirementOutcome, expectation?: Expectation): Record<string, unknown> {

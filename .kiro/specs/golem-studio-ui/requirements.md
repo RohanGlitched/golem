@@ -546,7 +546,7 @@ Out of scope: EARS parsing and monitors, MuJoCo loading and trial execution, sea
 8. WHERE Reduced_Motion is set, THE Number_Tween SHALL show the new value without animation.
 9. WHILE a run is active, THE Verdict_Panel SHALL update its counters at most once per frame.
 10. THE Verdict_Panel SHALL show the Aura_Summary as text.
-11. THE Verdict_Panel SHALL show for a held verdict the sentence "No counterexample found in N trials (n random, m guided)" with the Budget and SHALL NOT show a claim of proof.
+11. THE Verdict_Panel SHALL show for a held verdict the sentence "No counterexample in N trials; from the n uniformly random ones, failure rate below P % (95 % confidence)" (or "No counterexample in N trials (n random, m guided)" when there is no bound) with the Budget and SHALL NOT show a claim of proof.
 12. WHEN the displayed Number_Tween is running, THE Render_Scheduler SHALL NOT be a Render_Reason and the tween SHALL run on its own `requestAnimationFrame` loop that stops when all tweens end.
 13. FOR ALL Verdicts, THE Verdict_Panel final displayed values SHALL equal the Verdict values after formatting (display property).
 14. FOR ALL tween progress values, THE Number_Tween displayed value SHALL lie between the old value and the new value (bounds property).

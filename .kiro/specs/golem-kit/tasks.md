@@ -123,7 +123,7 @@ This revision follows the current requirements and design:
 
   - [x] 3.4 Implement output formatters and reason truncation
     - Create `skeleton/src/cli/format.ts` with `formatQuantity`, `formatScenario`, `formatMargin`, `requirementLine`, `progressLine`, `gateBlock`, `buildReason`, `diagnosticsReason`, `sortDiagnostics` and `diagnosticText`.
-    - Voice follows `product.md`: units on every physical number, a held line says "no counterexample found in N trials". `diagnosticsReason` builds the block text that lists Diagnostics for a compile error under `--kiro`.
+    - Voice follows `product.md`: units on every physical number, a held line says "no counterexample in N trials". `diagnosticsReason` builds the block text that lists Diagnostics for a compile error under `--kiro`.
     - Test with examples: each line shape, the four-line gate block, an error-status block, a Diagnostics reason, `buildReason` under and over 4000 characters.
     - _Requirements: 3.3, 4.8, 4.9, 5.2, 7.6, 7.8, 8.2, 8.7, 8.9_
 

@@ -60,7 +60,7 @@ describe('CLI end to end', () => {
     // 7. gate is green: exit 0, the pinned seed passes now
     h.clearOutput();
     expect(await h.run('gate')).toBe(0);
-    expect(h.io.stdoutText()).toMatch(/^no counterexample found in \d+ trials/);
+    expect(h.io.stdoutText()).toMatch(/^no counterexample in \d+ trials/);
     expect(h.report().meta.lastGateExitCode).toBe(0);
 
     // 8. gate --kiro prints 0 bytes and deletes the session key

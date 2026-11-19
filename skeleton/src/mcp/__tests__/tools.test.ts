@@ -65,7 +65,7 @@ describe('run_requirement and falsify', () => {
     const m = await createMcpHarness({ requirements: GREEN_REQUIREMENTS });
     const r = await m.call('run_requirement', { reqId: '1.1' });
     expect(r.json).toMatchObject({ status: 'held', guidedTrials: 0 });
-    expect(r.summary).toContain('no counterexample found in');
+    expect(r.summary).toMatch(/no counterexample in 24 trials; from the 24 uniformly random ones, failure rate below 12\.5 % \(95 % confidence\)/);
     expect(m.report().meta.budget).toEqual({ maxTrials: 24 });
   });
 

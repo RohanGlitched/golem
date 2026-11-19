@@ -50,9 +50,9 @@ $ npx --no-install golem-spec check
 [exit 0]
 
 $ npx --no-install golem-spec test --budget 24
-1.1  HELD  closest margin +17.9 deg  no counterexample found in 24 trials (failure rate below 75 % at 95 % confidence)
+1.1  HELD  closest margin +17.9 deg  no counterexample in 24 trials; from the 4 uniformly random ones, failure rate below 75 % (95 % confidence)
 1.2  BROKEN  margin -0.421 deg  21 trials  push.force = 14.5 N  (shrunk, seed 3909821944)
-2.1  HELD  closest margin +0.193 m  no counterexample found in 4 trials (failure rate below 75 % at 95 % confidence)
+2.1  HELD  closest margin +0.193 m  no counterexample in 4 trials; from the 4 uniformly random ones, failure rate below 75 % (95 % confidence)
 3 requirements: 1 broken, 2 held, 0 error, in 2.38 s (search budget 24 trials per requirement; held means no counterexample found within that budget, not a proof)
 [exit 2]
 

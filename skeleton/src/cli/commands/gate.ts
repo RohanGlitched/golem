@@ -37,7 +37,7 @@ export const handler: CommandHandler = async (p, io, deps) => {
   if (grouped) for (const l of gateGroups(judged)) line(io, l);
   for (const j of unmet) line(io, `${expectationBlock(j)}\n`);
   if (!grouped) {
-    if (code === 0) line(io, `no counterexample found in ${run.totalTrials} trials (${run.outcomes.length} requirements, pinned seeds first, then the quick budget)`);
+    if (code === 0) line(io, `no counterexample in ${run.totalTrials} trials (${run.outcomes.length} requirements, pinned seeds first, then the quick budget)`);
     else line(io, `gate RED: ${unmet.length} of ${run.outcomes.length} requirements are not held`);
     return code;
   }

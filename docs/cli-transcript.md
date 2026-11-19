@@ -6,7 +6,7 @@ Before the run, `apps/stagger/.golem` was deleted, so the pinned seeds in `.gole
 
 The spec's Expectation table marks 1.2, 4.2 and 6.2 as Expected_Break and every other line as Expected_Hold. 1.3 was Expected_Break until the team decided it is a real requirement now that Kiro's reflex exists (see the notes at the end of the requirements file).
 
-A held line means no counterexample found within the stated budget. It is not a proof.
+A held line means no counterexample found within the stated budget. It is not a proof. The failure-rate bound on a held line comes from the uniformly random trials only, and the line says how many those are. The runs were recorded before that wording; the held lines are re-worded to the current format, with the random-trial count taken from the recorded bound (3 / bound, the rule of three).
 ### 1. golem check
 
 ```text
@@ -19,16 +19,16 @@ Exit code 0. Compiling takes under a second; no trials run.
 
 ```text
 $ golem test --budget 200
-1.1  HELD  closest margin +0.233 m  no counterexample found in 200 trials (failure rate below 7.5 % at 95 % confidence)  [Expected_Hold: met]
+1.1  HELD  closest margin +0.233 m  no counterexample in 200 trials; from the 40 uniformly random ones, failure rate below 7.5 % (95 % confidence)  [Expected_Hold: met]
 1.2  BROKEN  margin -0.339 m  50 trials  push.force = 223 N, push.angle = 220 deg, push.phase = 0.0715 (stride phase)  (shrunk, seed 2205968643)  [Expected_Break: met]
 1.3  BROKEN  margin -0.442 m  122 trials  push.force = 72.7 N, push.angle = 88.1 deg, push.phase = 0.277 (stride phase)  (shrunk, seed 1291121316)  [Expected_Hold: NOT met]
-2.1  HELD  closest margin +0.116 m/s  no counterexample found in 40 trials (failure rate below 7.5 % at 95 % confidence)  [Expected_Hold: met]
-2.2  HELD  closest margin +0.257 m  no counterexample found in 200 trials (failure rate below 7.5 % at 95 % confidence)  [Expected_Hold: met]
-3.1  HELD  closest margin +0.144 m  no counterexample found in 200 trials (failure rate below 7.5 % at 95 % confidence)  [Expected_Hold: met]
-4.1  HELD  closest margin +0.191 m  no counterexample found in 200 trials (failure rate below 7.5 % at 95 % confidence)  [Expected_Hold: met]
+2.1  HELD  closest margin +0.116 m/s  no counterexample in 40 trials; from the 40 uniformly random ones, failure rate below 7.5 % (95 % confidence)  [Expected_Hold: met]
+2.2  HELD  closest margin +0.257 m  no counterexample in 200 trials; from the 40 uniformly random ones, failure rate below 7.5 % (95 % confidence)  [Expected_Hold: met]
+3.1  HELD  closest margin +0.144 m  no counterexample in 200 trials; from the 40 uniformly random ones, failure rate below 7.5 % (95 % confidence)  [Expected_Hold: met]
+4.1  HELD  closest margin +0.191 m  no counterexample in 200 trials; from the 40 uniformly random ones, failure rate below 7.5 % (95 % confidence)  [Expected_Hold: met]
 4.2  BROKEN  margin -0.376 m  50 trials  payload.mass = 15.5 kg  (shrunk, seed 3160059130)  [Expected_Break: met]
-5.1  HELD  closest margin +0.262 m  no counterexample found in 40 trials (failure rate below 7.5 % at 95 % confidence)  [Expected_Hold: met]
-6.1  HELD  closest margin +0.223 m  no counterexample found in 200 trials (failure rate below 7.5 % at 95 % confidence)  [Expected_Hold: met]
+5.1  HELD  closest margin +0.262 m  no counterexample in 40 trials; from the 40 uniformly random ones, failure rate below 7.5 % (95 % confidence)  [Expected_Hold: met]
+6.1  HELD  closest margin +0.223 m  no counterexample in 200 trials; from the 40 uniformly random ones, failure rate below 7.5 % (95 % confidence)  [Expected_Hold: met]
 6.2  BROKEN  margin -0.445 m  48 trials  latency.duration = 0.05 s  (shrunk, seed 229287175)  [Expected_Break: met]
 11 requirements: 4 broken, 7 held, 0 error, in 155 s (search budget 200 trials per requirement; held means no counterexample found within that budget, not a proof)
 ```
@@ -69,14 +69,14 @@ The robot is pushed from its left at 28 % of its stride and falls: the pelvis re
 ```text
 $ golem gate
 Expected_Hold (8 lines: must hold)
-  ok    1.1  HELD  closest margin +0.252 m  no counterexample found in 24 trials (failure rate below 75 % at 95 % confidence)
+  ok    1.1  HELD  closest margin +0.252 m  no counterexample in 24 trials; from the 4 uniformly random ones, failure rate below 75 % (95 % confidence)
   FAIL  1.3  BROKEN  margin -0.439 m  19 trials  push.force = 72.1 N, push.angle = 88.1 deg, push.phase = 0.277 (stride phase)  (shrunk, seed 1291121316)  <- expected to hold but a counterexample was found
-  ok    2.1  HELD  closest margin +0.117 m/s  no counterexample found in 4 trials (failure rate below 75 % at 95 % confidence)
-  ok    2.2  HELD  closest margin +0.257 m  no counterexample found in 24 trials (failure rate below 75 % at 95 % confidence)
-  ok    3.1  HELD  closest margin +0.197 m  no counterexample found in 24 trials (failure rate below 75 % at 95 % confidence)
-  ok    4.1  HELD  closest margin +0.192 m  no counterexample found in 24 trials (failure rate below 75 % at 95 % confidence)
-  ok    5.1  HELD  closest margin +0.262 m  no counterexample found in 4 trials (failure rate below 75 % at 95 % confidence)
-  ok    6.1  HELD  closest margin +0.227 m  no counterexample found in 24 trials (failure rate below 75 % at 95 % confidence)
+  ok    2.1  HELD  closest margin +0.117 m/s  no counterexample in 4 trials; from the 4 uniformly random ones, failure rate below 75 % (95 % confidence)
+  ok    2.2  HELD  closest margin +0.257 m  no counterexample in 24 trials; from the 4 uniformly random ones, failure rate below 75 % (95 % confidence)
+  ok    3.1  HELD  closest margin +0.197 m  no counterexample in 24 trials; from the 4 uniformly random ones, failure rate below 75 % (95 % confidence)
+  ok    4.1  HELD  closest margin +0.192 m  no counterexample in 24 trials; from the 4 uniformly random ones, failure rate below 75 % (95 % confidence)
+  ok    5.1  HELD  closest margin +0.262 m  no counterexample in 4 trials; from the 4 uniformly random ones, failure rate below 75 % (95 % confidence)
+  ok    6.1  HELD  closest margin +0.227 m  no counterexample in 24 trials; from the 4 uniformly random ones, failure rate below 75 % (95 % confidence)
 
 Expected_Break (3 lines: must break)
   ok    1.2  BROKEN  margin -0.318 m  19 trials  push.force = 216 N, push.angle = 220 deg, push.phase = 0.0715 (stride phase)  (shrunk, seed 2205968643)
@@ -97,14 +97,14 @@ Default configuration: Unitree's policy alone. Exit code 2. The gate prints the 
 ```text
 $ GOLEM_REFLEX=kiro golem gate
 Expected_Hold (8 lines: must hold)
-  ok    1.1  HELD  closest margin +0.251 m  no counterexample found in 24 trials (failure rate below 75 % at 95 % confidence)
-  ok    1.3  HELD  closest margin +0.216 m  no counterexample found in 26 trials (failure rate below 60 % at 95 % confidence)
-  ok    2.1  HELD  closest margin +0.116 m/s  no counterexample found in 4 trials (failure rate below 75 % at 95 % confidence)
-  ok    2.2  HELD  closest margin +0.257 m  no counterexample found in 24 trials (failure rate below 75 % at 95 % confidence)
-  ok    3.1  HELD  closest margin +0.207 m  no counterexample found in 24 trials (failure rate below 75 % at 95 % confidence)
-  ok    4.1  HELD  closest margin +0.193 m  no counterexample found in 24 trials (failure rate below 75 % at 95 % confidence)
-  ok    5.1  HELD  closest margin +0.262 m  no counterexample found in 4 trials (failure rate below 75 % at 95 % confidence)
-  ok    6.1  HELD  closest margin +0.228 m  no counterexample found in 24 trials (failure rate below 75 % at 95 % confidence)
+  ok    1.1  HELD  closest margin +0.251 m  no counterexample in 24 trials; from the 4 uniformly random ones, failure rate below 75 % (95 % confidence)
+  ok    1.3  HELD  closest margin +0.216 m  no counterexample in 26 trials; from the 5 uniformly random ones, failure rate below 60 % (95 % confidence)
+  ok    2.1  HELD  closest margin +0.116 m/s  no counterexample in 4 trials; from the 4 uniformly random ones, failure rate below 75 % (95 % confidence)
+  ok    2.2  HELD  closest margin +0.257 m  no counterexample in 24 trials; from the 4 uniformly random ones, failure rate below 75 % (95 % confidence)
+  ok    3.1  HELD  closest margin +0.207 m  no counterexample in 24 trials; from the 4 uniformly random ones, failure rate below 75 % (95 % confidence)
+  ok    4.1  HELD  closest margin +0.193 m  no counterexample in 24 trials; from the 4 uniformly random ones, failure rate below 75 % (95 % confidence)
+  ok    5.1  HELD  closest margin +0.262 m  no counterexample in 4 trials; from the 4 uniformly random ones, failure rate below 75 % (95 % confidence)
+  ok    6.1  HELD  closest margin +0.228 m  no counterexample in 24 trials; from the 4 uniformly random ones, failure rate below 75 % (95 % confidence)
 
 Expected_Break (3 lines: must break)
   ok    1.2  BROKEN  margin -0.439 m  44 trials  push.force = 201 N, push.angle = 179 deg, push.phase = 0.56 (stride phase)  (shrunk, seed 3844575921)

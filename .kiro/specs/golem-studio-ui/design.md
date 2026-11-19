@@ -700,11 +700,11 @@ The replay trial is `pool.run([{ ...ce, record: 'poses' }])` through the `Record
 | Trials | `verdict.trials` (equal to `randomTrials + guidedTrials` plus pinned and shrink trials as the falsifier counts them) |
 | Random trials, Guided trials | `randomTrials`, `guidedTrials` |
 | Closest call | `marginText(closest.robustness, unit)` |
-| Failure-rate bound (95%) | `formatSig(failureRateUpper95 · 100, 2) + '%'`, or "not available" |
+| Failure-rate bound (95%, random trials) | `formatSig(failureRateUpper95 · 100, 2) + '%'`, or "not available" |
 | Wall time | `(ms / 1000).toFixed(1) + ' s'` |
 | Pool size | `pool.size` |
 
-Held sentence: "No counterexample found in {N} trials ({n} random, {m} guided)" with the Budget in parentheses. The word "proved" never appears.
+Held sentence: "No counterexample in {N} trials; from the {n} uniformly random ones, failure rate below {P} % (95 % confidence)" (without a bound: "No counterexample in {N} trials ({n} random, {m} guided)") with the Budget after it. The bound row is labelled "Failure-rate bound (95%, random trials)". The word "proved" never appears.
 
 `tween.ts`:
 
@@ -1287,7 +1287,7 @@ For any sequence of pin operations, the stored list for an app and requirement c
 
 ### Property 42: Verdict display
 
-For any `Verdict` and pool size, the displayed trial count equals `verdict.trials`, the random and guided counts equal their fields, the wall time equals `(ms / 1000).toFixed(1)` with unit s, the failure-rate bound equals `failureRateUpper95 · 100` rounded to two significant figures with a percent sign (or "not available" when undefined), the closest call equals its margin text, and the pool size equals `pool.size`. The held sentence contains "No counterexample found in N trials" and never contains "proved" or "verified".
+For any `Verdict` and pool size, the displayed trial count equals `verdict.trials`, the random and guided counts equal their fields, the wall time equals `(ms / 1000).toFixed(1)` with unit s, the failure-rate bound equals `failureRateUpper95 · 100` rounded to two significant figures with a percent sign (or "not available" when undefined), the closest call equals its margin text, and the pool size equals `pool.size`. The held sentence contains "No counterexample in N trials" and never contains "proved" or "verified".
 
 **Validates: Requirements 23.1, 23.2, 23.3, 23.4, 23.5, 23.11, 23.13, 18.12**
 
