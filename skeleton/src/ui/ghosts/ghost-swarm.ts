@@ -5,7 +5,7 @@ import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js
 import { nlerp, writeMatrixTRS } from '../core/pose-math.js';
 import type { ThemeName, TokenSet, TrialResult, V3 } from '../types.js';
 import type { StageParts } from '../stage/stage-builder.js';
-import { GHOST_RENDER_ORDER, createGhostMaterial, setGhostTheme } from './ghost-shader.js';
+import { crowdFactor, GHOST_RENDER_ORDER, createGhostMaterial, setGhostTheme } from './ghost-shader.js';
 import { RETIRE_S, evalGhost, newGhostEval, retireFactor } from './ghost-state.js';
 import type { GhostRecord } from './ghost-state.js';
 import type { ResolvedArrow } from './push-arrow.js';
@@ -294,7 +294,7 @@ export class GhostSwarm {
     let high = -1;
     let span = -1;
     let any = false;
-    let cx = 0, cy = 0, cn = 0;
+    let cx = 0, cy = 0, cn = 0, visible = 0;
     for (let s = 0; s <= this.span; s++) {
       let stage = this.stage[s];
       if (stage === FREE) { st[4 * s + 1] = 0; ast[4 * s + 1] = 0; continue; }
@@ -339,6 +339,7 @@ export class GhostSwarm {
         const m = this.meshes[g] as THREE_NS.InstancedMesh;
         mul4(m.instanceMatrix.array as Float32Array, 16 * s, this.bodyMats, 16 * (this.geomBody[g] as number), this.geomLocal, 16 * g);
       }
+      if (opacity > 0.01) visible++;
       st[4 * s] = ev.breakMix; st[4 * s + 1] = opacity; st[4 * s + 2] = ev.rise; st[4 * s + 3] = 0;
       const a = this.arrows[s];
       if (a && tau <= a.tEnd && stage !== RETIRING) {
@@ -349,6 +350,7 @@ export class GhostSwarm {
     this.highest = high;
     this.span = span;
     if (cn > 0) { this.centroidBuf[0] = cx / cn; this.centroidBuf[1] = cy / cn; this.centroid = this.centroidBuf; } else this.centroid = null;
+    this.material.uniforms['uCrowd']!.value = crowdFactor(visible);
     for (const m of this.meshes) { m.count = high + 1; m.instanceMatrix.needsUpdate = true; }
     this.arrowMesh.count = high + 1;
     this.arrowMesh.instanceMatrix.needsUpdate = true;

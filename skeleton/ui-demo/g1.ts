@@ -7,9 +7,14 @@ import md from '../../apps/stagger/.kiro/specs/g1-walking/requirements.md?raw';
 setRobotBase(new URL('./robot/', location.href));
 const params = new URLSearchParams(location.search);
 const el = document.getElementById('app') as HTMLElement;
-const pool = new InlinePool(stagger);
 const studio = mountStudio(el, stagger, md, {
-  pool,
+  ...(params.get('inline') === '1'
+    ? { pool: new InlinePool(stagger) }
+    : {
+      workerUrl: new URL('./g1-worker.ts', import.meta.url),
+      workerEntry: new URL('../src/pool/browser-entry.ts', import.meta.url),
+      ...(params.has('workers') ? { workerCount: Number(params.get('workers')) } : {}),
+    }),
   seed: Number(params.get('seed') ?? 1),
   budget: { maxTrials: Number(params.get('trials') ?? 64), maxMs: 60000 },
   autorun: params.get('autorun') === '1',

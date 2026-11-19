@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import * as THREE from 'three';
-import { GHOST_FRAG, GHOST_VERT, createGhostMaterial, ghostAlpha } from '../ghosts/ghost-shader.js';
+import { GHOST_FRAG, GHOST_VERT, createGhostMaterial, crowdFactor, ghostAlpha } from '../ghosts/ghost-shader.js';
 import { TOKENS } from '../core/theme-tokens.js';
 import { result, swarmRig } from './generators/swarm.js';
 import type { TrialResult } from '../types.js';
@@ -18,7 +18,16 @@ describe('ghost material', () => {
   });
   it('discards a zero opacity', () => {
     expect(ghostAlpha(0, 0.5)).toBeUndefined();
-    expect(ghostAlpha(0.5, 1)).toBeCloseTo(0.05, 12);
+    expect(ghostAlpha(0.5, 1)).toBeCloseTo(0.5 * 0.04, 12);   // face-on: rim-only base alpha
+  });
+
+  it('fades holding ghosts in a crowd but keeps breaking ghosts at full strength', () => {
+    expect(crowdFactor(6)).toBe(1);
+    expect(crowdFactor(64)).toBeCloseTo(Math.sqrt(6 / 64), 12);
+    const holding = ghostAlpha(0.5, 0.2, crowdFactor(64), 0)!;
+    const breaking = ghostAlpha(0.5, 0.2, crowdFactor(64), 1)!;
+    expect(holding).toBeLessThan(breaking / 3);
+    expect(breaking).toBeCloseTo(ghostAlpha(0.5, 0.2)!, 12);
   });
 });
 

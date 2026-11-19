@@ -93,7 +93,8 @@ function safeStorage(win: Window | null): Storage | undefined {
 }
 
 /** Checks for WebGL without creating a context (the Stage renderer is the studio's only context). */
-/** Turns camera and orbit target together by ad about the vertical axis through (px, py). No allocation. */
+/** Turns camera and orbit target together by 
+ad about the vertical axis through (px, py). No allocation. */
 function orbitAbout(stage: Stage, px: number, py: number, rad: number): void {
   const c = Math.cos(rad), s = Math.sin(rad);
   const rot = (v: { x: number; y: number }): void => {
@@ -306,6 +307,12 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
       const c = swarm && swarm.shown > 0 ? swarm.centroid : null;
       if (c) stage.follow(c[0], c[1]);
       else if (root) stage.follow(root.position.x, root.position.y);
+      // The aura is the boundary around the robot being tested: it rides under the ghost swarm while one
+      // plays, and under the hero otherwise.
+      if (aura) {
+        const ax = c ? c[0] : root ? root.position.x : 0, ay = c ? c[1] : root ? root.position.y : 0;
+        if (Math.abs(aura.group.position.x - ax) > 1e-3 || Math.abs(aura.group.position.y - ay) > 1e-3) aura.setCentre(ax, ay);
+      }
       if (stage.stepFollow(now(), reduced())) scheduler.requestOnce();
     }
     stage?.orbit.update();
