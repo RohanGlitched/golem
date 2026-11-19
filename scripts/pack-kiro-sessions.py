@@ -48,7 +48,7 @@ for p in sorted(src.glob('run-*.jsonl')):
     raw = p.read_text(encoding='utf-8', errors='replace')
     red = redact(raw)
     name = p.stem[4:]
-    (out / f'{name}.jsonl.gz').write_bytes(gzip.compress(red.encode('utf-8'), 9))
+    (out / f'{name}.jsonl.gz').write_bytes(gzip.compress(red.encode("utf-8"), 9, mtime=0))
     sessions, modes, models, credits, tools, files, final = set(), set(), set(), 0.0, 0, set(), ''
     for line in red.splitlines():
         try:
@@ -87,5 +87,5 @@ for p in sorted(src.glob('run-*.jsonl')):
     })
     print(f'{name:18} credits {credits:7.1f}  tools {tools:5}  files {len(files):4}  modes {sorted(modes)}')
 
-(out / 'index.json').write_text(json.dumps(index, indent=1, ensure_ascii=False), encoding='utf-8')
+(out / 'index.json').write_bytes((json.dumps(index, indent=1, ensure_ascii=False) + '\n').encode('utf-8'))  # LF on every OS
 print('total credits', round(sum(r['credits'] for r in index), 1), 'logs', len(index))

@@ -13,10 +13,10 @@
    "auto",
    "claude-sonnet-5.5"
   ],
-  "credits": 0.0,
-  "toolCalls": 42,
-  "filesWritten": 3,
-  "finalMessage": ""
+  "credits": 22.77,
+  "toolCalls": 75,
+  "filesWritten": 10,
+  "finalMessage": "I'll start by reading the gate sources and the spec.\nCopy the base tsconfig too (the `extends` target sits one level up).\nFixing the line references that are off (round-trip 46-60, exit-code property 74-82, override at `gate-kiro.ts:54` and `:78-79`).\nI've written the audit to `docs/reviews/gate-audit.md`. The verdict is **FIX**. I changed no source or test files.\n\nThe core is small and fails closed. A missing row, a typo or a bad header all default to `Expected_Hold`, so a mistake turns the gate red, not green. The module's own tests pass (66 of 66). The problems are at the edges.\n\nYour cases:\n- **Unknown values:** the row is dropped and the line is treated as `Expected_Hold`. The only warning goes to stderr.\n- **Missing row:** nothing is reported, even when a table exists.\n- **Duplicated row:** the first row wins. Break-then-Hold gives a green gate and Hold-then-Break gives a red one, with a stderr warning only.\n- **`Expected_Break` line that holds:** the gate goes red correctly.\n- **Mixed case, a table after the requirements, CRLF, no table:** all handled correctly.\n\nDefects, ranked:\n1. **Silent orphans (high).** A row for an id that matches no requirement (`R1.2`, `1.20`) is dropped without a word. A line with no row is never flagged either. `golem check` doesn't read the table. `Judged.explicit` already holds the missing-row information, but nothing uses it.\n2. **Warnings never reach the agent (high).** Under `--kiro` the table warnings go only to stderr. The Stop `reaso"
  },
  {
   "name": "candy",
@@ -71,6 +71,24 @@
   "finalMessage": "I'll start by checking the git state and any uncommitted files.\nSteps 1 and 2 are committed. Step 3 is partly done in uncommitted files, so I'll review them.\n`zz-replay.test.ts` is marked as a scratch file, so I'll delete it. Then I'll run the candy tests and the golem commands to see where step 3 stands.\n`SOURCE.json` has a stale `scene.xml` hash, probably left over from the power loss. I'll regenerate it with the asset script.\nThe scene is now consistent, and the P9 solref fix is in it. The `.golem` seeds on disk came from an older scene, so I'll re-run `golem check` and `golem test --budget 48`.\n`npx` pulled an unrelated npm package named `golem`, so I'll stop using it. I'll look for the skeleton's own bin instead.\nThe old seeds came from the defective scene (P9), so I'll discard them and run a fresh campaign.\nLines 1.1 and 8.1 broke at a hand speed of 0.09 m/s. That's slow enough that I'll check whether it's a real failure or a defect.\nThe requirements file is intact, and the garbling was only PowerShell's console encoding. Next I'll check what the repo tracks under `.golem` and run the typecheck and tests before committing step 3.\nBoth failures so far (`smoke` 2000 ms, `scene` 4000 ms) are timing thresholds and the suite ran them under heavy parallel load. I'll check for stray node processes, then run those files alone.\nThree node processes started at 20:31 have used a lot of CPU. I'll check what they are before treating the timing failures as noise.\nStep 3 is committed."
  },
  {
+  "name": "ci",
+  "file": "ci.jsonl.gz",
+  "sessions": [
+   "sess_3251ca05-b633-4a78-89da-c74eee506b9a"
+  ],
+  "modes": [
+   "vibe"
+  ],
+  "models": [
+   "auto",
+   "claude-sonnet-5.5"
+  ],
+  "credits": 26.09,
+  "toolCalls": 83,
+  "filesWritten": 7,
+  "finalMessage": "I'll start by looking at the repo layout.\nEscaping went wrong; I'll fix with the editor.\nMeanwhile, I'll write the READMEs. First the badge and existing README badge lines.\nNow the emulation runner for the stagger-gate job (waits for the first run to finish).\nAdd a regression test for the exact failing case and rerun the tablet tests.\nNow fill in the \"Recorded locally\" block.\nThe gate is now a CI step. I made five commits on `feat/ci` and pushed nothing. Every command the workflow runs passed locally from a fresh clone, but the GitHub runner itself hasn't run. The first push is the first real test of `setup-node`, `actions/cache`, `upload-artifact` and `continue-on-error`, and of whether the `exit-code` output survives the failing action step.\n\n## Files\n- `.github/actions/golem-gate/action.yml` is the composite action.\n- `.github/actions/golem-gate/summary.mjs` writes the job summary: one row per requirement with expectation, verdict, margin, counterexample and reproduce command.\n- `.github/actions/golem-gate/summary.test.mjs` has 15 Vitest and fast-check tests.\n- `.github/actions/golem-gate/README.md` has the copy-paste workflow and the \"Recorded locally\" section.\n- `.github/workflows/golem.yml` has the jobs `skeleton`, `starter` and `stagger-gate`.\n- `.github/scripts/starter-smoke.mjs` is the starter flow that the `starter` job runs.\n- `README.md` has the workflow badge next to the existing ones, and `skeleton/README.md` has a \"Run GOLEM in CI\" section.\n\n## Local results\nEv"
+ },
+ {
   "name": "cloud",
   "file": "cloud.jsonl.gz",
   "sessions": [
@@ -86,6 +104,24 @@
   "toolCalls": 51,
   "filesWritten": 5,
   "finalMessage": "Directories appear empty, so I'll delegate with the full brief.\nThe `golem-cloud` spec is written in `.kiro/specs/golem-cloud/`, as `requirements.md`, `design.md` and `tasks.md`. The format validator reported no issues on `requirements.md`, `design.md` and `tasks.md`. I wrote no implementation code and ran no tests.\n\nI skipped the automatic requirement-by-requirement detailing pass, which normally runs after requirements are drafted. The 20 requirements were already specific, and that pass would have meant 20 separate rewrites. Tell me if you want it run.\n\n- **Requirements:** 20 requirements covering hosting, headers, the deploy script, the Scribe API, spend guards, the studio box, privacy, tests and the smoke script.\n- **Design:** 28 correctness properties, each with a `Validates:` line, plus architecture diagrams, error handling and the test strategy.\n- **Tasks:** 18 ordered tasks, with a property-test sub-task for every design property, 4 checkpoints and a 19-wave dependency graph. The real AWS deploy is the last task and is manual. The smoke script does not run in CI.\n\nDecisions for you:\n1. **Rate-limit scope.** The response shape from the requirements has no `scope` field, but the box has to tell the hourly limit from the daily one. The design puts the scope in a message prefix (\"Hourly limit reached:\" or \"Daily limit reached:\"). A separate `scope` field would be cleaner but needs a requirements change.\n2. **Property tests not marked optional.** I left them unmarked beca"
+ },
+ {
+  "name": "confirm",
+  "file": "confirm.jsonl.gz",
+  "sessions": [
+   "sess_76945d60-b22c-4bc0-b5a1-1e85ecc3c5b2"
+  ],
+  "modes": [
+   "vibe"
+  ],
+  "models": [
+   "auto",
+   "claude-sonnet-5.5"
+  ],
+  "credits": 55.54,
+  "toolCalls": 135,
+  "filesWritten": 11,
+  "finalMessage": "I'll start by looking at the repo and the gate code.\nThe blank line after the header got eaten; fix that and add the block lines to format.ts.\nNow the runGateOnce body.\nNow gate-kiro.ts.\nThe `\\n` in \"`no\" bit me again. I'll use the edit tool.\nI mangled that file (duplicate line, joined lines). I'll view and repair it.\nNow the contract test and the interfaces steering.\nNow the steering edits (UTF-8-safe, single-quoted here-strings).\nNow skeleton/README.md, CHANGELOG and the version.\nNow reinstall the pack into both apps.\n`golem gate` now confirms a green with a second search seed before it prints GREEN. The new gate is RED on 3 of the 4 reflexes that claimed success in experiment 3b, and still GREEN on 1.\n\n## What changed (commit `e115eb6`)\n\n- **Confirmation pass.** It runs only when every line already meets its expectation. Each `Expected_Hold` line is searched again with seed `fmix32(first XOR 0xC0DEF57A)`. For first seed 1 that is 588244584. The budget is the first pass's budget, with the pinned seeds re-run first.\n- **Flags and report.** `--confirm-budget <n>` sets the searched trials per line. `--no-confirm` skips the pass and prints `NOT confirmed (--no-confirm)`. Both are recorded in `meta.confirm` in `.golem/report.json`.\n- **RED output.** If the second search finds a counterexample, the gate is RED. The output says the line held under seed A and broke under seed B, gives both seeds and the reproduce command, and pins the counterexample. An error during the confirmatio"
  },
  {
   "name": "crew",
@@ -104,6 +140,23 @@
   "toolCalls": 65,
   "filesWritten": 8,
   "finalMessage": "I'll start by looking at the repo state and fetching the docs.\nToo noisy. Targeted search for Crew references.\nThe `cd ..` left the worktree, so nothing was written. I'll redo these edits with explicit paths.\nNow the specs and kiro-pack README references to `schedule`. Let me view them.\nTypecheck caught a real error in my test (earlier evidence errors were just the missing `dist`). Fixing it.\nNow I'll write the spec edits for the starter robot.\nFix layout: move the two `skeleton/test/` files to the right block.\nAs expected, the requirement text moved again. Regenerating the golden and checking what changed.\nBoth fixes are committed on `fix/crew`. The whole suite passes, as do `npm run typecheck`, `npm run pack:build` and `kiro-cli agent validate --path` on all six agent files. A fresh worktree needs `npm run build -w golem-spec` before the evidence package typechecks.\n\nI haven't installed the app on a Crew gateway, so `kirocrew doctor` and the install call have not been run against it.\n\n## Crew manifest fields\n\nThe docs are the manifest, build-first-app and publishing pages under `https://kiro.dev/docs/crew/apps/`. `skeleton/crew-app/README.md` records the page for every field in the same way.\n\n**Kept**\n| Field | Doc page |\n|---|---|\n| `name`, `version`, `displayName`, `description` | manifest (required fields and install-time checks) |\n| `author`, `license`, `tags` | manifest; publishing checklist for `author` and `tags` |\n| `repo` | manifest (store listing, used by the blob"
+ },
+ {
+  "name": "drone",
+  "file": "drone.jsonl.gz",
+  "sessions": [
+   "sess_b69b2a30-b007-4011-b25d-1b8ceac6d3cf"
+  ],
+  "modes": [
+   "vibe"
+  ],
+  "models": [
+   "claude-sonnet-5.5"
+  ],
+  "credits": 107.82,
+  "toolCalls": 187,
+  "filesWritten": 40,
+  "finalMessage": "I'll start by looking at the repo layout and the candy app.\nNow the asset script.\nOld PowerShell; I'll use fs_write for files.\nThe line is mangled differently than I matched; I'll fix it with the edit tool.\nNow the data generator, loader and page.\nNow edit home.ts.\nAdd the e2e hover branch and the data tests.\nFix lines 108, 132, 133 (template literals lost their backticks).\nThe third app, `apps/hover`, is built, committed and wired into the site. It runs on `golem-spec` only. Typecheck, the site build and the hover build pass. The full `npm test` run has one failure outside this work: the skeleton latency test `prop-10-guard-latency`, which spawns a child process (the guard hook) and returns a different message than it expects. I didn't touch `skeleton/` and didn't dig into the failure. The other 2,500-odd tests pass: skeleton 1,942, stagger 212, candy 366, evidence 79, site 45 and hover 155.\n\n## Requirement lines, verdicts and margins\nMeasured with `npx --no-install golem-spec test --budget 64` over six search seeds (1 to 6), plus one run at budget 256. Verdicts were the same every time. `golem gate` is green: four lines held as expected, two broke as expected.\n\n| Line | Expectation | Verdict | Margin |\n|---|---|---|---|\n| 1.1 WHEN a gust of up to 2 N hits it for 0.5 s from any direction THE drone SHALL stay within 0.25 m of its hover point for 4 s | Hold | held | +0.097 to +0.112 m |\n| 1.2 WHEN a gust of up to 3 N … THE drone SHALL keep its tilt below 30 deg for 4 s | Hold "
  },
  {
   "name": "ears-fix",
@@ -242,6 +295,23 @@
   "toolCalls": 10,
   "filesWritten": 3,
   "finalMessage": "The spec for `golem-falsify` is written: `requirements.md`, `design.md` and `tasks.md`. `validate_spec_format` reports no issues on all three. I did not write any implementation code or run any tests.\n\n- **Requirements:** 21 requirements, approved with your four defaults (a robustness of exactly 0 counts as not failing, a 40% phase 1 budget share, a 1% shrink tolerance, `Verdict.trials` counting all phases).\n- **Design:** It has 38 correctness properties and fixes the concrete choices you asked for. These are the CEM update equations, the wrapped normal with circular statistics, LHS with per-dimension permutations, the shrink bisection, the Clopper-Pearson computation, and the worker protocol messages with a shared `TrialScheduler`.\n- **Tasks:** There are 22 top-level tasks, and each has its tests in the same task. Every design property has its own property-test sub-task, none marked optional. The dependency graph runs Waves 0 to 10, and the final checkpoint is task 22.\n\nThree design decisions go beyond or reinterpret the approved requirements. Please confirm or change them:\n1. **Generations are atomic.** After a failing trial, the falsifier submits no further generation. It does not cancel the unstarted trials of the current one. Otherwise the trial count would depend on completion order. The cost is up to `generationSize - 1` extra trials.\n2. **The falsifier never writes the seed database.** It returns a `pinEntry` and run metadata, and the caller pins it. An aborted run th"
+ },
+ {
+  "name": "gatefix",
+  "file": "gatefix.jsonl.gz",
+  "sessions": [
+   "sess_b4af07e4-ea39-4227-b154-0dca9df5b8b0"
+  ],
+  "modes": [
+   "vibe"
+  ],
+  "models": [
+   "claude-sonnet-5.5"
+  ],
+  "credits": 161.96,
+  "toolCalls": 274,
+  "filesWritten": 35,
+  "finalMessage": "I'll start by reading the audit report and the earlier hardening specs.\nNow the earlier hardening specs (format) and the source in scope.\nBaseline: run the gate tests and typecheck, and capture the probe outputs from the unfixed code.\nNow I have the full picture. I'll write the spec files, starting with `bugfix.md`.\nNow the interface additions (task 1).\nNow the tests for task 4 first (written against the intended behaviour), then the implementation.\nNow `gate.ts`:\nPowerShell quoting is fighting me; I'll use the edit tool for this file.\nNow the task 5 tests.\nNow the gate commands, `test`, `falsify`, and the MCP run tool.\nNow `test`, `falsify`, and the MCP run tool:\nI'll stop using PowerShell string escapes for source edits and use the edit tool.\nTests first:\nNow run the new tests against the old parser to record the failure count, then change the parser.\nPlain-text editing via the tool is safer. I'll make the edits one at a time.\nI'll use the edit tool for these two fixes instead.\nNow the parser changes: split on any line end, strip a quote prefix, accept a line with an unescaped pipe, escaped pipes, and a header inside a table.\nNow the spec text edits in golem-kit (requirements first).\nNow Requirement 7A itself, inserted before Requirement 8.\nAdd a design section for `expectation.ts` before \"Output formatting\", then update the steering.\nNow reinstall the pack into the two apps with `golem init --force`.\nRe-run only M8 to confirm it dies now, then run the probes after the fixe"
  },
  {
   "name": "impl-candy",
@@ -522,6 +592,42 @@
   "finalMessage": "Both pass (the earlier exit 1 was a PowerShell stderr artifact). Commit only my files.\nThe monorepo scaffold is committed as \"Scaffold monorepo\". `npm install` ran at the root, and `npm run typecheck` and `npm test` both exit 0. The test run finds no test files in any workspace, so nothing is actually tested yet. I didn't touch `.kiro/`. The other sessions' uncommitted files there (`specs/` and `steering/interfaces.md`) are still untracked and not in the commit.\n\nI added a few things you didn't list:\n- **Entry files:** `skeleton/src/index.ts` re-exports ears, sim, falsify and pool. `skeleton/src/node.ts` re-exports cli and mcp. `skeleton/src/cli/main.ts` is a stub for the `golem` bin. These back the `.`, `./ui` and `./node` exports.\n- **App stubs:** each app has an empty `lexicon.ts` and `app.ts`. Each also has `robot/`, `controller/`, `web/` and `scripts/` folders, held in git by `.gitkeep` files.\n- **App tsconfigs:** each app has its own `tsconfig.json` extending the base.\n\nThings to know:\n- **Dependency versions:** versions I chose that you didn't specify: `@modelcontextprotocol/sdk` ^1.0.0, `typescript` ^5.6.0, `vitest` ^2.1.0, `fast-check` ^3.22.0, `@types/node` ^20.14.0, `vite` ^5.4.0, `quickhull3d` ^2.0.5, `meshoptimizer` ^0.22.0.\n- **Install warning:** `npm install` reported 6 vulnerabilities (3 moderate, 1 high, 2 critical). I didn't run `npm audit` or fix anything.\n- **Apps import `golem-spec` from `dist/`:** the apps' `golem-spec` imports resolve to `skeleton/dist`"
  },
  {
+  "name": "scribe.r0",
+  "file": "scribe.r0.jsonl.gz",
+  "sessions": [
+   "sess_d4aa8e8c-97bb-48c6-aa7e-974da9f58367"
+  ],
+  "modes": [
+   "golem-scribe",
+   "vibe"
+  ],
+  "models": [
+   "auto"
+  ],
+  "credits": 0.25,
+  "toolCalls": 0,
+  "filesWritten": 0,
+  "finalMessage": "I haven't filed anything. `check_requirement` and `propose_requirement` aren't available in this session, so I can't compile-check lines. I only write a line to `proposals.md` after it compiles with no error Diagnostic.\n\nI also won't pick numbers myself. Your four wishes give only one quantity, the 5 kg box. The other three need values from you:\n\n1. **Side bump while walking:**\n   - What peak lateral push force, in N, or impulse, in N·s, should the G1 survive?\n   - How long is the push, in ms?\n   - Which walking speed, in m/s, applies?\n   - What does \"shouldn't fall over\" mean as a measurable outcome? For example, torso tilt stays under some number of degrees, or the robot is still upright after some number of seconds.\n2. **5 kg box:**\n   - The 5 kg payload is given.\n   - What should hold while carrying it? For example, a walking speed, a tilt limit, or no fall.\n   - Is the box held in the hands or carried some other way?\n3. **Slippery floor, such as a wet kitchen:**\n   - What floor friction coefficient should this cover? This is a declared ratio, so it needs no unit.\n   - What walking speed should the robot keep?\n4. **Laggy sensors:**\n   - How much added sensor delay, in ms, should it tolerate?\n   - Which sensor is delayed: IMU, joint encoders, or both?\n   - What should still hold under that delay? For example, it keeps walking without a fall.\n\nOnce you send the numbers, I will write each line and run `check_requirement`. I will then file the compiled lines with a rationale "
+ },
+ {
+  "name": "scribe.r1",
+  "file": "scribe.r1.jsonl.gz",
+  "sessions": [
+   "sess_44a00127-975c-4d23-9e41-e03060fd9004"
+  ],
+  "modes": [
+   "golem-scribe",
+   "vibe"
+  ],
+  "models": [
+   "auto"
+  ],
+  "credits": 0.65,
+  "toolCalls": 7,
+  "filesWritten": 0,
+  "finalMessage": "I filed nothing and ran no checks, because every wish is either already covered by an existing line or needs a number you didn't give. `check_requirement` and `propose_requirement` were not called, and `proposals.md` and `requirements.md` are unchanged.\n\n**Wishes already covered**\n- **Bump from the side.** Criteria 1.1 (up to 60 N) and 1.3 (up to 100 N) already cover any direction, including from the side, at any point in the stride. Criterion 1.2 (250 N from behind) is an Expected_Break line. \"Even pretty hard\" could mean a harder side push than 100 N, but no force is given.\n- **5 kg box.** Criterion 4.1 covers payloads up to 10 kg, and 4.2 covers up to 20 kg. A 5 kg box is inside both, so it adds nothing.\n- **Slippery floor.** Criterion 5.1 covers friction dropping to 30% for 5 s. \"A bit slippery\" is milder than that, so nothing new is needed.\n- **Laggy sensors.** Criterion 6.1 covers sensor latency up to 40 ms, and 6.2 covers up to 100 ms. \"A little laggy\" falls inside 6.1.\n\n**Why I didn't pick the missing numbers**\nYou asked me to choose believable numbers. My standing rule is never to guess a quantity the description lacks, and nobody can answer here, so I left them out. These are the questions to answer:\n1. **Harder side push.** What force should it survive, and for how long? If it's more than 100 N, I'd write `WHEN the pelvis is pushed with up to <force> N for 0.2 s from 90 deg at any point in its stride THE robot SHALL stay upright for 3 s`. I haven't confirmed that t"
+ },
+ {
   "name": "sig",
   "file": "sig.jsonl.gz",
   "sessions": [
@@ -630,19 +736,18 @@
   "name": "skeptic",
   "file": "skeptic.jsonl.gz",
   "sessions": [
-   "sess_d758421f-4734-4037-b3b0-ea52e6cd27ab"
+   "sess_a50437f8-fecf-42b7-ad56-ebb8251268ac"
   ],
   "modes": [
-   "golem-skeptic",
-   "vibe"
+   "golem-skeptic"
   ],
   "models": [
    "auto"
   ],
-  "credits": 0.19,
-  "toolCalls": 0,
+  "credits": 0.64,
+  "toolCalls": 12,
   "filesWritten": 0,
-  "finalMessage": "I didn't run the night watch, because the tools it depends on aren't available in this session. I have no `list_requirements`, `falsify`, `get_counterexample`, `explain_margin`, `check_requirement` or `propose_requirement`. My only tools are code intelligence, a PowerShell shell, file search and read, and skill loading.\n\nYou told me to submit proposals only through `propose_requirement` and never to touch a requirements or controller file. So I haven't substituted anything. I haven't edited files, and I haven't run `golem-spec` from the shell to imitate the missing tools. Proposals made that way would not reach the proposal queue. They would also lack the budgeted counterexamples and seeds the rationale needs.\n\n- **Proposals:** none, with no ids.\n- **Requirements with a broken latest verdict:** unknown, because I couldn't read the list.\n- **Budget used:** 0 trials and no meaningful wall time.\n\nTo get the run done, you could do either of these:\n1. Re-run it in a session where the golem-skeptic tool server is connected.\n2. Tell me to use the `golem-spec` CLI (`npx --no-install golem-spec test` and `gate run`) read-only to find breakable requirements. I would report the harsher lines and counterexamples in chat for you to submit, and I wouldn't write any files.The hook output says `golem-spec@0.1.0` isn't installed locally, so `npx --no-install golem-spec` can't run. The CLI fallback I offered isn't available either, and the run is still blocked.\n\nI haven't installed anything. I"
+  "finalMessage": "I can't do this run. The tools it needs aren't available to me in this session: `list_requirements`, `falsify`, `get_counterexample`, `explain_margin`, `check_requirement` and `propose_requirement`. The tool catalogue lists no tools beyond the built-in ones.\n\nThe only other route is the `golem-spec` CLI through the shell. It has no way to submit proposals, and it might write result or report files. You told me never to write files, and the proposal channel is `propose_requirement` only. I also won't report verdicts or margins I haven't measured.\n\n**Summary**\n- Proposals submitted: none.\n- Requirements with a broken latest verdict: unknown, because I never read the requirement list.\n- Budget used: 0 trials, no falsification run.\n\nTo run the watch, the golem tool server needs to be connected to this session. Once it is, I'll run the full pass with 64 trials per requirement. If you would rather have a read-only CLI pass without proposals, tell me and I'll do that. I'd first check that the CLI doesn't write anything.I was wrong earlier. The golem tools are in the catalogue and can be loaded. I'll load them now.\nI proposed nothing. None of the seven Expected_Hold requirements broke, and I had no counterexample to attach to a harsher line.\n\n**Falsification of the held requirements**\n\n| Id | Trials | Closest margin |\n|---|---|---|\n| 1.1 | 64 | +0.249 m |\n| 2.1 | 12 | +0.117 m/s |\n| 2.2 | 64 | +0.257 m |\n| 3.1 | 64 | +0.200 m |\n| 4.1 | 64 | +0.192 m |\n| 5.1 | 12 | +0.262 m |\n| 6.1 | "
  },
  {
   "name": "stagger",

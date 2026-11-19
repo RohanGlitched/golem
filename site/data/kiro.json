@@ -1,6 +1,6 @@
 {
-  "generated": "2026-11-19T21:58:43.388Z",
-  "commit": "3b48f4a",
+  "generated": "2026-11-19T23:10:10.419Z",
+  "commit": "20466a0",
   "workspaces": [
     {
       "path": ".kiro",
@@ -90,11 +90,23 @@
           "status": "done"
         },
         {
+          "name": "golem-gate-hardening",
+          "path": ".kiro/specs/golem-gate-hardening",
+          "type": "bugfix",
+          "requirements": 0,
+          "earsCriteria": 0,
+          "properties": 0,
+          "tasksDone": 29,
+          "tasksOpen": 0,
+          "waves": false,
+          "status": "done"
+        },
+        {
           "name": "golem-kit",
           "path": ".kiro/specs/golem-kit",
           "type": "feature",
-          "requirements": 28,
-          "earsCriteria": 299,
+          "requirements": 29,
+          "earsCriteria": 309,
           "properties": 49,
           "tasksDone": 125,
           "tasksOpen": 0,
@@ -232,10 +244,10 @@
         ],
         "skills": [],
         "steering": [
-          "design-language.md:44a209adc255",
+          "design-language.md:3e9b01d9aaa8",
           "ears-for-robots.md:0b727c1e6fe6",
           "experience.md:ead1f7d4aac0",
-          "interfaces.md:73364196627e",
+          "interfaces.md:4f0147b41337",
           "mujoco-wasm.md:f1872c1da58c",
           "product.md:1e36e153ad4e",
           "structure.md:9b6767ddb5d8",
@@ -348,11 +360,11 @@
           "Summon the ghosts|Manual|npx --no-install golem-spec test --budget 256"
         ],
         "skills": [
-          "falsify-and-fix:481a6b6842ef",
+          "falsify-and-fix:aa23b6382570",
           "robot-ears:d03e01ddcc8c"
         ],
         "steering": [
-          "golem-ears.md:3bcf91be53cf"
+          "golem-ears.md:c7946da45d71"
         ]
       },
       "workflows": [
@@ -462,11 +474,11 @@
           "Summon the ghosts|Manual|npx --no-install golem-spec test --budget 256"
         ],
         "skills": [
-          "falsify-and-fix:481a6b6842ef",
+          "falsify-and-fix:aa23b6382570",
           "robot-ears:d03e01ddcc8c"
         ],
         "steering": [
-          "golem-ears.md:3bcf91be53cf"
+          "golem-ears.md:c7946da45d71"
         ]
       },
       "workflows": [
@@ -576,11 +588,11 @@
           "Summon the ghosts|Manual|npx --no-install golem-spec test --budget 256"
         ],
         "skills": [
-          "falsify-and-fix:481a6b6842ef",
+          "falsify-and-fix:aa23b6382570",
           "robot-ears:d03e01ddcc8c"
         ],
         "steering": [
-          "golem-ears.md:3bcf91be53cf"
+          "golem-ears.md:c7946da45d71"
         ]
       },
       "workflows": [
@@ -589,17 +601,18 @@
     }
   ],
   "commits": {
-    "total": 291,
+    "total": 319,
     "byPrefix": {
-      "hover": 6,
+      "evidence": 15,
+      "golem-kit": 29,
+      "hover": 9,
+      "merge": 23,
+      "docs": 4,
+      "other": 30,
+      "golem-gate-hardening": 13,
       "ci": 5,
-      "docs": 3,
-      "other": 29,
-      "evidence": 12,
       "site": 9,
-      "merge": 20,
       "stagger": 7,
-      "golem-kit": 25,
       "candy": 1,
       "apps": 1,
       "studios": 1,
@@ -622,17 +635,17 @@
     }
   },
   "tests": {
-    "files": 404,
-    "propertyAsserts": 519
+    "files": 415,
+    "propertyAsserts": 543
   },
   "totals": {
-    "specs": 16,
+    "specs": 17,
     "specsNotStarted": 1,
-    "bugfixSpecs": 3,
-    "requirements": 216,
-    "earsCriteria": 2147,
+    "bugfixSpecs": 4,
+    "requirements": 217,
+    "earsCriteria": 2157,
     "properties": 273,
-    "tasksDone": 699,
+    "tasksDone": 728,
     "tasksOpen": 8,
     "steering": 10,
     "hooks": 8,

@@ -8,7 +8,7 @@
 <img alt="MuJoCo WASM" src="https://img.shields.io/badge/physics-MuJoCo%20WASM-D6F1F2?labelColor=1A1411">
 </p>
 
-<p align="center"><b><a href="https://d23v187fnxad7l.cloudfront.net">Live site</a></b> · <b><a href="https://d23v187fnxad7l.cloudfront.net/stagger/">Shove the G1 in your browser</a></b> · <b><a href="https://www.npmjs.com/package/golem-spec">npm package</a></b> · <b><a href="https://d23v187fnxad7l.cloudfront.net/evidence/">Evidence</a></b> · <b><a href="https://d23v187fnxad7l.cloudfront.net/how-kiro/">How Kiro built it</a></b></p>
+<p align="center"><b><a href="https://d23v187fnxad7l.cloudfront.net">Live site</a></b> · <b><a href="https://youtu.be/EdKUbMvNX_g">Demo video (2:31)</a></b> · <b><a href="https://d23v187fnxad7l.cloudfront.net/stagger/">Shove the G1 in your browser</a></b> · <b><a href="https://www.npmjs.com/package/golem-spec">npm package</a></b> · <b><a href="https://d23v187fnxad7l.cloudfront.net/evidence/">Evidence</a></b> · <b><a href="https://d23v187fnxad7l.cloudfront.net/how-kiro/">How Kiro built it</a></b></p>
 
 # GOLEM
 
@@ -113,7 +113,7 @@ Every number here comes from committed raw data in [`evidence/`](evidence), usin
 
 ## How Kiro built GOLEM
 
-Kiro CLI did the building: 15 specs, among them 3 bugfix specs written from independent audits in [`docs/reviews/`](docs/reviews) and the three robots' own requirement files, which GOLEM tests (a 16th, golem-cloud, is written and not started). Together they hold 213 requirements, 2,141 EARS acceptance criteria and 273 correctness properties; 699 of 707 tasks are done, and the tests make 490 property-test assertions in 388 files (counted by `scripts/kiro-stats.mjs`, with pack copies installed into the apps counted once). The root [`.kiro/`](.kiro) holds the steering, specs, hooks, agents and MCP config used to build it. The full account is on the site's [How Kiro built it](https://d23v187fnxad7l.cloudfront.net/how-kiro/) page, and the raw logs of the 40 headless Kiro runs we kept (33 sessions) are in [`evidence/kiro-sessions/`](evidence/kiro-sessions).
+Kiro CLI did the building: 16 specs, among them 4 bugfix specs written from audits in [`docs/reviews/`](docs/reviews) and the three robots' own requirement files, which GOLEM tests (a 17th, golem-cloud, is written and not started). Together they hold 217 requirements, 2,157 EARS acceptance criteria and 273 correctness properties; 728 of 736 tasks are done, and the tests make 543 property-test assertions in 415 files (counted by `scripts/kiro-stats.mjs`, with pack copies installed into the apps counted once). The root [`.kiro/`](.kiro) holds the steering, specs, hooks, agents and MCP config used to build it. The full account is on the site's [How Kiro built it](https://d23v187fnxad7l.cloudfront.net/how-kiro/) page, and the raw logs of the 48 headless Kiro runs we kept (41 sessions) are in [`evidence/kiro-sessions/`](evidence/kiro-sessions).
 
 ## Run it locally
 
