@@ -15,5 +15,9 @@ const studio = mountStudio(el, stagger, md, {
   autorun: params.get('autorun') === '1',
   idleSleepMs: Number(params.get('sleep') ?? 10000),
   fontBaseUrl: './fonts/',
+  // The G1's head is drawn as part of the pelvis body (g1_12dof has no head link).
+  emet: { body: 'pelvis' },
+  // summonSynthetic(n, seconds): synthetic ghosts for the fps probe and the bullet-time and scrubber checks.
+  testHooks: { summonSynthetic: true },
 });
 Object.assign(window, { studio });

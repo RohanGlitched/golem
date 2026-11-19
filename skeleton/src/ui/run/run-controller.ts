@@ -37,6 +37,12 @@ export interface RunDeps {
   summaryPhrases?: Partial<Record<Kind, string>>;
   /** Called when a run starts (summon counts as activity for the hero). */
   onActivity?(): void;
+  /** The Swarm_Clock in seconds (golem-signature); default now() / 1000. */
+  swarmNow?(): number;
+  /** Every trial result of the active run, with its poses (long exposure). */
+  onTrial?(r: TrialResult): void;
+  /** A generation of the active run was committed (long exposure rebuilds its trails). */
+  onGeneration?(): void;
 }
 
 interface Active {
@@ -145,7 +151,7 @@ export class RunController {
     this.d.store.update((s) => ({
       selectedId: lineId,
       run: { runId, lineId, trials: 0, generation: 0 },
-      lines: s.lines.map((l) => (l.id === lineId ? { ...l, status: 'running', progress: { trials: 0 }, stale: !!l.verdict } : l)),
+      lines: s.lines.map((l) => (l.id === lineId ? { ...l, status: 'running', progress: { trials: 0 }, stale: !!l.verdict, fracture: undefined } : l)),
     }));
     this.refreshAura();
     const rec = new RecordingPool(pool, { ingest: (r) => this.guard(runId, () => this.ingest(a, req, r, aura)) }, this.d.appId);
@@ -187,8 +193,11 @@ export class RunController {
   private commitGeneration(a: Active): void {
     if (!a.open) return;
     a.open = false;
-    this.d.swarm()?.commitGeneration(this.d.now() / 1000);
+    this.d.swarm()?.commitGeneration(this.swarmNow());
+    this.d.onGeneration?.();
   }
+
+  private swarmNow(): number { return this.d.swarmNow ? this.d.swarmNow() : this.d.now() / 1000; }
 
   private ingest(a: Active, req: CompiledRequirement, r: TrialResult, aura: AuraModel | undefined): void {
     if (!a.open) this.beginGeneration(a);
@@ -204,7 +213,8 @@ export class RunController {
     if (r.poses) {
       a.genResults.push(r);
       const meta: GhostMeta = { robustness: r.robustness, worstAt: r.worstAt, warmup: this.d.warmup, arrow: this.d.arrowOf?.(req, r.spec.scenario) };
-      this.d.swarm()?.accept(r, meta, this.d.now() / 1000);
+      this.d.swarm()?.accept(r, meta, this.swarmNow());
+      this.d.onTrial?.(r);
     }
     this.d.store.update((s) => ({
       run: s.run ? { ...s.run, trials: a.trials, generation: a.generation } : s.run,

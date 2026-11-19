@@ -13,7 +13,7 @@ import { StudioStore } from './core/store.js';
 import { TOKENS } from './core/theme-tokens.js';
 import { syntheticTrialFields } from './core/trial-fields.js';
 import { GhostSwarm } from './ghosts/ghost-swarm.js';
-import { findTemplate, resolveArrow } from './ghosts/push-arrow.js';
+import { DEFAULT_PUSH_S, arrowLength, findTemplate, resolveArrow, resolveValues } from './ghosts/push-arrow.js';
 import { HeroSim, DIVERGED_TEXT, SLEEP_TEXT } from './hero/hero-sim.js';
 import { loadHero } from './hero/load-hero.js';
 import type { HeroModel } from './hero/load-hero.js';
@@ -41,6 +41,22 @@ import { NO_WEBGL_TEXT, Stage } from './stage/stage.js';
 import type { Renderer } from './stage/stage.js';
 import type { ReelData, StudioActions } from './tablet/actions.js';
 import { Tablet } from './tablet/tablet.js';
+import {
+  DEFAULT_TILT_WORDS, boundValues, forceFraction, fractureSignal, fractureWord, fuseFill, harshestScenario, leanDeg, livingSegments,
+} from './tablet/living.js';
+import { LiveSentence } from './signature/live-sentence.js';
+import { SignatureBar } from './signature/signature-bar.js';
+import { TrailsView } from './signature/trails-view.js';
+import { savePhotograph } from './signature/photograph.js';
+import { Sonifier } from './signature/sonifier.js';
+import type { AudioContextLike } from './signature/sonifier.js';
+import type { Trace } from '../ears/index.js';
+import { SwarmClock } from './core/swarm-clock.js';
+import { BulletTime } from './core/bullet-time.js';
+import { EmetDecal, bodyPoints, highestBody } from './signature/emet-decal.js';
+import { emetTarget, foreheadSpot } from './core/emet.js';
+import { instantMargins, sampleAt, traceTrial } from './signature/trace-trial.js';
+import type { TraceTrialResult } from './signature/trace-trial.js';
 import { VerdictPanel } from './verdict/verdict-panel.js';
 import type {
   CompiledRequirement, Counterexample, LineModel, RobotApp, Scenario, ShareState, StudioHandle, StudioOptions, StudioState,
@@ -49,6 +65,12 @@ import type {
 
 export const NOT_ELEMENT = 'mountStudio needs an HTMLElement as its first argument';
 const STYLE_ID = 'golem-studio-css';
+/** The drag preview of a push stays this long after the last change of a quantity. */
+export const PREVIEW_MS = 800;
+export const LONG_EXPOSURE_LABEL = 'Long exposure';
+export const PHOTO_LABEL = 'Save photograph';
+export const SOUND_LABEL = 'Sound';
+export const NO_AUDIO_TEXT = 'Sound needs Web Audio, which this browser does not offer';
 
 const errText = (e: unknown): string => (e instanceof Error ? e.message : String(e));
 
@@ -71,6 +93,18 @@ function safeStorage(win: Window | null): Storage | undefined {
 }
 
 /** Checks for WebGL without creating a context (the Stage renderer is the studio's only context). */
+/** Turns camera and orbit target together by ad about the vertical axis through (px, py). No allocation. */
+function orbitAbout(stage: Stage, px: number, py: number, rad: number): void {
+  const c = Math.cos(rad), s = Math.sin(rad);
+  const rot = (v: { x: number; y: number }): void => {
+    const x = v.x - px, y = v.y - py;
+    v.x = px + c * x - s * y;
+    v.y = py + s * x + c * y;
+  };
+  rot(stage.camera.position);
+  rot(stage.orbit.controls.target);
+}
+
 function probeWebGL(doc: Document): boolean {
   const w = doc.defaultView as (Window & { WebGL2RenderingContext?: unknown; WebGLRenderingContext?: unknown }) | null;
   return !!(w && (w.WebGL2RenderingContext || w.WebGLRenderingContext));
@@ -92,6 +126,7 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
   const reducedMq = matchMedia?.('(prefers-reduced-motion: reduce)');
   const reduced = (): boolean => !!reducedMq?.matches;
   const lexicon = app.lexicon;
+  const tiltWords: readonly string[] = [...DEFAULT_TILT_WORDS, ...(options.tiltWords ?? [])];
   let disposed = false;
   const cleanups: (() => void)[] = [];
 
@@ -173,7 +208,27 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
   const reelHost = host('golem-host');
   const verdictHost = host('golem-host');
   const liveHost = host('golem-host');
-  main.append(stageHost, reelHost);
+  const clock = new SwarmClock();
+  const bullet = new BulletTime();
+  const bar = new SignatureBar(doc, {
+    onScrub: (tau) => { if (!swarm) return; clock.seek(swarm.playStart + tau); swarm.setFrozen(true); bullet.cancel(); scheduler.requestOnce(); },
+    onPlay: () => { clock.play(); swarm?.setFrozen(false); scheduler.requestOnce(); },
+    onFreeze: () => { clock.freeze(); swarm?.setFrozen(true); bullet.cancel(); scheduler.requestOnce(); },
+  });
+  bar.addToggle(LONG_EXPOSURE_LABEL, false, (on) => { trails?.setVisible(on); scheduler.requestOnce(); });
+  bar.addButton(PHOTO_LABEL, () => { void photograph(); });
+  const sonifier = new Sonifier(() => {
+    if (hooks.createAudio) return hooks.createAudio() as AudioContextLike;
+    const AC = (win as unknown as { AudioContext?: new () => AudioContextLike; webkitAudioContext?: new () => AudioContextLike } | null);
+    const Ctor = AC?.AudioContext ?? AC?.webkitAudioContext;
+    return Ctor ? new Ctor() : undefined;
+  });
+  const soundBtn = bar.addToggle(SOUND_LABEL, false, (on) => {
+    sonifier.setEnabled(on);
+    if (on && !sonifier.enabled) { soundBtn.setAttribute('aria-pressed', 'false'); store.addMessage('info', NO_AUDIO_TEXT); }
+    scheduler.requestOnce();
+  });
+  main.append(stageHost, bar.el, reelHost);
   root.append(actionsHost, tabletHost, main, verdictHost, liveHost);
   el.appendChild(root);
   const politeId = `golem-live-${Math.round(now() * 1000) % 1e9}`;
@@ -220,17 +275,30 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
     },
   });
   let replayLine = '';
+  let replayPush = { forceN: 0, durS: 0 };
 
   const tick = (ts: number): void => {
     const dt = lastTs > 0 ? Math.max(0, Math.min(0.25, (ts - lastTs) / 1000)) : 0;
     lastTs = ts;
+    const nowMs = now();
+    // Bullet time slows the swarm and the hero together.
+    const rate = replay.active ? 1 : bullet.rate(nowMs);
+    clock.rate = rate;
+    clock.advance(dt);
     if (replay.active) {
       replay.advance(dt);
     } else if (hero) {
-      hero.advance(dt, now());
+      hero.advance(dt * rate, nowMs);
     }
     shove?.update();
-    swarm?.update(now() / 1000);
+    swarm?.update(clock.now);
+    const turn = bullet.takeDelta(nowMs);
+    if (turn !== 0 && stage) orbitAbout(stage, bullet.pivotX, bullet.pivotY, (turn * Math.PI) / 180);
+    if (bullet.turning()) scheduler.requestOnce();
+    if (swarm) bar.setTimeline(swarm.scrubbable, clock.now - swarm.playStart, swarm.playDuration, clock.frozen);
+    updateLive();
+    if (emet?.animating) { emet.update(now()); scheduler.requestOnce(); }
+    if (sonifier.enabled) { const lm = liveMargin(nowMs); sonifier.setMargin(lm.margin, lm.unit); }
     if (pendingAura !== null && aura) { aura.write(pendingAura); pendingAura = null; }
     if (stage && parts) {
       const groups = parts.bodyGroups;
@@ -280,6 +348,109 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
       resolveReady();
     }
   }
+
+  // ---------------------------------------------------------------- long exposure (golem-signature 5)
+  let trails: TrailsView | undefined;
+  async function photograph(): Promise<void> {
+    if (!stage) return;
+    const s = store.getState();
+    const line = s.lines.find((l) => l.id === s.selectedId);
+    const n = trails?.store.count ?? 0;
+    const st = stage;
+    // A long exposure photographs the trails: the ghosts of the last generation would cover them.
+    const hideGhosts = !!(trails?.visible && swarm);
+    if (hideGhosts && swarm) swarm.group.visible = false;
+    try {
+      await savePhotograph({
+        renderer: st.renderer, render: () => st.render(), canvas: st.canvas, tokens: TOKENS[s.theme],
+        id: line ? `Requirement ${line.id}` : app.name, text: line ? line.text : app.name,
+        ...(n > 0 ? { note: `Long exposure of ${n} trials, ${trails?.store.brokenCount() ?? 0} broken` } : {}),
+        fileName: `golem-${app.id}-${line ? line.id.replace(/[^A-Za-z0-9._-]/g, '_') : 'stage'}.png`,
+      });
+      announcer.announceFinal('Saved the photograph');
+    } catch (e) {
+      announcer.announceError(`The photograph could not be saved: ${errText(e)}`);
+    } finally {
+      if (hideGhosts && swarm) swarm.group.visible = true;
+    }
+    scheduler.requestOnce();
+  }
+
+  // ---------------------------------------------------------------- sonification (golem-signature 6)
+  const projV = new THREE.Vector3();
+  const heroSig: Record<string, number> = {};
+  const heroOne: Trace = { t: new Float64Array(1), signals: {}, events: [{ name: 'trigger', t: 0 }] };
+  let heroMargin = Number.NaN;
+  let heroMarginAt = -Infinity;
+  let heroSignalsFailed = false;
+  /** The selected line's live margin: the replay's trace, the run's closest call, the hero's signals (10 Hz), the verdict. */
+  function liveMargin(nowMs: number): { margin: number; unit: string } {
+    const s = store.getState();
+    const line = s.selectedId ? s.lines.find((l) => l.id === s.selectedId) : undefined;
+    if (!line) return { margin: Number.NaN, unit: '' };
+    const unit = line.unit ?? (line.compiled ? predicatesOf(line.text, lexicon)[0]?.unit ?? '' : '');
+    if (replay.active && replayLine === line.id && line.counterexample) {
+      const tr = traced.get(ceKey(line.id, line.counterexample));
+      if (tr && tr.inst.length > 0) return { margin: tr.inst[sampleAt(tr.trace.t, app.warmup + replay.t)] as number, unit };
+    }
+    if (s.run?.lineId === line.id) return { margin: rc.closestCall?.robustness ?? Number.NaN, unit };
+    if (hero && heroModel && line.compiled && !replay.active && !hero.sleeping && !heroSignalsFailed) {
+      if (nowMs - heroMarginAt >= 100) {
+        heroMarginAt = nowMs;
+        try {
+          app.signals(heroModel.ctx, heroSig);
+          const sig = heroOne.signals;
+          for (const k in heroSig) { (sig[k] ??= new Float64Array(1))[0] = heroSig[k] as number; }
+          heroOne.t[0] = hero.simTime;
+          (heroOne.events[0] as { t: number }).t = hero.simTime;
+          heroMargin = line.compiled.monitor(heroOne).robustness;
+        } catch { heroSignalsFailed = true; heroMargin = Number.NaN; }
+      }
+      if (heroMargin === heroMargin) return { margin: heroMargin, unit };
+    }
+    return { margin: line.verdict?.closest.robustness ?? Number.NaN, unit };
+  }
+  const lastStatus = new Map<string, string>();
+  cleanups.push(store.subscribe(() => {
+    for (const l of store.getState().lines) {
+      const prev = lastStatus.get(l.id);
+      if (prev !== l.status) {
+        lastStatus.set(l.id, l.status);
+        if (prev === 'running' && l.status === 'held') sonifier.chord();
+      }
+    }
+  }));
+
+  // ---------------------------------------------------------------- emet (golem-signature 2)
+  let emet: EmetDecal | undefined;
+  function setupEmet(bodyId: (n: string) => number): void {
+    const opt = options.emet;
+    if (opt === false || !parts || !stage) return;
+    const body = opt ? bodyId(opt.body) : highestBody(THREE, parts);
+    if (!(body >= 0) || !parts.bodyGroups[body]) {
+      if (opt) store.addMessage('warning', `The emet decal names body "${opt.body}", which ${app.name} does not have: check StudioOptions.emet.body`);
+      return;
+    }
+    const found = opt?.at ? undefined : foreheadSpot(bodyPoints(THREE, parts, body));
+    const spot = opt?.at
+      ? { at: opt.at, normal: opt.normal ?? [1, 0, 0] as [number, number, number], width: opt.width ?? 0.06 }
+      : found ? { ...found, ...(opt?.normal ? { normal: opt.normal } : {}), ...(opt?.width ? { width: opt.width } : {}) } : undefined;
+    if (!spot) return;
+    emet = new EmetDecal({
+      THREE, tokens: TOKENS[store.getState().theme], spot, hintHost: stage.el, storage, reduced,
+      announce: (m) => announcer.announceFinal(m),
+    });
+    (parts.bodyGroups[body] as THREE.Group).add(emet.group);
+    syncEmet();
+  }
+  function syncEmet(): void {
+    if (!emet) return;
+    const s = store.getState();
+    const status = s.lines.find((l) => l.id === s.selectedId)?.status;
+    if (emet.setWord(emetTarget(status, emet.word), now())) scheduler.requestOnce();
+    if (stage) stage.el.dataset['golemEmet'] = emet.word;
+  }
+  cleanups.push(store.subscribe(syncEmet));
 
   const failHero = (msg: string): void => {
     store.update({ hero: 'failed' });
@@ -331,8 +502,14 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
     swarm = new GhostSwarm(parts, THREE, {
       nbody: Number(h.modelLike.nbody), tokens, theme: store.getState().theme, riseDepth: Math.max(0.3, bound.height),
       reducedMotion: reduced, warn: (m) => store.addMessage('warning', m), scheduler,
+      onBreak: (_slot, x, y, _z, first) => {
+        if (first && !reduced() && !clock.frozen && !replay.active && bullet.trigger(now(), x, y)) scheduler.requestOnce();
+        if (sonifier.enabled && stage) { projV.set(x, y, _z).project(stage.camera); sonifier.thud((projV.x + 1) / 2, now()); }
+      },
     });
     stage.scene.add(swarm.group);
+    trails = new TrailsView(THREE, tokens, store.getState().theme);
+    stage.scene.add(trails.lines);
     aura = new AuraView(THREE, tokens, scheduler);
     const auraCentre = (): void => {
       const v = hero!.views;
@@ -343,7 +520,7 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
     stage.scene.add(aura.group);
     film = new FilmstripRenderer({
       THREE, renderer: stage.renderer, scene: stage.scene, mainCamera: stage.camera, bodyGroups: parts.bodyGroups,
-      hide: [swarm.group, aura.group, shove.arrow], restoreLive: () => { if (replay.active && replay.poses && parts) applyReplayPose(parts.bodyGroups, replay.poses, replay.t, reduced(), scratch); else hero?.sync(); },
+      hide: [swarm.group, aura.group, shove.arrow, trails.lines], restoreLive: () => { if (replay.active && replay.poses && parts) applyReplayPose(parts.bodyGroups, replay.poses, replay.t, reduced(), scratch); else hero?.sync(); },
       raf, caf, focusBody: primaryBody,
     });
     stage.onTheme((t) => {
@@ -351,7 +528,10 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
       swarm?.setTheme(t, store.getState().theme);
       aura?.setTheme(t);
       shove?.setInk(t.ink);
+      emet?.setTheme(t);
+      trails?.setTheme(t, store.getState().theme);
     });
+    setupEmet(bodyId);
     store.update({ hero: 'running' });
     scheduler.requestOnce();
   };
@@ -386,7 +566,10 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
     },
     isFall: fallOf,
     ...(options.summaryPhrases ? { summaryPhrases: options.summaryPhrases } : {}),
-    onActivity: () => hero?.wake(),
+    onActivity: () => { hero?.wake(); clock.play(); swarm?.setFrozen(false); trails?.clear(); },
+    onTrial: (r) => { if (r.poses && trails) trails.add(r.poses.frames, r.poses.nbody, Math.min(primaryBody, r.poses.nbody - 1), r.robustness < 0); },
+    onGeneration: () => { if (trails?.visible) { trails.rebuild(); scheduler.requestOnce(); } else trails?.rebuild(); },
+    swarmNow: () => clock.now,
   });
   if (pool && canRegister(pool)) for (const l of lines) if (l.compiled) pool.register(l.compiled);
 
@@ -429,7 +612,7 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
       store.update((s) => ({
         lines: s.lines.map((l) => {
           if (l.id !== id) return l;
-          const { compiled: _c, ...rest } = l;
+          const { compiled: _c, fracture: _f, ...rest } = l;
           return {
             ...rest, text, diagnostics: r.diagnostics, ...(r.requirement ? { compiled: r.requirement } : {}),
             status: hasError ? 'error' : l.verdict ? statusOfVerdict(l.verdict) : 'untested', stale: !!l.verdict,
@@ -448,6 +631,7 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
       const data = ce ? reelCache.get(ceKey(id, ce)) : undefined;
       if (!data || !parts) return;
       replayLine = id;
+      replayPush = line?.compiled && ce ? pushOf(line.compiled, ce.scenario as Scenario) : { forceN: 0, durS: 0 };
       replay.load(data.poses, data.worstTau);
       replay.enter();
     },
@@ -502,7 +686,114 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
       return d;
     },
     renderFilmstrip: (data, canvases) => (film ? film.start(data.poses.frames, data.poses.nbody, data.entries, canvases) : () => {}),
+    tiltWords,
+    previewQuantity: (id, text) => previewPush(id, text),
   };
+
+  // ---------------------------------------------------------------- living sentence (golem-signature 1)
+  /** Force (N) and window (s) of the first perturbation's push in a scenario, from its `visual` hint. */
+  function pushOf(req: CompiledRequirement, scenario: Scenario): { forceN: number; durS: number } {
+    const call = req.perturbations[0];
+    const tpl = call ? findTemplate(lexicon, call) : undefined;
+    if (!call || !tpl || typeof tpl.visual !== 'function') return { forceN: 0, durS: 0 };
+    const values = resolveValues(call, scenario);
+    try {
+      const f = tpl.visual(values)?.force;
+      const dur = values['duration'];
+      return { forceN: f ? Math.hypot(f[0], f[1], f[2]) : 0, durS: typeof dur === 'number' && dur >= 0 ? dur : DEFAULT_PUSH_S };
+    } catch { return { forceN: 0, durS: 0 }; }
+  }
+  function previewPush(id: string, text: string): void {
+    if (!shove || !heroModel) return;
+    const req = compileLine(id, text).requirement;
+    const call = req?.perturbations[0];
+    const tpl = call ? findTemplate(lexicon, call) : undefined;
+    if (!req || !call || !tpl || typeof tpl.visual !== 'function') return;
+    let v: ReturnType<NonNullable<typeof tpl.visual>> | undefined;
+    try { v = tpl.visual(resolveValues(call, harshestScenario(req.space))); } catch { v = undefined; }
+    const f = v?.force;
+    const lookup = (heroModel.ctx as { lookup?: { body(n: string): number } }).lookup;
+    let body = -1;
+    try { body = v?.at !== undefined && lookup ? lookup.body(v.at) : -1; } catch { body = -1; }
+    if (!f || !(body >= 0)) return;
+    shove.preview(body, f[0], f[1], f[2], arrowLength(Math.hypot(f[0], f[1], f[2])));
+    if (previewTimer !== undefined) clearTimeout(previewTimer);
+    previewTimer = setTimeout(() => { previewTimer = undefined; shove?.clearPreview(); }, PREVIEW_MS);
+  }
+  let previewTimer: ReturnType<typeof setTimeout> | undefined;
+  cleanups.push(() => { if (previewTimer !== undefined) clearTimeout(previewTimer); });
+
+  const liveSentence = new LiveSentence(root);
+  let boundKey = '';
+  let bound = { fuseS: Number.NaN, forceN: Number.NaN };
+  let lastSelected: string | undefined;
+  let heroFuseStart = -1;
+  let wasShoving = false;
+  const boundOf = (l: LineModel): { fuseS: number; forceN: number } => {
+    const k = `${l.id}\n${l.text}`;
+    if (k !== boundKey) { boundKey = k; bound = boundValues(livingSegments(l.text, tiltWords)); }
+    return bound;
+  };
+  const leanOf = (g: THREE.Object3D | undefined): number => {
+    if (!g || !stage) return 0;
+    const e = stage.camera.matrixWorld.elements;
+    const q = g.quaternion;
+    return leanDeg(q.w, q.x, q.y, q.z, e[0] as number, e[1] as number, e[2] as number);
+  };
+  /** Per frame: the bound words move only while a trial plays (a replay of this line, or the hero being shoved). */
+  function updateLive(): void {
+    const s = store.getState();
+    if (s.selectedId !== lastSelected) { lastSelected = s.selectedId; liveSentence.invalidate(); }
+    const line = s.selectedId ? s.lines.find((l) => l.id === s.selectedId) : undefined;
+    if (!line || !parts) { liveSentence.rest(); return; }
+    const b = boundOf(line);
+    const g = parts.bodyGroups[primaryBody];
+    if (replay.active) {
+      if (replayLine !== line.id) { liveSentence.rest(); return; }
+      const t = replay.t;
+      liveSentence.write(leanOf(g), fuseFill(t, b.fuseS), t <= replayPush.durS ? forceFraction(replayPush.forceN, b.forceN) : 0);
+      return;
+    }
+    const shoving = !!shove?.active;
+    if (hero && (hero.sleeping || hero.paused)) { heroFuseStart = -1; wasShoving = false; liveSentence.rest(); return; }
+    if (shoving && !wasShoving && hero) heroFuseStart = hero.simTime;
+    wasShoving = shoving;
+    const fuse = heroFuseStart >= 0 && hero ? fuseFill(hero.simTime - heroFuseStart, b.fuseS) : 0;
+    if (!shoving && !(heroFuseStart >= 0 && b.fuseS > 0 && fuse < 1)) { heroFuseStart = -1; liveSentence.rest(); return; }
+    liveSentence.write(leanOf(g), fuse, forceFraction(shove?.liveForce ?? 0, b.forceN));
+  }
+
+  // ---------------------------------------------------------------- fracture (golem-signature 1)
+  const traced = new Map<string, TraceTrialResult & { inst: Float64Array }>();
+  const traceRequested = new Set<string>();
+  let traceChain: Promise<void> = Promise.resolve();
+  const requestTrace = (id: string, ce: Counterexample, req: CompiledRequirement): void => {
+    const key = ceKey(id, ce);
+    if (traceRequested.has(key)) return;
+    traceRequested.add(key);
+    traceChain = traceChain.then(() => new Promise<void>((resolve) => {
+      // After the verdict has drawn: the trial blocks this thread for one trial's CPU time.
+      setTimeout(() => {
+        if (disposed || !heroModel) { resolve(); return; }
+        traceTrial(heroModel.mj, heroModel.model, app, req, ce).then((r) => {
+          if (disposed) return;
+          traced.set(key, { ...r, inst: instantMargins(req, r.trace) });
+          const line = store.getState().lines.find((l) => l.id === id);
+          if (!line?.counterexample || ceKey(id, line.counterexample) !== key) return;
+          const signal = fractureSignal(r.margins, r.marginsAt);
+          const w = fractureWord(livingSegments(line.text, tiltWords), signal, options.signalWords);
+          if (!w) return;
+          const margin = signal !== undefined ? (r.margins?.[signal] as number) : line.counterexample.robustness;
+          store.setLine(id, { fracture: { start: w.start, end: w.end, margin, unit: line.unit ?? r.result.unit, ...(signal !== undefined ? { signal } : {}) } });
+        }, () => { /* the fracture falls back to the first response word */ }).finally(resolve);
+      }, 30);
+    }));
+  };
+  cleanups.push(store.subscribe(() => {
+    for (const l of store.getState().lines) {
+      if (l.status === 'broken' && l.counterexample && l.compiled && !l.fracture && heroModel) requestTrace(l.id, l.counterexample, l.compiled);
+    }
+  }));
 
   // ---------------------------------------------------------------- theme
   const theme = new ThemeController({
@@ -540,6 +831,10 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
       for (const c of cleanups.splice(0)) c();
       theme.dispose();
       shove?.dispose();
+      emet?.dispose();
+      trails?.dispose();
+      sonifier.dispose();
+      bar.dispose();
       swarm?.dispose();
       aura?.dispose();
       film?.dispose();
@@ -583,14 +878,45 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
           spec, robustness, worstAt: app.warmup + seconds * 0.8, unit: 'm', wallMs: 0, poses,
           ...syntheticTrialFields(spec, poses, { warmup: app.warmup, timestep: app.simDt }),
         };
-        swarm.accept(res, { robustness, worstAt: res.worstAt, warmup: app.warmup }, now() / 1000);
+        swarm.accept(res, { robustness, worstAt: res.worstAt, warmup: app.warmup }, clock.now);
+        trails?.add(f, nb, Math.min(primaryBody, nb - 1), falls);
       }
-      swarm.commitGeneration(now() / 1000);
+      swarm.commitGeneration(clock.now);
+      trails?.rebuild();
       hero.wake();
       scheduler.requestOnce();
     };
     handle.renderCalls = () => (stage?.renderer.info?.render.calls ?? 0);
     (handle as { reasons?: () => string[] }).reasons = () => [...scheduler.active()];
   }
+  // Read-only probe of the signature moments for browser tests and screenshots (not part of StudioHandle).
+  (handle as { signature?: unknown }).signature = {
+    state: () => {
+      let head: [number, number] | undefined;
+      if (emet && stage) {
+        const v = new THREE.Vector3();
+        emet.group.getWorldPosition(v).project(stage.camera);
+        head = [(v.x * 0.5 + 0.5) * stage.canvas.clientWidth, (-v.y * 0.5 + 0.5) * stage.canvas.clientHeight];
+      }
+      return {
+        emet: emet?.word ?? 'none', crumble: emet?.crumble ?? 0, head, reasons: [...scheduler.active()],
+        clock: { now: clock.now, rate: clock.rate, frozen: clock.frozen }, bullet: bullet.active(now()), bulletAngle: bullet.angle(now()),
+        timeline: bar.timelineVisible, playStart: swarm?.playStart ?? 0, playDuration: swarm?.playDuration ?? 0,
+        trails: { count: trails?.store.count ?? 0, vertices: trails?.vertices ?? 0, visible: trails?.visible ?? false },
+        sound: { enabled: sonifier.enabled, state: sonifier.state, hz: sonifier.hz, thuds: sonifier.thuds, chords: sonifier.chords },
+      };
+    },
+    /** Moves the camera to look at the emet decal from `distance` metres in front of it. */
+    focusEmet: (distance = 0.7) => {
+      if (!emet || !stage) return;
+      const p = new THREE.Vector3(), n = new THREE.Vector3(0, 0, 1);
+      emet.group.getWorldPosition(p);
+      n.applyQuaternion(emet.group.getWorldQuaternion(new THREE.Quaternion()));
+      stage.orbit.controls.target.copy(p);
+      stage.camera.position.copy(p).addScaledVector(n, distance).add(new THREE.Vector3(0, 0, 0.05));
+      stage.orbit.controls.update();
+      scheduler.requestOnce();
+    },
+  };
   return handle;
 }

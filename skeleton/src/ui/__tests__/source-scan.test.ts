@@ -28,6 +28,9 @@ const LAYER: Record<string, number> = {
   'stage/stage.ts': 4, 'hero/hero-sim.ts': 4, 'hero/load-hero.ts': 4, 'ghosts/ghost-swarm.ts': 4,
   'hero/shove.ts': 5, 'run/recording-pool.ts': 5,
   'run/run-controller.ts': 6, 'run/falsify-adapter.ts': 6, 'run/inline-pool.ts': 6, 'run/studio-pool.ts': 6,
+  // golem-signature
+  'signature/live-sentence.ts': 5, 'signature/trace-trial.ts': 6, 'signature/emet-decal.ts': 4, 'signature/signature-bar.ts': 5,
+  'signature/trails-view.ts': 4, 'signature/photograph.ts': 5, 'signature/sonifier.ts': 4,
   'mount.ts': 8, 'index.ts': 8, 'worker.ts': 8,
 };
 function layerOf(file: string): number {

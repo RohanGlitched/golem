@@ -21,6 +21,7 @@ export function studioCss(fontBaseUrl = './fonts/'): string {
 @font-face{font-family:'B612';src:url('${f}B612-Regular.ttf') format('truetype');font-weight:400;font-display:swap}
 @font-face{font-family:'B612';src:url('${f}B612-Bold.ttf') format('truetype');font-weight:700;font-display:swap}
 @font-face{font-family:'B612 Mono';src:url('${f}B612Mono-Regular.ttf') format('truetype');font-weight:400;font-display:swap}
+@font-face{font-family:'Gloock';src:url('${f}Gloock-Regular.ttf') format('truetype');font-weight:400;font-display:swap}
 .golem-studio[data-golem-theme='dark']{${tokenBlock(TOKENS.dark)};color-scheme:dark}
 .golem-studio[data-golem-theme='light']{${tokenBlock(TOKENS.light)};color-scheme:light}
 .golem-studio{box-sizing:border-box;background:var(--ground);color:var(--ink);font-family:'B612',system-ui,sans-serif;font-size:${s16}px;line-height:1.55;
@@ -32,13 +33,20 @@ export function studioCss(fontBaseUrl = './fonts/'): string {
 .golem-actions{grid-area:actions;display:flex;flex-wrap:wrap;gap:8px;padding:16px 20px 12px;background:var(--ground-2);border-right:1px solid var(--rule)}
 .golem-tablet{grid-area:tablet;overflow:auto;padding:4px 20px 20px;background:var(--ground-2);border-right:1px solid var(--rule)}
 .golem-verdict{grid-area:verdict;padding:12px 20px 16px;background:var(--ground-2);border-right:1px solid var(--rule);border-top:1px solid var(--rule);font-size:${s13}px;max-height:40vh;overflow:auto}
-.golem-main{grid-area:stage / stage / reel / reel;display:grid;grid-template-rows:minmax(0,1fr) auto;min-width:0;min-height:0}
+.golem-main{grid-area:stage / stage / reel / reel;display:grid;grid-template-rows:minmax(0,1fr) auto auto;min-width:0;min-height:0}
+.golem-sigbar{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;padding:8px 20px;border-top:1px solid var(--rule);background:var(--ground);font-size:${s13}px;min-width:0}
+.golem-timeline{display:flex;gap:8px;align-items:center;flex:1 1 320px;min-width:0}
+.golem-timeline[hidden]{display:none}
+.golem-timeline-range{flex:1 1 auto;min-width:80px;accent-color:var(--ghost)}
+.golem-timeline-time{color:var(--ink-2);white-space:nowrap}
+.golem-sigtools{display:flex;flex-wrap:wrap;gap:8px;margin-left:auto}
 .golem-stage{position:relative;min-height:0;background:var(--ground);border-radius:0;overflow:hidden}
 .golem-stage::after{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(120% 95% at 50% 42%,transparent 55%,rgba(0,0,0,.38) 100%)}
 .golem-canvas{display:block;width:100%;height:100%;touch-action:pan-y}
 .golem-stage-msg,.golem-stage-slow{position:absolute;left:20px;top:16px;max-width:60ch;color:var(--ink-2);font-size:${s13}px;pointer-events:none}
 .golem-stage-slow{top:auto;bottom:12px}
 .golem-stage-msg[hidden],.golem-stage-slow[hidden],.golem-shove-label[hidden]{display:none}
+.golem-stage-hint{position:absolute;left:20px;bottom:36px;margin:0;max-width:60ch;color:var(--ink);font-size:${s13}px;pointer-events:none}
 .golem-shove-label{position:absolute;left:0;top:0;padding:2px 6px;margin:-28px 0 0 8px;background:var(--ground-2);color:var(--ink);border:1px solid var(--rule);border-radius:2px;font-size:${s13}px;pointer-events:none}
 .golem-reel{padding:12px 20px 16px;border-top:1px solid var(--rule);min-width:0;background:var(--ground)}
 .golem-h{font-size:${s20}px;font-weight:700;line-height:1.3;margin:12px 0 8px}
@@ -59,6 +67,18 @@ export function studioCss(fontBaseUrl = './fonts/'): string {
 .golem-q-input{font:inherit;color:var(--ink);background:var(--ground);border:1px solid var(--clay);border-radius:2px;padding:0 3px}
 .golem-q-msg{display:block;color:var(--break-text);font-size:${s13}px}
 .golem-fracture{position:absolute;left:-4px;right:8%;top:52%;height:1px;background:var(--break);transform:rotate(-1.2deg);transform-origin:left;pointer-events:none}
+.golem-line-selected .golem-response{display:block;margin-top:2px;font-family:'Gloock',Georgia,serif;font-size:clamp(39px,3.4vw,61px);line-height:1.12;letter-spacing:0}
+.golem-line-selected .golem-response .golem-q{min-height:0;text-underline-offset:8px}
+.golem-w.golem-bind-tilt{display:inline-block;transform:rotate(calc(var(--golem-tilt,0) * 1deg));transform-origin:50% 85%}
+.golem-bind{position:relative;display:inline-block}
+.golem-bind::after{content:'';position:absolute;left:3px;right:3px;bottom:0;height:2px;transform-origin:left center;pointer-events:none}
+.golem-bind-fuse::after{background:var(--ghost);transform:scaleX(var(--golem-fuse,0))}
+.golem-bind-force::after{background:var(--ink);transform:scaleX(var(--golem-force,0))}
+.golem-fracture-word{position:relative}
+.golem-w.golem-fracture-word:not(.golem-bind-tilt){display:inline-block}
+.golem-fracture.golem-fracture-at{left:-3px;right:-3px;top:56%;transform:rotate(-5deg);transform-origin:center}
+.golem-fracture-margin{color:var(--break-text);font-size:${s13}px;vertical-align:middle;white-space:nowrap}
+.golem-line-selected .golem-fracture-margin{font-size:${s16}px}
 .golem-status{margin:4px 0 0;font-size:${s13}px;color:var(--ink-2)}
 .golem-status-held .golem-status{color:var(--hold-text)}
 .golem-status-broken .golem-status,.golem-status-error .golem-status{color:var(--break-text)}
@@ -99,7 +119,8 @@ export function studioCss(fontBaseUrl = './fonts/'): string {
 .golem-panel-error{padding:12px 20px;color:var(--break-text)}
 .golem-messages{list-style:none;margin:0;padding:0 20px;font-size:${s13}px;color:var(--ink-2)}
 @media (max-width:1023.98px){
-  .golem-studio{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:none;grid-template-areas:"stage" "actions" "tablet" "reel" "verdict";height:auto;overflow:visible}
+  .golem-studio{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:none;grid-template-areas:"stage" "sigbar" "actions" "tablet" "reel" "verdict";height:auto;overflow:visible}
+  .golem-sigbar{grid-area:sigbar}
   .golem-main{display:contents}
   .golem-stage{grid-area:stage;height:56vh}
   .golem-reel{grid-area:reel}

@@ -56,6 +56,10 @@ export class ShoveController {
   private keyDir: V3 = [0, 0, 0];
   private keyName: ArrowKey | undefined;
   private dragging = false;
+  private previewBody = -1;
+  private readonly previewDir = new Float64Array(3);
+  private previewForce = 0;
+  private previewLength = 0;
   private readonly raycaster: THREE_NS.Raycaster;
   private readonly ndc: THREE_NS.Vector2;
   private readonly listeners: [string, EventListener, AddEventListenerOptions?][] = [];
@@ -268,6 +272,31 @@ export class ShoveController {
 
   get active(): boolean { return this.pointerId !== undefined || this.keySteps > 0; }
 
+  /** Newtons the hero is being pushed with right now (pointer spring or key push), 0 when no push is active. */
+  get liveForce(): number { return this.pointerId !== undefined ? this.force : this.keySteps > 0 ? KEY_PUSH_FORCE : 0; }
+
+  /**
+   * Draws the push a sentence describes, before any test runs: the shove arrow pointing at `body` along the force,
+   * `length` metres long, labelled with the force. Ignored while a real push is active.
+   */
+  preview(body: number, fx: number, fy: number, fz: number, length: number): void {
+    const m = Math.hypot(fx, fy, fz);
+    if (!(m > 0) || !(body >= 0)) { this.clearPreview(); return; }
+    this.previewBody = body;
+    this.previewDir[0] = fx / m; this.previewDir[1] = fy / m; this.previewDir[2] = fz / m;
+    this.previewForce = m;
+    this.previewLength = length;
+    this.d.scheduler.requestOnce();
+  }
+
+  clearPreview(): void {
+    if (this.previewBody < 0) return;
+    this.previewBody = -1;
+    if (!this.active) this.clearVisual();
+  }
+
+  get previewing(): boolean { return this.previewBody >= 0; }
+
   private setLabel(n: number): void {
     const t = `${Math.round(n)} N`;
     if (t !== this.label) { this.label = t; this.labelEl.textContent = t; }
@@ -295,7 +324,11 @@ export class ShoveController {
       const v = this.d.hero.views, b = this.d.primaryBody;
       ex = v.xipos[3 * b] as number; ey = v.xipos[3 * b + 1] as number; ez = v.xipos[3 * b + 2] as number;
       sx = ex - 0.3 * this.keyDir[0]; sy = ey - 0.3 * this.keyDir[1]; sz = ez - 0.3 * this.keyDir[2];
-      this.setLabel(KEY_PUSH_FORCE);
+    } else if (this.previewBody >= 0) {
+      const v = this.d.hero.views, b = this.previewBody, L = this.previewLength, pd = this.previewDir;
+      ex = v.xipos[3 * b] as number; ey = v.xipos[3 * b + 1] as number; ez = v.xipos[3 * b + 2] as number;
+      sx = ex - L * (pd[0] as number); sy = ey - L * (pd[1] as number); sz = ez - L * (pd[2] as number);
+      this.setLabel(this.previewForce);
     } else return;
     const len = Math.hypot(ex - sx, ey - sy, ez - sz);
     this.arrow.visible = len > 1e-4;

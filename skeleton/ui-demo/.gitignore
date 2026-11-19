@@ -3,3 +3,4 @@ public/fonts/
 dist/
 test-results/
 playwright-report/
+public/robot/

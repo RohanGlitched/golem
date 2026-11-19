@@ -60,6 +60,8 @@ export interface LineModel {
   unit?: string;
   /** Error message of the last run, when its status is `error`. */
   error?: string;
+  /** Where a broken line fractures: the Response_Clause word of the signal that broke first, and its margin. */
+  fracture?: { start: number; end: number; margin: number; unit: string; signal?: string } | undefined;
 }
 
 export interface VerdictRow { label: string; value: string }
@@ -118,6 +120,8 @@ export interface StudioTestHooks {
   clipboard?: { writeText(s: string): Promise<void> };
   /** Adds `summonSynthetic(n, seconds)` to the handle: feeds `n` synthetic pose results through the swarm (perf and e2e tests). */
   summonSynthetic?: boolean;
+  /** Replaces the AudioContext the Sound toggle creates (returns an AudioContext-like object). */
+  createAudio?: () => unknown;
 }
 
 export interface StudioOptions {
@@ -143,6 +147,15 @@ export interface StudioOptions {
   stepCap?: number;
   fontBaseUrl?: string;
   summaryPhrases?: Partial<Record<Kind, string>>;
+  /**
+   * The incised "emet" on the robot: `body` names the head body; `at` (body frame, m), `normal` and `width` (m) override
+   * the placement found from the body's drawn geometry. `false` draws no decal. Default: the body that reaches highest.
+   */
+  emet?: { body: string; at?: [number, number, number]; normal?: [number, number, number]; width?: number } | false;
+  /** Extra words of a Response_Clause that tilt with the robot's lean (default: "upright", "level", ...). */
+  tiltWords?: string[];
+  /** Signal name → the Response_Clause words it binds to, for the fracture of a broken line. */
+  signalWords?: Record<string, string[]>;
   testHooks?: StudioTestHooks;
 }
 

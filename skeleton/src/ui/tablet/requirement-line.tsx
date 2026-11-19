@@ -1,13 +1,15 @@
 // One requirement line on the Tablet: ID, sentence with live quantities, status text and shape.
-import { useId, useMemo, useState } from 'react';
+import { Fragment, useId, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
 import { marginText, statusText } from '../run/status.js';
 import type { Kind, LineModel, LineStatus } from '../types.js';
 import type { StudioActions } from './actions.js';
 import { LineEditor } from './line-editor.js';
 import { applySuggestion, diagnosticLabel } from './diagnostics-view.js';
+import { fractureWord, livingSegments, signedMarginText } from './living.js';
+import type { LivingSegment } from './living.js';
 import { QuantityControl } from './quantity-control.js';
-import { rewriteSpan } from './quantity-edit.js';
-import { segmentLine } from './segments.js';
+import { formatSpan, rewriteSpan } from './quantity-edit.js';
 
 export const SUMMON_LABEL = 'Summon 64 ghosts';
 export const STOP_LABEL = 'Stop the run';
@@ -41,11 +43,51 @@ export function RequirementLine({ line, selected, running, canSummon, actions }:
   const [editing, setEditing] = useState(false);
   const statusId = useId();
   const textId = useId();
-  const segs = useMemo(() => segmentLine(line.text), [line.text]);
+  const segs = useMemo(() => livingSegments(line.text, actions.tiltWords), [line.text, actions.tiltWords]);
   const hasError = line.diagnostics.some((d) => d.severity === 'error');
   const status = lineStatusText(line);
   const margin = line.status === 'broken' && line.counterexample
     ? marginText(line.counterexample.robustness, line.unit ?? '') : undefined;
+  // The fracture: at the word of the signal that broke first, else at the first word of the Response_Clause.
+  const fractureAt = line.status === 'broken' ? (line.fracture ?? (() => {
+    const w = fractureWord(segs, undefined);
+    return w ? { start: w.start, end: w.end, margin: line.counterexample?.robustness ?? Number.NaN, unit: line.unit ?? '' } : undefined;
+  })()) : undefined;
+  const pre = segs.filter((s) => !s.response);
+  const resp = segs.filter((s) => s.response);
+  const renderSeg = (s: LivingSegment): ReactNode => {
+    const key = `${s.start}:${s.kind}`;
+    if (s.kind === 'keyword') return <span key={key} className="golem-kw">{s.text}</span>;
+    if (s.kind === 'quantity' && s.q) {
+      const q = s.q;
+      const control = (
+        <QuantityControl
+          key={`${key}:${line.text.length}`}
+          info={q}
+          label={`${KIND_LABEL[q.kind]} in line ${line.id}`}
+          disabled={running}
+          onCommit={(span) => actions.commitLine(line.id, rewriteSpan(line.text, s.start, s.end, span))}
+          {...(actions.previewQuantity ? { onPreview: (v: number) => actions.previewQuantity?.(line.id, rewriteSpan(line.text, s.start, s.end, formatSpan(q, v, Math.max(q.decimals, 6)))) } : {})}
+        />
+      );
+      return s.bind ? <span key={key} className={`golem-bind golem-bind-${s.bind}`} data-golem-bind={s.bind}>{control}</span> : control;
+    }
+    if (s.kind === 'word') {
+      const cls = `golem-w${s.bind ? ` golem-bind-${s.bind}` : ''}`;
+      if (fractureAt && fractureAt.start === s.start) {
+        return (
+          <Fragment key={key}>
+            <span className={`${cls} golem-fracture-word`} {...(s.bind ? { 'data-golem-bind': s.bind } : {})} data-golem-fracture={line.fracture?.signal ?? ''}>
+              {s.text}<span className="golem-fracture golem-fracture-at" aria-hidden="true" />
+            </span>
+            <span className="golem-fracture-margin golem-num">{` ${signedMarginText(fractureAt.margin, fractureAt.unit)}`}</span>
+          </Fragment>
+        );
+      }
+      return s.bind ? <span key={key} className={cls} data-golem-bind={s.bind}>{s.text}</span> : <span key={key}>{s.text}</span>;
+    }
+    return <span key={key}>{s.text}</span>;
+  };
 
   return (
     <li
@@ -75,23 +117,9 @@ export function RequirementLine({ line, selected, running, canSummon, actions }:
         />
       ) : (
         <p className="golem-sentence" aria-hidden="false">
-          {line.status === 'broken' ? <span className="golem-fracture" aria-hidden="true" /> : null}
-          {segs.map((s, i) => {
-            if (s.kind === 'keyword') return <span key={i} className="golem-kw">{s.text}</span>;
-            if (s.kind === 'quantity' && s.q) {
-              const q = s.q;
-              return (
-                <QuantityControl
-                  key={`${i}:${s.start}:${line.text.length}`}
-                  info={q}
-                  label={`${KIND_LABEL[q.kind]} in line ${line.id}`}
-                  disabled={running}
-                  onCommit={(span) => actions.commitLine(line.id, rewriteSpan(line.text, s.start, s.end, span))}
-                />
-              );
-            }
-            return <span key={i}>{s.text}</span>;
-          })}
+          {fractureAt ? null : line.status === 'broken' ? <span className="golem-fracture" aria-hidden="true" /> : null}
+          {pre.map(renderSeg)}
+          {resp.length > 0 ? <span className="golem-response">{resp.map(renderSeg)}</span> : null}
         </p>
       )}
       <p id={statusId} className="golem-status">
