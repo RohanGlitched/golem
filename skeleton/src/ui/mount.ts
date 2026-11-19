@@ -45,6 +45,9 @@ import {
   DEFAULT_TILT_WORDS, boundValues, forceFraction, fractureSignal, fractureWord, fuseFill, harshestScenario, leanDeg, livingSegments,
 } from './tablet/living.js';
 import { LiveSentence } from './signature/live-sentence.js';
+import { SignatureBar } from './signature/signature-bar.js';
+import { SwarmClock } from './core/swarm-clock.js';
+import { BulletTime } from './core/bullet-time.js';
 import { EmetDecal, bodyPoints, highestBody } from './signature/emet-decal.js';
 import { emetTarget, foreheadSpot } from './core/emet.js';
 import { instantMargins, traceTrial } from './signature/trace-trial.js';
@@ -81,6 +84,18 @@ function safeStorage(win: Window | null): Storage | undefined {
 }
 
 /** Checks for WebGL without creating a context (the Stage renderer is the studio's only context). */
+/** Turns camera and orbit target together by ad about the vertical axis through (px, py). No allocation. */
+function orbitAbout(stage: Stage, px: number, py: number, rad: number): void {
+  const c = Math.cos(rad), s = Math.sin(rad);
+  const rot = (v: { x: number; y: number }): void => {
+    const x = v.x - px, y = v.y - py;
+    v.x = px + c * x - s * y;
+    v.y = py + s * x + c * y;
+  };
+  rot(stage.camera.position);
+  rot(stage.orbit.controls.target);
+}
+
 function probeWebGL(doc: Document): boolean {
   const w = doc.defaultView as (Window & { WebGL2RenderingContext?: unknown; WebGLRenderingContext?: unknown }) | null;
   return !!(w && (w.WebGL2RenderingContext || w.WebGLRenderingContext));
@@ -184,7 +199,14 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
   const reelHost = host('golem-host');
   const verdictHost = host('golem-host');
   const liveHost = host('golem-host');
-  main.append(stageHost, reelHost);
+  const clock = new SwarmClock();
+  const bullet = new BulletTime();
+  const bar = new SignatureBar(doc, {
+    onScrub: (tau) => { if (!swarm) return; clock.seek(swarm.playStart + tau); swarm.setFrozen(true); bullet.cancel(); scheduler.requestOnce(); },
+    onPlay: () => { clock.play(); swarm?.setFrozen(false); scheduler.requestOnce(); },
+    onFreeze: () => { clock.freeze(); swarm?.setFrozen(true); bullet.cancel(); scheduler.requestOnce(); },
+  });
+  main.append(stageHost, bar.el, reelHost);
   root.append(actionsHost, tabletHost, main, verdictHost, liveHost);
   el.appendChild(root);
   const politeId = `golem-live-${Math.round(now() * 1000) % 1e9}`;
@@ -236,13 +258,22 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
   const tick = (ts: number): void => {
     const dt = lastTs > 0 ? Math.max(0, Math.min(0.25, (ts - lastTs) / 1000)) : 0;
     lastTs = ts;
+    const nowMs = now();
+    // Bullet time slows the swarm and the hero together.
+    const rate = replay.active ? 1 : bullet.rate(nowMs);
+    clock.rate = rate;
+    clock.advance(dt);
     if (replay.active) {
       replay.advance(dt);
     } else if (hero) {
-      hero.advance(dt, now());
+      hero.advance(dt * rate, nowMs);
     }
     shove?.update();
-    swarm?.update(now() / 1000);
+    swarm?.update(clock.now);
+    const turn = bullet.takeDelta(nowMs);
+    if (turn !== 0 && stage) orbitAbout(stage, bullet.pivotX, bullet.pivotY, (turn * Math.PI) / 180);
+    if (bullet.turning()) scheduler.requestOnce();
+    if (swarm) bar.setTimeline(swarm.scrubbable, clock.now - swarm.playStart, swarm.playDuration, clock.frozen);
     updateLive();
     if (emet?.animating) { emet.update(now()); scheduler.requestOnce(); }
     if (pendingAura !== null && aura) { aura.write(pendingAura); pendingAura = null; }
@@ -376,6 +407,9 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
     swarm = new GhostSwarm(parts, THREE, {
       nbody: Number(h.modelLike.nbody), tokens, theme: store.getState().theme, riseDepth: Math.max(0.3, bound.height),
       reducedMotion: reduced, warn: (m) => store.addMessage('warning', m), scheduler,
+      onBreak: (_slot, x, y, _z, first) => {
+        if (first && !reduced() && !clock.frozen && !replay.active && bullet.trigger(now(), x, y)) scheduler.requestOnce();
+      },
     });
     stage.scene.add(swarm.group);
     aura = new AuraView(THREE, tokens, scheduler);
@@ -433,7 +467,8 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
     },
     isFall: fallOf,
     ...(options.summaryPhrases ? { summaryPhrases: options.summaryPhrases } : {}),
-    onActivity: () => hero?.wake(),
+    onActivity: () => { hero?.wake(); clock.play(); swarm?.setFrozen(false); },
+    swarmNow: () => clock.now,
   });
   if (pool && canRegister(pool)) for (const l of lines) if (l.compiled) pool.register(l.compiled);
 
@@ -696,6 +731,7 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
       theme.dispose();
       shove?.dispose();
       emet?.dispose();
+      bar.dispose();
       swarm?.dispose();
       aura?.dispose();
       film?.dispose();
@@ -739,9 +775,9 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
           spec, robustness, worstAt: app.warmup + seconds * 0.8, unit: 'm', wallMs: 0, poses,
           ...syntheticTrialFields(spec, poses, { warmup: app.warmup, timestep: app.simDt }),
         };
-        swarm.accept(res, { robustness, worstAt: res.worstAt, warmup: app.warmup }, now() / 1000);
+        swarm.accept(res, { robustness, worstAt: res.worstAt, warmup: app.warmup }, clock.now);
       }
-      swarm.commitGeneration(now() / 1000);
+      swarm.commitGeneration(clock.now);
       hero.wake();
       scheduler.requestOnce();
     };
@@ -757,7 +793,11 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
         emet.group.getWorldPosition(v).project(stage.camera);
         head = [(v.x * 0.5 + 0.5) * stage.canvas.clientWidth, (-v.y * 0.5 + 0.5) * stage.canvas.clientHeight];
       }
-      return { emet: emet?.word ?? 'none', crumble: emet?.crumble ?? 0, head, reasons: [...scheduler.active()] };
+      return {
+        emet: emet?.word ?? 'none', crumble: emet?.crumble ?? 0, head, reasons: [...scheduler.active()],
+        clock: { now: clock.now, rate: clock.rate, frozen: clock.frozen }, bullet: bullet.active(now()), bulletAngle: bullet.angle(now()),
+        timeline: bar.timelineVisible, playStart: swarm?.playStart ?? 0, playDuration: swarm?.playDuration ?? 0,
+      };
     },
     /** Moves the camera to look at the emet decal from `distance` metres in front of it. */
     focusEmet: (distance = 0.7) => {

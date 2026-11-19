@@ -13,7 +13,8 @@ import type { ResolvedArrow } from './push-arrow.js';
 type Three = typeof THREE_NS;
 
 export const CAPACITY = 64;
-const FREE = 0, STAGED = 1, PLAYING = 2, RETIRING = 3;
+/** HIDDEN: a broken ghost that has faded out but keeps its slot until the next generation, so the scrubber can go back. */
+const FREE = 0, STAGED = 1, PLAYING = 2, RETIRING = 3, HIDDEN = 4;
 
 export interface GhostMeta {
   robustness: number;
@@ -29,8 +30,13 @@ export interface SwarmOptions {
   riseDepth: number;
   reducedMotion(): boolean;
   warn(msg: string): void;
-  scheduler?: { acquire(r: 'ghosts-running'): void; release(r: 'ghosts-running'): void };
+  scheduler?: { acquire(r: 'ghosts-running'): void; release(r: 'ghosts-running'): void; requestOnce?(): void };
   capacity?: number;
+  /**
+   * A playing ghost reached its break time (once per ghost): slot, root-body position at that instant, and whether it
+   * is the first ghost of its generation to break. Called from `update`; must not allocate.
+   */
+  onBreak?(slot: number, x: number, y: number, z: number, first: boolean): void;
 }
 
 /** column-major 4x4 product out = a * b, scalar only. */
@@ -78,8 +84,19 @@ export class GhostSwarm {
   private nextSlot = 0;
   private genId = 0;
   private highest = -1;
+  /** Highest slot that is not free (hidden slots included). */
+  private span = -1;
+  private readonly brokeSeen: Uint8Array;
+  private genBroke = false;
+  private frozen = false;
+  /** Swarm time at which the current generation started playing, and its longest recording (s). */
+  playStart = 0;
+  playDuration = 0;
+  /** Id of the generation that last started playing. */
+  private playGen = -1;
   /** Mean xy of body 1 (the root body) over visible ghosts, or null when none is visible. */
   centroid: [number, number] | null = null;
+  private readonly centroidBuf: [number, number] = [0, 0];
   private running = false;
   private now = 0;
   disposed = false;
@@ -137,14 +154,31 @@ export class GhostSwarm {
     this.frames = new Array<Float32Array | null>(cap).fill(null);
     this.arrows = new Array<ResolvedArrow | undefined>(cap).fill(undefined);
     this.bodyMats = new Float32Array(16 * this.nbody);
+    this.brokeSeen = new Uint8Array(cap);
   }
 
-  /** Ghosts currently held in a slot (staged, playing or retiring). */
+  /** Ghosts currently held in a slot (staged, playing or retiring; not the faded ones kept for scrubbing). */
   get shown(): number {
     let n = 0;
-    for (let i = 0; i < this.capacity; i++) if (this.stage[i] !== FREE) n++;
+    for (let i = 0; i < this.capacity; i++) if (this.stage[i] !== FREE && this.stage[i] !== HIDDEN) n++;
     return n;
   }
+
+  /** True while the current generation has slots to scrub (playing or faded). */
+  get scrubbable(): boolean {
+    for (let i = 0; i <= this.span; i++) { const st = this.stage[i]; if ((st === PLAYING || st === HIDDEN) && this.gen[i] === this.playGen) return true; }
+    return false;
+  }
+
+  /** Frozen: the swarm holds no render reason and draws only when asked (the timeline scrubber). */
+  setFrozen(f: boolean): void {
+    if (f === this.frozen) return;
+    this.frozen = f;
+    if (f) this.setRunning(false);
+    else if (this.shown > 0) this.setRunning(true);
+  }
+
+  get isFrozen(): boolean { return this.frozen; }
 
   get count(): number { return this.highest + 1; }
 
@@ -186,26 +220,40 @@ export class GhostSwarm {
     this.arrows[s] = meta.arrow;
     this.arrivedAt[s] = nowSec;
     this.genStart[s] = 0;
+    this.brokeSeen[s] = 0;
     if (s > this.highest) this.highest = s;
-    this.setRunning(true);
+    if (s > this.span) this.span = s;
+    if (this.frozen) this.o.scheduler?.requestOnce?.();
+    else this.setRunning(true);
     return 'ok';
   }
 
   /** All staged ghosts of this Generation start playing from one clock; leftover slots retire over 300 ms. */
   commitGeneration(clockStartSec: number): void {
+    let started = false;
+    let dur = 0;
     for (let s = 0; s < this.capacity; s++) {
       const st = this.stage[s];
-      if (st === STAGED && this.gen[s] === this.genId) { this.stage[s] = PLAYING; this.genStart[s] = clockStartSec; }
+      if (st === STAGED && this.gen[s] === this.genId) {
+        this.stage[s] = PLAYING; this.genStart[s] = clockStartSec; started = true;
+        const fc = this.frameCount[s] as number, fps = this.fps[s] as number;
+        const T = fc > 1 && fps > 0 ? (fc - 1) / fps : 0;
+        if (T > dur) dur = T;
+      } else if (st === HIDDEN && this.gen[s] !== this.genId) this.free(s);
       else if ((st === PLAYING || st === STAGED) && this.gen[s] !== this.genId) { this.stage[s] = RETIRING; this.retireAt[s] = clockStartSec; }
     }
-    this.setRunning(this.shown > 0);
+    if (started) { this.playStart = clockStartSec; this.playDuration = dur; this.genBroke = false; this.playGen = this.genId; }
+    if (this.frozen) this.o.scheduler?.requestOnce?.();
+    else this.setRunning(this.shown > 0);
   }
 
   /** Cancel: hide every ghost now. */
   clear(): void {
     for (let s = 0; s < this.capacity; s++) this.free(s);
     this.highest = -1;
+    this.span = -1;
     this.nextSlot = 0;
+    this.playDuration = 0;
     for (const m of this.meshes) m.count = 0;
     this.arrowMesh.count = 0;
     this.setRunning(false);
@@ -230,7 +278,7 @@ export class GhostSwarm {
   /** Ghost time of a slot: 0 while staged, max(0, now - start) once its Generation plays. */
   timeOf(slot: number, nowSec: number): number {
     const st = this.stage[slot];
-    if (st === PLAYING || st === RETIRING) { const t = nowSec - (this.genStart[slot] as number); return t > 0 ? t : 0; }
+    if (st === PLAYING || st === RETIRING || st === HIDDEN) { const t = nowSec - (this.genStart[slot] as number); return t > 0 ? t : 0; }
     return 0;
   }
 
@@ -242,11 +290,13 @@ export class GhostSwarm {
     const ast = this.arrowState.array as Float32Array;
     const nb = this.nbody;
     const ng = this.geomBody.length;
+    const rootBody = nb > 1 ? 1 : 0;
     let high = -1;
+    let span = -1;
     let any = false;
     let cx = 0, cy = 0, cn = 0;
-    for (let s = 0; s <= this.highest; s++) {
-      const stage = this.stage[s];
+    for (let s = 0; s <= this.span; s++) {
+      let stage = this.stage[s];
       if (stage === FREE) { st[4 * s + 1] = 0; ast[4 * s + 1] = 0; continue; }
       const frames = this.frames[s] as Float32Array;
       const tau = this.timeOf(s, nowSec);
@@ -260,17 +310,31 @@ export class GhostSwarm {
         opacity *= retireFactor(since, reduced);
         if (reduced || since >= RETIRE_S) { this.free(s); continue; }
       }
-      if (ev.hidden) { this.free(s); continue; }
+      if (ev.hidden) {
+        // A faded broken ghost of the current generation keeps its slot for the scrubber.
+        if ((stage === PLAYING || stage === HIDDEN) && this.gen[s] === this.playGen) {
+          this.stage[s] = HIDDEN; st[4 * s + 1] = 0; ast[4 * s + 1] = 0; span = s;
+          const o = (ev.frame * nb + rootBody) * 7;
+          this.noteBreak(s, ev.breakMix, frames[o] as number, frames[o + 1] as number, frames[o + 2] as number);
+          continue;
+        }
+        this.free(s); continue;
+      }
+      if (stage === HIDDEN) { this.stage[s] = stage = PLAYING; }
       high = s;
+      span = s;
       // A survivor holding its last frame is static: it stays visible but needs no more frames.
       const T = rec.frameCount > 1 ? (rec.frameCount - 1) / rec.fps : 0;
       if (stage !== PLAYING || tau < T || ev.rise > 0 || (rec.robustness < 0 && opacity > 0)) any = true;
+      let rx = 0, ry = 0, rz = 0;
       for (let b = 0; b < nb; b++) {
         nlerp(frames, nb, ev.frame, ev.next, b, ev.alpha, this.pose);
         const p = this.pose;
         writeMatrixTRS(this.bodyMats, 16 * b, p[0] as number, p[1] as number, p[2] as number, p[3] as number, p[4] as number, p[5] as number, p[6] as number);
+        if (b === rootBody) { rx = p[0] as number; ry = p[1] as number; rz = p[2] as number; }
         if (b === 1 && opacity > 0.05) { cx += p[0] as number; cy += p[1] as number; cn++; }
       }
+      if (stage === PLAYING) this.noteBreak(s, ev.breakMix, rx, ry, rz);
       for (let g = 0; g < ng; g++) {
         const m = this.meshes[g] as THREE_NS.InstancedMesh;
         mul4(m.instanceMatrix.array as Float32Array, 16 * s, this.bodyMats, 16 * (this.geomBody[g] as number), this.geomLocal, 16 * g);
@@ -283,14 +347,24 @@ export class GhostSwarm {
       } else ast[4 * s + 1] = 0;
     }
     this.highest = high;
-    this.centroid = cn > 0 ? [cx / cn, cy / cn] : null;
+    this.span = span;
+    if (cn > 0) { this.centroidBuf[0] = cx / cn; this.centroidBuf[1] = cy / cn; this.centroid = this.centroidBuf; } else this.centroid = null;
     for (const m of this.meshes) { m.count = high + 1; m.instanceMatrix.needsUpdate = true; }
     this.arrowMesh.count = high + 1;
     this.arrowMesh.instanceMatrix.needsUpdate = true;
     this.state.needsUpdate = true;
     this.arrowState.needsUpdate = true;
-    if (!any) this.setRunning(false);
+    if (!any || this.frozen) this.setRunning(false);
     return any;
+  }
+
+  /** Calls onBreak once per ghost when its break time is crossed; the first of a generation is flagged. */
+  private noteBreak(s: number, breakMix: number, x: number, y: number, z: number): void {
+    if (breakMix !== 1 || this.brokeSeen[s] === 1 || this.gen[s] !== this.playGen) return;
+    this.brokeSeen[s] = 1;
+    const first = !this.genBroke;
+    this.genBroke = true;
+    this.o.onBreak?.(s, x, y, z, first);
   }
 
   /** T(start) * R(+X -> dir) * S(length, 1, 1), start at the body position in frame 0. */

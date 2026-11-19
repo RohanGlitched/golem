@@ -54,6 +54,72 @@ test.describe('emet and met', () => {
   });
 });
 
+test.describe('bullet time and the scrubber', () => {
+  const sig = (page: Page) => page.evaluate(() => (window as unknown as W).studio.signature.state());
+
+  test('slows the swarm to 0.1× for 1.2 s and orbits 40° when the first ghost breaks', async ({ page }) => {
+    await openG1(page, '?sleep=600000');
+    // Synthetic ghosts: 40 % fall, breaking 0.8 × 2 s = 1.6 s into the generation.
+    await page.evaluate(() => (window as unknown as W).studio.summonSynthetic(64, 2));
+    await page.waitForFunction(() => { const s = (window as unknown as W).studio.signature.state(); return s.bullet && s.clock.rate < 0.5; }, null, { timeout: 15_000 });
+    const a = await sig(page);
+    expect(a.clock.rate).toBeCloseTo(0.1, 9);
+    const cam0 = await page.evaluate(() => performance.now());
+    await page.waitForTimeout(400);
+    const b = await sig(page);
+    const wall = (await page.evaluate(() => performance.now()) - cam0) / 1000;
+    if (b.bullet) expect(b.clock.now - a.clock.now).toBeLessThan(0.15 * wall + 0.03);
+    await page.screenshot({ path: path.join(SHOTS, 'signature-bullet-time.png') });
+    await page.waitForFunction(() => !(window as unknown as W).studio.signature.state().bullet, null, { timeout: 5000 });
+    const c = await sig(page);
+    expect(c.clock.rate).toBe(1);
+    expect(c.bulletAngle).toBe(40);
+  });
+
+  test('skips bullet time under reduced motion', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await openG1(page, '?sleep=600000');
+    await page.evaluate(() => (window as unknown as W).studio.summonSynthetic(64, 2));
+    const seen = await page.evaluate(() => new Promise<boolean>((res) => {
+      const t0 = performance.now();
+      const step = () => {
+        const s = (window as unknown as W).studio.signature.state();
+        if (s.bullet) res(true); else if (performance.now() - t0 > 4000) res(false); else requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    }));
+    expect(seen).toBe(false);
+  });
+
+  test('scrubs every ghost at once, freezes without a ghosts-running reason, and plays on', async ({ page }) => {
+    await openG1(page, '?sleep=600000');
+    await page.evaluate(() => (window as unknown as W).studio.summonSynthetic(32, 4));
+    const range = page.getByRole('slider', { name: 'Ghost time' });
+    await expect(range).toBeVisible({ timeout: 10_000 });
+    await range.fill('2.5');
+    await page.waitForTimeout(200);
+    const a = await sig(page);
+    expect(a.clock.frozen).toBe(true);
+    expect(a.clock.now - a.playStart).toBeCloseTo(2.5, 6);
+    expect(a.reasons).not.toContain('ghosts-running');
+    await expect(page.getByRole('button', { name: 'Play' })).toBeVisible();
+    // Orbit the frozen swarm: drag on the floor at the stage's top-left corner.
+    const box = (await page.locator('canvas.golem-canvas').boundingBox())!;
+    await page.mouse.move(box.x + 30, box.y + 30);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 230, box.y + 40, { steps: 8 });
+    await page.mouse.up();
+    await page.waitForTimeout(300);
+    expect((await sig(page)).clock.now).toBe(a.clock.now);
+    await page.screenshot({ path: path.join(SHOTS, 'signature-scrubber-frozen.png') });
+    await page.getByRole('button', { name: 'Play' }).click();
+    await page.waitForTimeout(300);
+    const c = await sig(page);
+    expect(c.clock.frozen).toBe(false);
+    expect(c.clock.now).toBeGreaterThan(a.clock.now);
+  });
+});
+
 test.describe('the living sentence', () => {
   test('sets the selected response clause large in Gloock', async ({ page }) => {
     await openG1(page);

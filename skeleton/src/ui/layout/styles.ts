@@ -33,7 +33,13 @@ export function studioCss(fontBaseUrl = './fonts/'): string {
 .golem-actions{grid-area:actions;display:flex;flex-wrap:wrap;gap:8px;padding:16px 20px 12px;background:var(--ground-2);border-right:1px solid var(--rule)}
 .golem-tablet{grid-area:tablet;overflow:auto;padding:4px 20px 20px;background:var(--ground-2);border-right:1px solid var(--rule)}
 .golem-verdict{grid-area:verdict;padding:12px 20px 16px;background:var(--ground-2);border-right:1px solid var(--rule);border-top:1px solid var(--rule);font-size:${s13}px;max-height:40vh;overflow:auto}
-.golem-main{grid-area:stage / stage / reel / reel;display:grid;grid-template-rows:minmax(0,1fr) auto;min-width:0;min-height:0}
+.golem-main{grid-area:stage / stage / reel / reel;display:grid;grid-template-rows:minmax(0,1fr) auto auto;min-width:0;min-height:0}
+.golem-sigbar{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;padding:8px 20px;border-top:1px solid var(--rule);background:var(--ground);font-size:${s13}px;min-width:0}
+.golem-timeline{display:flex;gap:8px;align-items:center;flex:1 1 320px;min-width:0}
+.golem-timeline[hidden]{display:none}
+.golem-timeline-range{flex:1 1 auto;min-width:80px;accent-color:var(--ghost)}
+.golem-timeline-time{color:var(--ink-2);white-space:nowrap}
+.golem-sigtools{display:flex;flex-wrap:wrap;gap:8px;margin-left:auto}
 .golem-stage{position:relative;min-height:0;background:var(--ground);border-radius:0;overflow:hidden}
 .golem-stage::after{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(120% 95% at 50% 42%,transparent 55%,rgba(0,0,0,.38) 100%)}
 .golem-canvas{display:block;width:100%;height:100%;touch-action:pan-y}
@@ -113,7 +119,8 @@ export function studioCss(fontBaseUrl = './fonts/'): string {
 .golem-panel-error{padding:12px 20px;color:var(--break-text)}
 .golem-messages{list-style:none;margin:0;padding:0 20px;font-size:${s13}px;color:var(--ink-2)}
 @media (max-width:1023.98px){
-  .golem-studio{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:none;grid-template-areas:"stage" "actions" "tablet" "reel" "verdict";height:auto;overflow:visible}
+  .golem-studio{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:none;grid-template-areas:"stage" "sigbar" "actions" "tablet" "reel" "verdict";height:auto;overflow:visible}
+  .golem-sigbar{grid-area:sigbar}
   .golem-main{display:contents}
   .golem-stage{grid-area:stage;height:56vh}
   .golem-reel{grid-area:reel}

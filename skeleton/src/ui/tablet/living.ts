@@ -93,6 +93,8 @@ export function leanDeg(qw: number, qx: number, qy: number, qz: number, rx: numb
   const zy = 2 * (qy * qz - qw * qx);
   const zz = 1 - 2 * (qx * qx + qy * qy);
   const lateral = zx * rx + zy * ry + zz * rz;
+  // No sideways component: no lean to show (this also keeps an upside-down body symmetric).
+  if (lateral === 0) return 0;
   const d = (Math.atan2(lateral, zz) * 180) / Math.PI;
   if (!(d === d)) return 0;
   return d > LEAN_CAP_DEG ? LEAN_CAP_DEG : d < -LEAN_CAP_DEG ? -LEAN_CAP_DEG : d;
