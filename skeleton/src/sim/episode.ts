@@ -189,6 +189,12 @@ export async function runTrial(
     // ---- prologue: trigger, then sample 0 (allocates the signal arrays once, D6)
     const events: Array<{ name: string; t: number }> = [{ name: 'trigger', t: warmup }];
     xfrc.fill(0);
+    // D7: one-off hooks at the trigger, in array order, before sample 0 and the first apply.
+    for (let c = 0; c < nCalls; c++) {
+      const call = calls[c] as (typeof calls)[number];
+      if (typeof call.template.begin === 'function') call.template.begin(ctx, call.values);
+    }
+    refreshIfDetached();
     const pose = spec.record === 'poses' ? new PoseRecorder(model.nbody as number, req.horizon) : undefined;
     const traceT = new Float64Array(N + 1);
     const out: Record<string, number> = {};

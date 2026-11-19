@@ -205,4 +205,38 @@ describe('defect 3 and improvement 4: Controller.substep at the sim rate, and th
   });
 });
 
+describe('defect 7: PerturbationTemplate.begin runs once at the trigger', () => {
+  it('calls begin once per call, in array order, at the trigger, before sample 0 and the first apply; a mass doubling does not compound', async () => {
+    const log: string[] = [];
+    const { model } = await cache.getModel(boxDropApp);
+    const box = 1; // body id of "box"
+    const mass0 = model.body_mass[box] as number;
+    const mk = (name: string) => ({
+      phrase: name, name, dims: () => [],
+      begin: (ctx: any, values: Record<string, number>) => {
+        log.push(`begin:${name}:${Math.abs((ctx.data.time as number) - 0.2) < 1e-12}:${values['k']}`);
+        ctx.model.body_mass[box] *= 2;
+      },
+      apply: () => { if (!log.includes(`apply:${name}`)) log.push(`apply:${name}`); },
+    });
+    const masses: number[] = [];
+    const app: RobotApp = {
+      ...boxDropApp,
+      lexicon: { ...boxDropApp.lexicon, perturbations: [mk('A'), mk('B')] },
+      signals: (ctx, out) => {
+        if (masses.length === 0) log.push('sample0');
+        masses.push(ctx.model.body_mass[box] as number);
+        boxDropApp.signals(ctx, out);
+      },
+    };
+    await run(app, alwaysAbove({
+      signal: 'box.z', bound: 0, horizon: 0.5,
+      perturbations: [{ template: 'A', params: { k: 1 } }, { template: 'B', params: { k: 2 } }],
+    }));
+    expect(log).toEqual(['begin:A:true:1', 'begin:B:true:2', 'sample0', 'apply:A', 'apply:B']);
+    expect(masses.every((m) => m === mass0 * 4)).toBe(true);
+    expect(model.body_mass[box]).toBe(mass0);
+  });
+});
+
 void makeStoolApp; void shoveCall;

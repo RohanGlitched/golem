@@ -58,6 +58,11 @@ export interface PerturbationTemplate {
   name?: string;
   dims(slots: Record<string, Quantity | [Quantity, Quantity] | string>): Dimension[];
   apply(ctx: SimContext, t: number, tTrigger: number, values: Record<string, number>): void;
+  /**
+   * Approved addition (golem-sim-hardening): called once per perturbation call at the trigger, in array
+   * order, before sample 0 and the first apply. For one-off edits; the runner restores the model afterwards.
+   */
+  begin?(ctx: SimContext, values: Record<string, number>): void;
   visual?(values: Record<string, number>): { force?: [number, number, number]; at?: string };
 }
 export interface Lexicon {
