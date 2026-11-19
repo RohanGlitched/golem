@@ -444,23 +444,23 @@ Conventions for every task:
     - **Property 21: Stale runs change nothing**
     - **Validates: Requirements 10.11, 19.3, 19.11, 19.15**
 
-- [ ] 14. Tablet (React 18)
-  - [ ] 14.1 Implement `tablet/quantity-control.tsx`
+- [x] 14. Tablet (React 18)
+  - [x] 14.1 Implement `tablet/quantity-control.tsx`
     - A `<span role="spinbutton" tabindex="0">` with `aria-valuenow`, `aria-valuemin`, `aria-valuemax`, `aria-valuetext`, `aria-label`; pointer drag (one step per 4 px, `touch-action: none` while dragging, live number update on every move), arrow keys with Shift and Alt modifiers, typed commit on Enter or blur with the inline message from `commitTyped`, visible focus ring, pointer target at least 24 px high, 80 ms debounce before recompile and run.
     - Testing Library example tests: ARIA attributes, ArrowUp and ArrowDown steps, `it('rejects a force typed with a time unit')` shows the inline message and keeps the value.
     - _Requirements: 16.1, 16.2, 16.3, 16.4, 16.5, 16.6, 16.7, 16.8, 16.12, 16.13, 16.14_
 
-  - [ ] 14.2 Implement `tablet/line-editor.tsx`
+  - [x] 14.2 Implement `tablet/line-editor.tsx`
     - Transparent `<textarea>` over a mirrored underline layer (wavy `--break` underline), recompile 100 ms after the last keystroke, Diagnostic message list with suggestion and "Use suggestion" button, `aria-describedby` and `aria-invalid`, Enter or blur commits when the line compiles (updates the Share_Hash, starts a run), Escape restores the previous text, writes no file.
     - Testing Library example tests: Escape restores, suggestion button replaces the line, `aria-invalid` while an error Diagnostic exists, nothing is written to disk.
     - _Requirements: 17.1, 17.2, 17.3, 17.4, 17.5, 17.6, 17.8, 17.9, 17.10_
 
-  - [ ] 14.3 Implement `tablet/requirement-line.tsx`
+  - [x] 14.3 Implement `tablet/requirement-line.tsx`
     - One line with ID, segments (keywords at 0.85em and letter-spacing 0.04em, quantity controls, plain text), `aria-current="true"` and the 2 px `--clay` left rule when selected, status text and shape (not colour alone) for `untested`, `running`, `held`, `broken`, `error`, Margin_Text in Tabular_Figures, the Fracture hairline for `broken` only, no check mark or green fill for `held`, "Edit line", "Summon 64 ghosts" (verb phrase, becomes "Stop the run" while active), accessible name as ID plus text with status via `aria-describedby`, Enter or click selects.
     - Testing Library example tests: status text for each state, Fracture only when broken, held text reads "no counterexample found in N trials".
     - _Requirements: 15.2, 15.3, 15.4, 15.7, 15.8, 15.10, 18.1, 18.2, 18.3, 18.4, 18.5, 18.9, 18.10, 18.12, 18.13, 18.16, 19.1, 19.12, 26.11_
 
-  - [ ] 14.4 Implement `tablet/tablet.tsx`
+  - [x] 14.4 Implement `tablet/tablet.tsx`
     - The Tablet container: lines in file order, group headings from Kiro requirement headings, the empty message "No requirements found: add lines such as 'WHEN …, THE robot SHALL …' to your requirements.md", the "Summon 64 ghosts for every line" button, the disabled Summon message when no pool is configured, selection that sets the Aura_Source and the Reel subject, `aside` landmark with an accessible name, Live_Region announcements of status changes with line ID and summary.
     - Testing Library example tests: file order, empty message text, disabled-pool message, status change announced.
     - _Requirements: 1.7, 15.1, 15.5, 15.6, 15.9, 15.10, 18.11, 19.2, 19.4, 26.10_
