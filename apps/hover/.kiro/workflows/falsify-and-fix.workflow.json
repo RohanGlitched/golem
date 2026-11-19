@@ -1,0 +1,28 @@
+{
+  "name": "falsify-and-fix",
+  "nodes": [
+    {
+      "type": "repeat",
+      "id": "repair_loop",
+      "maxIterations": 6,
+      "onMaxIterations": "pause",
+      "stopCondition": {
+        "fileCheck": { "path": ".golem/report.json", "jsonPath": "meta.lastGateExitCode", "value": 0 }
+      },
+      "nodes": [
+        {
+          "type": "step",
+          "id": "tune",
+          "agent": "golem-tuner",
+          "prompt": "Run npx --no-install golem-spec falsify, fix the controller, re-run until it holds."
+        },
+        {
+          "type": "step",
+          "id": "gate",
+          "agent": "golem-tuner",
+          "prompt": "Run `npx --no-install golem-spec gate` (without --kiro) in the app directory. Report its full stdout. If it exits 1 (usage, compile or runtime error), stop and report the output unchanged."
+        }
+      ]
+    }
+  ]
+}
