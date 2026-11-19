@@ -155,4 +155,9 @@ export type EarlyStopHook = (trace: Trace, n: number) => number | undefined;
 export interface RunOptions {
   earlyStop?: EarlyStopHook;
   cache: ModelCache;
+  /**
+   * golem-sim-hardening improvement 2: run this one trial with another sim timestep (controlDt unchanged,
+   * so it must still be an integer multiple) and/or integrator. The model is restored afterwards.
+   */
+  numerics?: { simDt?: number; integrator?: IntegratorName };
 }

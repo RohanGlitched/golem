@@ -60,7 +60,11 @@ export async function runTrial(
   let mj: any;
   let model: any;
   try {
-    v = validateTrial(app, req, spec);
+    const num = opts.numerics;
+    if (num?.integrator !== undefined && !INTEGRATORS.includes(num.integrator)) {
+      throw new SimError(`Unknown integrator "${String(num.integrator)}"; use one of ${INTEGRATORS.join(', ')}`);
+    }
+    v = validateTrial(num?.simDt !== undefined ? { ...app, simDt: num.simDt } : app, req, spec);
     ({ mj, model } = await opts.cache.getModel(app));
   } catch (e) {
     throw wrapTrialError(e, app, req, spec);
@@ -76,6 +80,9 @@ export async function runTrial(
   try {
     // D1: MuJoCo's auto-reset would silently repair a blown-up state. The restore below undoes it.
     model.opt.disableflags = model.opt.disableflags | autoresetBit(mj);
+    // I2: per-trial numerics; the snapshot restore puts the compiled values back.
+    if (opts.numerics?.simDt !== undefined) model.opt.timestep = opts.numerics.simDt;
+    if (opts.numerics?.integrator !== undefined) model.opt.integrator = INTEGRATORS.indexOf(opts.numerics.integrator);
     const data = scope.track(new mj.MjData(model), 'MjData');
     const rng = mulberry32(spec.seed);
     ctx = buildContext(mj, model, data, app.names);
@@ -104,7 +111,8 @@ export async function runTrial(
       }
     };
 
-    const { simDt, controlDt, warmup } = app;
+    const { controlDt, warmup } = app;
+    const simDt = opts.numerics?.simDt ?? app.simDt;
     const { n, calls } = v;
     const nCalls = calls.length;
     const N = v.controlSteps;

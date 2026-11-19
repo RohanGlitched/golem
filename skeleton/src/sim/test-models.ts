@@ -248,3 +248,40 @@ export function makeStoolApp(pd: 'substep' | 'step' | 'none' = 'substep'): Robot
 
 export const stoolApp: RobotApp = makeStoolApp('substep');
 export const STOOL_LEGS = LEGS;
+
+// ---------------------------------------------------------------- numerical artefact (recheck tests)
+
+const JITTER_XML = `<mujoco model="golem-jitter">
+  <compiler angle="radian"/>
+  <option timestep="0.01" gravity="0 0 0"/>
+  <worldbody>
+    <body name="wheel" pos="0 0 1">
+      <joint name="spin" type="hinge" axis="0 0 1" armature="1"/>
+      <geom type="sphere" size="0.05" mass="0.001" contype="0" conaffinity="0"/>
+    </body>
+  </worldbody>
+  <actuator>
+    <velocity name="brake" joint="spin" kv="250"/>
+  </actuator>
+</mujoco>
+`;
+
+/**
+ * A wheel (inertia 1 kg m^2) held at zero speed by a velocity servo with kv = 250 N m s/rad. Explicit Euler at
+ * 0.01 s has dt kv / I = 2.5 > 2 and blows up; at 0.005 s or with implicitfast it decays. A failure of
+ * `|spin.speed| <= 2 rad/s` is therefore a timestep artefact.
+ */
+export const jitterApp: RobotApp = {
+  id: 'jitter',
+  name: 'Velocity-servo wheel (timestep artefact)',
+  files: async () => ({ 'scene.xml': enc(JITTER_XML) }),
+  sceneFile: 'scene.xml',
+  simDt: 0.01,
+  controlDt: 0.02,
+  warmup: 0,
+  names: { joint: ['spin'] },
+  lexicon: { robotNames: ['robot'], predicates: [], perturbations: [] },
+  initState(ctx) { (ctx.data.qvel as Float64Array)[0] = 1; },
+  makeController: (): Controller => ({ step: () => {} }),
+  signals(ctx, out) { out['spin.slack'] = 2 - Math.abs((ctx.data.qvel as Float64Array)[0] as number); },
+};

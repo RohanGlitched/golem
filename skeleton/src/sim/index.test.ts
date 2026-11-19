@@ -11,7 +11,8 @@ describe('sim public exports', () => {
   it('matches the documented export surface exactly', () => {
     expect(Object.keys(sim).sort()).toEqual([
       'DIVERGED_ROBUSTNESS', 'ModelCache', 'PoseRecorder', 'SimError', 'buildContext', 'changedModelFields', 'createSaturationMeter', 'forEachContact', 'geomDistance',
-      'liveHandleCount', 'loadMujoco', 'makeTestRequirement', 'mulberry32', 'readWarnings', 'runTrial', 'testApp',
+      'liveHandleCount', 'loadMujoco', 'makeTestRequirement', 'mulberry32', 'otherIntegrator', 'readWarnings', 'recheckTrial',
+      'runTrial', 'testApp',
       'validateRobotPaths', 'withDoubleBuffer', 'writeRobotFiles',
     ]);
   });
