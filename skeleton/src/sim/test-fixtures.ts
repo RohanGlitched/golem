@@ -1,5 +1,8 @@
 ﻿// Test-only fixtures. Not exported from index.ts.
-import type { CompiledRequirement, Dimension, Mj, RobotApp, TrialSpec } from './types.js';
+import { runtimeOf } from './test-app.js';
+import type {
+  CompiledRequirement, Controller, Dimension, Mj, PerturbationTemplate, RobotApp, SimContext, TrialSpec,
+} from './types.js';
 
 // ---------------------------------------------------------------- fake MuJoCo
 
@@ -180,3 +183,112 @@ export const miniSpec = (over: Partial<TrialSpec> = {}): TrialSpec => ({
 });
 
 
+
+// ---------------------------------------------------------------- behaviour wrappers (Test_App based)
+// Each wrapper changes exactly one behaviour of the app it wraps.
+
+/** controller.step throws at the given 0-based call index (warm-up calls count). */
+export function withThrowingController(app: RobotApp, atStep: number): RobotApp {
+  return {
+    ...app,
+    makeController(ctx, rng): Controller {
+      const inner = app.makeController(ctx, rng);
+      let n = 0;
+      return {
+        step(c, t) {
+          if (n++ === atStep) throw new Error(`controller failed at step ${atStep}`);
+          inner.step(c, t);
+        },
+      };
+    },
+  };
+}
+
+/** app.signals throws at the given 0-based call index. */
+export function withThrowingSignals(app: RobotApp, atStep: number): RobotApp {
+  const counts = new WeakMap<SimContext, number>();
+  return {
+    ...app,
+    signals(ctx, out) {
+      const n = counts.get(ctx) ?? 0;
+      counts.set(ctx, n + 1);
+      if (n === atStep) throw new Error(`signals failed at step ${atStep}`);
+      app.signals(ctx, out);
+    },
+  };
+}
+
+const AUTORESET_BIT = 65536; // mjDSBL_AUTORESET in MuJoCo 4.x
+/**
+ * At control step `atStep` the controller writes NaN into ctrl and into the hinge qpos.
+ * MuJoCo's auto-reset would silently repair that, so the wrapper turns auto-reset off for the
+ * trial and restores it in endTrial. (NaN in ctrl alone does not make qpos non-finite.)
+ */
+export function withNaNControl(app: RobotApp, atStep: number): RobotApp {
+  return {
+    ...app,
+    makeController(ctx, rng): Controller {
+      const inner = app.makeController(ctx, rng);
+      ctx.model.opt.disableflags = ctx.model.opt.disableflags | AUTORESET_BIT;
+      let n = 0;
+      return {
+        step(c, t) {
+          inner.step(c, t);
+          if (n++ === atStep) {
+            const rt = runtimeOf(c);
+            rt.ctrl[rt.driveId] = NaN;
+            rt.qpos[rt.hingeAdr] = NaN;
+          }
+        },
+      };
+    },
+    endTrial(ctx) {
+      ctx.model.opt.disableflags = ctx.model.opt.disableflags & ~AUTORESET_BIT;
+      app.endTrial?.(ctx);
+    },
+  };
+}
+
+/** Adds a template named `alter` that changes body_mass, geom_friction and opt.gravity when applied. */
+export function withModelAlteringTemplate(app: RobotApp): RobotApp {
+  const alter: PerturbationTemplate = {
+    phrase: 'the model is altered',
+    name: 'alter',
+    dims: () => [],
+    apply(ctx) {
+      const m = ctx.model;
+      const bob = ctx.ids['body:bob'] as number;
+      m.body_mass[bob] = m.body_mass[bob] * 2;
+      m.geom_friction[0] = m.geom_friction[0] * 0.5;
+      m.opt.gravity[2] = -1;
+    },
+  };
+  return { ...app, lexicon: { ...app.lexicon, perturbations: [...app.lexicon.perturbations, alter] } };
+}
+
+export interface SpyEntry {
+  name: string; t: number; tTrigger: number; values: Record<string, number>; xfrc: Float64Array;
+}
+/** Adds a template (default name `spy`) that records every apply call into `log`. */
+export function withSpyTemplate(app: RobotApp, log: SpyEntry[], name = 'spy'): RobotApp {
+  const spy: PerturbationTemplate = {
+    phrase: `spy ${name}`,
+    name,
+    dims: () => [],
+    apply(ctx, t, tTrigger, values) {
+      log.push({ name, t, tTrigger, values, xfrc: Float64Array.from(ctx.data.xfrc_applied as Float64Array) });
+    },
+  };
+  return { ...app, lexicon: { ...app.lexicon, perturbations: [...app.lexicon.perturbations, spy] } };
+}
+
+/** initState and the controller draw no PRNG value: the initial hinge angle is the fixed 0.05 rad. */
+export function withNoDraws(app: RobotApp): RobotApp {
+  return {
+    ...app,
+    initState(ctx) {
+      const rt = runtimeOf(ctx);
+      rt.qpos[rt.hingeAdr] = 0.05;
+    },
+  };
+}

@@ -124,13 +124,13 @@ Rules that apply to every task:
     - The app imports nothing outside `skeleton/src/sim` except `@mujoco/mujoco` types and contract types.
     - _Requirements: 13.1, 13.2, 13.3, 13.4, 13.5, 13.6, 13.7, 13.8, 13.10, 13.11, 3.12_
 
-- [ ] 12. Behaviour fixtures
-  - [~] 12.1 Add app wrappers to `test-fixtures.ts`
+- [x] 12. Behaviour fixtures
+  - [x] 12.1 Add app wrappers to `test-fixtures.ts`
     - `withThrowingController`, `withThrowingSignals`, `withNaNControl`, `withModelAlteringTemplate`, `withSpyTemplate`, `withNoDraws`.
     - Example tests per wrapper confirming that it changes only its one behaviour, for example the spy log records `(t, tTrigger, values identity, xfrc snapshot)`.
     - _Requirements: 6.13, 7.13, 3.11, 11.9_
 
-- [~] 13. Checkpoint - Building blocks complete
+- [x] 13. Checkpoint - Building blocks complete
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 14. Episode runner
