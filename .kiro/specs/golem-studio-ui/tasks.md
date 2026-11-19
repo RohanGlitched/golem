@@ -187,57 +187,57 @@ Conventions for every task:
     - **Property 23: Push arrow direction and length**
     - **Validates: Requirements 12.1, 12.2, 12.3, 12.7, 12.8**
 
-- [ ] 5. Status, codecs, pins and verdict rows
-  - [ ] 5.1 Implement `run/status.ts`
+- [x] 5. Status, codecs, pins and verdict rows
+  - [x] 5.1 Implement `run/status.ts`
     - `statusOfVerdict`, `lineStatusOf` (compile error, running, verdict, untested), `marginText` (`-Infinity` gives "diverged"), `counterexampleSummary` with the phrase table, "falls" or "fails" verb selection, button label selection ("Replay the fall" or "Replay the failure"), "depends on the seed".
     - Example tests: "falls from 168 N at 135 deg, 62% into the stride", `seed-sensitive` suffix, never the words "proved" or "verified".
     - _Requirements: 17.7, 18.1, 18.2, 18.3, 18.4, 18.5, 18.6, 18.7, 18.8, 18.12, 20.12_
 
-  - [ ]* 5.2 Write property test for status
+  - [x]* 5.2 Write property test for status
     - **Property 36: Status is broken if and only if the verdict is broken**
     - **Validates: Requirements 17.7, 18.1, 18.2, 18.14**
 
-  - [ ]* 5.3 Write property test for margin text
+  - [x]* 5.3 Write property test for margin text
     - **Property 37: Margin text**
     - **Validates: Requirements 18.3, 18.15**
 
-  - [ ]* 5.4 Write property test for counterexample summary units
+  - [x]* 5.4 Write property test for counterexample summary units
     - **Property 38: Counterexample summary units**
     - **Validates: Requirements 18.4, 18.6, 18.7, 18.8**
 
-  - [ ] 5.5 Implement `run/seed-json.ts`
+  - [x] 5.5 Implement `run/seed-json.ts`
     - `seedToJson` (2-space indent, stable key order, sorted scenario keys, non-finite robustness as strings, `-0` normalised) and `seedFromJson` returning a result object, never throwing.
     - Example tests: `-Infinity` robustness round trip, invalid JSON gives an error message.
     - _Requirements: 22.1, 22.14_
 
-  - [ ] 5.6 Write property test for seed JSON round trip
+  - [x] 5.6 Write property test for seed JSON round trip
     - **Property 40: Seed JSON round trip**
     - **Validates: Requirements 22.1, 22.14**
 
-  - [ ] 5.7 Implement `run/pins.ts`
+  - [x] 5.7 Implement `run/pins.ts`
     - `PinnedSeedStore` with `read`, `pin`, `remove`, `sameCounterexample` (same `reqId`, same `seed`, equal values per dimension name), key `golem:pins:v1:<appId>:<reqId>`, in-memory fallback with the announcement text, one warning with the count of ignored entries.
     - Example tests: storage missing, storage full, invalid JSON, valid mixed with invalid entries.
     - _Requirements: 22.3, 22.4, 22.6, 22.7, 22.16_
 
-  - [ ]* 5.8 Write property test for pinned seeds
+  - [x]* 5.8 Write property test for pinned seeds
     - **Property 41: Pinned seeds are stored once and invalid entries are skipped**
     - **Validates: Requirements 22.3, 22.4, 22.7, 22.16**
 
-  - [ ] 5.9 Implement `run/share-hash.ts`
+  - [x] 5.9 Implement `run/share-hash.ts`
     - `encodeShare` (`#g=` plus base64url of compact JSON, UTF-8, no `Buffer`), `decodeShare` (never throws, lists ignored parts), `buildShareState`, `fitShare` (4000 characters, drop lines equal to the original first, then edited lines from the end, `tooLong` and omitted ids).
     - Example tests: malformed hash loads the original with the message, unknown id ignored while valid ids apply, over-length message text.
     - _Requirements: 22.8, 22.9, 22.10, 22.11, 22.12, 22.15, 29.7_
 
-  - [ ] 5.10 Write property test for share hash round trip and limit
+  - [x] 5.10 Write property test for share hash round trip and limit
     - **Property 39: Share hash round trip and limit**
     - **Validates: Requirements 22.8, 22.10, 22.11, 22.12, 22.13**
 
-  - [ ] 5.11 Implement `verdict/verdict-rows.ts`
+  - [x] 5.11 Implement `verdict/verdict-rows.ts`
     - Format rows from a `Verdict` and the pool size: trials, random, guided, closest call, failure-rate bound (two significant figures, "not available"), wall time, pool size, the held sentence with the Budget, and no claim of proof.
     - Example tests: held sentence text, failure-rate bound "not available".
     - _Requirements: 23.1, 23.2, 23.3, 23.4, 23.5, 23.11, 18.12_
 
-  - [ ]* 5.12 Write property test for verdict display
+  - [x]* 5.12 Write property test for verdict display
     - **Property 42: Verdict display**
     - **Validates: Requirements 18.12, 23.1, 23.2, 23.3, 23.4, 23.5, 23.11, 23.13**
 
