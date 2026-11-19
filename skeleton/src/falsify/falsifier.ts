@@ -4,7 +4,7 @@
 import { BudgetClock, validateBudget, type SearchPhase } from './budget.js';
 import { clopperPearsonUpper, failureRateUpper95 } from './beta.js';
 import {
-  initCem, refitCem, sampleGeneration, validateCemParams, type CemParams, type CemState, type DimDist, type Observed,
+  DEFAULT_CEM, initCem, refitCem, sampleGeneration, validateCemParams, type CemParams, type CemState, type DimDist, type Observed,
 } from './cem.js';
 import { classify, verificationSeeds } from './classify.js';
 import type {
@@ -14,7 +14,7 @@ import { AbortError, errorMessage } from './errors.js';
 import { latinHypercube } from './lhs.js';
 import { deriveSeed, SALT } from './prng.js';
 import { ProgressEmitter, safeInvoke } from './progress.js';
-import { shrink, type ShrinkTrialOutcome } from './shrink.js';
+import { DEFAULT_SHRINK, shrink, type ShrinkTrialOutcome } from './shrink.js';
 import type {
   CemDimInfo, FalsifyOptions, FalsifyResult, PinnedSeedEntry, ReplayOptions, ResolvedConfig, ResultInfo, RunMetadata,
 } from './types.js';
@@ -23,6 +23,9 @@ interface Completed { phase: 0 | 1 | 2 | 3; scenario: Scenario; seed: number; ro
 
 /** Default share of the trial budget (and of the wall time) given to the Phase 1 Latin hypercube. */
 export const DEFAULT_PHASE1_FRACTION = 0.2;
+export const DEFAULT_PHASE1_GENERATION_SIZE = 32;
+/** Shrink trials on top of maxTrials: max(reserveMin, ceil(reserveFraction * maxTrials)). */
+export const DEFAULT_SHRINK_RESERVE = { reserveFraction: 0.15, reserveMin: 12 } as const;
 
 function isAbortLike(e: unknown): boolean {
   return typeof e === 'object' && e !== null && (e as { name?: unknown }).name === 'AbortError';
@@ -40,18 +43,21 @@ function resolveConfig(o: FalsifyOptions): { cfg: ResolvedConfig; randomOnly: bo
   const f1 = o.phase1Fraction ?? DEFAULT_PHASE1_FRACTION;
   const f2 = o.phase2Fraction ?? Math.max(0, 1 - f1);
   validateBudget(o.budget, f1, f2);
-  const g1 = o.phase1GenerationSize ?? 32;
+  const g1 = o.phase1GenerationSize ?? DEFAULT_PHASE1_GENERATION_SIZE;
   if (!Number.isInteger(g1) || g1 < 1) throw new RangeError(`phase1GenerationSize must be a positive integer, got ${String(g1)}`);
   const maxPinned = o.maxPinned ?? Infinity;
   if (!(maxPinned === Infinity || (Number.isInteger(maxPinned) && maxPinned >= 0))) {
     throw new RangeError(`maxPinned must be a non-negative integer, got ${String(o.maxPinned)}`);
   }
-  const sh = { tolerance: 0.01, maxTrials: 60, reserveFraction: 0.15, reserveMin: 12, ...stripUndefined(o.shrink ?? {}) };
+  const sh = { ...DEFAULT_SHRINK, ...DEFAULT_SHRINK_RESERVE, ...stripUndefined(o.shrink ?? {}) };
   if (!(sh.tolerance > 0 && sh.tolerance < 1)) throw new RangeError(`shrink.tolerance must be in (0, 1), got ${String(sh.tolerance)}`);
   if (!Number.isInteger(sh.maxTrials) || sh.maxTrials < 1) throw new RangeError(`shrink.maxTrials must be an integer of at least 1, got ${String(sh.maxTrials)}`);
   if (!(sh.reserveFraction >= 0 && sh.reserveFraction <= 1)) throw new RangeError(`shrink.reserveFraction must be in [0, 1], got ${String(sh.reserveFraction)}`);
   if (!Number.isInteger(sh.reserveMin) || sh.reserveMin < 0) throw new RangeError(`shrink.reserveMin must be a non-negative integer, got ${String(sh.reserveMin)}`);
-  const cem = { generationSize: 32, eliteFraction: 0.25, smoothing: 1, lhsFraction: 0.2, ...stripUndefined(o.cem ?? {}) };
+  const cem = {
+    generationSize: DEFAULT_CEM.genSize, eliteFraction: DEFAULT_CEM.eliteFraction, smoothing: DEFAULT_CEM.smoothing,
+    lhsFraction: DEFAULT_CEM.lhsFraction, ...stripUndefined(o.cem ?? {}),
+  };
   const randomOnly = mode === 'random-only';
   return {
     randomOnly,

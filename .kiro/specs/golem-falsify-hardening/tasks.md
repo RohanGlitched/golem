@@ -68,7 +68,7 @@ Rules for every task:
   - `docs/reviews/falsify-bench.mts`; change the default to 0.2 only under bugfix E.2; document the trade-off in the README.
   - _Bugfix: E.1–E.2_
 
-- [ ] 15. Design document and README (defect 9)
+- [x] 15. Design document and README (defect 9)
   - Test: `design-doc.test.ts` checks the `BudgetClock` methods and the stated defaults against the code.
   - Rewrite the drifted sections of `golem-falsify/design.md` and `falsify/README.md`.
   - _Bugfix: 9.2–9.4_

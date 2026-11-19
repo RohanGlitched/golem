@@ -40,6 +40,11 @@ export function validateBudget(budget: Budget, phase1Fraction: number, phase2Fra
 
 export type SearchPhase = 0 | 1 | 2;
 
+/** Weight of the newest batch in the exponential average of the time per wave. */
+export const WAVE_EMA_WEIGHT = 0.5;
+/** Added before flooring a quota, so a fraction p / T gives back exactly p trials. */
+export const QUOTA_EPSILON = 1e-9;
+
 export class BudgetClock {
   readonly maxTrials: number | null;
   readonly maxWallMs: number | null;
@@ -85,10 +90,10 @@ export class BudgetClock {
     const remaining0 = T - this.used[0];
     if (phase === 0) return T;
     // floor(x + 1e-9): f = p/T from replay options must give back exactly p (golem-falsify-hardening 5.4)
-    const q1 = this.cfg.randomOnly ? remaining0 : Math.min(remaining0, Math.floor(this.cfg.phase1Fraction * T + 1e-9));
+    const q1 = this.cfg.randomOnly ? remaining0 : Math.min(remaining0, Math.floor(this.cfg.phase1Fraction * T + QUOTA_EPSILON));
     if (phase === 1) return q1;
     // cumulative Phase 1 + 2 cap, so unused Phase 1 trials carry over and no trial is lost to two floors
-    const q12 = Math.floor((this.cfg.phase1Fraction + this.cfg.phase2Fraction) * T + 1e-9);
+    const q12 = Math.floor((this.cfg.phase1Fraction + this.cfg.phase2Fraction) * T + QUOTA_EPSILON);
     return Math.min(T - this.used[0] - this.used[1], q12 - this.used[1]);
   }
 
@@ -118,7 +123,7 @@ export class BudgetClock {
   observe(n: number, ms: number, poolSize: number): void {
     if (n <= 0 || !(ms >= 0)) return;
     const perWave = ms / Math.ceil(n / Math.max(1, poolSize));
-    this.wave = this.wave === null ? perWave : 0.5 * this.wave + 0.5 * perWave;
+    this.wave = this.wave === null ? perWave : (1 - WAVE_EMA_WEIGHT) * this.wave + WAVE_EMA_WEIGHT * perWave;
   }
   /** Estimated ms per wave, or null before any batch was measured (or without a wall limit). */
   waveMs(): number | null { return this.maxWallMs === null ? null : this.wave; }
