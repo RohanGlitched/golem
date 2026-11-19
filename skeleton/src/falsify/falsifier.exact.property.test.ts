@@ -33,7 +33,7 @@ describe('exact Clopper-Pearson bound on the verdict (golem-falsify-hardening it
   it('gives 1 - 0.05^(1/20) next to 3/20 for 20 passing random trials', async () => {
     const { pool } = loggingPool({ kind: 'const', value: 1 });
     const r = await falsify({ id: 'R1', space: { dims: [{ name: 'x', kind: 'force', min: 0, max: 1, severity: 'up' }] } }, pool, {
-      appId: 'a', budget: { maxTrials: 50 }, searchSeed: 1,
+      appId: 'a', budget: { maxTrials: 50 }, searchSeed: 1, phase1Fraction: 0.4,
     });
     expect(r.verdict.randomTrials).toBe(20);
     expect(r.verdict.failureRateUpper95).toBeCloseTo(0.15, 12);

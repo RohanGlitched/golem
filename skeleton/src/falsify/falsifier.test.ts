@@ -31,12 +31,13 @@ describe('falsify: Phases 0 and 1', () => {
   it('holds with the stated trial count and a rule-of-three bound', async () => {
     const r = await falsify(req, directPool(holds), { ...base, budget: { maxTrials: 50 } });
     expect(r.verdict.status).toBe('held');
+    // default Phase 1 fraction 0.2 (golem-falsify-hardening item E)
     expect(r.verdict.trials).toBe(50);
-    expect(r.verdict.randomTrials).toBe(20);
-    expect(r.verdict.guidedTrials).toBe(30);
-    expect(r.verdict.failureRateUpper95).toBeCloseTo(3 / 20, 12);
+    expect(r.verdict.randomTrials).toBe(10);
+    expect(r.verdict.guidedTrials).toBe(40);
+    expect(r.verdict.failureRateUpper95).toBeCloseTo(3 / 10, 12);
     expect(r.verdict.counterexample).toBeUndefined();
-    expect(r.meta.phaseTrials).toEqual({ p0: 0, p1: 20, p2: 30, p3: 0 });
+    expect(r.meta.phaseTrials).toEqual({ p0: 0, p1: 10, p2: 40, p3: 0 });
     expect(r.meta.mode).toBe('full');
     expect(r.meta.budgetExhausted).toBe(true);
     expect(r.pinEntry).toBeUndefined();
@@ -146,10 +147,10 @@ describe('falsify: Phases 0 and 1', () => {
     const fixed = { id: 'R9', space: { dims: [{ name: 'x', kind: 'force' as const, min: 3, max: 3, severity: 'none' as const }] } };
     const pool = directPool(holds);
     const r = await falsify(fixed, pool, { ...base, budget: { maxTrials: 50 } });
-    expect(r.verdict.randomTrials).toBe(20);
+    expect(r.verdict.randomTrials).toBe(10);
     expect(r.verdict.guidedTrials).toBe(0);
     const seeds = new Set(pool.calls.flat().map((s) => s.seed));
-    expect(seeds.size).toBe(20);
+    expect(seeds.size).toBe(10);
     for (const s of pool.calls.flat()) expect(s.scenario).toEqual({ x: 3 });
   });
 
@@ -173,7 +174,7 @@ describe('falsify: Phases 0 and 1', () => {
 
   it('emits one progress event per phase 0 and per generation, with frozen contents', async () => {
     const events: ProgressEvent[] = [];
-    await falsify(req, directPool(holds), { ...base, budget: { maxTrials: 50 }, cem: { generationSize: 16 }, onProgress: (e) => { events.push(e); } });
+    await falsify(req, directPool(holds), { ...base, budget: { maxTrials: 50 }, phase1Fraction: 0.4, cem: { generationSize: 16 }, onProgress: (e) => { events.push(e); } });
     expect(events.map((e) => [e.phase, e.generation])).toEqual([[0, 0], [1, 0], [2, 0], [2, 1]]);
     expect(events[1]!.scenarios).toHaveLength(20);
     expect(events[3]!.scenarios).toHaveLength(14); // last generation shrunk to the grant
@@ -185,7 +186,7 @@ describe('falsify: Phases 0 and 1', () => {
 describe('falsify: Phase 2, Phase 3, random-only and abort', () => {
   it('shrinks a failure found in the last generation of an exhausted budget using the shrink reserve', async () => {
     const T = 20;
-    const failSeed = deriveSeed(42, 2, 11); // the last Phase 2 trial
+    const failSeed = deriveSeed(42, 2, 15); // the last Phase 2 trial (Phase 1: 0.2 * 20 = 4, Phase 2: 16)
     const trialFn = syntheticTrialFn((_s, seed) => (seed === failSeed ? -1 : 1));
     const pool = directPool((spec: TrialSpec) => trialFn(spec));
     const r = await falsify(req, pool, { ...base, budget: { maxTrials: T } });

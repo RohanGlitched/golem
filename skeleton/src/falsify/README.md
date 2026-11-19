@@ -13,7 +13,7 @@ through any `TrialPool`.
 | Phase | What runs | Budget |
 |---|---|---|
 | 0 | Pinned seeds from `.golem/seeds/<app>/<reqId>.json`, lowest stored robustness first | taken from the total as they run |
-| 1 | Latin hypercube random sampling, generations of 32 | 40% of `maxTrials` (`phase1Fraction`) |
+| 1 | Latin hypercube random sampling, generations of 32 | 20% of `maxTrials` (`phase1Fraction`) |
 | 2 | Cross-entropy search toward the lowest margin, generations of 16, elite fraction 0.25 | the rest (`phase2Fraction`), plus what Phase 1 left unused |
 | 3 | Shrinking toward the mildest failing scenario, then 3 verification seeds | a separate shrink reserve: `max(12, ceil(0.15 * maxTrials))`, on top of `maxTrials` |
 
@@ -25,6 +25,19 @@ dimension width (`shrink.tolerance`) or 60 shrink trials have run (`shrink.maxTr
 counterexample found in the last generation is still shrunk.
 
 `mode: 'random-only'` runs Phase 0 and Phase 1 only, with the whole budget, as a baseline.
+
+## Choosing the Phase 1 fraction
+
+The default is 0.2 (it was 0.4 until golem-falsify-hardening). At equal trial budgets, over 300 search
+seeds per case (`docs/reviews/falsify-bench.mts`), 0.2 found every needle at least as often as 0.4 and
+found graded needles sooner: the 0.11% needle at 400 trials in 300/300 runs either way, with a median
+of 140 trials against 208. On a flat robustness function (no gradient to follow) both behave like
+random sampling.
+
+The cost is the failure-rate bound. `failureRateUpper95` and `failureRateUpper95Exact` come from the
+Phase 1 random trials only, because only those are an unbiased sample of the scenario space. A held run
+of 400 trials reports 3/80 = 3.75% at 0.2 against 3/160 = 1.9% at 0.4. When the bound is what you
+publish, set `phase1Fraction` higher (or use `mode: 'random-only'`, which spends the whole budget on it).
 
 ## What a verdict means
 
@@ -116,7 +129,7 @@ lists the path and reason in `meta.skippedSeedFiles` or `meta.skippedPinned`, an
 | Option | Default | Allowed |
 |---|---|---|
 | `budget.maxTrials` / `budget.maxWallMs` | none (one is required) | positive integer / positive ms |
-| `phase1Fraction`, `phase2Fraction` | 0.4, remainder | each in [0, 1], sum at most 1 |
+| `phase1Fraction`, `phase2Fraction` | 0.2, remainder | each in [0, 1], sum at most 1 |
 | `phase1GenerationSize` | 32 | integer ≥ 1 |
 | `cem` | `{ generationSize: 16, eliteFraction: 0.25, smoothing: 1 }` | |
 | `shrink` | `{ tolerance: 0.01, maxTrials: 60, reserveFraction: 0.15, reserveMin: 12 }` | tolerance in (0, 1) |

@@ -170,7 +170,7 @@ Supersedes golem-falsify design section 5 procedure (plain bisection, single pas
 
 ## Item A: search effectiveness in CI
 
-A.1 A property test SHALL run the graded needle at 400 trials and the flat needle at 1000 trials over fixed sets of search seeds, in full and random-only mode, and SHALL assert: graded, full finds the region in at least as many runs as random-only; flat, full finds it in at least (random-only − 8% of the runs).
+A.1 A property test SHALL run the graded needle at 400 trials (100 search seeds per case) and the flat needle at 1000 trials (400 search seeds per case) over fixed sets of search seeds, in full and random-only mode, and SHALL assert: graded, full finds the region in at least as many runs as random-only; flat, full finds it in at least (random-only − 8% of the runs).
 A.2 The test SHALL finish within 60 s in CI with the in-process pool.
 
 ## Item B: calibration of robust versus seed-sensitive
@@ -189,5 +189,5 @@ D.1 Covered by 10.7. A test SHALL show that replaying a counterexample found by 
 
 ## Item E: Phase 1 fraction default
 
-E.1 A benchmark (`docs/reviews/falsify-bench.mts`) SHALL compare Phase 1 fractions 0.4 and 0.2 at equal budgets on the graded and flat needles, the 0.78% needle, the extra-dimension needle and the wrap needle, with 95% intervals.
+E.1 A benchmark (`docs/reviews/falsify-bench.mts`) SHALL compare Phase 1 fractions 0.4 and 0.2 at equal budgets on the graded and flat needles, the 0.78% needle, the extra-dimension needle and the wrap needle, with 95% intervals, over 300 search seeds per case (100-seed runs are too noisy to separate the flat cases: one run of difference).
 E.2 THE default SHALL become 0.2 only if it finds the region in at least as many runs on every case and has a lower median `foundAfter` on the graded needle. The trade-off (fewer Phase 1 trials give a looser `failureRateUpper95`) SHALL be documented in the falsify README and in `docs/reviews/falsify-hardening.md`.

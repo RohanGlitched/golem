@@ -21,6 +21,9 @@ import type {
 
 interface Completed { phase: 0 | 1 | 2 | 3; scenario: Scenario; seed: number; robustness: number; run: number }
 
+/** Default share of the trial budget (and of the wall time) given to the Phase 1 Latin hypercube. */
+export const DEFAULT_PHASE1_FRACTION = 0.2;
+
 function isAbortLike(e: unknown): boolean {
   return typeof e === 'object' && e !== null && (e as { name?: unknown }).name === 'AbortError';
 }
@@ -32,7 +35,9 @@ function resolveConfig(o: FalsifyOptions): { cfg: ResolvedConfig; randomOnly: bo
   }
   const mode = o.mode ?? 'full';
   if (mode !== 'full' && mode !== 'random-only') throw new RangeError(`mode must be 'full' or 'random-only', got ${String(mode)}`);
-  const f1 = o.phase1Fraction ?? 0.4;
+  // 0.2 since golem-falsify-hardening item E (docs/reviews/falsify-hardening.md): at equal budgets it finds
+  // needles at least as often as 0.4 and sooner; the cost is a looser failureRateUpper95 (fewer random trials).
+  const f1 = o.phase1Fraction ?? DEFAULT_PHASE1_FRACTION;
   const f2 = o.phase2Fraction ?? Math.max(0, 1 - f1);
   validateBudget(o.budget, f1, f2);
   const g1 = o.phase1GenerationSize ?? 32;

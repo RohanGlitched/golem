@@ -165,9 +165,9 @@ A single severity dimension gets no second pass. A half-space costs `1 + k + log
 
 ## Item A and E: benchmark
 
-`falsify/search.benchmark.property.test.ts` uses fast-check to draw the base of the search-seed set with a fixed logged fast-check seed, 2 cases, 100 search seeds per case. It is a statistical property, so a fixed seed keeps CI deterministic; the bound (8% of runs) is about two standard deviations of the paired difference measured on the flat needle.
+`falsify/search.benchmark.property.test.ts` uses fast-check to draw the base of the search-seed set with a fixed logged fast-check seed, 2 cases per property: 100 search seeds per mode on the graded needle, 400 on the flat needle. It is a statistical property, so a fixed seed keeps CI deterministic. On the flat needle the two modes share only the Phase 1 prefix, so the paired difference of found counts has a standard deviation of about `0.6·sqrt(runs)`; at 400 runs the bound (8% of runs = 32) is about 2.6 standard deviations.
 
-`docs/reviews/falsify-bench.mts` runs the cases of bugfix E.1 with 100 search seeds each and prints found / runs with a 95% Clopper-Pearson interval and the median `foundAfter`.
+`docs/reviews/falsify-bench.mts` runs the cases of bugfix E.1 and prints found / runs with a 95% Clopper-Pearson interval and the median `foundAfter`.
 
 ## Item B: calibration
 

@@ -64,7 +64,7 @@ Rules for every task:
   - `classify.calibration.test.ts`: confusion matrix over the noise sweep; robust recall ≥ 90%, seed-sensitive recall ≥ 85%.
   - _Bugfix: B.1–B.2_
 
-- [ ] 14. Phase 1 fraction benchmark (item E)
+- [x] 14. Phase 1 fraction benchmark (item E)
   - `docs/reviews/falsify-bench.mts`; change the default to 0.2 only under bugfix E.2; document the trade-off in the README.
   - _Bugfix: E.1–E.2_
 
