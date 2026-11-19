@@ -32,15 +32,15 @@ Rules that apply to every task:
     - Example test: source scan shows no `Math.random` under `skeleton/src/sim`.
     - _Requirements: 5.2, 5.3_
 
-- [ ] 2. Handle registry and Handle_Counter
-  - [~] 2.1 Implement `handles.ts`
+- [x] 2. Handle registry and Handle_Counter
+  - [x] 2.1 Implement `handles.ts`
     - `HandleRegistry` (`track`, `release`, `live`), module-level `registry`, `liveHandleCount()`, and `TrialScope` (`track`, LIFO `disposeAll`).
     - The counter is derived from the live set. `release` is idempotent, and a second release makes no second WASM `.delete()` call.
     - `disposeAll` continues after a throwing `.delete()` and rethrows the first error only if none is already propagating.
     - Example tests: a throwing `.delete()` does not stop the remaining deletes, and LIFO order.
     - _Requirements: 10.12, 10.13, 10.16_
 
-  - [~] 2.2 Write property test for the handle registry
+  - [x] 2.2 Write property test for the handle registry
     - **Property 19: Handle registry counts live handles**
     - **Validates: Requirements 10.12, 10.13, 10.16**
 
