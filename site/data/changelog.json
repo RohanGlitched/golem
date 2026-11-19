@@ -1,0 +1,62 @@
+[
+  {
+    "date": "2026-11-19",
+    "hash": "5e41314",
+    "subject": "golem-site: 6 how-kiro page (specs, config, surfaces, audits, what went wrong); kiro.json regenerated"
+  },
+  {
+    "date": "2026-11-19",
+    "hash": "109af58",
+    "subject": "golem-site: 5 evidence page (polar G1 map, honest falsifier benchmark, needle, candy, agent-gate pending, methods, limits)"
+  },
+  {
+    "date": "2026-11-19",
+    "hash": "3cb7f3d",
+    "subject": "golem-site: 4 kit page (CLI output, MCP tools, hooks, agents, skills, Power, workflow, Crew app, EARS dialect)"
+  },
+  {
+    "date": "2026-11-19",
+    "hash": "a08a51f",
+    "subject": "golem-site: 1-3 scaffold, fonts, theme, footer, home page, studios at /stagger/ and /candy/"
+  },
+  {
+    "date": "2026-11-19",
+    "hash": "b0c27eb",
+    "subject": "README: first full draft (try it, what it does, the kit, two apps, evidence, how Kiro built it)"
+  },
+  {
+    "date": "2026-11-19",
+    "hash": "b6f06da",
+    "subject": "evidence: falsifier bench round 2 with the graded upright margin (raw results)"
+  },
+  {
+    "date": "2026-11-19",
+    "hash": "77caa09",
+    "subject": "infra: CloudFormation stack (private S3 + CloudFront OAC, index rewrite, security headers) and a boto3 deploy script"
+  },
+  {
+    "date": "2026-11-19",
+    "hash": "77ec8db",
+    "subject": "golem-evidence: 5 report generator: results/*.jsonl to evidence/REPORT.md and site/data/*.json, with methods, budgets, intervals, limits and what went wrong"
+  },
+  {
+    "date": "2026-11-19",
+    "hash": "4a15101",
+    "subject": "golem-evidence: 4 agent-gate A/B harness and its N=1-per-arm dry run (0.35 credits); full run needs --approved; PREREG amendments from the real stream format"
+  },
+  {
+    "date": "2026-11-19",
+    "hash": "402b27d",
+    "subject": "golem-evidence: 3 map-g1 on the Node pool; same method, the 2-direction spot check (30 cells, 270 trials) matches the committed rows exactly; prototype map-g1.mts removed"
+  },
+  {
+    "date": "2026-11-19",
+    "hash": "fd2aff2",
+    "subject": "golem-evidence: 2 bench-falsifier (stats, runner, tests) and its campaign: 160 runs, 4 Expected_Break lines x 20 seeds x 2 arms, budget 96"
+  },
+  {
+    "date": "2026-11-19",
+    "hash": "9237372",
+    "subject": "golem-evidence: 1 preregistration for falsifier bench, G1 map and agent-gate A/B"
+  }
+]

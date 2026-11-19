@@ -1,0 +1,798 @@
+[
+  {
+    "app": "stagger",
+    "name": "Stagger: Unitree G1",
+    "robotNames": [
+      "golem",
+      "G1",
+      "robot"
+    ],
+    "predicates": [
+      {
+        "phrase": "stay upright",
+        "unit": "m",
+        "signals": [
+          "pelvis_z",
+          "tilt_deg"
+        ],
+        "slots": []
+      },
+      {
+        "phrase": "keep its pelvis above {length}",
+        "unit": "m",
+        "signals": [
+          "pelvis_z"
+        ],
+        "slots": []
+      },
+      {
+        "phrase": "track the commanded speed within {speed}",
+        "unit": "m/s",
+        "signals": [
+          "forward_speed",
+          "commanded_speed",
+          "episode_time"
+        ],
+        "slots": []
+      },
+      {
+        "phrase": "not drift sideways more than {length}",
+        "unit": "m",
+        "signals": [
+          "lateral_drift"
+        ],
+        "slots": []
+      }
+    ],
+    "perturbations": [
+      {
+        "phrase": "the pelvis is pushed with {range:force} for {duration} from {direction} at {phase}",
+        "slots": {}
+      },
+      {
+        "phrase": "walking on a slope of {range:angle}",
+        "slots": {}
+      },
+      {
+        "phrase": "carrying a payload of {range:mass}",
+        "slots": {}
+      },
+      {
+        "phrase": "the floor friction drops to {ratio}",
+        "slots": {}
+      },
+      {
+        "phrase": "the sensor latency rises to {range:duration}",
+        "slots": {}
+      },
+      {
+        "phrase": "commanded to walk at {range:speed}",
+        "slots": {}
+      }
+    ],
+    "lines": [
+      {
+        "id": "1.1",
+        "source": "WHEN the pelvis is pushed with up to 60 N for 0.2 s from any direction at any point in its stride THE robot SHALL stay upright for 3 s",
+        "pattern": "event",
+        "horizon": 3.2,
+        "formula": "G[t₀, t₀+3 s] margin(\"stay upright\") > 0 m",
+        "dims": [
+          {
+            "name": "push.force",
+            "kind": "force",
+            "min": 0,
+            "max": 60,
+            "severity": "up"
+          },
+          {
+            "name": "push.angle",
+            "kind": "angle",
+            "min": 0,
+            "max": 6.283185307179586,
+            "severity": "none",
+            "wrap": true
+          },
+          {
+            "name": "push.phase",
+            "kind": "phase",
+            "min": 0,
+            "max": 1,
+            "severity": "none",
+            "wrap": true
+          }
+        ]
+      },
+      {
+        "id": "1.2",
+        "source": "WHEN the pelvis is pushed with up to 250 N for 0.2 s from behind at any point in its stride THE robot SHALL stay upright for 3 s",
+        "pattern": "event",
+        "horizon": 3.2,
+        "formula": "G[t₀, t₀+3 s] margin(\"stay upright\") > 0 m",
+        "dims": [
+          {
+            "name": "push.force",
+            "kind": "force",
+            "min": 0,
+            "max": 250,
+            "severity": "up"
+          },
+          {
+            "name": "push.angle",
+            "kind": "angle",
+            "min": 2.356194490192345,
+            "max": 3.9269908169872414,
+            "severity": "none",
+            "wrap": true
+          },
+          {
+            "name": "push.phase",
+            "kind": "phase",
+            "min": 0,
+            "max": 1,
+            "severity": "none",
+            "wrap": true
+          }
+        ]
+      },
+      {
+        "id": "1.3",
+        "source": "WHEN the pelvis is pushed with up to 100 N for 0.2 s from any direction at any point in its stride THE robot SHALL stay upright for 3 s",
+        "pattern": "event",
+        "horizon": 3.2,
+        "formula": "G[t₀, t₀+3 s] margin(\"stay upright\") > 0 m",
+        "dims": [
+          {
+            "name": "push.force",
+            "kind": "force",
+            "min": 0,
+            "max": 100,
+            "severity": "up"
+          },
+          {
+            "name": "push.angle",
+            "kind": "angle",
+            "min": 0,
+            "max": 6.283185307179586,
+            "severity": "none",
+            "wrap": true
+          },
+          {
+            "name": "push.phase",
+            "kind": "phase",
+            "min": 0,
+            "max": 1,
+            "severity": "none",
+            "wrap": true
+          }
+        ]
+      },
+      {
+        "id": "2.1",
+        "source": "THE robot SHALL track the commanded speed within 0.15 m/s",
+        "pattern": "ubiquitous",
+        "horizon": 10,
+        "formula": "G[t_start, t_end] margin(\"track the commanded speed within 0.15 m/s\") > 0 m/s",
+        "dims": []
+      },
+      {
+        "id": "2.2",
+        "source": "WHEN commanded to walk at 0 m/s to 0.8 m/s THE robot SHALL stay upright for 5 s",
+        "pattern": "event",
+        "horizon": 5,
+        "formula": "G[t₀, t₀+5 s] margin(\"stay upright\") > 0 m",
+        "dims": [
+          {
+            "name": "command.speed",
+            "kind": "speed",
+            "min": 0,
+            "max": 0.8,
+            "severity": "none"
+          }
+        ]
+      },
+      {
+        "id": "3.1",
+        "source": "WHEN walking on a slope of up to 8 deg THE robot SHALL stay upright for 5 s",
+        "pattern": "event",
+        "horizon": 5,
+        "formula": "G[t₀, t₀+5 s] margin(\"stay upright\") > 0 m",
+        "dims": [
+          {
+            "name": "slope.angle",
+            "kind": "angle",
+            "min": 0,
+            "max": 0.13962634015954636,
+            "severity": "up"
+          }
+        ]
+      },
+      {
+        "id": "4.1",
+        "source": "WHEN carrying a payload of up to 10 kg THE robot SHALL stay upright for 5 s",
+        "pattern": "event",
+        "horizon": 5,
+        "formula": "G[t₀, t₀+5 s] margin(\"stay upright\") > 0 m",
+        "dims": [
+          {
+            "name": "payload.mass",
+            "kind": "mass",
+            "min": 0,
+            "max": 10,
+            "severity": "up"
+          }
+        ]
+      },
+      {
+        "id": "4.2",
+        "source": "WHEN carrying a payload of up to 20 kg THE robot SHALL stay upright for 5 s",
+        "pattern": "event",
+        "horizon": 5,
+        "formula": "G[t₀, t₀+5 s] margin(\"stay upright\") > 0 m",
+        "dims": [
+          {
+            "name": "payload.mass",
+            "kind": "mass",
+            "min": 0,
+            "max": 20,
+            "severity": "up"
+          }
+        ]
+      },
+      {
+        "id": "5.1",
+        "source": "WHEN the floor friction drops to 30% THE robot SHALL stay upright for 5 s",
+        "pattern": "event",
+        "horizon": 5,
+        "formula": "G[t₀, t₀+5 s] margin(\"stay upright\") > 0 m",
+        "dims": []
+      },
+      {
+        "id": "6.1",
+        "source": "WHEN the sensor latency rises to up to 40 ms THE robot SHALL stay upright for 5 s",
+        "pattern": "event",
+        "horizon": 5.04,
+        "formula": "G[t₀, t₀+5 s] margin(\"stay upright\") > 0 m",
+        "dims": [
+          {
+            "name": "latency.duration",
+            "kind": "duration",
+            "min": 0,
+            "max": 0.04,
+            "severity": "up"
+          }
+        ]
+      },
+      {
+        "id": "6.2",
+        "source": "WHEN the sensor latency rises to up to 100 ms THE robot SHALL stay upright for 5 s",
+        "pattern": "event",
+        "horizon": 5.1,
+        "formula": "G[t₀, t₀+5 s] margin(\"stay upright\") > 0 m",
+        "dims": [
+          {
+            "name": "latency.duration",
+            "kind": "duration",
+            "min": 0,
+            "max": 0.1,
+            "severity": "up"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "app": "candy",
+    "name": "Candy: Franka Panda",
+    "robotNames": [
+      "arm",
+      "Panda",
+      "robot"
+    ],
+    "predicates": [
+      {
+        "phrase": "drop every candy into the bowl of its colour within {duration}",
+        "unit": "candies",
+        "signals": [
+          "candies_sorted",
+          "candies_misplaced",
+          "candies_dropped_outside",
+          "candies_active"
+        ],
+        "slots": []
+      },
+      {
+        "phrase": "keep every link at least {length} from the hand",
+        "unit": "m",
+        "signals": [
+          "min_link_hand_distance"
+        ],
+        "slots": []
+      },
+      {
+        "phrase": "keep its fastest link below {speed}",
+        "unit": "m/s",
+        "signals": [
+          "fastest_link_speed"
+        ],
+        "slots": []
+      },
+      {
+        "phrase": "not drop a candy outside the bowls",
+        "unit": "candies",
+        "signals": [
+          "candies_dropped_outside"
+        ],
+        "slots": []
+      },
+      {
+        "phrase": "never press on the table with more than {force}",
+        "unit": "N",
+        "signals": [
+          "table_force"
+        ],
+        "slots": []
+      }
+    ],
+    "perturbations": [
+      {
+        "phrase": "a hand reaches in from {direction} at {range:speed}",
+        "slots": {}
+      },
+      {
+        "phrase": "the candies weigh {range:mass}",
+        "slots": {}
+      },
+      {
+        "phrase": "the vacuum weakens to {range:ratio}",
+        "slots": {}
+      },
+      {
+        "phrase": "the hand tracker lags by {range:duration}",
+        "slots": {}
+      },
+      {
+        "phrase": "candies land anywhere on the tray",
+        "slots": {}
+      },
+      {
+        "phrase": "the hand tracker lags by {range:duration} and a hand reaches in from {direction} at {range:speed}",
+        "slots": {}
+      }
+    ],
+    "lines": [
+      {
+        "id": "1.1",
+        "source": "WHEN a hand reaches in from any direction at up to 1.5 m/s THE arm SHALL keep every link at least 0.10 m from the hand",
+        "pattern": "event",
+        "horizon": 10,
+        "formula": "G[t₀, t_end] margin(\"keep every link at least 0.10 m from the hand\") > 0 m",
+        "dims": [
+          {
+            "name": "hand.angle",
+            "kind": "angle",
+            "min": 0,
+            "max": 6.283185307179586,
+            "severity": "none",
+            "wrap": true
+          },
+          {
+            "name": "hand.speed",
+            "kind": "speed",
+            "min": 0,
+            "max": 1.5,
+            "severity": "up"
+          },
+          {
+            "name": "hand.entry",
+            "kind": "duration",
+            "min": 0,
+            "max": 3,
+            "severity": "none"
+          },
+          {
+            "name": "hand.height",
+            "kind": "length",
+            "min": 0.05,
+            "max": 0.25,
+            "severity": "none"
+          }
+        ]
+      },
+      {
+        "id": "2.1",
+        "source": "WHEN a hand reaches in from any direction at up to 1.5 m/s THE arm SHALL keep its fastest link below 1.0 m/s",
+        "pattern": "event",
+        "horizon": 10,
+        "formula": "G[t₀, t_end] margin(\"keep its fastest link below 1.0 m/s\") > 0 m/s",
+        "dims": [
+          {
+            "name": "hand.angle",
+            "kind": "angle",
+            "min": 0,
+            "max": 6.283185307179586,
+            "severity": "none",
+            "wrap": true
+          },
+          {
+            "name": "hand.speed",
+            "kind": "speed",
+            "min": 0,
+            "max": 1.5,
+            "severity": "up"
+          },
+          {
+            "name": "hand.entry",
+            "kind": "duration",
+            "min": 0,
+            "max": 3,
+            "severity": "none"
+          },
+          {
+            "name": "hand.height",
+            "kind": "length",
+            "min": 0.05,
+            "max": 0.25,
+            "severity": "none"
+          }
+        ]
+      },
+      {
+        "id": "3.1",
+        "source": "WHEN candies land anywhere on the tray THE arm SHALL never press on the table with more than 20 N",
+        "pattern": "event",
+        "horizon": 10,
+        "formula": "G[t₀, t_end] margin(\"never press on the table with more than 20 N\") > 0 N",
+        "dims": [
+          {
+            "name": "candy.0.x",
+            "kind": "length",
+            "min": 0.35,
+            "max": 0.39,
+            "severity": "none"
+          },
+          {
+            "name": "candy.0.y",
+            "kind": "length",
+            "min": -0.13,
+            "max": 0.13,
+            "severity": "none"
+          },
+          {
+            "name": "candy.1.x",
+            "kind": "length",
+            "min": 0.35,
+            "max": 0.39,
+            "severity": "none"
+          },
+          {
+            "name": "candy.1.y",
+            "kind": "length",
+            "min": -0.13,
+            "max": 0.13,
+            "severity": "none"
+          },
+          {
+            "name": "candy.2.x",
+            "kind": "length",
+            "min": 0.35,
+            "max": 0.39,
+            "severity": "none"
+          },
+          {
+            "name": "candy.2.y",
+            "kind": "length",
+            "min": -0.13,
+            "max": 0.13,
+            "severity": "none"
+          },
+          {
+            "name": "candy.3.x",
+            "kind": "length",
+            "min": 0.35,
+            "max": 0.39,
+            "severity": "none"
+          },
+          {
+            "name": "candy.3.y",
+            "kind": "length",
+            "min": -0.13,
+            "max": 0.13,
+            "severity": "none"
+          },
+          {
+            "name": "candy.4.x",
+            "kind": "length",
+            "min": 0.35,
+            "max": 0.39,
+            "severity": "none"
+          },
+          {
+            "name": "candy.4.y",
+            "kind": "length",
+            "min": -0.13,
+            "max": 0.13,
+            "severity": "none"
+          },
+          {
+            "name": "candy.5.x",
+            "kind": "length",
+            "min": 0.35,
+            "max": 0.39,
+            "severity": "none"
+          },
+          {
+            "name": "candy.5.y",
+            "kind": "length",
+            "min": -0.13,
+            "max": 0.13,
+            "severity": "none"
+          }
+        ]
+      },
+      {
+        "id": "4.1",
+        "source": "WHEN candies land anywhere on the tray THE arm SHALL not drop a candy outside the bowls",
+        "pattern": "event",
+        "horizon": 10,
+        "formula": "G[t₀, t_end] margin(\"not drop a candy outside the bowls\") > 0 candies",
+        "dims": [
+          {
+            "name": "candy.0.x",
+            "kind": "length",
+            "min": 0.35,
+            "max": 0.39,
+            "severity": "none"
+          },
+          {
+            "name": "candy.0.y",
+            "kind": "length",
+            "min": -0.13,
+            "max": 0.13,
+            "severity": "none"
+          },
+          {
+            "name": "candy.1.x",
+            "kind": "length",
+            "min": 0.35,
+            "max": 0.39,
+            "severity": "none"
+          },
+          {
+            "name": "candy.1.y",
+            "kind": "length",
+            "min": -0.13,
+            "max": 0.13,
+            "severity": "none"
+          },
+          {
+            "name": "candy.2.x",
+            "kind": "length",
+            "min": 0.35,
+            "max": 0.39,
+            "severity": "none"
+          },
+          {
+            "name": "candy.2.y",
+            "kind": "length",
+            "min": -0.13,
+            "max": 0.13,
+            "severity": "none"
+          },
+          {
+            "name": "candy.3.x",
+            "kind": "length",
+            "min": 0.35,
+            "max": 0.39,
+            "severity": "none"
+          },
+          {
+            "name": "candy.3.y",
+            "kind": "length",
+            "min": -0.13,
+            "max": 0.13,
+            "severity": "none"
+          },
+          {
+            "name": "candy.4.x",
+            "kind": "length",
+            "min": 0.35,
+            "max": 0.39,
+            "severity": "none"
+          },
+          {
+            "name": "candy.4.y",
+            "kind": "length",
+            "min": -0.13,
+            "max": 0.13,
+            "severity": "none"
+          },
+          {
+            "name": "candy.5.x",
+            "kind": "length",
+            "min": 0.35,
+            "max": 0.39,
+            "severity": "none"
+          },
+          {
+            "name": "candy.5.y",
+            "kind": "length",
+            "min": -0.13,
+            "max": 0.13,
+            "severity": "none"
+          }
+        ]
+      },
+      {
+        "id": "5.1",
+        "source": "WHEN candies land anywhere on the tray THE arm SHALL drop every candy into the bowl of its colour within 45 s",
+        "pattern": "event",
+        "horizon": 90,
+        "formula": "F[t₀, t₀+45 s] G[·, t_end] margin(\"drop every candy into the bowl of its colour within 45 s\") > 0 candies",
+        "dims": [
+          {
+            "name": "candy.0.x",
+            "kind": "length",
+            "min": 0.35,
+            "max": 0.39,
+            "severity": "none"
+          },
+          {
+            "name": "candy.0.y",
+            "kind": "length",
+            "min": -0.13,
+            "max": 0.13,
+            "severity": "none"
+          },
+          {
+            "name": "candy.1.x",
+            "kind": "length",
+            "min": 0.35,
+            "max": 0.39,
+            "severity": "none"
+          },
+          {
+            "name": "candy.1.y",
+            "kind": "length",
+            "min": -0.13,
+            "max": 0.13,
+            "severity": "none"
+          },
+          {
+            "name": "candy.2.x",
+            "kind": "length",
+            "min": 0.35,
+            "max": 0.39,
+            "severity": "none"
+          },
+          {
+            "name": "candy.2.y",
+            "kind": "length",
+            "min": -0.13,
+            "max": 0.13,
+            "severity": "none"
+          },
+          {
+            "name": "candy.3.x",
+            "kind": "length",
+            "min": 0.35,
+            "max": 0.39,
+            "severity": "none"
+          },
+          {
+            "name": "candy.3.y",
+            "kind": "length",
+            "min": -0.13,
+            "max": 0.13,
+            "severity": "none"
+          },
+          {
+            "name": "candy.4.x",
+            "kind": "length",
+            "min": 0.35,
+            "max": 0.39,
+            "severity": "none"
+          },
+          {
+            "name": "candy.4.y",
+            "kind": "length",
+            "min": -0.13,
+            "max": 0.13,
+            "severity": "none"
+          },
+          {
+            "name": "candy.5.x",
+            "kind": "length",
+            "min": 0.35,
+            "max": 0.39,
+            "severity": "none"
+          },
+          {
+            "name": "candy.5.y",
+            "kind": "length",
+            "min": -0.13,
+            "max": 0.13,
+            "severity": "none"
+          }
+        ]
+      },
+      {
+        "id": "6.1",
+        "source": "WHEN the candies weigh 0.005 kg to 0.060 kg THE arm SHALL drop every candy into the bowl of its colour within 45 s",
+        "pattern": "event",
+        "horizon": 90,
+        "formula": "F[t₀, t₀+45 s] G[·, t_end] margin(\"drop every candy into the bowl of its colour within 45 s\") > 0 candies",
+        "dims": [
+          {
+            "name": "candy.mass",
+            "kind": "mass",
+            "min": 0.005,
+            "max": 0.06,
+            "severity": "up"
+          }
+        ]
+      },
+      {
+        "id": "7.1",
+        "source": "WHEN the vacuum weakens to 50% to 100% THE arm SHALL drop every candy into the bowl of its colour within 45 s",
+        "pattern": "event",
+        "horizon": 90,
+        "formula": "F[t₀, t₀+45 s] G[·, t_end] margin(\"drop every candy into the bowl of its colour within 45 s\") > 0 candies",
+        "dims": [
+          {
+            "name": "vacuum.ratio",
+            "kind": "ratio",
+            "min": 0.5,
+            "max": 1,
+            "severity": "down"
+          }
+        ]
+      },
+      {
+        "id": "8.1",
+        "source": "WHEN the hand tracker lags by up to 0.3 s and a hand reaches in from any direction at up to 1.5 m/s THE arm SHALL keep every link at least 0.10 m from the hand",
+        "pattern": "event",
+        "horizon": 10,
+        "formula": "G[t₀, t_end] margin(\"keep every link at least 0.10 m from the hand\") > 0 m",
+        "dims": [
+          {
+            "name": "tracker.lag",
+            "kind": "duration",
+            "min": 0,
+            "max": 0.3,
+            "severity": "up"
+          },
+          {
+            "name": "hand.angle",
+            "kind": "angle",
+            "min": 0,
+            "max": 6.283185307179586,
+            "severity": "none",
+            "wrap": true
+          },
+          {
+            "name": "hand.speed",
+            "kind": "speed",
+            "min": 0,
+            "max": 1.5,
+            "severity": "up"
+          },
+          {
+            "name": "hand.entry",
+            "kind": "duration",
+            "min": 0,
+            "max": 3,
+            "severity": "none"
+          },
+          {
+            "name": "hand.height",
+            "kind": "length",
+            "min": 0.05,
+            "max": 0.25,
+            "severity": "none"
+          }
+        ]
+      }
+    ]
+  }
+]

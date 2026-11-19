@@ -1,0 +1,5 @@
+shots/
+dist/
+test-results/
+playwright-report/
+.lighthouse/
