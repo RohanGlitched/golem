@@ -222,16 +222,16 @@ Rules that apply to every task:
     - Example tests: the export surface matches the list, and nothing under `sim` imports from `ears`, `falsify`, `pool` or `ui`.
     - _Requirements: 10.13, 13.1, 13.10_
 
-- [ ] 18. Evidence benchmarks (not CI)
-  - [~] 18.1 Add `evidence/sim-model-load.bench.ts`
+- [x] 18. Evidence benchmarks (not CI)
+  - [x] 18.1 Add `evidence/sim-model-load.bench.ts`
     - Time the first loader load plus the first `ModelCache` compile for the Unitree G1 (`apps/stagger/robot`) and report against the 5 s budget. If the assets are not present, print a message that says so and exit 0. Write the result as JSONL under `evidence/`. Do not register it with the Vitest CI run.
     - _Requirements: 1.9, 3.12_
 
-  - [~] 18.2 Add `evidence/sim-cross-runtime.ts`
+  - [x] 18.2 Add `evidence/sim-cross-runtime.ts`
     - Run a fixed Test_App `TrialSpec` in Node, write `t` and `signals` to JSONL, and provide the comparison step for a browser run: `t` Bit-identical, `signals` within 1e-9 relative. Not a CI test.
     - _Requirements: 1.11_
 
-- [~] 19. Final checkpoint - Ensure all tests pass
+- [x] 19. Final checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes
