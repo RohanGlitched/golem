@@ -61,10 +61,10 @@ Rules for every task:
   - [x] 8.2 Property test: for any header spelling from the alias set in any case, the rows are read; for any header with an `Expect*` cell and no id cell, one warning and no rows.
   - _Bugfix: 6.1 to 6.6_
 
-- [ ] 9. Conflicting duplicates fail closed (defect 7)
+- [x] 9. Conflicting duplicates fail closed (defect 7)
   - Conflict is an error naming both lines; `byId` holds `Expected_Hold`; equal duplicates warn; unreadable plus valid is an error and `Expected_Hold`; the same across files. Replace the "merges files, first file wins" test and say why.
-  - [ ] 9.1 Property test (T.3.8): two rows of one id with different readable marks give `Expected_Hold` in both orders and in both file orders, and exactly one error.
-  - [ ] 9.2 Property test: with no conflicts and no unreadable rows, `byId` holds the single mark of each id (round trip of generated tables, canonical and varied spelling).
+  - [x] 9.1 Property test (T.3.8): two rows of one id with different readable marks give `Expected_Hold` in both orders and in both file orders, and exactly one error.
+  - [x] 9.2 Property test: with no conflicts and no unreadable rows, `byId` holds the single mark of each id (round trip of generated tables, canonical and varied spelling).
   - _Bugfix: 7.1 to 7.5_
 
 - [ ] 10. Row parsing details and JSON (defect 10)

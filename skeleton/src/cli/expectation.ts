@@ -35,15 +35,57 @@ export interface ParsedExpectations {
   rows: ExpectationRow[];
   /** Everything found wrong or doubtful: parse problems first, then (after reconcile) orphan rows and unmarked lines. */
   issues: TableIssue[];
+  /** The issues of `issues` that come from reading one row (an unreadable mark): they do not depend on the other rows or files. */
+  scanIssues: TableIssue[];
   /** `line <n>: <message>` for every issue, for callers that print strings. */
   problems: string[];
   /** Number of tables recognised. */
   tables: number;
 }
 
-const finish = (byId: Map<string, Expectation>, rows: ExpectationRow[], issues: TableIssue[], tables: number): ParsedExpectations => ({
-  byId, rows, issues, tables, problems: issues.map((i) => `line ${i.line}: ${i.message}`),
+const finish = (
+  byId: Map<string, Expectation>, rows: ExpectationRow[], issues: TableIssue[], tables: number, scanIssues: TableIssue[] = issues,
+): ParsedExpectations => ({
+  byId, rows, issues, scanIssues, tables, problems: issues.map((i) => `line ${i.line}: ${i.message}`),
 });
+
+const baseName = (f: string): string => f.split(/[\\/]/).pop() ?? f;
+
+/**
+ * One mark per id from the rows of all files, in order. The same mark twice is a warning on the later row. Two readable
+ * marks that differ are an error on the later row and the id is Expected_Hold, whichever came first. An id with an
+ * unreadable row is Expected_Hold if it has a readable one too, and absent otherwise (its unreadable rows are errors already).
+ */
+function resolveRows(rows: readonly ExpectationRow[]): { byId: Map<string, Expectation>; issues: TableIssue[] } {
+  const byId = new Map<string, Expectation>();
+  const issues: TableIssue[] = [];
+  const first = new Map<string, ExpectationRow>();
+  const conflicted = new Set<string>();
+  const unreadable = new Set<string>();
+  const at = (r: ExpectationRow): Pick<TableIssue, 'line'> & { file?: string } => ({ line: r.line, ...(r.file !== undefined ? { file: r.file } : {}) });
+  for (const r of rows) {
+    if (r.expectation === undefined) unreadable.add(r.id);
+    const f = first.get(r.id);
+    if (f === undefined) { first.set(r.id, r); continue; }
+    if (f.expectation === undefined || r.expectation === undefined) continue;
+    if (f.expectation === r.expectation) {
+      issues.push({ severity: 'warning', ...at(r), message: `${r.id} appears twice in the Expectation table with the same mark; the later row is ignored` });
+      continue;
+    }
+    conflicted.add(r.id);
+    const where = f.file !== undefined && f.file !== r.file ? ` of ${baseName(f.file)}` : '';
+    issues.push({
+      severity: 'error', ...at(r),
+      message: `the table gives ${r.id} two marks: ${f.expectation} at line ${f.line}${where} and ${r.expectation} at line ${r.line}`,
+    });
+  }
+  for (const r of rows) {
+    if (byId.has(r.id) || r.expectation === undefined) continue;
+    const readable = rows.find((x) => x.id === r.id && x.expectation !== undefined);
+    byId.set(r.id, conflicted.has(r.id) || unreadable.has(r.id) ? DEFAULT_EXPECTATION : (readable?.expectation as Expectation));
+  }
+  return { byId, issues };
+}
 
 /** `<file>:<line>: <severity>: <message>`, the file as `show` writes it (for example relative to the working directory). */
 export function formatIssue(i: TableIssue, show: (file: string) => string = (f) => f): string {
@@ -80,13 +122,12 @@ const FENCE_CLOSE = /^ {0,3}(`{3,}|~{3,})\s*$/;
 
 /** Reads every table whose header has an id column and an `Expectation` column, outside code. */
 export function parseExpectations(text: string, file?: string): ParsedExpectations {
-  const byId = new Map<string, Expectation>();
   const rows: ExpectationRow[] = [];
-  const issues: TableIssue[] = [];
+  const scan: TableIssue[] = [];
   let tables = 0;
   const lines = text.split(/\r?\n/);
   const issue = (severity: TableIssue['severity'], line: number, message: string): void => {
-    issues.push({ severity, line, message, ...(file !== undefined ? { file } : {}) });
+    scan.push({ severity, line, message, ...(file !== undefined ? { file } : {}) });
   };
   let idCol = -1;
   let expCol = -1;
@@ -132,25 +173,29 @@ export function parseExpectations(text: string, file?: string): ParsedExpectatio
     }
     const expectation: Expectation = m[1]?.toLowerCase() === 'break' ? 'Expected_Break' : 'Expected_Hold';
     rows.push({ id, expectation, line: i + 1, ...(file !== undefined ? { file } : {}) });
-    if (byId.has(id)) issue('warning', i + 1, `${id} appears twice in the expectation table; the first row is used`);
-    else byId.set(id, expectation);
   }
-  return finish(byId, rows, issues, tables);
+  const resolved = resolveRows(rows);
+  const all = [...scan, ...resolved.issues].sort((a, b) => a.line - b.line);
+  return finish(resolved.byId, rows, all, tables, scan);
 }
 
-/** Merges the tables of several files; the first file that names an id wins. */
+/** Merges the tables of several files, in order. An id that two files mark differently is an error and Expected_Hold. */
 export function mergeExpectations(parts: readonly ParsedExpectations[]): ParsedExpectations {
-  const byId = new Map<string, Expectation>();
   const rows: ExpectationRow[] = [];
-  const issues: TableIssue[] = [];
+  const scan: TableIssue[] = [];
   let tables = 0;
   for (const p of parts) {
-    for (const [k, v] of p.byId) if (!byId.has(k)) byId.set(k, v);
     rows.push(...p.rows);
-    issues.push(...p.issues);
+    scan.push(...p.scanIssues);
     tables += p.tables;
   }
-  return finish(byId, rows, issues, tables);
+  const resolved = resolveRows(rows);
+  // Issues in file order, then by line; the parts are in file order, so the position of a file's first row decides.
+  const order = new Map<string | undefined, number>();
+  for (const p of parts) for (const i of [...p.issues, ...p.rows]) if (!order.has(i.file)) order.set(i.file, order.size);
+  const rank = (i: TableIssue): number => order.get(i.file) ?? order.size;
+  const all = [...scan, ...resolved.issues].sort((a, b) => rank(a) - rank(b) || a.line - b.line);
+  return finish(resolved.byId, rows, all, tables, scan);
 }
 
 /** A numbered criterion of a requirements file: its id and where it is written. */
@@ -217,7 +262,7 @@ export function reconcileExpectations(parsed: ParsedExpectations, criteria: read
       });
     }
   }
-  return finish(parsed.byId, parsed.rows, issues, parsed.tables);
+  return finish(parsed.byId, parsed.rows, issues, parsed.tables, parsed.scanIssues);
 }
 
 /**

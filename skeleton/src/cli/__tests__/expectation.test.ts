@@ -31,21 +31,29 @@ describe('parseExpectations', () => {
     expect(r.problems[0]).toContain('Expected_Brek');
   });
 
-  it('uses the first row of an id that appears twice and says so', () => {
+  it('gives Expected_Hold to an id that has two different marks, and says so as an error (it used to take the first row)', () => {
     const r = parseExpectations(table(['| 1.1 | A | Expected_Break |', '| 1.1 | B | Expected_Hold |']));
-    expect(r.byId.get('1.1')).toBe('Expected_Break');
+    expect(r.byId.get('1.1')).toBe('Expected_Hold');
     expect(r.problems).toHaveLength(1);
+    expect(r.issues[0]?.severity).toBe('error');
   });
 
-  it('merges files, first file wins', () => {
+  it('merges files: an id that two files mark differently is Expected_Hold (it used to be the first file)', () => {
     const a = parseExpectations(table(['| 1.1 | A | Expected_Break |']));
     const b = parseExpectations(table(['| 1.1 | A | Expected_Hold |', '| 2.1 | A | Expected_Break |']));
+    expect([...mergeExpectations([a, b]).byId]).toEqual([['1.1', 'Expected_Hold'], ['2.1', 'Expected_Break']]);
+    expect(mergeExpectations([a, b]).issues).toHaveLength(1);
+  });
+
+  it('merges files without conflict: every mark is kept', () => {
+    const a = parseExpectations(table(['| 1.1 | A | Expected_Break |']));
+    const b = parseExpectations(table(['| 1.1 | A | Expected_Break |', '| 2.1 | A | Expected_Break |']));
     expect([...mergeExpectations([a, b]).byId]).toEqual([['1.1', 'Expected_Break'], ['2.1', 'Expected_Break']]);
   });
 
-  it('round-trips generated tables', () => {
+  it('round-trips generated tables (distinct ids; repeated ids with different marks are covered by expectation-duplicates.test.ts)', () => {
     fc.assert(fc.property(
-      fc.array(fc.tuple(fc.integer({ min: 1, max: 9 }), fc.integer({ min: 1, max: 9 }), fc.boolean()), { maxLength: 12 }),
+      fc.uniqueArray(fc.tuple(fc.integer({ min: 1, max: 9 }), fc.integer({ min: 1, max: 9 }), fc.boolean()), { selector: ([a, b]) => `${a}.${b}`, maxLength: 12 }),
       (rows) => {
         const want = new Map<string, 'Expected_Hold' | 'Expected_Break'>();
         for (const [a, b, br] of rows) if (!want.has(`${a}.${b}`)) want.set(`${a}.${b}`, br ? 'Expected_Break' : 'Expected_Hold');
