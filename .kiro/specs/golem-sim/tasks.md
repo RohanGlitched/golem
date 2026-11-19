@@ -211,13 +211,13 @@ Rules that apply to every task:
     - **Property 20: PRNG and seed behaviour**
     - **Validates: Requirements 5.2, 5.14, 11.9**
 
-- [ ] 16. Error catalogue
-  - [~] 16.1 Write `errors.catalogue.test.ts`
+- [x] 16. Error catalogue
+  - [x] 16.1 Write `errors.catalogue.test.ts`
     - One example test for each error condition in Requirements 1, 2, 3, 4, 5, 6, 7, 9, 10 and 14 not already covered by an earlier example test. Each asserts that the message contains the identifiers the criterion names. Reference the covering test for conditions covered elsewhere.
     - _Requirements: 15.10, 15.11_
 
-- [ ] 17. Public exports and wiring
-  - [~] 17.1 Wire `skeleton/src/sim/index.ts`, `skeleton/src/index.ts` and `skeleton/src/node.ts`
+- [x] 17. Public exports and wiring
+  - [x] 17.1 Wire `skeleton/src/sim/index.ts`, `skeleton/src/index.ts` and `skeleton/src/node.ts`
     - Export `loadMujoco`, `writeRobotFiles`, `validateRobotPaths`, `ModelCache`, `buildContext`, `liveHandleCount`, `withDoubleBuffer`, `geomDistance`, `forEachContact`, `mulberry32`, `runTrial`, `PoseRecorder`, `testApp`, `makeTestRequirement`, `SimError` and the types. Keep `HandleRegistry`, `TrialScope`, test seams and fixtures internal.
     - Example tests: the export surface matches the list, and nothing under `sim` imports from `ears`, `falsify`, `pool` or `ui`.
     - _Requirements: 10.13, 13.1, 13.10_
