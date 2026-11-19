@@ -232,6 +232,14 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
     shove?.update();
     swarm?.update(now() / 1000);
     if (pendingAura !== null && aura) { aura.write(pendingAura); pendingAura = null; }
+    if (stage && parts) {
+      const groups = parts.bodyGroups;
+      const root = groups[1] ?? groups[0];
+      const c = swarm && swarm.shown > 0 ? swarm.centroid : null;
+      if (c) stage.follow(c[0], c[1]);
+      else if (root) stage.follow(root.position.x, root.position.y);
+      if (stage.stepFollow(now(), reduced())) scheduler.requestOnce();
+    }
     stage?.orbit.update();
     stage?.render();
     frames++;

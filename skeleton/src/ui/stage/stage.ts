@@ -7,6 +7,44 @@ import type { Floor } from './floor.js';
 import { createOrbit } from './orbit.js';
 import type { Orbit } from './orbit.js';
 import type { StageParts } from './stage-builder.js';
+import { KEY_AZIMUTH_DEG, KEY_ELEVATION_DEG, lightDir } from './clay-material.js';
+
+/** Lamp pool on the floor: a soft disc of light that follows the camera target. */
+export const POOL_RADIUS = 2.6;
+export const POOL_GAIN = 0.2;
+export const SHADOW_OPACITY = 0.5;
+export const SHADOW_HALF = 1.8;
+/** Camera follow time constant (s): critically damped toward the followed point. */
+export const FOLLOW_TAU = 0.5;
+
+const POOL_VERT = /* glsl */ `
+varying vec2 vXY;
+void main() {
+  vec4 wp = modelMatrix * vec4(position, 1.0);
+  vXY = wp.xy;
+  gl_Position = projectionMatrix * viewMatrix * wp;
+}
+`;
+const POOL_FRAG = /* glsl */ `
+uniform vec3 uLight;
+uniform vec2 uCentre;
+uniform float uRadius;
+uniform float uGain;
+varying vec2 vXY;
+float h(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+void main() {
+  vec2 d = (vXY - uCentre) / vec2(uRadius, uRadius * 0.82);
+  float r = length(d);
+  float pool = 1.0 - smoothstep(0.0, 1.0, r);
+  pool = pool * pool * (3.0 - 2.0 * pool);
+  float grain = (h(floor(vXY * 900.0)) - 0.5) * 0.06;
+  float a = uGain * pool * (1.0 + grain);
+  if (a <= 0.001) discard;
+  gl_FragColor = vec4(uLight, a);
+  #include <colorspace_fragment>
+}
+`;
+
 
 type Three = typeof THREE_NS;
 
@@ -69,6 +107,44 @@ export class Stage {
   lost = false;
 
   private bound: { radius: number; target: THREE_NS.Vector3 } | undefined;
+  private readonly pool: THREE_NS.Mesh;
+  private readonly poolMat: THREE_NS.ShaderMaterial;
+  private readonly catcher: THREE_NS.Mesh;
+  private readonly shadowMat: THREE_NS.ShadowMaterial;
+  private readonly key: THREE_NS.DirectionalLight;
+  private readonly keyDir: THREE_NS.Vector3;
+  private followGoal: [number, number] | undefined;
+  private lastFollowTs = 0;
+
+  private placeLight(x: number, y: number): void {
+    this.key.target.position.set(x, y, 0.4);
+    this.key.position.set(x + 6 * this.keyDir.x, y + 6 * this.keyDir.y, 0.4 + 6 * this.keyDir.z);
+    this.key.target.updateMatrixWorld();
+    (this.poolMat.uniforms['uCentre']!.value as THREE_NS.Vector2).set(x, y);
+    this.pool.position.x = x; this.pool.position.y = y;
+    this.catcher.position.x = x; this.catcher.position.y = y;
+  }
+
+  /** Follow a floor point (the robot's root, the ghost swarm's centre or a replay) with critical damping. */
+  follow(x: number, y: number): void { this.followGoal = [x, y]; }
+
+  /** Moves target, camera, light and pool one damped step toward the follow goal. Returns true while moving. */
+  stepFollow(nowMs: number, reduced: boolean): boolean {
+    const goal = this.followGoal;
+    if (!goal || !this.bound) return false;
+    const t = this.orbit.controls.target;
+    const dt = this.lastFollowTs > 0 ? Math.min(0.1, Math.max(0, (nowMs - this.lastFollowTs) / 1000)) : 1 / 60;
+    this.lastFollowTs = nowMs;
+    const dx = goal[0] - t.x, dy = goal[1] - t.y;
+    const dist = Math.hypot(dx, dy);
+    if (dist < 1e-4) { this.lastFollowTs = 0; return false; }
+    const a = reduced ? 1 : 1 - Math.exp(-dt / FOLLOW_TAU);
+    const mx = dx * a, my = dy * a;
+    t.x += mx; t.y += my;
+    this.camera.position.x += mx; this.camera.position.y += my;
+    this.placeLight(t.x, t.y);
+    return dist > 2e-3;
+  }
 
   /** 2.6 R on a wide stage; farther on a narrow one so the robot fits the horizontal field of view. */
   private fitDistance(): number {
@@ -119,12 +195,43 @@ export class Stage {
     this.scene.add(this.floor.mesh);
     this.scene.fog = this.floor.fog;
 
+    // Lamp pool, shadow catcher and the shadow-casting key light. The clay shader does its own
+    // lighting; the light exists only to cast the robot's shadow onto the floor.
+    const sm = (this.renderer as unknown as { shadowMap?: { enabled: boolean; type: number } }).shadowMap;
+    if (sm && !(globalThis as { __golemNoShadow?: boolean }).__golemNoShadow) { sm.enabled = true; sm.type = T.PCFSoftShadowMap; }
+    this.poolMat = new T.ShaderMaterial({
+      vertexShader: POOL_VERT, fragmentShader: POOL_FRAG,
+      uniforms: {
+        uLight: { value: new T.Color(deps.tokens.clay) }, uCentre: { value: new T.Vector2(0, 0) },
+        uRadius: { value: POOL_RADIUS }, uGain: { value: POOL_GAIN },
+      },
+      transparent: true, depthWrite: false,
+    });
+    this.pool = new T.Mesh(new T.PlaneGeometry(4 * POOL_RADIUS, 4 * POOL_RADIUS), this.poolMat);
+    this.pool.position.z = 0.0005; this.pool.renderOrder = 0; this.pool.name = 'golem-lamp-pool';
+    this.scene.add(this.pool);
+    this.shadowMat = new T.ShadowMaterial({ opacity: SHADOW_OPACITY, color: new T.Color('#000000'), depthWrite: false, transparent: true });
+    this.catcher = new T.Mesh(new T.PlaneGeometry(4 * SHADOW_HALF, 4 * SHADOW_HALF), this.shadowMat);
+    this.catcher.position.z = 0.001; this.catcher.receiveShadow = true; this.catcher.renderOrder = 0; this.catcher.name = 'golem-shadow';
+    this.scene.add(this.catcher);
+    this.key = new T.DirectionalLight(0xffffff, 1);
+    const kd = lightDir(KEY_AZIMUTH_DEG, Math.max(KEY_ELEVATION_DEG, 38));
+    this.keyDir = new T.Vector3(kd[0], kd[1], kd[2]).normalize();
+    this.key.castShadow = true;
+    this.key.shadow.mapSize.set(2048, 2048);
+    const sc = this.key.shadow.camera as THREE_NS.OrthographicCamera;
+    sc.left = -SHADOW_HALF; sc.right = SHADOW_HALF; sc.top = SHADOW_HALF; sc.bottom = -SHADOW_HALF; sc.near = 0.1; sc.far = 12;
+    this.key.shadow.bias = -0.0004; this.key.shadow.normalBias = 0.02; this.key.shadow.radius = 4;
+    this.scene.add(this.key, this.key.target);
+    this.placeLight(0, 0);
+
     this.orbit = createOrbit(T, this.camera, this.canvas, {
       scheduler: deps.scheduler, reduced: deps.reduced, isOnBody: (e) => deps.isOnBody?.(e) ?? false,
     });
     this.onTheme((t) => {
       (this.scene.background as THREE_NS.Color).set(t.ground);
       setFloorTheme(this.floor, t);
+      (this.poolMat.uniforms['uLight']!.value as THREE_NS.Color).set(t.clay);
     });
 
     // Visibility_Gate.
@@ -165,6 +272,7 @@ export class Stage {
     const T = this.deps.THREE;
     this.parts = parts;
     this.scene.add(parts.root);
+    for (const m of parts.meshes) { m.castShadow = true; m.receiveShadow = false; }
     if (parts.floor) this.floor.mesh.position.set(parts.floor.pos[0], parts.floor.pos[1], parts.floor.pos[2]);
     this.radius = bound.radius;
     this.baseXY = [bound.centre.x, bound.centre.y];
@@ -226,6 +334,9 @@ export class Stage {
     this.orbit.dispose();
     this.floor.mesh.geometry.dispose();
     this.floor.material.dispose();
+    this.pool.geometry.dispose(); this.poolMat.dispose();
+    this.catcher.geometry.dispose(); this.shadowMat.dispose();
+    this.key.shadow.map?.dispose();
     if (this.parts) {
       const geos = new Set<THREE_NS.BufferGeometry>();
       const mats = new Set<THREE_NS.Material>();

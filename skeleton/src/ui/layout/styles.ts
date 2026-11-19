@@ -34,6 +34,7 @@ export function studioCss(fontBaseUrl = './fonts/'): string {
 .golem-verdict{grid-area:verdict;padding:12px 20px 16px;background:var(--ground-2);border-right:1px solid var(--rule);border-top:1px solid var(--rule);font-size:${s13}px;max-height:40vh;overflow:auto}
 .golem-main{grid-area:stage / stage / reel / reel;display:grid;grid-template-rows:minmax(0,1fr) auto;min-width:0;min-height:0}
 .golem-stage{position:relative;min-height:0;background:var(--ground);border-radius:0;overflow:hidden}
+.golem-stage::after{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(120% 95% at 50% 42%,transparent 55%,rgba(0,0,0,.38) 100%)}
 .golem-canvas{display:block;width:100%;height:100%;touch-action:pan-y}
 .golem-stage-msg,.golem-stage-slow{position:absolute;left:20px;top:16px;max-width:60ch;color:var(--ink-2);font-size:${s13}px;pointer-events:none}
 .golem-stage-slow{top:auto;bottom:12px}

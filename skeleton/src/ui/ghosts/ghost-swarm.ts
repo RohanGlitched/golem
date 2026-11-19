@@ -78,6 +78,8 @@ export class GhostSwarm {
   private nextSlot = 0;
   private genId = 0;
   private highest = -1;
+  /** Mean xy of body 1 (the root body) over visible ghosts, or null when none is visible. */
+  centroid: [number, number] | null = null;
   private running = false;
   private now = 0;
   disposed = false;
@@ -242,6 +244,7 @@ export class GhostSwarm {
     const ng = this.geomBody.length;
     let high = -1;
     let any = false;
+    let cx = 0, cy = 0, cn = 0;
     for (let s = 0; s <= this.highest; s++) {
       const stage = this.stage[s];
       if (stage === FREE) { st[4 * s + 1] = 0; ast[4 * s + 1] = 0; continue; }
@@ -266,6 +269,7 @@ export class GhostSwarm {
         nlerp(frames, nb, ev.frame, ev.next, b, ev.alpha, this.pose);
         const p = this.pose;
         writeMatrixTRS(this.bodyMats, 16 * b, p[0] as number, p[1] as number, p[2] as number, p[3] as number, p[4] as number, p[5] as number, p[6] as number);
+        if (b === 1 && opacity > 0.05) { cx += p[0] as number; cy += p[1] as number; cn++; }
       }
       for (let g = 0; g < ng; g++) {
         const m = this.meshes[g] as THREE_NS.InstancedMesh;
@@ -279,6 +283,7 @@ export class GhostSwarm {
       } else ast[4 * s + 1] = 0;
     }
     this.highest = high;
+    this.centroid = cn > 0 ? [cx / cn, cy / cn] : null;
     for (const m of this.meshes) { m.count = high + 1; m.instanceMatrix.needsUpdate = true; }
     this.arrowMesh.count = high + 1;
     this.arrowMesh.instanceMatrix.needsUpdate = true;

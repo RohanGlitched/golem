@@ -24,10 +24,13 @@ export function lightDir(azDeg: number, elDeg: number): [number, number, number]
 export const CLAY_VERT = /* glsl */ `
 varying vec3 vNormalW;
 varying vec3 vObj;
+varying vec3 vWorld;
 void main() {
   vObj = position;
   vNormalW = normalize(mat3(modelMatrix) * normal);
-  gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);
+  vec4 wp = modelMatrix * vec4(position, 1.0);
+  vWorld = wp.xyz;
+  gl_Position = projectionMatrix * viewMatrix * wp;
 }
 `;
 
@@ -41,8 +44,10 @@ uniform float uAmb;
 uniform float uWrap;
 uniform float uGrain;
 uniform float uGrainFreq;
+uniform vec3 uRimTint;
 varying vec3 vNormalW;
 varying vec3 vObj;
+varying vec3 vWorld;
 
 float hash31(vec3 p) {
   p = fract(p * 0.3183099 + vec3(0.1, 0.2, 0.3));
@@ -72,7 +77,15 @@ void main() {
   float fill = wrapped(dot(n, normalize(uFillDir))) * uFillI;
   float g = vnoise(vObj * uGrainFreq) * 0.65 + vnoise(vObj * uGrainFreq * 3.1) * 0.35;
   float grain = 1.0 + uGrain * (2.0 * g - 1.0);
-  vec3 lit = uClay * (uAmb + key + fill) * grain;
+  vec3 v = normalize(cameraPosition - vWorld);
+  // hemispheric ambient: a little warmer from above, darker from below (cavity under the body)
+  float hemi = mix(0.55, 1.15, 0.5 + 0.5 * n.z);
+  // soft sheen of burnished clay along the key light
+  vec3 h = normalize(normalize(uKeyDir) + v);
+  float sheen = pow(max(dot(n, h), 0.0), 12.0) * 0.07;
+  // rim: separates the sculpture from the dark ground
+  float rim = pow(1.0 - clamp(dot(n, v), 0.0, 1.0), 3.0) * 0.24;
+  vec3 lit = uClay * (uAmb * hemi + key + fill) * grain + vec3(sheen) + uRimTint * rim;
   gl_FragColor = vec4(lit, 1.0);
   #include <colorspace_fragment>
 }
@@ -94,6 +107,7 @@ export function createClayMaterial(T: Three, tokens: TokenSet): THREE_NS.ShaderM
       uWrap: { value: WRAP },
       uGrain: { value: GRAIN_AMPLITUDE },
       uGrainFreq: { value: GRAIN_FREQ },
+      uRimTint: { value: new T.Color(tokens.ghost).lerp(new T.Color(tokens.clay), 0.55) },
     },
     side: T.FrontSide,
     transparent: false,
@@ -103,4 +117,7 @@ export function createClayMaterial(T: Three, tokens: TokenSet): THREE_NS.ShaderM
 
 export function setClayTheme(m: THREE_NS.ShaderMaterial, tokens: TokenSet): void {
   (m.uniforms['uClay']!.value as THREE_NS.Color).set(tokens.clay);
+  const rim = m.uniforms['uRimTint']!.value as THREE_NS.Color;
+  const clay = (m.uniforms['uClay']!.value as THREE_NS.Color).clone();
+  rim.set(tokens.ghost).lerp(clay, 0.55);
 }
