@@ -16,7 +16,8 @@ import { REFLEX_LIMITS, Reflex } from './reflex.js';
 import { KiroReflex } from './kiro-reflex.js';
 
 export type ReflexKind = 'none' | 'kiro';
-let reflexKind: ReflexKind = 'none';
+// Node worker threads inherit GOLEM_REFLEX, so a whole campaign can run with one reflex.
+let reflexKind: ReflexKind = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env?.['GOLEM_REFLEX'] === 'kiro' ? 'kiro' : 'none';
 /** Selects the balance reflex for Walkers created from now on: 'none' (Unitree's policy alone, the default) or 'kiro'. */
 export function setReflex(kind: ReflexKind): void { reflexKind = kind; }
 export const currentReflex = (): ReflexKind => reflexKind;

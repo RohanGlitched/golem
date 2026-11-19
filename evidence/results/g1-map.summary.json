@@ -1,0 +1,243 @@
+{
+  "meta": {
+    "line": "WHEN the pelvis is pushed with up to 400 N for 0.2 s from any direction at any point in its stride THE robot SHALL stay upright for 3 s",
+    "dirs": 36,
+    "phases": 5,
+    "seeds": 3,
+    "steps": 8,
+    "fmax": 400,
+    "cells": 540,
+    "trials": 4860,
+    "seconds": 436.216,
+    "weakest": {
+      "dirDeg": 80,
+      "minHeldN": 62.5,
+      "weakestPhase": 0.2,
+      "meanHeldN": 164.47916666666666
+    },
+    "strongest": {
+      "dirDeg": 340,
+      "minHeldN": 240.625,
+      "weakestPhase": 0.6,
+      "meanHeldN": 249.27083333333334
+    }
+  },
+  "summary": [
+    {
+      "dirDeg": 0,
+      "minHeldN": 206.25,
+      "weakestPhase": 0.2,
+      "meanHeldN": 233.4375
+    },
+    {
+      "dirDeg": 10,
+      "minHeldN": 185.9375,
+      "weakestPhase": 0.2,
+      "meanHeldN": 231.45833333333334
+    },
+    {
+      "dirDeg": 20,
+      "minHeldN": 187.5,
+      "weakestPhase": 0.2,
+      "meanHeldN": 263.6458333333333
+    },
+    {
+      "dirDeg": 30,
+      "minHeldN": 200,
+      "weakestPhase": 0.2,
+      "meanHeldN": 276.3541666666667
+    },
+    {
+      "dirDeg": 40,
+      "minHeldN": 217.1875,
+      "weakestPhase": 0.2,
+      "meanHeldN": 273.0208333333333
+    },
+    {
+      "dirDeg": 50,
+      "minHeldN": 204.6875,
+      "weakestPhase": 0.6,
+      "meanHeldN": 239.16666666666666
+    },
+    {
+      "dirDeg": 60,
+      "minHeldN": 148.4375,
+      "weakestPhase": 0.4,
+      "meanHeldN": 228.125
+    },
+    {
+      "dirDeg": 70,
+      "minHeldN": 140.625,
+      "weakestPhase": 0.2,
+      "meanHeldN": 179.47916666666666
+    },
+    {
+      "dirDeg": 80,
+      "minHeldN": 62.5,
+      "weakestPhase": 0.2,
+      "meanHeldN": 164.47916666666666
+    },
+    {
+      "dirDeg": 90,
+      "minHeldN": 81.25,
+      "weakestPhase": 0.4,
+      "meanHeldN": 158.4375
+    },
+    {
+      "dirDeg": 100,
+      "minHeldN": 104.6875,
+      "weakestPhase": 0.2,
+      "meanHeldN": 173.02083333333334
+    },
+    {
+      "dirDeg": 110,
+      "minHeldN": 139.0625,
+      "weakestPhase": 0.4,
+      "meanHeldN": 184.16666666666666
+    },
+    {
+      "dirDeg": 120,
+      "minHeldN": 170.3125,
+      "weakestPhase": 0.4,
+      "meanHeldN": 191.04166666666666
+    },
+    {
+      "dirDeg": 130,
+      "minHeldN": 176.5625,
+      "weakestPhase": 0.6,
+      "meanHeldN": 195.52083333333334
+    },
+    {
+      "dirDeg": 140,
+      "minHeldN": 182.8125,
+      "weakestPhase": 0.4,
+      "meanHeldN": 192.5
+    },
+    {
+      "dirDeg": 150,
+      "minHeldN": 182.8125,
+      "weakestPhase": 0.4,
+      "meanHeldN": 191.875
+    },
+    {
+      "dirDeg": 160,
+      "minHeldN": 182.8125,
+      "weakestPhase": 0.8,
+      "meanHeldN": 191.66666666666666
+    },
+    {
+      "dirDeg": 170,
+      "minHeldN": 175,
+      "weakestPhase": 0.8,
+      "meanHeldN": 192.5
+    },
+    {
+      "dirDeg": 180,
+      "minHeldN": 171.875,
+      "weakestPhase": 0.8,
+      "meanHeldN": 190.10416666666666
+    },
+    {
+      "dirDeg": 190,
+      "minHeldN": 185.9375,
+      "weakestPhase": 0.6,
+      "meanHeldN": 198.4375
+    },
+    {
+      "dirDeg": 200,
+      "minHeldN": 203.125,
+      "weakestPhase": 0.8,
+      "meanHeldN": 208.4375
+    },
+    {
+      "dirDeg": 210,
+      "minHeldN": 210.9375,
+      "weakestPhase": 0.8,
+      "meanHeldN": 217.29166666666666
+    },
+    {
+      "dirDeg": 220,
+      "minHeldN": 192.1875,
+      "weakestPhase": 0.6,
+      "meanHeldN": 209.47916666666666
+    },
+    {
+      "dirDeg": 230,
+      "minHeldN": 203.125,
+      "weakestPhase": 0.6,
+      "meanHeldN": 210.41666666666666
+    },
+    {
+      "dirDeg": 240,
+      "minHeldN": 193.75,
+      "weakestPhase": 0.6,
+      "meanHeldN": 208.85416666666666
+    },
+    {
+      "dirDeg": 250,
+      "minHeldN": 171.875,
+      "weakestPhase": 0.8,
+      "meanHeldN": 208.95833333333334
+    },
+    {
+      "dirDeg": 260,
+      "minHeldN": 145.3125,
+      "weakestPhase": 0.8,
+      "meanHeldN": 214.375
+    },
+    {
+      "dirDeg": 270,
+      "minHeldN": 135.9375,
+      "weakestPhase": 0.8,
+      "meanHeldN": 206.35416666666666
+    },
+    {
+      "dirDeg": 280,
+      "minHeldN": 121.875,
+      "weakestPhase": 0.8,
+      "meanHeldN": 206.14583333333334
+    },
+    {
+      "dirDeg": 290,
+      "minHeldN": 134.375,
+      "weakestPhase": 0.8,
+      "meanHeldN": 202.70833333333334
+    },
+    {
+      "dirDeg": 300,
+      "minHeldN": 160.9375,
+      "weakestPhase": 0,
+      "meanHeldN": 223.02083333333334
+    },
+    {
+      "dirDeg": 310,
+      "minHeldN": 209.375,
+      "weakestPhase": 0.6,
+      "meanHeldN": 232.39583333333334
+    },
+    {
+      "dirDeg": 320,
+      "minHeldN": 210.9375,
+      "weakestPhase": 0.4,
+      "meanHeldN": 239.6875
+    },
+    {
+      "dirDeg": 330,
+      "minHeldN": 210.9375,
+      "weakestPhase": 0.4,
+      "meanHeldN": 244.47916666666666
+    },
+    {
+      "dirDeg": 340,
+      "minHeldN": 240.625,
+      "weakestPhase": 0.6,
+      "meanHeldN": 249.27083333333334
+    },
+    {
+      "dirDeg": 350,
+      "minHeldN": 234.375,
+      "weakestPhase": 0.8,
+      "meanHeldN": 248.33333333333334
+    }
+  ]
+}

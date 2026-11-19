@@ -1,7 +1,8 @@
 import { defineConfig } from 'vite';
 import { fileURLToPath } from 'node:url';
 
-const skeleton = (p: string): string => fileURLToPath(new URL(`../skeleton/src/${p}`, import.meta.url));
+// The built package (skeleton/dist): Node worker threads need its compiled worker entry. Run `npm run build -w skeleton` first.
+const skeleton = (p: string): string => fileURLToPath(new URL(`../skeleton/dist/${p.replace(/.ts$/, '.js')}`, import.meta.url));
 
 // Evidence scripts import the apps and the skeleton sources directly, as the app tests do.
 export default defineConfig({
