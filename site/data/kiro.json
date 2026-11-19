@@ -1,6 +1,6 @@
 {
-  "generated": "2026-11-19T14:23:47.574Z",
-  "commit": "b0c27eb",
+  "generated": "2026-11-19T15:05:04.618Z",
+  "commit": "a08a51f",
   "workspaces": [
     {
       "path": ".kiro",
@@ -121,10 +121,10 @@
           "type": "feature",
           "requirements": 27,
           "earsCriteria": 223,
-          "properties": 47,
-          "tasksDone": 0,
-          "tasksOpen": 114,
-          "waves": true
+          "properties": 0,
+          "tasksDone": 3,
+          "tasksOpen": 4,
+          "waves": false
         },
         {
           "name": "golem-studio-ui",
@@ -294,9 +294,10 @@
     }
   ],
   "commits": {
-    "total": 194,
+    "total": 196,
     "byPrefix": {
-      "other": 17,
+      "golem-site": 1,
+      "other": 18,
       "evidence": 2,
       "infra": 1,
       "stage-look": 4,
@@ -325,8 +326,8 @@
     "bugfixSpecs": 3,
     "requirements": 224,
     "earsCriteria": 2273,
-    "properties": 340,
-    "tasksDone": 656,
+    "properties": 293,
+    "tasksDone": 659,
     "steering": 10,
     "hooks": 6,
     "agents": 4,

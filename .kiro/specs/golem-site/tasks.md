@@ -11,7 +11,7 @@ Compact plan, done sequentially in one session. One commit per page: `golem-site
 - [x] 3. Studios at `/stagger/` and `/candy/`
   - Generic studio entry, workers, robot files copied into `dist`, tolerance for a missing candy studio.
   - _Requirements: 1, 5_
-- [ ] 4. Kit page `/kit`
+- [x] 4. Kit page `/kit`
   - CLI transcript excerpts, MCP tools, hooks, agents, skills, Power, workflow, Crew app, EARS dialect reference from `lexicon.json`.
   - _Requirements: 13, 14_
 - [ ] 5. Evidence page `/evidence`
