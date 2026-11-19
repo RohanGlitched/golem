@@ -180,8 +180,12 @@ export function parse(
       for (let k = i + 1; k < tokens.length; k++) {
         if (isHead(k)) {
           found = k;
-          boundary = tokens[k]!;
-          condRaw = tokens.slice(i + 1, k);
+          // Kiro writes `WHEN x THEN the system SHALL`: drop `THEN`, `, THEN` or `THEN ,` before THE.
+          let end = k;
+          if (tokens[end - 1]?.type === 'comma' && isKw(tokens[end - 2], 'THEN') && end - 2 > i) end -= 2;
+          else if (isKw(tokens[end - 1], 'THEN') && end - 1 > i) end -= 1;
+          boundary = tokens[end]!;
+          condRaw = tokens.slice(i + 1, end);
           break;
         }
       }

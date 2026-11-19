@@ -15,7 +15,7 @@ Conventions: sources in `skeleton/src/ears/`, tests in `skeleton/src/ears/__test
   - _Bugfix: 12.1–12.3_
 - [x] 4. Multi-word robot names (defect 13)
   - _Bugfix: 13.1–13.3_
-- [ ] 5. Accept THEN before THE in WHEN, WHILE and WHERE (defect 8)
+- [x] 5. Accept THEN before THE in WHEN, WHILE and WHERE (defect 8)
   - _Bugfix: 8.1–8.4_
 - [ ] 6. Kiro markup and trailing periods (defect 2)
   - `kiroText` in the tokenizer module, used by `compileRequirement`; extractor start test
