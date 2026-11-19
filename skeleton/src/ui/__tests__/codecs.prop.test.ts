@@ -9,12 +9,17 @@ import { formatSig } from '../core/format.js';
 import { siToDisplayByKind } from '../core/units-ui.js';
 import { FakeStorage } from './fakes.js';
 import { arbCounterexample, arbDimension, arbShareState, arbVerdict } from './generators/verdict.js';
-import type { Counterexample } from '../types.js';
+import type { Counterexample, ShareState } from '../types.js';
 
 const R = { numRuns: 100 };
 const nz = (o: Counterexample): Counterexample => ({
   ...o, seed: o.seed === 0 ? 0 : o.seed, robustness: o.robustness === 0 ? 0 : o.robustness,
   scenario: Object.fromEntries(Object.entries(o.scenario).map(([k, v]) => [k, v === 0 ? 0 : v])),
+});
+
+/** The share hash writes -0 as 0 (share-hash.ts), as the seed codec does; the expected state is normalised the same way. */
+const nzShare = (s: ShareState): ShareState => (s.pick === undefined ? s : {
+  ...s, pick: { ...s.pick, seed: s.pick.seed === 0 ? 0 : s.pick.seed, scenario: Object.fromEntries(Object.entries(s.pick.scenario).map(([k, v]) => [k, v === 0 ? 0 : v])) },
 });
 
 describe('status, codec and verdict properties', () => {
@@ -69,7 +74,7 @@ describe('status, codec and verdict properties', () => {
       const ids = new Set([...Object.keys(s.lines), ...(s.pick ? [s.pick.reqId] : [])]);
       const d = decodeShare(shareFragment(s), ids);
       expect(d.ignored).toEqual([]);
-      expect(d.state).toEqual(s);
+      expect(d.state).toEqual(nzShare(s));
       const original = Object.fromEntries([...ids].map((id) => [id, 'orig']));
       const big = { ...s, lines: Object.fromEntries(Object.entries(s.lines).map(([k, v]) => [k, v.repeat(80)])) };
       const f = fitShare(big, original, 4000);

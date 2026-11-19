@@ -1,0 +1,46 @@
+[
+  {
+    "boundarySensitive": true,
+    "classification": "robust",
+    "foundAfter": 6,
+    "reqId": "4.2",
+    "robustness": -0.026535794649089006,
+    "scenario": {
+      "payload.mass": 15.019522691763996
+    },
+    "seed": 4080057767,
+    "shrunk": true,
+    "verificationRobustness": [
+      -0.047408267736910925,
+      -0.03203541321136705,
+      -0.02810553172461322
+    ],
+    "verificationSeeds": [
+      1448352424,
+      3254842707,
+      1536383744
+    ]
+  },
+  {
+    "boundarySensitive": true,
+    "classification": "seed-sensitive",
+    "foundAfter": 1,
+    "reqId": "4.2",
+    "robustness": -0.06060503764135344,
+    "scenario": {
+      "payload.mass": 14.90218267073459
+    },
+    "seed": 4080057767,
+    "shrunk": true,
+    "verificationRobustness": [
+      0.13954851804695034,
+      0.14191676998754565,
+      0.14030016188335948
+    ],
+    "verificationSeeds": [
+      1448352424,
+      3254842707,
+      1536383744
+    ]
+  }
+]

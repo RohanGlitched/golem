@@ -16,9 +16,9 @@ export interface PredicateBinding {
 }
 
 /** Approved optional additions: `predicates` on the compiled requirement, `margins` on the monitor result. */
-export type MonitorResult = ReturnType<BaseCompiledRequirement['monitor']> & { margins?: Record<string, number> };
+export type MonitorResult = ReturnType<BaseCompiledRequirement['monitor']> & { margins?: Record<string, number>; marginsAt?: Record<string, number> };
 export type CompiledRequirement = Omit<BaseCompiledRequirement, 'monitor'> & {
-  monitor(trace: Trace): MonitorResult;
+  monitor(trace: Trace, opts?: { margins?: boolean }): MonitorResult;
   predicates?: PredicateBinding[];
 };
 

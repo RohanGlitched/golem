@@ -138,8 +138,8 @@ describe('replay', () => {
 });
 
 describe('explain_margin', () => {
-  it('names the lowest-margin signal and the others from the predicate bindings', async () => {
-    const m = await createMcpHarness({ predicates: true });
+  it('names the lowest-margin signal and the others from the predicate bindings when the monitor has no breakdown', async () => {
+    const m = await createMcpHarness({ predicates: true, noMargins: true });
     await m.call('falsify', { reqId: '1.2' });
     const r = await m.call('explain_margin', { reqId: '1.2' });
     expect(r.isError).toBe(false);
@@ -165,8 +165,22 @@ describe('explain_margin', () => {
     expect(r.summary).toContain('call falsify first');
   });
 
-  it('returns the unavailable-margins error when the requirement has no predicate bindings', async () => {
+  it('uses the breakdown of the monitor when the compiled requirement provides one', async () => {
     const m = await createMcpHarness();
+    await m.call('falsify', { reqId: '1.2' });
+    const r = await m.call('explain_margin', { reqId: '1.2' });
+    expect(r.isError).toBe(false);
+    expect(r.json.marginSource).toBe('monitor');
+    expect(r.json.lowest).toMatchObject({ signal: 'height', unit: 'm' });
+    expect(r.json.lowest.margin).toBeCloseTo(r.json.robustness, 12);
+    expect(r.json.lowest.at).toBeGreaterThan(0);
+    expect(r.json.others).toEqual([]);
+    expect(r.summary).toMatch(/\. The requirement itself has margin -[\d.]+ m at t = [\d.]+ s\.$/);
+    expect(r.json.worstAt).toBeCloseTo(r.json.lowest.at, 12);
+  });
+
+  it('returns the unavailable-margins error when the monitor has no breakdown and the requirement has no predicate bindings', async () => {
+    const m = await createMcpHarness({ noMargins: true });
     await m.call('falsify', { reqId: '1.2' });
     const r = await m.call('explain_margin', { reqId: '1.2' });
     expect(r.isError).toBe(true);

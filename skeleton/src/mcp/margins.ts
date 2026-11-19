@@ -74,7 +74,7 @@ export function explain(
     source = 'monitor';
     list = Object.keys(map).map((signal) => {
       const r = recomputed?.find((x) => x.signal === signal);
-      return { signal, margin: map[signal] as number, at: r?.at ?? monitor.worstAt, unit: r?.unit ?? monitor.unit };
+      return { signal, margin: map[signal] as number, at: monitor.marginsAt?.[signal] ?? r?.at ?? monitor.worstAt, unit: r?.unit ?? monitor.unit };
     });
   } else {
     if (recomputed === undefined) throw new MarginsUnavailableError();

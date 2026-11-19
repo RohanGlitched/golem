@@ -3,7 +3,7 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { createGolemServer, type GolemServer, type McpAppContext, type ToolDef } from '../../src/mcp/server.js';
 import { locateApp } from '../../src/cli/config.js';
-import type { CompiledRequirement, PredicateBinding } from '../../src/cli/sibling-types.js';
+import type { CompiledRequirement, PredicateBinding, Trace } from '../../src/cli/sibling-types.js';
 import { createHarness, type Harness } from './harness.js';
 import type { TestDepsOptions } from './test-deps.js';
 import { tinyApp, tinyLexicon } from './tiny-app.js';
@@ -28,13 +28,25 @@ export function withPredicates(reqs: CompiledRequirement[]): CompiledRequirement
   }));
 }
 
-export async function createMcpHarness(o: TestDepsOptions & { requirements?: string; mcpApp?: Partial<McpAppContext>; tools?: ToolDef[]; predicates?: boolean; seed?: boolean } = {}): Promise<McpHarness> {
+export async function createMcpHarness(o: TestDepsOptions & { requirements?: string; mcpApp?: Partial<McpAppContext>; tools?: ToolDef[]; predicates?: boolean; seed?: boolean; noMargins?: boolean } = {}): Promise<McpHarness> {
   const h = createHarness(o);
   if (o.predicates === true) {
     const base = h.deps.compileFile;
     h.deps.compileFile = ((text, lex, opts) => {
       const r = base(text, lex, opts);
       return { ...r, requirements: withPredicates(r.requirements as CompiledRequirement[]) } as ReturnType<typeof base>;
+    }) as typeof base;
+  }
+  if (o.noMargins === true) {
+    // A monitor from before the margin breakdown: ignores the option and returns the three numbers only.
+    const base = h.deps.compileFile;
+    h.deps.compileFile = ((text, lex, opts) => {
+      const r = base(text, lex, opts);
+      const requirements = (r.requirements as CompiledRequirement[]).map((q) => ({
+        ...q,
+        monitor: (trace: Trace) => { const { robustness, worstAt, unit } = q.monitor(trace); return { robustness, worstAt, unit }; },
+      }));
+      return { ...r, requirements } as ReturnType<typeof base>;
     }) as typeof base;
   }
   let located: McpAppContext['located'];

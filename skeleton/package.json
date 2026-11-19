@@ -22,7 +22,8 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "test": "vitest run --passWithNoTests",
+    "test": "vitest run --passWithNoTests && npm run test:latency",
+    "test:latency": "vitest run --config vitest.latency.config.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "demo": "node ui-demo/fetch-fonts.mjs && vite --config ui-demo/vite.config.ts",
     "demo:shots": "node ui-demo/fetch-fonts.mjs && node ui-demo/shots.mjs",

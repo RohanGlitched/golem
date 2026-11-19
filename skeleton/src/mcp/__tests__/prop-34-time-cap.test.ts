@@ -8,7 +8,7 @@ import { propConfig } from '../../../test/support/prop.js';
 /** A falsifier that reports `n` trials and then waits for the abort signal. */
 const slowFalsify = (n: number): KitDeps['falsify'] => (async (req, _pool, opts) => {
   for (let i = 0; i < n; i++) {
-    opts.onResult?.({ spec: { app: 'tiny', reqId: req.id, scenario: { 'push.force': 10 + i }, seed: i + 1 }, robustness: 0.5 - 0.1 * i, worstAt: 0, unit: 'm', wallMs: 0 });
+    opts.onResult?.({ spec: { app: 'tiny', reqId: req.id, scenario: { 'push.force': 10 + i }, seed: i + 1 }, robustness: 0.5 - 0.1 * i, worstAt: 0, unit: 'm', wallMs: 0 }, { phase: 1, generation: 0, index: i });
   }
   await new Promise<never>((_, reject) => {
     const abort = (): void => reject(new AbortError());

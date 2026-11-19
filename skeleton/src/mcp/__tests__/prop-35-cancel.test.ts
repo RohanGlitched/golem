@@ -11,7 +11,7 @@ const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 const endless: KitDeps['falsify'] = (async (req, _pool, opts) => {
   for (let i = 0; ; i++) {
     if (opts.signal?.aborted === true) throw new AbortError();
-    opts.onResult?.({ spec: { app: 'tiny', reqId: req.id, scenario: { 'push.force': 1 }, seed: i }, robustness: 0.3, worstAt: 0, unit: 'm', wallMs: 0 });
+    opts.onResult?.({ spec: { app: 'tiny', reqId: req.id, scenario: { 'push.force': 1 }, seed: i }, robustness: 0.3, worstAt: 0, unit: 'm', wallMs: 0 }, { phase: 1, generation: 0, index: i });
     await sleep(1);
   }
 }) as KitDeps['falsify'];

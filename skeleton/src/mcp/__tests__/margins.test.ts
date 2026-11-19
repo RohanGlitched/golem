@@ -60,6 +60,12 @@ describe('explain', () => {
     expect(e.lowest).toMatchObject({ signal: 'tilt', margin: -3 });
   });
 
+  it('takes the time of each signal from marginsAt, then the recomputed time, then worstAt', () => {
+    const e = explain({}, trace, { ...mon, margins: { tilt: -3, height: 5 }, marginsAt: { tilt: 0.7 } });
+    expect(e.lowest).toMatchObject({ signal: 'tilt', at: 0.7 });
+    expect(e.others[0]).toMatchObject({ signal: 'height', at: mon.worstAt });
+  });
+
   it('throws a named error when neither exists', () => {
     expect(() => explain({}, trace, mon)).toThrow(MarginsUnavailableError);
     expect(() => explain({}, trace, mon)).toThrow('per-signal margins unavailable: the compiled requirement carries no predicate bindings');

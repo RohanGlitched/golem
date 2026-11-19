@@ -36,7 +36,11 @@ export interface CompiledRequirement {
   horizon: number;
   /** The STL formula the monitor computes, e.g. `G[t₀, t₀+3 s] margin("stay upright") > 0 m`. */
   formula: string;
-  monitor(trace: Trace): { robustness: number; worstAt: number; unit: string };
+  /** With { margins: true } the result also carries the per-signal breakdown (see MonitorResult in monitor.ts). */
+  monitor(trace: Trace, opts?: { margins?: boolean }): {
+    robustness: number; worstAt: number; unit: string;
+    margins?: Record<string, number>; marginsAt?: Record<string, number>;
+  };
 }
 
 // ---------- lexicon (sim types are opaque to ears) ----------

@@ -63,7 +63,9 @@ describe('gateBlock', () => {
 
 describe('progressLine', () => {
   it('names phase, generation, lowest margin with unit, trials used and remaining', () => {
-    const e = { phase: 2, generation: 1, scenarios: [], robustness: [], lowestRobustness: -0.02, trialsUsed: 40, trialsRemaining: 24 } as const;
+    const e = {
+      phase: 2, generation: 1, scenarios: [], robustness: [], lowestRobustness: -0.02, trialsUsed: 40, trialsRemaining: 24,
+      seeds: [], elapsedMs: 1200, timeFraction: null } as const;
     expect(progressLine(e, 'guided', { reqId: 'R3', unit: 'm' })).toBe('R3  guided generation 1: lowest -0.02 m, 40 trials used, 24 remaining');
     expect(progressLine({ ...e, trialsRemaining: null }, 'random')).toContain('no trial limit');
   });

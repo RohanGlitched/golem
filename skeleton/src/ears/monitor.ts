@@ -4,8 +4,50 @@
 
 import type { MonitorSpec, Trace } from './types.js';
 
-export type MonitorResult = { robustness: number; worstAt: number; unit: string };
-export type MonitorFn = (trace: Trace) => MonitorResult;
+export type MonitorResult = {
+  robustness: number; worstAt: number; unit: string;
+  /**
+   * Only with { margins: true }. For each signal the requirement's response predicate reads: the lowest margin over the
+   * window the requirement checks, with that signal live and the others held at their first-window value. Same unit as
+   * obustness. For a response predicate that reads one signal it equals obustness.
+   */
+  margins?: Record<string, number>;
+  /** Only with { margins: true }. The earliest time, in seconds, of each signal's lowest margin. */
+  marginsAt?: Record<string, number>;
+};
+export interface MonitorOptions { margins?: boolean }
+export type MonitorFn = (trace: Trace, opts?: MonitorOptions) => MonitorResult;
+
+/**
+ * WHILE I^ ... for d: G(I^ -> G[t, t+d] I+). For each instant i from lo: max(-s[i], min of p over [i, i+hold]).
+ * dq is a scratch index deque of length n. A violation points at the response sample, a held implication at the state instant.
+ */
+function slideHold(p: Float64Array, s: Float64Array, dq: Int32Array, t: Float64Array, lo: number, n: number, hold: number): { worst: number; worstAt: number } {
+  let worst = Infinity;
+  let worstAt = t[lo]!;
+  let r = lo - 1;
+  let head = 0;
+  let tail = 0;
+  for (let i = lo; i < n; i++) {
+    const end = t[i]! + hold;
+    while (r + 1 < n && t[r + 1]! <= end) {
+      r++;
+      // Pop strictly larger values only, so the front is the earliest minimum.
+      while (tail > head && p[dq[tail - 1]!]! > p[r]!) tail--;
+      dq[tail++] = r;
+    }
+    while (dq[head]! < i) head++;
+    const j = dq[head]!;
+    const minP = p[j]!;
+    const ns = -s[i]!;
+    const term = ns > minP ? ns : minP;
+    if (term < worst) {
+      worst = term;
+      worstAt = ns > minP && term > 0 ? t[i]! : t[j]!;
+    }
+  }
+  return { worst, worstAt };
+}
 
 export function buildMonitor(spec: MonitorSpec): MonitorFn {
   const { predicate, slots, wrapper, pattern } = spec;
@@ -45,7 +87,7 @@ export function buildMonitor(spec: MonitorSpec): MonitorFn {
   let sBuf = new Float64Array(0);
   let dq = new Int32Array(0);
 
-  return (trace: Trace): MonitorResult => {
+  return (trace: Trace, opts?: MonitorOptions): MonitorResult => {
     const signals = trace.signals;
     const t = trace.t;
     const n = t.length;
@@ -84,6 +126,55 @@ export function buildMonitor(spec: MonitorSpec): MonitorFn {
     if (lo >= n || t[lo]! > b) return { robustness: NaN, worstAt: 0, unit: 'trace' };
     if (isEventually && t[lo]! > deadline) return { robustness: NaN, worstAt: 0, unit: 'trace' };
 
+    // The samples the requirement checks: `within` holds from the last sample at or before the deadline.
+    const finish = (res: MonitorResult): MonitorResult => {
+      if (opts?.margins !== true || res.robustness !== res.robustness) return res;
+      let first = lo;
+      if (isEventually) while (first + 1 < n && t[first + 1]! <= deadline) first++;
+      let last = first;
+      while (last + 1 < n && t[last + 1]! <= b) last++;
+      const margins: Record<string, number> = {};
+      const marginsAt: Record<string, number> = {};
+      // The state margin, live, gates every signal's term. Computed once.
+      const sm = stateSlots ? new Float64Array(n) : undefined;
+      if (sm && stateSlots) {
+        for (let i = first; i <= last || (holdFor > 0 && i < n); i++) {
+          for (let k = 0; k < stateNames.length; k++) ss[stateNames[k]!] = arrays[stateIdx[k]!]![i]!;
+          sm[i] = stateSlots.margin(ss, stateSlotValues as Record<string, number>);
+        }
+      }
+      const frozen: Record<string, number> = {};
+      const p = holdFor > 0 ? new Float64Array(n) : undefined;
+      const dqk = holdFor > 0 ? new Int32Array(n) : undefined;
+      for (let k = 0; k < respNames.length; k++) {
+        const name = respNames[k]!;
+        for (let j = 0; j < respNames.length; j++) frozen[respNames[j]!] = arrays[respIdx[j]!]![lo]!;
+        const live = arrays[respIdx[k]!]!;
+        let best = Infinity;
+        let at = t[first]!;
+        let bad = false;
+        const end = holdFor > 0 ? n - 1 : last;
+        for (let i = first; i <= end; i++) {
+          frozen[name] = live[i]!;
+          const m = predicate.margin(frozen, respSlots);
+          if (m !== m) { bad = true; break; }
+          if (p) p[i] = m;
+          else {
+            const term = sm && -sm[i]! > m ? -sm[i]! : m;
+            if (term < best) { best = term; at = t[i]!; }
+          }
+        }
+        if (bad) continue;
+        if (p && sm && dqk) {
+          const w = slideHold(p, sm, dqk, t, lo, n, holdFor);
+          best = w.worst;
+          at = w.worstAt;
+        }
+        margins[name] = best;
+        marginsAt[name] = at;
+      }
+      return { ...res, margins, marginsAt };
+    };
     if (stateSlots && holdFor > 0) {
       if (pBuf.length < n) { pBuf = new Float64Array(n); sBuf = new Float64Array(n); dq = new Int32Array(n); }
       for (let i = lo; i < n; i++) {
@@ -96,31 +187,8 @@ export function buildMonitor(spec: MonitorSpec): MonitorFn {
         pBuf[i] = m;
         sBuf[i] = sm;
       }
-      let worst = Infinity;
-      let worstAt = t[lo]!;
-      let r = lo - 1;
-      let head = 0;
-      let tail = 0;
-      for (let i = lo; i < n; i++) {
-        const end = t[i]! + holdFor;
-        while (r + 1 < n && t[r + 1]! <= end) {
-          r++;
-          // Pop strictly larger values only, so the front is the earliest minimum.
-          while (tail > head && pBuf[dq[tail - 1]!]! > pBuf[r]!) tail--;
-          dq[tail++] = r;
-        }
-        while (dq[head]! < i) head++;
-        const j = dq[head]!;
-        const minP = pBuf[j]!;
-        const ns = -sBuf[i]!;
-        const term = ns > minP ? ns : minP;
-        if (term < worst) {
-          worst = term;
-          // A violation points at the response sample; a held implication at the state instant.
-          worstAt = ns > minP && term > 0 ? t[i]! : t[j]!;
-        }
-      }
-      return { robustness: worst, worstAt, unit };
+      const { worst, worstAt } = slideHold(pBuf, sBuf, dq, t, lo, n, holdFor);
+      return finish({ robustness: worst, worstAt, unit });
     }
 
     // Always: the minimum and its first time. F-then-G: the minimum from the last sample at or
@@ -148,6 +216,6 @@ export function buildMonitor(spec: MonitorSpec): MonitorFn {
       } else if (m < best) { best = m; bestAt = ti; }
     }
     if (isEventually && lastViolation !== -Infinity) bestAt = lastViolation;
-    return { robustness: best, worstAt: bestAt, unit };
+    return finish({ robustness: best, worstAt: bestAt, unit });
   };
 }
