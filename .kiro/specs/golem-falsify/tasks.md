@@ -164,42 +164,42 @@ Test rules for every task (`testing.md`):
     - Write example tests that the functions are pure, that `directPool` returns results in input order with `results[i].spec` equal to `specs[i]`, and that a stubbed `Math.random` that throws is never called.
     - _Requirements: 19.1, 20.6, 20.7, 21.1_
 
-- [ ] 13. Falsifier orchestration
-  - [~] 13.1 Implement `falsify` option validation, Phase 0, Phase 1, verdict and metadata
+- [x] 13. Falsifier orchestration
+  - [x] 13.1 Implement `falsify` option validation, Phase 0, Phase 1, verdict and metadata
     - Validate options before any trial. Phase 0 reads pinned seeds through a read-only handle (range and dimension checks, ordering by stored robustness, `pinnedNotRun`, resolved and skipped lists, errors ignored). Phase 1 runs generations of Latin hypercube batches with derived seeds, including the all-fixed space.
     - Compute `Verdict` (`status`, `trials`, `randomTrials`, `guidedTrials`, `closest`, `counterexample`, `failureRateUpper95` from Phase 1 only, `ms`) and `RunMetadata`. Pool errors and NaN stop the run with `error`, with `broken` taking precedence.
     - Wire `onResult` forwarding and `onProgress` emission per generation.
     - Write example tests: held with the stated trial count, failing Phase 0 pinned seed skipping Phases 1 and 2, pinned seed that now passes is resolved, invalid seed file skipped, rejecting pool gives `error`, budget exhausted before Phase 1, empty space, `onResult` that throws.
     - _Requirements: 1.1, 1.2, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 1.10, 1.11, 1.12, 1.13, 2.1, 2.2, 2.3, 2.4, 2.5, 2.8, 2.9, 2.11, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 9.1, 9.2, 9.4, 9.5, 9.12, 9.13_
-  - [~] 13.2 Add Phase 2, Phase 3, random-only mode and abort to `falsify`
+  - [x] 13.2 Add Phase 2, Phase 3, random-only mode and abort to `falsify`
     - Phase 2 CEM generations with refit and last-generation shrink, Phase 3 shrink then three verification trials (run even when the budget is gone, counted in Phase 3), `PinnedSeedEntry` with classification and verification fields, `random-only` mode with the whole budget in Phase 1 and the same Phase 3, mode recorded in metadata, abort rejecting with `AbortError` and writing nothing, invalid CEM parameters giving `error` unless a failing trial was seen.
     - Write example tests: broken verdict with `shrunk` true and `foundAfter`, failing trial in the last generation of an exhausted budget (shrunk false, three verification trials), `seed-sensitive` entry still pinned, random-only has `guidedTrials = 0`, wall-time budget with injected clock, abort during Phase 3.
     - _Requirements: 1.3, 1.11, 1.14, 5.9, 5.10, 5.11, 5.14, 7.1, 7.6, 7.7, 7.8, 8.12, 9.6, 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.8, 17.6, 17.7, 19.8_
-  - [~] 13.3 Write property test for verdict soundness
+  - [x] 13.3 Write property test for verdict soundness
     - **Property 16: Verdict soundness**
     - **Validates: Requirements 1.10, 1.11, 2.1, 2.3, 2.4, 2.5, 21.7**
-  - [~] 13.4 Write property test for trial accounting
+  - [x] 13.4 Write property test for trial accounting
     - **Property 17: Trial accounting**
     - **Validates: Requirements 1.5, 5.14, 6.14, 8.3, 8.10, 8.11, 10.2**
-  - [~] 13.5 Write property test for `closest`
+  - [x] 13.5 Write property test for `closest`
     - **Property 18: Closest is the earliest minimum**
     - **Validates: Requirements 1.6**
-  - [~] 13.6 Write property test for margin soundness and monotonicity
+  - [x] 13.6 Write property test for margin soundness and monotonicity
     - **Property 20: Soundness and monotonicity of margins**
     - **Validates: Requirements 21.8, 2.1**
-  - [~] 13.7 Write property test for the Phase 1 failure rate
+  - [x] 13.7 Write property test for the Phase 1 failure rate
     - **Property 23: Failure rate uses Phase 1 only**
     - **Validates: Requirements 2.8, 2.9**
-  - [~] 13.8 Write property test for Phase 0 ordering and no writes
+  - [x] 13.8 Write property test for Phase 0 ordering and no writes
     - **Property 24: Phase 0 ordering and no writes**
     - **Validates: Requirements 3.1, 3.2, 3.6, 3.9**
-  - [~] 13.9 Write property test for progress events
+  - [x] 13.9 Write property test for progress events
     - **Property 26: Progress events**
     - **Validates: Requirements 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 9.7, 9.8, 9.9, 9.11**
   - [~] 13.10 Write property test for result forwarding
     - **Property 27: Result forwarding**
     - **Validates: Requirements 9.12, 9.13**
-  - [~] 13.11 Write property test for the random-only Phase 1 prefix
+  - [x] 13.11 Write property test for the random-only Phase 1 prefix
     - **Property 5: Random-only Phase 1 prefix equals full-mode Phase 1**
     - **Validates: Requirements 10.7, 4.9**
 
