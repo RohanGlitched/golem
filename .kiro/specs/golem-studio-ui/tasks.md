@@ -412,35 +412,35 @@ Conventions for every task:
     - Example tests: texture wrap, filter and size, one `requestOnce` per batch, a bin with a break writes `G = 255`.
     - _Requirements: 14.1, 14.2, 14.3, 14.4, 14.5, 14.6, 14.11_
 
-- [ ] 13. Run orchestration
-  - [ ] 13.1 Implement `run/recording-pool.ts`
+- [x] 13. Run orchestration
+  - [x] 13.1 Implement `run/recording-pool.ts`
     - `RecordingPool` implementing `TrialPool`: chunks of at most 64, `record: 'poses'` on every forwarded spec, `beginGeneration`, `ingest` and `commit` hooks, results returned in input order with `poses` removed, `size` from the inner pool, `close` never closes the inner pool, a throwing chunk propagates and skips `commit`.
     - Example tests: chunk sizes for 130 specs, error path skips `commit`.
     - _Requirements: 1.10, 10.1_
 
-  - [ ]* 13.2 Write property test for the RecordingPool
+  - [x]* 13.2 Write property test for the RecordingPool
     - **Property 20: RecordingPool preserves results and records poses**
     - **Validates: Requirements 1.10, 10.1**
 
-  - [ ] 13.3 Implement `run/falsify-adapter.ts`
+  - [x] 13.3 Implement `run/falsify-adapter.ts`
     - The `FalsifyFn` type and its default binding to `golem-falsify`; the only file that names falsify option names (`signal`, `seeds`, `onProgress`, `generationSize`).
     - Example test: the adapter passes seeds, signal and generation size through to a fake falsifier.
     - _Requirements: 19.3, 19.16_
 
-  - [ ] 13.4 Implement `run/run-controller.ts`
+  - [x] 13.4 Implement `run/run-controller.ts`
     - `RunController` with `start`, `startAll` (file order, skip lines with errors), `stop`, `select`, `dispose`; `Run_Id` pinned to every callback with a `guard`; one run at a time on the pool; abort and await settle before a new run; per-run `trialCount`, closest call and best counterexample retention; aura, counters and swarm fed from `ingest`; previous Generation poses dropped except the two retained; verdict storage, Aura summary, announcements, `stale` marking on cancel, `AbortError` shows no error, other errors set `error` status with the `TrialSpec` named; pinned seeds from `PinnedSeedStore` passed as Phase 0 seeds; no run on load unless `autorun`; no run for a line with an error Diagnostic.
     - Example tests with `fakeFalsify`: Summon button label becomes "Stop the run" while active, stale verdict marked, pinned seeds passed, error versus `AbortError`, first ghost or running status within 100 ms.
     - _Requirements: 10.1, 10.2, 10.3, 10.10, 10.11, 10.15, 10.16, 10.17, 17.7, 19.3, 19.4, 19.5, 19.6, 19.7, 19.8, 19.9, 19.10, 19.11, 19.12, 19.13, 19.14, 19.15, 19.16, 29.4_
 
-  - [ ]* 13.5 Write property test for counts covering all trials
+  - [x]* 13.5 Write property test for counts covering all trials
     - **Property 18: Counts cover all trials**
     - **Validates: Requirements 10.12, 10.15, 10.16, 10.18**
 
-  - [ ]* 13.6 Write property test for bounded pose retention
+  - [x]* 13.6 Write property test for bounded pose retention
     - **Property 19: Pose retention is bounded**
     - **Validates: Requirements 10.17**
 
-  - [ ]* 13.7 Write property test for stale runs
+  - [x]* 13.7 Write property test for stale runs
     - **Property 21: Stale runs change nothing**
     - **Validates: Requirements 10.11, 19.3, 19.11, 19.15**
 

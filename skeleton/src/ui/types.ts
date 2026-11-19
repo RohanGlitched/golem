@@ -54,8 +54,12 @@ export interface LineModel {
   progress?: { trials: number };
   verdict?: Verdict;
   stale: boolean;
-  counterexample?: ClassifiedCounterexample;
+  counterexample?: ClassifiedCounterexample | undefined;
   summary?: string;
+  /** Unit of the monitor's robustness, from the first trial result. */
+  unit?: string;
+  /** Error message of the last run, when its status is `error`. */
+  error?: string;
 }
 
 export interface VerdictRow { label: string; value: string }
