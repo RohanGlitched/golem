@@ -77,3 +77,13 @@ Pinned engine: the commit of this repository at the time the campaign runs (reco
 ## Deviations from the earlier spec text
 
 `requirements.md` (earlier draft) says 8 runs per arm and the full 6,480-trial map grid. The decisions above (N = 6, credit cap 150, the 4,860-trial map already run, falsifier budget 96 with 20 seeds) were given by the owner for this build and take precedence.
+
+
+## Amendments
+
+**2025-11-19 (before any full agent-gate run; made after the dry run showed the real stream format).**
+1. Credits come from `session_usage` events (`"credits":[{"usage":N}]`), which carry the session total so far. A run's credits are the largest such total, not a sum of events.
+2. With one prompt per run the total may only arrive when the turn ends, so the in-run kill cannot always fire before the end. To keep the cap hard, a run also does not start when the total used plus the largest earlier run would pass the cap. The in-run kill (event total reaches the cap) and the 20-minute wall limit stay.
+3. The final message is `runFinished.data.finalText`, falling back to the last assistant message. `turns` counts assistant messages (runs of `agent_message_chunk` split by tool calls); the stream has one `turn_start` per run, which is not informative. Each record also stores `toolCalls`, `hookEvents` (names and status of hook events, to show whether the Stop hook ran) and `stopReason`.
+4. The dry run goes to `results/agent-gate.dryrun.jsonl`, with raw streams in `results/agent-gate.dryrun.streams/`. The full run will write `results/agent-gate.jsonl`.
+5. The independent gate on the pristine copy (`baseline` record, once per experiment) shows the starting state is red. It runs on its own copy so it does not seed `.golem/` in the experiment workspaces.
