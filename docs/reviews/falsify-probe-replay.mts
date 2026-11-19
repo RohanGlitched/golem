@@ -1,0 +1,13 @@
+const R = 'file:///I:/Programs/ListofHackathon/hackathons/39-kiroween/golem-wt-earsfix/skeleton/src';
+const { falsify } = await import(`${R}/falsify/index.ts`);
+const { InProcessPool } = await import(`${R}/pool/in-process.ts`);
+const space = { dims: [{ name: 'force', kind: 'force', min: 0, max: 250, severity: 'up' }, { name: 'angle', kind: 'angle', min: 0, max: 360, severity: 'none', wrap: true }] };
+const fn = (s: any) => Math.max(Math.abs(s.angle - 135) - 3, (245 - s.force) * 0.1);
+const mk = (delay: number, log: string[]) => new InProcessPool((spec: any) => { const t = performance.now(); while (performance.now() - t < delay); log.push(JSON.stringify(spec.scenario)); return { spec, robustness: fn(spec.scenario), worstAt: 0, unit: 'u', wallMs: 0 }; });
+const la: string[] = [], lb: string[] = [], lc: string[] = [];
+const a = await falsify({ id: 'R1', space }, mk(2, la), { appId: 'a', budget: { maxWallMs: 250 }, searchSeed: 9 });
+const T = a.meta.phaseTrials.p0 + a.meta.phaseTrials.p1 + a.meta.phaseTrials.p2;
+const b = await falsify({ id: 'R1', space }, mk(0, lb), { appId: 'a', budget: { maxTrials: T }, searchSeed: 9 });
+const c = await falsify({ id: 'R1', space }, mk(0, lc), { appId: 'a', budget: { maxTrials: T }, searchSeed: 9, phase1Fraction: a.meta.phaseTrials.p1 / T, phase2Fraction: a.meta.phaseTrials.p2 / T });
+const same = (x: string[], y: string[]) => x.length === y.length && x.every((v, i) => v === y[i]);
+console.log(`time run phases ${JSON.stringify(a.meta.phaseTrials)} status ${a.verdict.status}; replay maxTrials=${T} default fractions: phases ${JSON.stringify(b.meta.phaseTrials)} status ${b.verdict.status} identical=${same(la, lb)}; with fractions p1/T: identical=${same(la, lc)} status ${c.verdict.status}`);
