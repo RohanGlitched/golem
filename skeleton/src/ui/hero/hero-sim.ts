@@ -134,7 +134,11 @@ export class HeroSim {
 
   hasForce(slot: Slot): boolean { return this.providers[slot] !== null; }
 
-  sync(): void { this.d.sync?.(this.views.xpos, this.views.xquat); }
+  /** Writes the body poses to the stage. Reads fresh views: a controller that allocates (a second MjData for IK) may have grown the WASM heap. */
+  sync(): void {
+    if (this.d.data.xfrc_applied.buffer !== this.xfrcBuf) this.refreshViews();
+    this.d.sync?.(this.views.xpos, this.views.xquat);
+  }
 
   /** Position of mocap row `row` (a row of `mocap_pos`). The array is read fresh: WASM may have replaced its buffer. */
   mocapPos(row: number, out: Float64Array): void {

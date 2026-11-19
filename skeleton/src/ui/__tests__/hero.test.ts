@@ -54,6 +54,27 @@ describe('HeroSim', () => {
     expect(mj.stepLog[0]).toBe(7);
   });
 
+  it('syncs from fresh views when the controller grew the WASM heap while it was built', () => {
+    const mj = new ResettableMj(3);
+    const seen: number[] = [];
+    const a = app({
+      makeController: (ctx) => {
+        // a second MjData for IK grows the heap: every typed-array view taken before is detached and a new one replaces it
+        ctx.data.xfrc_applied = new Float64Array(18);
+        ctx.data.xpos = new Float64Array(9).fill(4);
+        return { step() {} };
+      },
+    });
+    const { h } = hero({ sync: (xpos) => { seen.push(xpos[0] as number); } }, a, mj);
+    expect(seen.at(-1)).toBe(4);
+    h.sync();
+    expect(seen.at(-1)).toBe(4);
+    mj.data.xpos = new Float64Array(9).fill(7);
+    mj.data.xfrc_applied = new Float64Array(18);
+    h.sync();
+    expect(seen.at(-1)).toBe(7);
+  });
+
   it('calls the controller once per control interval', () => {
     let calls = 0;
     const { h } = hero({}, app({ makeController: () => ({ step: () => { calls++; } }) }));
