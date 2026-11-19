@@ -1,0 +1,4 @@
+Measured on the code before task 7 (no retry), with the same loop as p5-corrected.mts over seeds 0 to 59 (a scratch script, not kept); seed 0 is exit 1 (usage error) and is left out here.
+up to 160 N (breaks above ~149 N): gate red on 3/59 search seeds (seeds 1 to 59) with no pinned seed: [2,15,58]
+up to 175 N (breaks above ~149 N): gate red on 0/59 search seeds (seeds 1 to 59) with no pinned seed
+up to 200 N: not measured by the scratch run; the audit's single miss there was seed 0, the usage error

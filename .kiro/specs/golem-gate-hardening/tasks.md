@@ -84,6 +84,6 @@ Rules for every task:
   - `npm run pack:build`, `kiro-cli agent validate --path` on every agent, `golem init --force` into `apps/stagger` and `apps/candy`.
   - _Bugfix: 1.8, 3.3, 5.5, 5.6, 8.4_
 
-- [ ] 13. Final checkpoint
+- [x] 13. Final checkpoint
   - Full `skeleton` suite, typecheck, `pack:build`, agent validation; probes 1 to 6 after the fixes in `docs/reviews/gate-hardening-runs/after-*.txt`; the mutants re-run (`mutate-after.mjs`); the section "After golem-gate-hardening" in `docs/reviews/gate-audit.md` with a before/after row per defect.
   - _Bugfix: T.5, T.6_

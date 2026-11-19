@@ -100,6 +100,14 @@ describe('golem gate --kiro with a table error', () => {
     expect(reasonOf(await stop(h))).not.toContain('Expectation table');
   });
 
+  it('logs a warning of the table on stderr when the gate is green, and lets the stop through', async () => {
+    const h = createHarness({ requirements: withTable(GREEN_REQUIREMENTS, [`| 1.1 | x | ${H} |`]) });
+    const r = await stop(h);
+    expect(r.stdout).toBe('');
+    expect(r.stderr).toMatch(/warning: 1\.2 has no row in the Expectation table, so it is Expected_Hold/);
+    expect(r.stderr).toMatch(/warning: 1\.3 has no row/);
+  });
+
   it('writes the issues to stderr as well (the log)', async () => {
     const h = createHarness({ requirements: withTable(RED_REQUIREMENTS, ['| 1.20 | x | Expected_Break |']) });
     expect((await stop(h)).stderr).toContain('error: the table marks 1.20');

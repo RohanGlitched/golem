@@ -188,8 +188,8 @@ A bigger change would be to retry every `held` line: no, a held `Expected_Hold` 
 ## Tests
 
 - **Parser examples** (T.1): table-driven, one row per audit probe case.
-- **Properties** (T.3.1 to T.3.8): one file each under `skeleton/src/cli/__tests__/`, named `prop-50-...` to `prop-57-...`. The generators share `test/support/table-gen.ts`: ids over a small alphabet (so collisions happen), marks, spelling variants (line ends, header case, bold, backticks, column order, extra columns).
-- **Corpus** (T.4): `real-specs.test.ts` reads `apps/stagger/.kiro/specs/g1-walking/requirements.md` and `apps/candy/.kiro/specs/candy-sorter/requirements.md` from the repository.
+- **Properties** (T.3.1 to T.3.8): in the test file of the fix they belong to, under `skeleton/src/cli/__tests__/`: `gate-marks.test.ts` (flip, diff), `hygiene.test.ts` (explicit Hold), `expectation-rows.test.ts` (spelling, permutation, noise), `expectation-reconcile.test.ts` and `gate-table-errors.test.ts` (orphans, Stop output shape), `expectation-markdown.test.ts` (fence, indent, aliases), `expectation-duplicates.test.ts`, `gate-retry.test.ts`, `gate-override.test.ts`, `expectation-read.test.ts`. The generators are in `test/support/table-gen.ts`: ids over a small alphabet (so collisions happen), marks, spelling variants (line ends, header case and aliases, bold, backticks, column order, extra columns, pipes at the edges, a quote prefix).
+- **Corpus** (T.4): `hygiene.test.ts` reads `apps/stagger/.kiro/specs/g1-walking/requirements.md` and `apps/candy/.kiro/specs/candy-sorter/requirements.md` from the repository.
 - **Command tests** (T.2): Tiny app with `createHarness`; `createTestDeps` gains `committed?: Record<string, string>` for `readCommitted`.
 - **Mutants** (T.5): `docs/reviews/gate-hardening-runs/mutate-after.mjs`, the audit's script with anchors updated to the new code.
 
