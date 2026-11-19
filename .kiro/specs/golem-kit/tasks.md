@@ -15,15 +15,15 @@ This revision follows the current requirements and design:
 
 ## Tasks
 
-- [ ] 1. Scaffolding and test support
-  - [ ] 1.1 Set up the skeleton package, module layout and shared type modules
+- [x] 1. Scaffolding and test support
+  - [x] 1.1 Set up the skeleton package, module layout and shared type modules
     - Add the `golem` bin entry and the `golem-spec`, `golem-spec/node` and `golem-spec/ui` export entries to `skeleton/package.json`. Set `license` to `Apache-2.0` and keep `dependencies` to `@modelcontextprotocol/sdk` and `@mujoco/mujoco` only. Later tasks do not edit `package.json`.
     - Create the empty module layout from the design under `skeleton/src/cli`, `skeleton/src/cli/commands`, `skeleton/src/mcp`, `skeleton/src/mcp/tools`, `skeleton/kiro-pack`, `skeleton/scripts` and `skeleton/test`.
     - Create the type-only modules `skeleton/src/cli/deps.ts` (`KitFs`, `CliIo`, `KitDeps`, `TraceUnavailableError`) and `skeleton/src/cli/types.ts` (outcome and report shapes). Every sibling-contract field the kit relies on is optional (`CompiledRequirement.predicates`, `RobotApp.signalUnits`, `TrialResult.trace`, monitor `margins`) and no field of `interfaces.md` is renamed or removed.
     - Add a Vitest smoke test that imports each new module entry.
     - _Requirements: 27.4, 27.5, 27.7_
 
-  - [ ] 1.2 Build test support: Tiny_Test_App, memory KitFs, fake pool, fake kiro-cli runner and fakes for KitDeps
+  - [x] 1.2 Build test support: Tiny_Test_App, memory KitFs, fake pool, fake kiro-cli runner and fakes for KitDeps
     - Create `skeleton/test/support/tiny-app.ts` with the Tiny_Test_App (one force perturbation, `height` and `tilt` predicates, analytic synthetic trial, seeded with `mulberry32`, 1 s horizon, no MuJoCo).
     - Add an in-memory `KitFs` (ENOENT as `error.code`, rename, `realpath`, symlinks), a recording fake pool, a synthetic `falsify`, a fake `runTraced`, a fake clock, a spy on the lazy loaders and a fake `kiro-cli` runner (returns `{ code, stdout, stderr }` or `'missing'`) that models the verified upgrade and validate behaviour.
     - Test that the synthetic trial gives the analytic robustness and is deterministic for equal (scenario, seed), that the memory `KitFs` behaves as the design requires, and that the fake runner reports a finalized file as skipped.

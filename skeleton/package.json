@@ -4,18 +4,40 @@
   "description": "Turn EARS acceptance criteria into physics property tests.",
   "license": "Apache-2.0",
   "type": "module",
-  "bin": { "golem": "dist/cli/main.js" },
-  "files": ["dist", "kiro-pack"],
+  "bin": {
+    "golem": "dist/cli/main.js"
+  },
+  "files": [
+    "dist",
+    "kiro-pack",
+    "power",
+    "crew-app"
+  ],
   "exports": {
-    ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
-    "./ui": { "types": "./dist/ui/index.d.ts", "default": "./dist/ui/index.js" },
-    "./node": { "types": "./dist/node.d.ts", "default": "./dist/node.js" },
-    "./testing": { "types": "./dist/testing.d.ts", "default": "./dist/testing.js" }
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./ui": {
+      "types": "./dist/ui/index.d.ts",
+      "default": "./dist/ui/index.js"
+    },
+    "./node": {
+      "types": "./dist/node.d.ts",
+      "default": "./dist/node.js"
+    },
+    "./testing": {
+      "types": "./dist/testing.d.ts",
+      "default": "./dist/testing.js"
+    }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.build.json",
     "test": "vitest run --passWithNoTests",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "pack:build": "vite-node scripts/build-pack.ts",
+    "pack:sync": "vite-node scripts/sync-power.ts",
+    "pack:check": "vite-node scripts/sync-power.ts -- --check"
   },
   "dependencies": {
     "@mujoco/mujoco": "^4.0.1",
@@ -34,9 +56,17 @@
     "three": ">=0.160.0"
   },
   "peerDependenciesMeta": {
-    "fast-check": { "optional": true },
-    "react": { "optional": true },
-    "react-dom": { "optional": true },
-    "three": { "optional": true }
+    "fast-check": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    },
+    "three": {
+      "optional": true
+    }
   }
 }
