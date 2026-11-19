@@ -22,7 +22,9 @@ export function rangeOf(kind: Kind, unit: string, limits?: Partial<Range>): Rang
   if (kind === 'ratio' || kind === 'phase') r = unit === '%' ? { min: 0, max: 100 } : { min: 0, max: 1 };
   else if (kind === 'angle') r = unit === 'rad' ? { min: 0, max: 2 * Math.PI } : { min: 0, max: 360 };
   else r = { min: 0, max: Infinity };
-  return { min: Math.max(r.min, limits?.min ?? -Infinity), max: Math.min(r.max, limits?.max ?? Infinity) };
+  const min = Math.min(r.max, Math.max(r.min, limits?.min ?? -Infinity));
+  const max = Math.max(min, Math.min(r.max, limits?.max ?? Infinity));
+  return { min, max };
 }
 
 export function toDisplay(si: number, unit: string): number { return fromSI(si, unit); }

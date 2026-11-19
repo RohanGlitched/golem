@@ -241,43 +241,43 @@ Conventions for every task:
     - **Property 42: Verdict display**
     - **Validates: Requirements 18.12, 23.1, 23.2, 23.3, 23.4, 23.5, 23.11, 23.13**
 
-- [ ] 6. Tablet logic
-  - [ ] 6.1 Implement `tablet/segments.ts`
+- [x] 6. Tablet logic
+  - [x] 6.1 Implement `tablet/segments.ts`
     - `segmentLine` using `tokenize` from `golem-ears`: keyword, quantity and plain segments, inherited unit for `150 to 250 N`, numbers rejected by `parseQuantity` stay plain.
     - Example tests: `WHEN … with up to 200 N …` splits into the expected segments, range with inherited unit.
     - _Requirements: 15.2, 15.11, 16.1_
 
-  - [ ]* 6.2 Write property test for tablet text display
+  - [x]* 6.2 Write property test for tablet text display
     - **Property 29: Tablet text display**
     - **Validates: Requirements 15.2, 15.11, 16.1**
 
-  - [ ] 6.3 Implement `tablet/quantity-edit.ts`
+  - [x] 6.3 Implement `tablet/quantity-edit.ts`
     - `effectiveStep`, `stepQuantity`, `dragQuantity` (`trunc(dx / 4)` steps), `rangeOf`, `rewriteSpan`, `formatSpan` (same unit and gap as written), `commitTyped` (unit of another kind rejected with "Write a force: 200 N, not 200 s", no unit uses the original unit).
     - Example tests: `it('rejects a force typed with a time unit')`, Shift multiplies by 10, Alt by 0.1.
     - _Requirements: 16.2, 16.3, 16.4, 16.5, 16.6, 16.7, 16.9, 16.10, 16.11, 16.12, 16.18_
 
-  - [ ] 6.4 Write property test for quantity step round trip
+  - [x] 6.4 Write property test for quantity step round trip
     - **Property 30: Quantity step round trip**
     - **Validates: Requirements 16.3, 16.4, 16.5, 16.11, 16.15**
 
-  - [ ] 6.5 Write property test for quantity clamp
+  - [x] 6.5 Write property test for quantity clamp
     - **Property 31: Quantity clamp**
     - **Validates: Requirements 16.2, 16.9, 16.16**
 
-  - [ ] 6.6 Write property test for quantity rewrite
+  - [x] 6.6 Write property test for quantity rewrite
     - **Property 32: Quantity rewrite touches only its span**
     - **Validates: Requirements 16.10, 16.12, 16.17, 16.18**
 
-  - [ ]* 6.7 Write property test for typed values with the wrong unit
+  - [x]* 6.7 Write property test for typed values with the wrong unit
     - **Property 33: Typed values with the wrong unit are rejected**
     - **Validates: Requirements 16.6, 16.7**
 
-  - [ ] 6.8 Implement `tablet/diagnostics-view.ts`
+  - [x] 6.8 Implement `tablet/diagnostics-view.ts`
     - `underlineRanges` clamping into `[0, text.length]`, sorted, disjoint, zero-width widened to one UTF-16 unit when inside the text.
     - Example tests: one test per `golem-ears` Diagnostic kind (`PATTERN_MISMATCH`, `MISSING_UNIT`, `UNKNOWN_PHRASE`, `BAD_RANGE`, `UNKNOWN_ROBOT`, `NON_EARS_LINE`) asserting that `kind`, `line` and `column` appear in the message list entry and the underline range.
     - _Requirements: 17.3, 17.4, 17.11, 17.12, 30.10_
 
-  - [ ]* 6.9 Write property test for diagnostic underline ranges
+  - [x]* 6.9 Write property test for diagnostic underline ranges
     - **Property 35: Diagnostic underline ranges**
     - **Validates: Requirements 17.11, 17.12, 17.13**
 
