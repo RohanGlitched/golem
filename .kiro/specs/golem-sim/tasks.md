@@ -52,8 +52,8 @@ Rules that apply to every task:
     - Example tests for the fake itself: delete counters and FS round trip.
     - _Requirements: 2.1, 3.1, 10.2_
 
-- [ ] 4. MuJoCo loader
-  - [~] 4.1 Implement `loader.ts` (`loadMujoco`, `__setLoadFnForTests`)
+- [x] 4. MuJoCo loader
+  - [x] 4.1 Implement `loader.ts` (`loadMujoco`, `__setLoadFnForTests`)
     - Single memoised `inflight` promise per worker module. The failed attempt is cleared before waiters see the rejection. Errors are `SimError` naming `@mujoco/mujoco` and the cause. Load with `import load from '@mujoco/mujoco'` and make no network call other than the package's static WASM fetch.
     - Example tests with a fake load function: same object by reference, overlapping calls load once, all waiters reject with the same error, retry after failure succeeds, and the message names the package and the cause.
     - Example tests with real MuJoCo: the first load resolves in 2 s or less and exposes `MjModel`, `MjData`, `mj_step`, `mj_name2id`, `mj_geomDistance`, `DoubleBuffer` and `FS`. A second call returns the same object in 10 ms or less.
