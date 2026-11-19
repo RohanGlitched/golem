@@ -5,6 +5,7 @@ import { TrialScope } from './handles.js';
 import { buildContext } from './context.js';
 import { PoseRecorder } from './pose-recorder.js';
 import { readWarnings } from './helpers.js';
+import { TrajectoryHasher } from './hash.js';
 import { modelSnapshot, restoreModelSnapshot } from './model-snapshot.js';
 import { mulberry32 } from './prng.js';
 import type {
@@ -91,12 +92,15 @@ export async function runTrial(
     let xfrc: Float64Array = data.xfrc_applied;
     let xpos: Float64Array = data.xpos;
     let xquat: Float64Array = data.xquat;
+    // I3: the trajectory hash reads qpos as 32-bit words through a view on the same bytes.
+    let qposWords = new Uint32Array(qpos.buffer, qpos.byteOffset, qpos.length * 2);
     const refreshIfDetached = (): void => {
       if (qpos.buffer.byteLength === 0 || qvel.buffer.byteLength === 0 || qacc.buffer.byteLength === 0
         || niter.buffer.byteLength === 0 || xfrc.buffer.byteLength === 0
         || xpos.buffer.byteLength === 0 || xquat.buffer.byteLength === 0) {
         qpos = data.qpos; qvel = data.qvel; qacc = data.qacc; niter = data.solver_niter;
         xfrc = data.xfrc_applied; xpos = data.xpos; xquat = data.xquat;
+        qposWords = new Uint32Array(qpos.buffer, qpos.byteOffset, qpos.length * 2);
       }
     };
 
@@ -113,9 +117,12 @@ export async function runTrial(
     let maxContacts = 0;
     let lastIter = 0;
     let divergence: DivergenceInfo | undefined;
+    const hasher = new TrajectoryHasher();
+    hasher.update(qposWords); // the initial state, after initState and mj_forward
     const afterStep = (phase: 'warmup' | 'trial'): boolean => {
       simIndex++;
       refreshIfDetached();
+      hasher.update(qposWords);
       const ncon = data.ncon as number;
       const nisland = data.nisland as number;
       let it = 0;
@@ -287,6 +294,7 @@ export async function runTrial(
       worstAt: divergence !== undefined ? divergence.t : m.worstAt,
       unit: m.unit,
       wallMs: performance.now() - t0,
+      hash: hasher.digest(qpos.length),
       diagnostics,
     };
     if (pose !== undefined) result.poses = pose.finish();

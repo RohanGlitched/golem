@@ -137,6 +137,11 @@ export interface TrialResult {
   spec: TrialSpec; robustness: number; worstAt: number; unit: string;
   wallMs: number;
   poses?: { fps: number; nbody: number; frames: Float32Array };
+  /**
+   * Approved addition (golem-sim-hardening improvement 3): 16 hex digits hashing the qpos trajectory (the
+   * initial state and the state after every sim step), the same in every JavaScript engine.
+   */
+  hash: string;
   /** Sim-level add-only field (golem-sim-hardening improvement 1). */
   diagnostics: TrialDiagnostics;
 }

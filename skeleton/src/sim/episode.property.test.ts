@@ -87,7 +87,8 @@ describe('runTrial properties', () => {
       const posesSame = (a.result.poses === undefined) === (b.result.poses === undefined)
         && (a.result.poses === undefined || bytesEq(a.result.poses.frames, b.result.poses!.frames));
       return traceEq(a.trace, b.trace) && Object.is(a.result.robustness, b.result.robustness)
-        && Object.is(a.result.worstAt, b.result.worstAt) && a.result.unit === b.result.unit && posesSame;
+        && Object.is(a.result.worstAt, b.result.worstAt) && a.result.unit === b.result.unit && posesSame
+        && a.result.hash === b.result.hash;
     }), cfg);
   });
 
@@ -485,7 +486,7 @@ describe('pose and seed properties', () => {
       const a = await runCaptured(testApp, reqFor(steps), mkSpec(sc, seed, 'none'));
       const b = await runCaptured(testApp, reqFor(steps), mkSpec(sc, seed, 'poses'));
       return traceEq(a.trace, b.trace) && Object.is(a.result.robustness, b.result.robustness)
-        && Object.is(a.result.worstAt, b.result.worstAt);
+        && Object.is(a.result.worstAt, b.result.worstAt) && a.result.hash === b.result.hash;
     }), cfg);
   });
 

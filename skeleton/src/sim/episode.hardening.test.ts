@@ -415,4 +415,76 @@ describe('defect 10: robustness survives JSON', () => {
   });
 });
 
-void makeStoolApp; void shoveCall;
+describe('improvement 3: trajectory hash', () => {
+  /** Independent reference: reads each qpos double as two little-endian uint32 words through a DataView. */
+  function referenceHash(states: Float64Array[], nq: number): string {
+    const rotl = (x: number, r: number) => (x << r) | (x >>> (32 - r));
+    const mm = (h: number, w: number) => {
+      let k = Math.imul(w, 0xcc9e2d51); k = rotl(k, 15); k = Math.imul(k, 0x1b873593);
+      h ^= k; h = rotl(h, 13); return (Math.imul(h, 5) + 0xe6546b64) | 0;
+    };
+    const fmix = (h: number) => {
+      h ^= h >>> 16; h = Math.imul(h, 0x85ebca6b); h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35); h ^= h >>> 16; return h >>> 0;
+    };
+    let a = 0x811c9dc5, b = 0x9747b28c;
+    for (const s of states) {
+      const dv = new DataView(s.buffer, s.byteOffset, s.byteLength);
+      for (let i = 0; i < s.byteLength; i += 4) {
+        const w = dv.getUint32(i, true);
+        a = Math.imul(a ^ w, 0x01000193); b = mm(b, w);
+      }
+    }
+    const n = states.length;
+    a = Math.imul(a ^ nq, 0x01000193); a = Math.imul(a ^ n, 0x01000193);
+    b = mm(b, nq); b = mm(b, n);
+    const hex = (x: number) => (x >>> 0).toString(16).padStart(8, '0');
+    return hex(fmix(a)) + hex(fmix(b ^ Math.imul(n, 4)));
+  }
+
+  /** Logs qpos before every step (substep) and after the last one (last signals call). */
+  function logging(base: RobotApp, states: Float64Array[]): RobotApp {
+    return {
+      ...base,
+      makeController: (ctx, rng) => {
+        const inner = base.makeController(ctx, rng);
+        return {
+          step: (c, t) => inner.step(c, t),
+          substep: (c, tSim) => { states[Math.round(tSim / 0.002)] = Float64Array.from(c.data.qpos as Float64Array); inner.substep?.(c, tSim); },
+        };
+      },
+      signals: (ctx, out) => {
+        base.signals(ctx, out);
+        states[Math.round((ctx.data.time as number) / 0.002)] = Float64Array.from(ctx.data.qpos as Float64Array);
+      },
+    };
+  }
+
+  it('hashes qpos after mj_forward and after every sim step, matching an independent reference', async () => {
+    const states: Float64Array[] = [];
+    const req = alwaysAbove({ signal: 'torso.z', bound: 0.25, horizon: 0.6, perturbations: [shoveCall(0.1)] });
+    const { result } = await run(logging(stoolApp, states), req, { f: 40, a: 1 }, 4);
+    expect(result.hash).toMatch(/^[0-9a-f]{16}$/);
+    expect(states).toHaveLength(100 + 300 + 1);
+    expect(result.hash).toBe(referenceHash(states, states[0]!.length));
+  });
+
+  it('is stable across repeats and pose recording, changes with the seed, and survives JSON', async () => {
+    const req = alwaysAbove({ signal: 'torso.z', bound: 0.25, horizon: 0.6, perturbations: [shoveCall(0.1)] });
+    const a = await run(stoolApp, req, { f: 40, a: 1 }, 4);
+    const b = await run(stoolApp, req, { f: 40, a: 1 }, 4, { record: 'poses' });
+    const c = await run(stoolApp, req, { f: 40, a: 1 }, 5);
+    expect(b.result.hash).toBe(a.result.hash);
+    expect(c.result.hash).not.toBe(a.result.hash);
+    expect(JSON.parse(JSON.stringify(a.result)).hash).toBe(a.result.hash);
+  });
+
+  it('covers only the steps that ran when the hook stops early', async () => {
+    const states: Float64Array[] = [];
+    const req = alwaysAbove({ signal: 'torso.z', bound: 0.25, horizon: 0.6 });
+    const { result } = await run(logging(stoolApp, states), req, { f: 0, a: 0 }, 4, { earlyStop: (_t, n) => (n === 6 ? 1 : undefined) });
+    expect(states).toHaveLength(100 + 50 + 1);
+    expect(result.hash).toBe(referenceHash(states, states[0]!.length));
+  });
+});
+
+void makeStoolApp;
