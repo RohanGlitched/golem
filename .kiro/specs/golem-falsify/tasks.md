@@ -283,8 +283,8 @@ Test rules for every task (`testing.md`):
     - **Property 35: Abort leaves pool reusable and database unchanged** (falsifier part: abort before the first dispatch, mid-generation and during Phase 3 rejects with `AbortError`, emits no later progress event, and leaves every `memoryFileSystem` seed file byte-identical)
     - **Validates: Requirements 17.6, 17.7**
 
-- [ ] 20. MuJoCo integration test
-  - [~] 20.1 Add a short MuJoCo integration test for pool equality and handle cleanup
+- [x] 20. MuJoCo integration test
+  - [x] 20.1 Add a short MuJoCo integration test for pool equality and handle cleanup
     - Run at most 50 trials with a horizon of at most 2 s through `InProcessPool` and the Node adapter and compare `robustness`, `worstAt`, `unit` and `poses.frames` bit for bit. Probe a worker after the 1st and the 100th trial of one spec shape and assert equal live handle counts, using the shortest horizon the sim supports.
     - The test uses the public trial entry of `skeleton/src/sim` and a small bundled model. Guard it with `describe.skipIf` only for "MuJoCo package or sim trial entry not installed", and print the skip reason so it cannot pass silently.
     - _Requirements: 12.5, 14.6, 19.7, 20.4, 20.8, 21.17_
