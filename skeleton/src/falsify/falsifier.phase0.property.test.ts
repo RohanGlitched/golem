@@ -29,7 +29,9 @@ describe('falsifier Phase 0', () => {
         const { db, fs } = seedDbOf(entries);
         const { pool, log } = loggingPool({ kind: 'const', value: 1 });
         const r = await falsify({ id: 'R1', space }, pool, { appId: 'app', budget: { maxTrials: 200 }, searchSeed: 3, seedDb: db });
-        expect(log.slice(0, expected.length).map((t) => [t.spec.seed, t.spec.scenario])).toEqual(expected.map((e) => [e['seed'], e['scenario']]));
+        // The seed file is JSON, which stores -0 as 0, so compare against what the file can hold.
+        const asStored = (v: unknown): unknown => JSON.parse(JSON.stringify(v));
+        expect(log.slice(0, expected.length).map((t) => [t.spec.seed, t.spec.scenario])).toEqual(expected.map((e) => [e['seed'], asStored(e['scenario'])]));
         expect(r.meta.phaseTrials.p0).toBe(expected.length);
         expect(r.meta.skippedPinned.map((s) => s.index)).toEqual([...invalidIdx].sort((a, b) => a - b));
         expect(r.meta.skippedPinned.every((s) => s.reason.length > 0)).toBe(true);
