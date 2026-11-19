@@ -10,12 +10,18 @@ export interface StaggerRuntime {
   saved: {
     gravity: Float64Array; torsoMass: number; torsoInertia: Float64Array;
     floorFriction: Float64Array; has: boolean;
+    /** Which model fields this trial changed (and saved first). */
+    gravityHas: boolean; massHas: boolean; frictionHas: boolean;
   };
   speedRing: { buf: Float64Array; n: number; head: number; sum: number };
+  /** Scratch for per-call vector math (heading, push force), so hot paths allocate nothing. */
+  scratch: Float64Array;
 }
 
 export const DEFAULT_COMMAND: readonly [number, number, number] = [0.5, 0, 0];
 export const SPEED_WINDOW = 50;
+/** Warm-up before the trigger, in seconds (app.warmup). */
+export const WARMUP = 2;
 
 const runtimes = new WeakMap<SimContext, StaggerRuntime>();
 
@@ -27,9 +33,10 @@ function create(): StaggerRuntime {
     push: { startTime: 0, dirX: 1, dirY: 0, latched: false },
     saved: {
       gravity: new Float64Array(3), torsoMass: 0, torsoInertia: new Float64Array(3),
-      floorFriction: new Float64Array(3), has: false,
+      floorFriction: new Float64Array(3), has: false, gravityHas: false, massHas: false, frictionHas: false,
     },
     speedRing: { buf: new Float64Array(SPEED_WINDOW), n: 0, head: 0, sum: 0 },
+    scratch: new Float64Array(4),
   };
   resetRuntime(rt);
   return rt;
@@ -45,13 +52,13 @@ export function runtimeFor(ctx: SimContext): StaggerRuntime {
   return rt;
 }
 
-/** Restores trial defaults. Keeps `saved` values so `app.initState` can still restore a model. */
+/** Restores trial defaults. Call only after any saved model values were restored. */
 export function resetRuntime(rt: StaggerRuntime): void {
   rt.command[0] = DEFAULT_COMMAND[0]; rt.command[1] = DEFAULT_COMMAND[1]; rt.command[2] = DEFAULT_COMMAND[2];
   rt.delaySteps = 0;
   rt.trigger.latched = false; rt.trigger.t = 0;
   rt.trigger.pos.fill(0); rt.trigger.heading[0] = 1; rt.trigger.heading[1] = 0;
   rt.push.startTime = 0; rt.push.dirX = 1; rt.push.dirY = 0; rt.push.latched = false;
-  rt.saved.has = false;
+  rt.saved.has = false; rt.saved.gravityHas = false; rt.saved.massHas = false; rt.saved.frictionHas = false;
   rt.speedRing.buf.fill(0); rt.speedRing.n = 0; rt.speedRing.head = 0; rt.speedRing.sum = 0;
 }

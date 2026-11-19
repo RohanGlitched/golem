@@ -135,14 +135,14 @@ Conventions for every task:
     - **Property 17: The Walker evaluates the Policy once per Control_Step and holds its target in data.ctrl**
     - **Validates: Requirements 8.5, 8.6, 8.7**
 
-- [ ] 4. Signals
-  - [ ] 4.1 Implement `signals.ts`
+- [x] 4. Signals
+  - [x] 4.1 Implement `signals.ts`
     - `SIGNAL_NAMES` (five named signals plus `episode_time`), `heading`, `tiltDeg`, `MovingAverage` (50-sample ring, allocated up front), `writeSignals(ctx, rt, out)`
     - Latch trigger pose and Heading in the runtime at the first call with `data.time >= warmup` when no perturbation latched one
     - Write `test/signals.test.ts` (examples): upright tilt 0, 90 deg roll gives 90, partial window average, drift for a hand-made geometry, source scan finds no allocation inside `writeSignals`
     - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5, 11.6, 11.7, 11.8, 11.9_
 
-  - [ ]* 4.2 Write property tests for signals
+  - [x]* 4.2 Write property tests for signals
     - **Property 18: Moving average semantics**
     - **Property 19: forward_speed is invariant under a common yaw rotation**
     - **Property 20: Tilt range and lateral drift geometry**
