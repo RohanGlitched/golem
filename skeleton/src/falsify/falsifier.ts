@@ -249,6 +249,55 @@ export async function falsify(
   const countOf = (b: { results: (TrialResult | undefined)[]; rejected?: unknown }): number =>
     b.results.filter((r) => r !== undefined).length + (b.rejected !== undefined && b.results.some((r) => r === undefined) ? 1 : 0);
 
+  // ---- wall-time estimate (golem-falsify-hardening defect 4): only read the clock under a wall limit
+  const timed = budget.maxWallMs !== null;
+  const poolSize = Number.isInteger(pool.size) && pool.size >= 1 ? pool.size : 1;
+  const measured = async (specs: TrialSpec[]): Promise<Awaited<ReturnType<typeof runBatch>>> => {
+    if (!timed) return runBatch(specs);
+    const t0 = now();
+    const b = await runBatch(specs);
+    budget.observe(countOf(b), now() - t0, poolSize);
+    return b;
+  };
+
+  type Batch = Awaited<ReturnType<typeof runBatch>>;
+  type Ingested = ReturnType<typeof ingest>;
+  /**
+   * Runs one generation of `specs` (already granted). Without a wave estimate under a wall limit, the
+   * first wave runs alone so the rest of the generation can be granted by the time left. Returns the
+   * specs that ran, their aligned results, the ingest summary and whether time cut the generation.
+   */
+  const runGeneration = async (
+    phase: 1 | 2, specs: TrialSpec[], timeLimited: boolean,
+  ): Promise<{ ran: TrialSpec[]; results: (TrialResult | undefined)[]; got: Ingested; timeLimited: boolean }> => {
+    const split = timed && budget.waveMs() === null && specs.length > poolSize;
+    const first = split ? specs.slice(0, poolSize) : specs;
+    const b1: Batch = await measured(first);
+    budget.record(phase, countOf(b1));
+    const got1 = ingest(phase, first, b1);
+    if (!split || got1.error || got1.failed) {
+      return { ran: first, results: b1.results, got: got1, timeLimited: timeLimited || (split && first.length < specs.length) };
+    }
+    const wanted = specs.length - first.length;
+    const n2 = budget.grant(phase, wanted, poolSize);
+    const cut = budget.lastGrantTimeLimited || n2 < wanted;
+    const second = specs.slice(first.length, first.length + n2);
+    if (second.length === 0) return { ran: first, results: b1.results, got: got1, timeLimited: true };
+    const b2: Batch = await measured(second);
+    budget.record(phase, countOf(b2));
+    const got2 = ingest(phase, second, b2);
+    return {
+      ran: [...first, ...second],
+      results: [...b1.results, ...b2.results],
+      got: {
+        scenarios: [...got1.scenarios, ...got2.scenarios],
+        robustness: [...got1.robustness, ...got2.robustness],
+        error: got2.error, failed: got2.failed,
+      },
+      timeLimited: timeLimited || cut,
+    };
+  };
+
   // =========================================================== Phase 0
   let seeds: PinnedSeedEntry[] = [];
   if (opts.seedDb !== undefined) {
@@ -277,7 +326,7 @@ export async function falsify(
     if (cfg.maxPinned !== null && ranP0 >= cfg.maxPinned) break;
     if (budget.grant(0, 1) === 0) break;
     const spec = specFor({ ...e.scenario }, e.seed);
-    const b = await runBatch([spec]);
+    const b = await measured([spec]);
     budget.record(0, countOf(b) || 1);
     ranP0++;
     const got = ingest(0, [spec], b);
@@ -298,24 +347,24 @@ export async function falsify(
     let i1 = 0;
     for (;;) {
       if (aborted()) { emitter.stop(); throw abortError(); }
-      const size = budget.grant(1, cfg.phase1GenerationSize);
+      const size = budget.grant(1, cfg.phase1GenerationSize, poolSize);
       if (size === 0) break;
+      const cutByTime = budget.lastGrantTimeLimited;
       // the generation prefix: a shortened generation is the start of the full-size hypercube (5.5)
       const scenarios = latinHypercube(space, cfg.phase1GenerationSize, searchSeed, g).slice(0, size);
       const specs = scenarios.map((s, k) => specFor(s, deriveSeed(searchSeed, SALT.phase1, i1 + k)));
-      const b = await runBatch(specs);
-      budget.record(1, countOf(b));
-      const got = ingest(1, specs, b);
-      b.results.forEach((r, k) => {
+      const gen = await runGeneration(1, specs, cutByTime);
+      const got = gen.got;
+      gen.results.forEach((r, k) => {
         if (r === undefined || Number.isNaN(r.robustness)) return;
         phase1Done++;
         if (r.robustness < 0) phase1Failed++;
-        phase1Obs.push({ scenario: specs[k]!.scenario, robustness: r.robustness, index: i1 + k });
+        phase1Obs.push({ scenario: gen.ran[k]!.scenario, robustness: r.robustness, index: i1 + k });
       });
       emit(1, g, got.scenarios, got.robustness);
-      if (got.error || got.failed) break;
+      if (got.error || got.failed || gen.timeLimited) break;
       g++;
-      i1 += size;
+      i1 += gen.ran.length;
     }
   }
 
@@ -336,21 +385,21 @@ export async function falsify(
       let i2 = 0;
       for (;;) {
         if (aborted()) { emitter.stop(); throw abortError(); }
-        const size = budget.grant(2, params.genSize);
+        const size = budget.grant(2, params.genSize, poolSize);
         if (size === 0) break;
+        const cutByTime = budget.lastGrantTimeLimited;
         const scenarios = sampleGeneration(space, state, params.genSize, size, params.lhsFraction, searchSeed, g);
         const specs = scenarios.map((s, k) => specFor(s, deriveSeed(searchSeed, SALT.phase2, i2 + k)));
-        const b = await runBatch(specs);
-        budget.record(2, countOf(b));
-        const got = ingest(2, specs, b);
+        const gen = await runGeneration(2, specs, cutByTime);
+        const got = gen.got;
         emit(2, g, got.scenarios, got.robustness);
-        if (got.error || got.failed) break;
-        const obs: Observed[] = specs.map((s, k) => ({
-          scenario: s.scenario, robustness: (b.results[k] as TrialResult).robustness, index: runOffset + i2 + k,
+        if (got.error || got.failed || gen.timeLimited) break;
+        const obs: Observed[] = gen.ran.map((s, k) => ({
+          scenario: s.scenario, robustness: (gen.results[k] as TrialResult).robustness, index: runOffset + i2 + k,
         }));
         state = refitCem(space, state, obs, params);
         g++;
-        i2 += size;
+        i2 += gen.ran.length;
       }
     }
   }
@@ -378,7 +427,7 @@ export async function falsify(
             const spec = specFor(cand, pick.seed);
             let b: Awaited<ReturnType<typeof runBatch>>;
             try {
-              b = await runBatch([spec]);
+              b = await measured([spec]);
             } catch (e) {
               if (e instanceof AbortError) { abortedInShrink = true; return { error: 'aborted' }; }
               throw e;
@@ -464,7 +513,7 @@ export async function falsify(
     meta.errors.push({ phase: 1, message: 'no trial completed: the budget ended before any trial ran' });
   }
   const trialsExhausted = budget.trialsExhausted();
-  const timeUp = budget.maxWallMs !== null && budget.elapsedMs() >= budget.maxWallMs;
+  const timeUp = budget.maxWallMs !== null && (budget.timeStopped || budget.elapsedMs() >= budget.maxWallMs);
   meta.budgetExhausted = trialsExhausted || timeUp;
   meta.stopReason = broken ? 'failure-found' : status === 'error' && errorSeen ? 'error'
     : timeUp ? 'time-budget' : trialsExhausted ? 'trial-budget' : 'completed';

@@ -36,7 +36,7 @@ Rules for every task:
   - Tests: `maxTrials = 7` uses 7 search trials; full-mode Phase 1 is a prefix of random-only Phase 1 for every Phase 1 size; replaying a timed run (fake clock) with `meta.replayOptions` gives the identical spec sequence and verdict.
   - _Bugfix: 5.3–5.7_
 
-- [ ] 7. Time-aware grants (defect 4)
+- [x] 7. Time-aware grants (defect 4)
   - Tests (fake clock, 5 ms per wave): held run with `maxWallMs` 300 ends by 305 ms for generation sizes 32 and 64 and pool sizes 1 and 4; a time-limited generation ends its phase; shrink trials respect the wave estimate; trial-only runs never read the clock.
   - _Bugfix: 4.2–4.9_
 

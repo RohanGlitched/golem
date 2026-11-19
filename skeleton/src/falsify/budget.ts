@@ -105,18 +105,54 @@ export class BudgetClock {
     return this.maxWallMs !== null && this.elapsedMs() >= this.deadlineMs(phase);
   }
 
-  /** Trials the next generation of `phase` may run (0 ends the phase). */
-  grant(phase: SearchPhase, wanted: number): number {
-    if (this.timeExhausted(phase)) return 0;
+  private wave: number | null = null;
+  /** True when the last `grant` was cut by the time left (golem-falsify-hardening defect 4). */
+  lastGrantTimeLimited = false;
+  /** True when the last grant was cut or refused because of the wall limit. */
+  timeStopped = false;
+
+  /**
+   * Records how long a batch of `n` trials took on a pool of `poolSize` slots. The estimate of the time
+   * per wave (poolSize trials at once) is an exponential average with weight 0.5; the first sample sets it.
+   */
+  observe(n: number, ms: number, poolSize: number): void {
+    if (n <= 0 || !(ms >= 0)) return;
+    const perWave = ms / Math.ceil(n / Math.max(1, poolSize));
+    this.wave = this.wave === null ? perWave : 0.5 * this.wave + 0.5 * perWave;
+  }
+  /** Estimated ms per wave, or null before any batch was measured (or without a wall limit). */
+  waveMs(): number | null { return this.maxWallMs === null ? null : this.wave; }
+
+  /** Trials that fit before the phase deadline: whole waves of `poolSize`; Infinity when unknown. */
+  private timeFit(phase: SearchPhase | 3, poolSize: number): number {
+    const w = this.waveMs();
+    if (w === null || !(w > 0)) return Infinity;
+    const left = this.deadlineMs(phase) - this.elapsedMs();
+    return Math.max(0, Math.floor(left / w)) * Math.max(1, poolSize);
+  }
+
+  /** Trials the next generation of `phase` may run on a pool of `poolSize` slots (0 ends the phase). */
+  grant(phase: SearchPhase, wanted: number, poolSize = 1): number {
+    this.lastGrantTimeLimited = false;
+    this.timeStopped = false;
+    if (this.timeExhausted(phase)) { this.timeStopped = true; return 0; }
     const left = Math.max(0, Math.min(this.quota(phase) - this.used[phase], this.remainingSearch()));
-    return Math.max(0, Math.min(wanted, left));
+    const byTrials = Math.max(0, Math.min(wanted, left));
+    const fit = this.timeFit(phase, poolSize);
+    if (fit < byTrials) {
+      this.lastGrantTimeLimited = true;
+      this.timeStopped = true;
+      return fit;
+    }
+    return byTrials;
   }
 
   record(phase: SearchPhase, n: number): void { this.used[phase] += n; }
 
-  /** 1 when one more shrink trial may start, else 0. */
+  /** 1 when one more shrink trial may start (one more wave fits in the shrink reserve), else 0. */
   grantShrink(): number {
     if (this.timeExhausted(3)) return 0;
+    if (this.timeFit(3, 1) < 1) return 0;
     if (this.shrinkReserve !== null && this.shrinkUsedCount >= this.shrinkReserve) return 0;
     return 1;
   }
