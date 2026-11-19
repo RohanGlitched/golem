@@ -129,6 +129,17 @@ const isWordTok = (t: Token | undefined, w: string): boolean =>
   t !== undefined && t.type === 'word' && lower(t) === w;
 const posOf = (a: Token, b: Token = a) => ({ start: a.start, end: b.end, line: a.line, column: a.column });
 
+/**
+ * The source text from token `a` to token `b` as written. Clause tokens carry upper-cased
+ * keywords, so messages slice the clause's source text instead.
+ */
+export function asWritten(clause: Clause, a: Token, b: Token = a): string {
+  const from = a.start - clause.span.start;
+  const to = b.end - clause.span.start;
+  if (from >= 0 && to <= clause.text.length && to >= from) return clause.text.slice(from, to);
+  return a === b ? a.text : `${a.text} ... ${b.text}`;
+}
+
 function mismatch(expected: string, found: string, text: string, a: Token, b: Token): Diagnostic {
   return makeDiagnostic(
     'UNKNOWN_PHRASE',
@@ -394,10 +405,10 @@ function run<T extends { phrase: string; dims?: (slots: Record<string, SlotValue
   }
   const tok = toks[best.pos];
   const generic = tok !== undefined
-    ? makeDiagnostic('UNKNOWN_PHRASE', `'${tok.text}' does not continue any ${cls} phrase`, posOf(tok))
+    ? makeDiagnostic('UNKNOWN_PHRASE', `'${asWritten(clause, tok)}' does not continue any ${cls} phrase`, posOf(tok))
     : makeDiagnostic(
       'UNKNOWN_PHRASE',
-      `The ${cls} phrase ends early: more words are expected after '${toks[toks.length - 1]?.text ?? ''}'`,
+      `The ${cls} phrase ends early: more words are expected after '${toks.length > 0 ? asWritten(clause, toks[toks.length - 1]!) : ''}'`,
       endPosition(toks, clause),
     );
   return { diagnostics: [decorate(generic)] };

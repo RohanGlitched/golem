@@ -11,7 +11,7 @@ Conventions: sources in `skeleton/src/ears/`, tests in `skeleton/src/ears/__test
 - [x] 2. Range text with a borrowed unit (defect 3)
   - Regression test `regress.d3.test.ts`; fix `make()`; tighten the `ranges.test.ts` and `compile.test.ts` checks to exact text
   - _Bugfix: 3.1–3.3_
-- [ ] 3. Quote source text as written (defect 12)
+- [x] 3. Quote source text as written (defect 12)
   - _Bugfix: 12.1–12.3_
 - [ ] 4. Multi-word robot names (defect 13)
   - _Bugfix: 13.1–13.3_
