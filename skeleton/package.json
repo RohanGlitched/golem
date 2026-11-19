@@ -34,6 +34,7 @@
   "files": [
     "dist",
     "kiro-pack",
+    "starter",
     "power",
     "crew-app",
     "CHANGELOG.md"

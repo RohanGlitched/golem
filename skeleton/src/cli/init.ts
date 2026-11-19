@@ -1,13 +1,26 @@
 // `golem init`: compute a WritePlan (read-only), then execute it (design D8). Every write is temp file plus rename.
-import { formatConfig } from './config.js';
+import { formatConfig, parseConfig, type GolemConfig } from './config.js';
 import type { KitFs } from './deps.js';
 import { basename, dirname, isInside, normalize, resolve } from './paths.js';
 import { atomicWriteFile, tmpCounter } from './store.js';
 
 export interface PackManifest { files: { rel: string; sha256: string; kind: 'copy' | 'merge-mcp' }[] }
 export type PlanAction = 'write' | 'skip' | 'merge';
-export interface PlanEntry { rel: string; target: string; kind: 'copy' | 'merge-mcp' | 'config'; action: PlanAction; reason?: string }
-export interface WritePlan { targetDir: string; entries: PlanEntry[] }
+export interface PlanEntry {
+  rel: string; target: string; kind: 'copy' | 'merge-mcp' | 'config' | 'starter'; action: PlanAction; reason?: string;
+  /** `starter` entries: the file's path under the starter root. */
+  src?: string;
+  /** `config` entries: which config text to write. */
+  config?: 'placeholder' | 'starter';
+  /** Printed after the path: `wrote app.js (starter cart-pole robot)`. */
+  note?: string;
+}
+export interface WritePlan {
+  targetDir: string;
+  entries: PlanEntry[];
+  /** Present when the starter robot was asked for: its root, and why it is not written (when it is not). */
+  starter?: { root: string; skipped?: string };
+}
 
 export class PackError extends Error {
   override name = 'PackError';
@@ -18,6 +31,23 @@ export class InitError extends Error {
 
 export const CONFIG_PLACEHOLDER = { app: './app.js', requirements: ['.kiro/specs/robot/requirements.md'] };
 const MCP_REL = 'settings/mcp.json';
+
+/** The starter cart-pole robot: files under `<package>/starter/` and where each goes in the project. */
+export const STARTER_FILES: readonly { src: string; dest: string }[] = [
+  { src: 'app.js', dest: 'app.js' },
+  { src: 'robot/scene.xml', dest: 'robot/scene.xml' },
+  { src: 'requirements.md', dest: '.kiro/specs/cartpole/requirements.md' },
+  { src: 'README.md', dest: 'README.md' },
+];
+/** The README may already be the project's own; every other starter file makes the starter stand down when it exists. */
+const STARTER_OPTIONAL = 'README.md';
+export const STARTER_CONFIG: GolemConfig = {
+  app: './app.js',
+  requirements: ['.kiro/specs/cartpole/requirements.md'],
+  robot: 'cartpole',
+  signalUnits: { pole_angle: 'rad', cart_x: 'm' },
+};
+export const STARTER_NOTE = 'starter cart-pole robot';
 
 /** Reads `<packRoot>/manifest.json`. Any failure names the pack path (requirement 9.15). */
 export async function readManifest(fs: KitFs, packRoot: string): Promise<PackManifest> {
@@ -63,23 +93,83 @@ async function exists(fs: KitFs, p: string): Promise<boolean> {
   }
 }
 
-/** Read-only. A target outside the target directory (`..`, absolute path, symlink) fails the whole plan. */
-export async function buildPlan(fs: KitFs, targetDir: string, m: PackManifest, o: { force: boolean }): Promise<WritePlan> {
+/** The text of golem.config.json, or undefined when there is none. */
+async function readConfigText(fs: KitFs, targetDir: string): Promise<string | undefined> {
+  try {
+    return await fs.readFile(`${targetDir}/golem.config.json`);
+  } catch (e) {
+    if ((e as { code?: string }).code === 'ENOENT') return undefined;
+    throw e;
+  }
+}
+
+/** True when the config parses and its `app` file exists: the project already has a robot. */
+async function namesExistingApp(fs: KitFs, targetDir: string, text: string): Promise<boolean> {
+  try {
+    return await exists(fs, resolve(targetDir, parseConfig(text, 'golem.config.json').app));
+  } catch (e) {
+    if ((e as { name?: string }).name === 'ConfigError') return false;
+    throw e;
+  }
+}
+
+/** Why the starter robot must not be written here, or undefined when it may be. Never touches anything. */
+async function starterBlocker(fs: KitFs, targetDir: string, configText: string | undefined): Promise<string | undefined> {
+  // An absent config, or the empty placeholder an earlier `golem init` wrote, leaves room for the starter.
+  if (configText !== undefined && configText !== formatConfig(CONFIG_PLACEHOLDER)) {
+    return (await namesExistingApp(fs, targetDir, configText)) ? 'golem.config.json names an app that exists' : 'golem.config.json exists';
+  }
+  for (const f of STARTER_FILES) {
+    if (f.dest !== STARTER_OPTIONAL && (await exists(fs, resolve(targetDir, f.dest)))) return `${f.dest} exists`;
+  }
+  if (await exists(fs, resolve(targetDir, 'robot'))) return 'robot/ exists';
+  return undefined;
+}
+
+/**
+ * Read-only. A target outside the target directory (`..`, absolute path, symlink) fails the whole plan.
+ * `o.starterRoot` asks for the starter robot; `force` never applies to it.
+ */
+export async function buildPlan(fs: KitFs, targetDir: string, m: PackManifest, o: { force: boolean; starterRoot?: string }): Promise<WritePlan> {
   const realTarget = await realLocation(fs, targetDir);
   const entries: PlanEntry[] = [];
-  const consider = async (rel: string, target: string, kind: PlanEntry['kind']): Promise<void> => {
+  const consider = async (rel: string, target: string, kind: PlanEntry['kind'], extra: Partial<PlanEntry> = {}): Promise<PlanEntry> => {
     const real = await realLocation(fs, target);
     if (!containedIn(realTarget, real)) throw new InitError(`refusing to write ${target}: it resolves to ${real}, outside ${realTarget}`);
     const present = await exists(fs, target);
     let action: PlanAction;
     if (!present) action = 'write';
     else if (kind === 'merge-mcp') action = 'merge';
-    else action = o.force ? 'write' : 'skip';
-    entries.push({ rel, target, kind, action, ...(action === 'skip' ? { reason: 'exists' } : {}) });
+    else action = o.force && kind !== 'starter' ? 'write' : 'skip';
+    const entry: PlanEntry = { rel, target, kind, action, ...extra, ...(action === 'skip' ? { reason: 'exists' } : {}) };
+    entries.push(entry);
+    return entry;
   };
   for (const f of m.files) await consider(f.rel, resolve(`${targetDir}/.kiro`, f.rel), f.kind);
-  await consider('golem.config.json', `${targetDir}/golem.config.json`, 'config');
-  return { targetDir, entries };
+
+  const configText = await readConfigText(fs, targetDir);
+  let starter: WritePlan['starter'];
+  if (o.starterRoot !== undefined) {
+    const why = await starterBlocker(fs, targetDir, configText);
+    starter = why === undefined ? { root: o.starterRoot } : { root: o.starterRoot, skipped: why };
+    if (why === undefined) {
+      for (const f of STARTER_FILES) {
+        await consider(f.dest, resolve(targetDir, f.dest), 'starter', { src: f.src, ...(f.dest === 'app.js' ? { note: STARTER_NOTE } : {}) });
+      }
+    }
+  }
+
+  const config = await consider('golem.config.json', `${targetDir}/golem.config.json`, 'config');
+  if (starter !== undefined && starter.skipped === undefined) {
+    // No config, or the empty placeholder of an earlier init: the starter's config replaces it.
+    config.config = 'starter';
+    if (configText !== undefined) { config.action = 'write'; delete config.reason; config.note = 'replaced the empty placeholder'; }
+  } else if (config.action === 'write' && configText !== undefined && (await namesExistingApp(fs, targetDir, configText))) {
+    // `--force` refreshes the pack; it never throws away a config that points at a working app.
+    config.action = 'skip';
+    config.reason = 'names an app that exists';
+  }
+  return { targetDir, entries, ...(starter !== undefined ? { starter } : {}) };
 }
 
 /** The `golem` entry is the only one init touches (assumptions A9, A10). Throws on invalid existing JSON. */
@@ -115,7 +205,15 @@ export async function executePlan(fs: KitFs, plan: WritePlan, packRoot: string, 
   const notes = new Map<PlanEntry, string>();
   for (const e of plan.entries) {
     if (e.action === 'skip') continue;
-    if (e.kind === 'config') { payload.set(e, formatConfig(CONFIG_PLACEHOLDER)); continue; }
+    if (e.kind === 'config') { payload.set(e, formatConfig(e.config === 'starter' ? STARTER_CONFIG : CONFIG_PLACEHOLDER)); continue; }
+    if (e.kind === 'starter') {
+      try {
+        payload.set(e, await fs.readBytes(`${plan.starter?.root ?? ''}/${e.src ?? e.rel}`));
+      } catch (err) {
+        throw new PackError(`the starter robot at ${plan.starter?.root ?? '(unset)'} cannot be read: ${e.src ?? e.rel}: ${(err as Error).message}`);
+      }
+      continue;
+    }
     let bytes: Uint8Array;
     try {
       bytes = await fs.readBytes(`${packRoot}/${e.rel}`);
@@ -135,7 +233,7 @@ export async function executePlan(fs: KitFs, plan: WritePlan, packRoot: string, 
   for (const e of plan.entries) {
     const data = payload.get(e);
     if (data === undefined) {
-      say(`skipped ${shown(plan, e)} (exists)`);
+      say(`skipped ${shown(plan, e)} (${e.reason ?? 'exists'})`);
       continue;
     }
     try {
@@ -144,6 +242,10 @@ export async function executePlan(fs: KitFs, plan: WritePlan, packRoot: string, 
       throw new InitError(`cannot write ${e.target}: ${(err as Error).message}`);
     }
     if (e.action === 'merge') say(`merged ${shown(plan, e)}: golem entry ${notes.get(e) ?? 'added'}`);
-    else say(`wrote ${shown(plan, e)}`);
+    else say(`wrote ${shown(plan, e)}${e.note !== undefined ? ` (${e.note})` : ''}`);
   }
+  if (plan.starter?.skipped !== undefined) say(`skipped starter robot (${plan.starter.skipped})`);
 }
+
+/** True when the plan wrote the starter robot's app.js. */
+export const starterWritten = (plan: WritePlan): boolean => plan.entries.some((e) => e.kind === 'starter' && e.rel === 'app.js' && e.action === 'write');

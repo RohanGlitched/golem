@@ -47,8 +47,8 @@ export const COMMANDS: Record<CommandName, CommandSpec> = {
     positionals: [], flags: [{ name: 'kiro', kind: 'bool' }, ...budgetFlags],
   },
   init: {
-    name: 'init', usage: 'npx golem-spec init [dir] [--force]',
-    positionals: [{ name: 'dir', required: false }], flags: [{ name: 'force', kind: 'bool' }],
+    name: 'init', usage: 'npx golem-spec init [dir] [--force] [--no-starter]',
+    positionals: [{ name: 'dir', required: false }], flags: [{ name: 'force', kind: 'bool' }, { name: 'no-starter', kind: 'bool' }],
   },
   mcp: { name: 'mcp', usage: 'npx golem-spec mcp [--app <dir>]', positionals: [], flags: [] },
 };

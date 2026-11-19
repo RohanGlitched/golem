@@ -93,9 +93,53 @@ export async function bundleApp(appPath: string): Promise<string> {
   return file;
 }
 
+const RELATIVE_IMPORT = /\b(?:from|import)\s*\(?\s*['"]\.{1,2}\//;
+const ESM_SYNTAX = /^\s*(?:export\s|import[\s{*'"])|\bimport\.meta\b/m;
+
+/** The `type` of the nearest package.json at or above `file` (undefined when there is none or it sets no type). */
+async function packageType(file: string): Promise<string | undefined> {
+  let dir = dirname(file);
+  for (;;) {
+    try {
+      return (JSON.parse(await readFile(join(dir, 'package.json'), 'utf8')) as { type?: string }).type;
+    } catch { /* no readable package.json here: keep walking up */ }
+    const up = dirname(dir);
+    if (up === dir) return undefined;
+    dir = up;
+  }
+}
+
+/**
+ * A `.js` app written as an ES module, in a package that does not say `"type": "module"` (the default after
+ * `npm init -y`), cannot be imported as it is. A self-contained app (no relative imports) is copied to
+ * `<cache>/app-<hash>.mjs` with `import.meta.url` pointing at the original file, so `./robot/` still resolves.
+ * Returns undefined when the file can be imported as it is.
+ */
+async function esmCopy(appPath: string): Promise<string | undefined> {
+  if (!/\.js$/.test(appPath) || (await packageType(appPath)) === 'module') return undefined;
+  const text = await readFile(appPath, 'utf8');
+  if (!ESM_SYNTAX.test(text)) return undefined;
+  if (RELATIVE_IMPORT.test(text)) {
+    throw new Error(`${appPath} uses ES module syntax and imports other files, so set "type": "module" in the nearest package.json`);
+  }
+  const body = text.replaceAll('import.meta.url', JSON.stringify(pathToFileURL(appPath).href));
+  const dir = await cacheDir(appPath);
+  const key = createHash('sha1').update(appPath).digest('hex').slice(0, 8);
+  const file = join(dir, `app-${key}-${createHash('sha1').update(body).digest('hex').slice(0, 10)}.mjs`);
+  await mkdir(dir, { recursive: true });
+  try {
+    await stat(file);
+  } catch {
+    const tmp = `${file}.tmp-${process.pid}`;
+    await writeFile(tmp, body);
+    await rename(tmp, file);
+  }
+  return file;
+}
+
 /** Imports the app module (building it first when it is TypeScript) and returns its RobotApp. */
 export async function prepareApp(modulePath: string): Promise<PreparedApp> {
-  const file = TS.test(modulePath) ? await bundleApp(modulePath) : modulePath;
+  const file = TS.test(modulePath) ? await bundleApp(modulePath) : ((await esmCopy(modulePath)) ?? modulePath);
   const moduleUrl = pathToFileURL(file).href;
   const mod = (await import(/* @vite-ignore */ moduleUrl)) as { default?: RobotApp; app?: RobotApp };
   const app = mod.default ?? mod.app;
