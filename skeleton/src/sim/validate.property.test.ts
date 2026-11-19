@@ -33,7 +33,7 @@ describe('normaliseScenario properties', () => {
     }), { numRuns: PURE_RUNS, seed: SEED });
   });
   it('wraps into [min, max) congruent modulo the span', () => {
-    fc.assert(fc.property(dim.filter((d) => d.wrap), fc.double({ min: -5000, max: 5000, noNaN: true }), (d, x) => {
+    fc.assert(fc.property(dim.filter((d) => d.wrap === true), fc.double({ min: -5000, max: 5000, noNaN: true }), (d, x) => {
       const out = normaliseScenario(d, x);
       if (!(out >= d.min && out < d.max)) return false;
       const k = (x - out) / (d.max - d.min);
@@ -55,4 +55,5 @@ describe('normaliseScenario properties', () => {
     expect(liveHandleCount()).toBe(before);
   });
 });
+
 

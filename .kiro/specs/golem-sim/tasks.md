@@ -133,23 +133,23 @@ Rules that apply to every task:
 - [x] 13. Checkpoint - Building blocks complete
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 14. Episode runner
-  - [~] 14.1 Implement `episode.ts`: setup and warm-up
+- [x] 14. Episode runner
+  - [x] 14.1 Implement `episode.ts`: setup and warm-up
     - `runTrial(app, req, spec, opts)`: validate before any handle, get the model from `opts.cache`, snapshot the guarded model fields, open a `TrialScope`, create the `MjData`, create `mulberry32(seed)`, call `buildContext`, then `initState` once, then `makeController` once with the same rng. Read the six views once. Warm up with exactly `round(warmup/controlDt)` control steps and `round(warmup/simDt)` sim steps, with no `apply` call, no `xfrc_applied` write and no sample. Throw on divergence during warm-up. `finally` restores the model, then runs `disposeAll`. Errors go through `wrapTrialError`.
     - Example tests: call order `initState` then `makeController` with the same rng, step counts at the trigger, zero `apply` calls in warm-up, `initState` throwing and `makeController` throwing both leave the handle counter unchanged, validation errors create no `MjData`, and an error message carries app id, requirement id, seed and `cause`.
     - _Requirements: 5.1, 5.4, 5.5, 5.6, 5.7, 5.8, 5.9, 5.10, 5.11, 3.10, 3.11, 14.1, 14.2, 14.3_
 
-  - [~] 14.2 Extend `episode.ts`: trigger, perturbations, sampling, monitor, result
+  - [x] 14.2 Extend `episode.ts`: trigger, perturbations, sampling, monitor, result
     - Push the `trigger` event, clear `xfrc_applied`, allocate the Trace arrays (the signal arrays in the sample-0 prologue, per design D6), then sample `k` with `t = warmup + k*controlDt`, one `controller.step` per control step, and `n` sim steps each clearing `xfrc_applied` then applying calls in array order with `t` as the start of the step. Stop at the horizon, call the monitor once on the trimmed trace, and return `TrialResult` with the spec, `wallMs` and the monitor result.
     - Example tests: trigger precedes sample 0 and the first `apply`, an empty `perturbations` array still gives the trigger event, `ctrl` is Bit-identical across a control step's sim steps, `signals` is called once per control step before its sim steps, non-finite signal values are stored unchanged, `apply` throws and `signals` throws and `controller.step` throws and `monitor` throws each reject with the cause and no leaked handle, and `result.spec` deep-equals the input with `wallMs` finite and at least 0.
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.8, 6.9, 6.10, 6.13, 6.14, 7.1, 7.3, 7.4, 7.5, 7.6, 7.7, 7.8, 7.9, 7.10, 7.13, 9.1, 9.5, 9.8, 9.9, 9.10, 9.11_
 
-  - [~] 14.3 Extend `episode.ts`: divergence, early stop, poses
+  - [x] 14.3 Extend `episode.ts`: divergence, early stop, poses
     - Add the `qpos` finite check after each sim step with one `diverged` event and `-Infinity` robustness, and call the monitor on the recorded prefix. Add the early-stop hook once per sample, with reject for `NaN` or non-number returns and stopping after the current sample, with no further sim step. Add the `PoseRecorder` after the trigger, with `finish()` in the result.
     - Example tests: a hook returning `NaN`, a string or an object rejects and deletes `MjData`, a hook throwing rejects without calling the monitor, a decided value at the final sample ends the trial there, divergence gives `worstAt` equal to the divergence time, and the pose count and `poses` absence with `record` `'none'` are right.
     - _Requirements: 7.11, 7.12, 8.6, 8.9, 9.2, 9.3, 9.4, 9.6, 9.7, 9.12, 9.13, 9.14, 9.15_
 
-  - [~] 14.4 Extend `episode.ts`: view refresh and allocation discipline
+  - [x] 14.4 Extend `episode.ts`: view refresh and allocation discipline
     - Compare `view.buffer` identity once per control step and re-read the views before the next `mj_step`. Ensure the Step_Loop uses index loops and reuses `out`, `values` and the signal pairs, with no closures or strings.
     - Example tests (Test_App, at most 2 s simulated): a probe around `mj_step` and `controller.step` shows an unchanged handle counter and zero new `Float64Array` or `Float32Array` instances inside the loop, `out` identity is equal at every call, forced WASM memory growth in a controller gives the same trace as no growth, and heap growth with a 1.5 s horizon and forced GC is 64 KiB or less (only when run with `--expose-gc`). Also a 2 s trial with a warm model completes in under 1 s.
     - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.5, 12.6, 12.7, 12.8, 12.9, 13.9_
