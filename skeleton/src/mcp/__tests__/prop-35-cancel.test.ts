@@ -44,6 +44,6 @@ describe('Property 35: cancellation leaves disk state unchanged', () => {
       expect(next.isError).toBe(false);
       expect(m.spies.poolClose).toBe(0);
       await m.close();
-    }), { ...propConfig, numRuns: 40 });
+    }), propConfig);
   });
 });

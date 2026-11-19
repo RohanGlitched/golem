@@ -5,11 +5,17 @@ import type { Verdict } from './sibling-types.js';
 
 export const UNIT_MISSING = 'unit not declared';
 
-/** `RobotApp.signalUnits`, then the unit of a lexicon predicate that reads the signal, then the text `unit not declared`. */
-export function signalUnit(app: Pick<RobotApp, 'lexicon'> & { signalUnits?: Record<string, string> }, signal: string): string {
-  const declared = app.signalUnits?.[signal];
+/**
+ * The unit of a signal, in this order: `RobotApp.signalUnits`, the `signalUnits` of the Config_File, the unit of a
+ * lexicon predicate that reads only this signal (its margin is then in the unit of the signal), and the text
+ * `unit not declared`. A predicate that reads several signals says nothing about the unit of each one.
+ */
+export function signalUnit(
+  app: Pick<RobotApp, 'lexicon'> & { signalUnits?: Record<string, string> }, signal: string, configUnits?: Record<string, string>,
+): string {
+  const declared = app.signalUnits?.[signal] ?? configUnits?.[signal];
   if (declared !== undefined) return declared;
-  const p = app.lexicon.predicates.find((x) => x.signals.includes(signal));
+  const p = app.lexicon.predicates.find((x) => x.signals.length === 1 && x.signals[0] === signal);
   return p?.unit ?? UNIT_MISSING;
 }
 

@@ -44,6 +44,6 @@ describe('Property 36: propose_requirement only appends accepted, new, compilabl
         }
         expect(m.fs.text(reqFile)).toBe(reqBefore);
       }
-    }), { ...propConfig, numRuns: 50 });
+    }), propConfig);
   });
 });

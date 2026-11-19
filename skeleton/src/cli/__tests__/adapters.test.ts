@@ -92,6 +92,10 @@ describe('signal units', () => {
     expect(signalUnit({ lexicon: tinyLexicon }, 'tilt')).toBe('rad');
     expect(signalUnit({ lexicon: tinyLexicon, signalUnits: { tilt: 'deg' } }, 'tilt')).toBe('deg');
     expect(signalUnit({ lexicon: tinyLexicon }, 'nope')).toBe(UNIT_MISSING);
+    expect(signalUnit({ lexicon: tinyLexicon }, 'nope', { nope: 'N' })).toBe('N');
+    expect(signalUnit({ lexicon: tinyLexicon, signalUnits: { nope: 'kg' } }, 'nope', { nope: 'N' })).toBe('kg');
+    const multi = { lexicon: { ...tinyLexicon, predicates: [{ ...tinyLexicon.predicates[0]!, signals: ['a', 'b'] }] } };
+    expect(signalUnit(multi, 'a')).toBe(UNIT_MISSING);
     expect(UNIT_MISSING).toBe('unit not declared');
   });
 

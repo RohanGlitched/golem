@@ -52,7 +52,7 @@ export const handler: CommandHandler = async (p, io, deps) => {
   line(io, `robustness ${formatMargin(result.robustness, result.unit)} at t = ${sig3(result.worstAt)} s (the worst moment)`);
   line(io, 'signals: minimum, maximum, and value at the worst moment');
   for (const s of stats) {
-    const u = signalUnit(robotApp, s.signal);
+    const u = signalUnit(robotApp, s.signal, app.config.signalUnits);
     line(io, `  ${s.signal}: min ${sig3(s.min)} ${u}, max ${sig3(s.max)} ${u}, at worst ${sig3(s.atWorst)} ${u}`);
   }
   line(io, `trace: ${displayPath(io.cwd, csvPath)} (${trace.t.length} samples)`);

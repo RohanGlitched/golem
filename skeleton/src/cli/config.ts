@@ -16,6 +16,8 @@ export interface GolemConfig {
   toolTimeCapS?: number;
   /** uint32, default 1 (assumption A7). */
   searchSeed?: number;
+  /** Signal name to unit text, for apps that declare no RobotApp.signalUnits. */
+  signalUnits?: Record<string, string>;
 }
 
 export interface LocatedApp {
@@ -30,7 +32,7 @@ export class ConfigError extends Error {
   constructor(message: string, readonly path: string, readonly field?: string) { super(message); }
 }
 
-export const FIELD_ORDER = ['app', 'requirements', 'studioUrl', 'robot', 'toolTimeCapS', 'searchSeed'] as const;
+export const FIELD_ORDER = ['app', 'requirements', 'studioUrl', 'robot', 'toolTimeCapS', 'searchSeed', 'signalUnits'] as const;
 
 export function parseConfig(text: string, path: string): GolemConfig {
   let raw: unknown;
@@ -64,11 +66,18 @@ export function parseConfig(text: string, path: string): GolemConfig {
     const v = o['searchSeed'];
     if (typeof v !== 'number' || !Number.isInteger(v) || v < 0 || v > 0xffffffff) bad('searchSeed', `must be an integer from 0 to 4294967295, got ${JSON.stringify(v)}`);
   }
+  if (has('signalUnits')) {
+    const u = o['signalUnits'];
+    if (typeof u !== 'object' || u === null || Array.isArray(u) || !Object.values(u).every((x) => typeof x === 'string' && x !== '')) {
+      bad('signalUnits', 'must be an object of non-empty unit texts');
+    }
+  }
   const c: GolemConfig = { app: o['app'] as string, requirements: [...(reqs as string[])] };
   if (has('studioUrl')) c.studioUrl = o['studioUrl'] as string;
   if (has('robot')) c.robot = o['robot'] as string;
   if (has('toolTimeCapS')) c.toolTimeCapS = o['toolTimeCapS'] as number;
   if (has('searchSeed')) c.searchSeed = o['searchSeed'] as number;
+  if (has('signalUnits')) c.signalUnits = { ...(o['signalUnits'] as Record<string, string>) };
   return c;
 }
 

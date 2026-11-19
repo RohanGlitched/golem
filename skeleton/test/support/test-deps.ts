@@ -69,6 +69,8 @@ export interface TestDepsOptions {
   /** `runTraced` fails with this error instead of running. */
   traceError?: Error;
   poolError?: Error;
+  /** The synthetic controller's droop (m/N), read at every trial. Change it to improve the controller. */
+  droop?: () => number;
   commit?: string | undefined;
 }
 
@@ -104,7 +106,8 @@ export function createTestDeps(o: TestDepsOptions = {}): TestDeps {
     if (r === undefined) throw new Error(`no requirement ${id}`);
     return r;
   };
-  const trial = o.trial ?? ((req, spec) => tinyTrial(req, spec).result);
+  const droop = (): number | undefined => o.droop?.();
+  const trial = o.trial ?? ((req, spec) => tinyTrial(req, spec, droop()).result);
 
   const deps: KitDeps = {
     fs,
@@ -145,7 +148,7 @@ export function createTestDeps(o: TestDepsOptions = {}): TestDeps {
       spies.runTraced++;
       if (o.traceError !== undefined) throw o.traceError;
       void a;
-      return tinyTrial(req, spec);
+      return tinyTrial(req, spec, droop());
     },
     async gitCommit() { return o.commit; },
   };

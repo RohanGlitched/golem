@@ -10,9 +10,10 @@ export const arbConfig: fc.Arbitrary<GolemConfig> = fc.record({
   robot: fc.option(fc.string({ minLength: 1 }), { nil: undefined }),
   toolTimeCapS: fc.option(fc.double({ min: 1e-9, max: 1e9, noNaN: true }), { nil: undefined }),
   searchSeed: fc.option(fc.integer({ min: 0, max: 0xffffffff }), { nil: undefined }),
+  signalUnits: fc.option(fc.dictionary(fc.stringMatching(/^[a-z_]{1,8}$/), fc.string({ minLength: 1, maxLength: 6 }), { maxKeys: 3 }), { nil: undefined }),
 }, { requiredKeys: ['app', 'requirements'] }).map((c) => {
   const out: GolemConfig = { app: c.app, requirements: c.requirements };
-  for (const k of ['studioUrl', 'robot', 'toolTimeCapS', 'searchSeed'] as const) if (c[k] !== undefined) (out as unknown as Record<string, unknown>)[k] = c[k];
+  for (const k of ['studioUrl', 'robot', 'toolTimeCapS', 'searchSeed', 'signalUnits'] as const) if (c[k] !== undefined) (out as unknown as Record<string, unknown>)[k] = c[k];
   return out;
 });
 

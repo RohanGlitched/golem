@@ -78,7 +78,10 @@ export function compileTiny(text: string = TINY_REQUIREMENTS): CompiledRequireme
 }
 
 /** Builds the synthetic trace of one trial. */
-export function tinyTrace(spec: TrialSpec, horizon: number = TINY_HORIZON_S): Trace {
+/** droop is the synthetic controller's height loss per newton (m/N); a smaller value is a better controller. */
+export const TINY_DROOP = 0.004;
+
+export function tinyTrace(spec: TrialSpec, horizon: number = TINY_HORIZON_S, droop: number = TINY_DROOP): Trace {
   const force = spec.scenario['push.force'] ?? 0;
   const noise = TINY_NOISE_M * mulberry32(spec.seed)();
   const n = Math.round(horizon / TINY_CONTROL_DT) + 1;
@@ -89,14 +92,14 @@ export function tinyTrace(spec: TrialSpec, horizon: number = TINY_HORIZON_S): Tr
     const tt = k * TINY_CONTROL_DT;
     const s = Math.min(1, tt / 0.5);
     t[k] = TINY_WARMUP + tt;
-    h[k] = 1.0 - 0.004 * force * s - noise;
+    h[k] = 1.0 - droop * force * s - noise;
     a[k] = 0.002 * force * s;
   }
   return { t, signals: { height: h, tilt: a }, events: [{ name: 'trigger', t: TINY_WARMUP }] };
 }
 
-export function tinyTrial(req: CompiledRequirement, spec: TrialSpec): { result: TrialResult; trace: Trace } {
-  const trace = tinyTrace(spec, req.horizon);
+export function tinyTrial(req: CompiledRequirement, spec: TrialSpec, droop: number = TINY_DROOP): { result: TrialResult; trace: Trace } {
+  const trace = tinyTrace(spec, req.horizon, droop);
   const m = req.monitor(trace);
   return { result: { spec, robustness: m.robustness, worstAt: m.worstAt, unit: m.unit, wallMs: 0 }, trace };
 }

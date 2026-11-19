@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { loadGuard } from './support/guard.js';
+import { loadGuard, runGuard } from './support/guard.js';
 
 const guard = await loadGuard();
 const pay = (o: unknown) => JSON.stringify(o);
@@ -40,4 +40,13 @@ describe('guard decide', () => {
     expect(guard.normalise('A\\B\\..\\.\\Requirements.MD')).toBe('a/requirements.md');
     expect(guard.isRequirementsPath('my-requirements.md')).toBe(false);
   });
+});
+
+describe('guard with a large payload', () => {
+  it('decides within 500 ms on a payload of about 1 MiB (best of three runs)', async () => {
+    const big = JSON.stringify({ tool_input: { path: 'a/requirements.md', content: 'x'.repeat(1024 * 1024 - 200) } });
+    const runs = [await runGuard(big, { PATH: process.env['PATH'] ?? '' }), await runGuard(big, { PATH: process.env['PATH'] ?? '' }), await runGuard(big, { PATH: process.env['PATH'] ?? '' })];
+    expect(runs.every((r) => r.code === 2)).toBe(true);
+    expect(Math.min(...runs.map((r) => r.ms))).toBeLessThan(500);
+  }, 30000);
 });

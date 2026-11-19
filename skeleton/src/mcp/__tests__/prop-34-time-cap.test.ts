@@ -32,7 +32,7 @@ describe('Property 34: time cap gives a result for run and falsify and an error 
       expect(m.fs.files.has(m.path('.golem/report.json'))).toBe(false);
       expect([...m.fs.files.keys()].some((p) => p.includes('/seeds/'))).toBe(false);
       await m.close();
-    }), { ...propConfig, numRuns: 40 });
+    }), propConfig);
   });
 
   it('returns an error result that says the cap ended the call for every other slow tool', async () => {
@@ -48,6 +48,6 @@ describe('Property 34: time cap gives a result for run and falsify and an error 
       expect(r.isError).toBe(true);
       expect(r.summary).toMatch(/time cap/);
       await m.close();
-    }), { ...propConfig, numRuns: 25 });
+    }), propConfig);
   });
 });

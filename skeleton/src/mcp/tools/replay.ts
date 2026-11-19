@@ -28,7 +28,7 @@ export const tool: ToolDef = {
         () => ctx.deps.runTraced(ctx.robotApp, found.req, { app: ctx.robotApp.id, reqId, scenario: target.scenario, seed: target.seed }),
         ctx.signal,
       );
-      const stats = signalStats(trace, result.worstAt).map((s) => ({ ...s, unit: signalUnit(ctx.robotApp, s.signal) }));
+      const stats = signalStats(trace, result.worstAt).map((s) => ({ ...s, unit: signalUnit(ctx.robotApp, s.signal, ctx.located.config.signalUnits) }));
       const url = studioUrl(ctx.located.config, ctx.robotApp.id, { reqId, seed: target.seed, scenario: target.scenario });
       return makeToolResult(
         `${reqId} replay (seed ${target.seed}): robustness ${formatMargin(result.robustness, result.unit)} at t = ${sig3(result.worstAt)} s, ${formatScenario(found.req.space, target.scenario)}`,

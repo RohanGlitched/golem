@@ -630,18 +630,18 @@ This revision follows the current requirements and design:
     - Do not change the design. A drifted shape must fail loudly.
     - _Requirements: 8.1, 17.1, 17.2, 17.3, 17.7, 19.2, 21.2, 24.1, 24.6, 25.1, 25.6, 26.1_
 
-- [ ] 14. End-to-end on the Tiny_Test_App
-  - [ ] 14.1 Write the CLI end-to-end test
+- [x] 14. End-to-end on the Tiny_Test_App
+  - [x] 14.1 Write the CLI end-to-end test
     - In-process with the real pack and a memory project: `init`, then `check`, then `test` (broken, pins a seed), then `gate` red, fix the synthetic controller threshold, then `gate` green, then `replay` (CSV and Studio_URL).
     - Assert exit codes 0, 0, 2, 2, 0, 0, that `gate --kiro` blocks with exit 0 while red and prints 0 bytes when green, and that a repeated red run follows the counter cycle with the dedupe window. Budgets at most 24.
     - _Requirements: 3.5, 4.11, 6.9, 7.3, 7.4, 8.1, 8.3, 9.1, 28.2_
 
-  - [ ] 14.2 Write the MCP end-to-end test
+  - [x] 14.2 Write the MCP end-to-end test
     - Over the same app through the in-memory transport: `list_requirements`, `check_requirement`, `falsify` (counterexample), `get_counterexample`, `replay`, `explain_margin`, `propose_requirement`, `run_requirement`.
     - Assert each result is a two-block Tool_Result, the counterexample from `falsify` matches the CLI's pinned entry for the same seed, and the Requirements_File is byte-identical at the end.
     - _Requirements: 11.1, 12.5, 13.3, 14.4, 15.1, 28.5, 28.6_
 
-- [ ] 15. Final checkpoint - Ensure all tests pass
+- [x] 15. Final checkpoint - Ensure all tests pass
   - Run `vitest --run` for `skeleton`. Ensure all tests pass, ask the user if questions arise.
 
 ## Notes

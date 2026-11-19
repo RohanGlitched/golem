@@ -1,0 +1,13 @@
+{
+  "app": "./app.ts",
+  "requirements": [".kiro/specs/g1-walking/requirements.md"],
+  "robot": "g1-walking",
+  "signalUnits": {
+    "pelvis_z": "m",
+    "tilt_deg": "deg",
+    "forward_speed": "m/s",
+    "commanded_speed": "m/s",
+    "lateral_drift": "m",
+    "episode_time": "s"
+  }
+}

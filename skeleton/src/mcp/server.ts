@@ -154,6 +154,11 @@ export async function runStdioServer(p: ParsedCommand, io: CliIo, deps: KitDeps,
   const closed = new Promise<void>((resolve) => {
     const prev = transport.onclose;
     transport.onclose = () => { prev?.(); resolve(); };
+    // The stdio transport does not notice the end of stdin by itself (requirement 10.4).
+    if (opts.transport === undefined) {
+      process.stdin.once('end', () => resolve());
+      process.stdin.once('close', () => resolve());
+    }
   });
   const server = await createGolemServer({ app: ctx, deps, transport, log });
   await closed;

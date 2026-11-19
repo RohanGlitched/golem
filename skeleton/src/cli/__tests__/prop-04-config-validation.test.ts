@@ -11,8 +11,9 @@ const invalid: Record<(typeof FIELD_ORDER)[number], unknown[]> = {
   robot: [1, '', null],
   toolTimeCapS: ['5', 0, -1, null, true],
   searchSeed: [1.5, -1, 2 ** 32, '1', null],
+  signalUnits: [1, 'm', [], { a: 1 }, { a: '' }, null],
 };
-const valid = { app: './a.js', requirements: ['r.md'], studioUrl: 'u', robot: 'r', toolTimeCapS: 5, searchSeed: 1 };
+const valid = { app: './a.js', requirements: ['r.md'], studioUrl: 'u', robot: 'r', toolTimeCapS: 5, searchSeed: 1, signalUnits: { a: 'm' } };
 
 describe('Property 4: config validation names the first invalid field', () => {
   // Feature: golem-kit, Property 4: Config validation names the first invalid field
