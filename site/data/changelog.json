@@ -1,62 +1,62 @@
 [
   {
-    "date": "2026-11-19",
-    "hash": "29234cb",
-    "subject": "README cover and hero poster from the 100 N recording; gate claim worded as what the hook does"
+    "date": "2026-11-20",
+    "hash": "eee33d1",
+    "subject": "Merge branch 'fix/polish2'"
+  },
+  {
+    "date": "2026-11-20",
+    "hash": "c518ed9",
+    "subject": "evidence: agent-gate subject is the registered controller (Kiro's later reflex is the identity reflex in each workspace); deviation 3 recorded"
+  },
+  {
+    "date": "2026-11-20",
+    "hash": "e797e78",
+    "subject": "README: spec count sentence"
+  },
+  {
+    "date": "2026-11-20",
+    "hash": "559d354",
+    "subject": "README: spec count wording"
+  },
+  {
+    "date": "2026-11-20",
+    "hash": "174ddaf",
+    "subject": "README: Kiro counts from the corrected stats script"
+  },
+  {
+    "date": "2026-11-20",
+    "hash": "7dfd31b",
+    "subject": "evidence: agent-gate workspaces carry the pinned seeds and restore them before the independent gate; deviations recorded in PREREG.md"
+  },
+  {
+    "date": "2026-11-20",
+    "hash": "93bcade",
+    "subject": "Merge branch 'fix/judge1'"
+  },
+  {
+    "date": "2026-11-20",
+    "hash": "8c3a48a",
+    "subject": "evidence: map-g1 takes --dir-offset <deg> and --seed-base <n> to re-run the map on held-out directions and seeds (default runs are unchanged)"
+  },
+  {
+    "date": "2026-11-20",
+    "hash": "f4d485f",
+    "subject": "evidence: kiro-stats counts unique artefacts, reports tasksOpen, leaves not-started specs out of the totals; how-kiro reads N done of M; stagger and candy task lists ticked or annotated"
+  },
+  {
+    "date": "2026-11-20",
+    "hash": "09212d2",
+    "subject": "README: captioned screens section"
+  },
+  {
+    "date": "2026-11-20",
+    "hash": "eae6c19",
+    "subject": "Merge branch 'fix/crew'"
   },
   {
     "date": "2026-11-19",
-    "hash": "d5dae41",
-    "subject": "README: designed cover, links, the Kiro-reflex before/after table, current counts; report and llms.txt regenerated with the counterclockwise push convention"
-  },
-  {
-    "date": "2026-11-19",
-    "hash": "057d748",
-    "subject": "Merge branch 'fix/kit'"
-  },
-  {
-    "date": "2026-11-19",
-    "hash": "bde3416",
-    "subject": "evidence: G1 stability map v2 (push.angle = side the push comes from); evidence scripts run on the built package; GOLEM_REFLEX selects the reflex in worker threads"
-  },
-  {
-    "date": "2026-11-19",
-    "hash": "289b7b6",
-    "subject": "evidence: keep the v1 stability map (force-direction convention) for the record"
-  },
-  {
-    "date": "2026-11-19",
-    "hash": "e9897b3",
-    "subject": "Merge branch 'build/candy2'"
-  },
-  {
-    "date": "2026-11-19",
-    "hash": "783f9cd",
-    "subject": "Merge branch 'build/site'"
-  },
-  {
-    "date": "2026-11-19",
-    "hash": "c06f325",
-    "subject": "golem-site: 7 quality: tests, Playwright smoke at 1440 and 390 in both themes, Lighthouse, OG card, hero poster, woff2 fonts, studio h1"
-  },
-  {
-    "date": "2026-11-19",
-    "hash": "3cb5d3e",
-    "subject": "Merge branch 'build/signature'"
-  },
-  {
-    "date": "2026-11-19",
-    "hash": "511de79",
-    "subject": "Merge branch 'build/signature'"
-  },
-  {
-    "date": "2026-11-19",
-    "hash": "5e41314",
-    "subject": "golem-site: 6 how-kiro page (specs, config, surfaces, audits, what went wrong); kiro.json regenerated"
-  },
-  {
-    "date": "2026-11-19",
-    "hash": "109af58",
-    "subject": "golem-site: 5 evidence page (polar G1 map, honest falsifier benchmark, needle, candy, agent-gate pending, methods, limits)"
+    "hash": "2a2334a",
+    "subject": "Merge branch 'feat/starter'"
   }
 ]

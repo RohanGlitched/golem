@@ -1,0 +1,26 @@
+Create a feature spec named golem-cloud for infra/ and the studio's "Say it plainly" box. GOLEM's public site is hosted on AWS. The AWS account is restricted to region ap-southeast-2 (Sydney) by an organisation policy, has no AWS CLI installed locally, and deploys with Python boto3 scripts. Scope:
+
+(1) Hosting
+- A CloudFormation stack (infra/stack.yaml): a private S3 bucket for the static site build (site/dist, including both app studios), a CloudFront distribution with origin access control, and long cache for hashed assets plus a short cache for HTML.
+- Response headers: cross-origin isolation (COOP same-origin, COEP require-corp) so SharedArrayBuffer is available to MuJoCo workers if needed, a strict CSP, and an HSTS header.
+- A deploy script infra/deploy.py: boto3, which creates or updates the stack, syncs files with correct content types (.wasm application/wasm), and invalidates HTML.
+
+(2) Scribe API, for the studio's "Say it plainly" box. A visitor types a behaviour in plain words ("it shouldn't fall over if a kid bumps into it"). The API proposes 1 to 3 GOLEM EARS lines for the current app.
+- One Lambda (Node 20, Function URL behind CloudFront at /api/scribe).
+- It calls Amazon Bedrock with SigV4: model apac.amazon.nova-lite-v1:0 in ap-southeast-2, with a fallback to apac.amazon.nova-micro-v1:0.
+- The prompt holds the app's lexicon phrase templates and units (from golem-ears) and asks for JSON lines.
+- The Lambda then COMPILES every proposed line with golem-ears against that lexicon, and returns only lines that compile, plus diagnostics for the ones that don't. It retries once with the diagnostics fed back.
+- The model never decides a verdict; it only proposes text. The browser shows proposed lines as drafts the visitor can add to the tablet and test.
+
+(3) Spend guards
+- Reserved concurrency 3.
+- A DynamoDB counter: 600 scribe calls per day in total, and 20 per IP per hour (hashed IP, TTL).
+- Max 400 output tokens, and input capped at 400 characters.
+- When over the limit, a clear message, and the studio falls back to showing the lexicon's phrase list so the visitor can still write a line by hand.
+- CloudFront sends a secret origin header, and the Function URL rejects calls without it.
+- An AWS Budget alarm already exists on the account; do not create billing resources.
+
+(4) Tests
+- Unit tests for prompt building and the compile-and-filter step, with a fake model.
+- A smoke script that calls the deployed endpoint once.
+- The browser box must work, clearly degraded, when the API is unreachable (the static build works anywhere, including localhost).

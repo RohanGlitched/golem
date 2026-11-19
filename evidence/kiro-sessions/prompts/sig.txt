@@ -1,0 +1,43 @@
+You are in a git worktree on branch build/signature. Build the signature moments in .kiro/steering/experience.md. That file is binding; read it and design-language.md first.
+
+**Step 1: write a compact Kiro spec.**
+- Name it golem-signature, at .kiro/specs/golem-signature/: requirements.md (EARS), design.md (with Correctness Properties) and tasks.md.
+- Keep it compact: about 8 requirements, and no detailing passes.
+
+**Step 2: implement it yourself, in this session.** Work sequentially, with no subagents. If throttled, wait and retry.
+
+**Scope, in priority order:**
+1. **The living sentence.** The selected requirement is set large on the tablet. While a trial plays (a replay, or the hero during a shove), words bound to a signal move:
+   - "upright" tilts with the torso tilt, capped at 12°;
+   - the duration quantity fills like a fuse over the monitored window;
+   - the force quantity's underline grows with the live push force.
+   Dragging a quantity draws the matching force arrow on the stage in real time, using the shove arrow. A broken line fractures at the word whose signal broke first: use the per-signal margin breakdown that golem-ears now exposes on the monitor result.
+2. **Emet → met.** "emet" is incised on the G1's head: a small decal on the head mesh, generic via an app option naming the head body. When the selected requirement is broken, the first "e" crumbles away (a short particle or crack animation). It re-forms when the requirement holds. There is a one-line hint the first time.
+3. **Bullet time.** When the first ghost of a generation breaks, playback slows to 0.1× for 1.2 s while the camera orbits 40° around that ghost, then resumes. Skip it under reduced motion.
+4. **A timeline scrubber under the stage.** It scrubs all ghosts at once, and freezes and orbits the frozen swarm.
+5. **Long exposure.**
+   - A toggle that draws every trial's root-body path as a thin light trail: ghost colour for held, cinnabar for broken.
+   - Build the trails as one merged line geometry, rebuilt per generation.
+   - "Save photograph" exports a 2× PNG with the requirement text in a corner.
+6. **Sonification.**
+   - Off by default, with one toggle. Web Audio only, with no files.
+   - A drone whose pitch follows the selected line's live margin.
+   - A soft thud, panned by screen x, when a ghost breaks.
+   - A quiet glassy chord when a requirement is held.
+   - Keep everything tasteful and low in volume.
+
+**Rules:**
+- Skeleton UI only: skeleton/src/ui, skeleton/ui-demo, and app options. Keep everything generic, so it works for apps/stagger and apps/candy.
+- Every moment gets tests (unit, plus property tests where there is logic) and a Playwright check on the ui-demo G1 page (skeleton/ui-demo/g1.html; robot files go in skeleton/ui-demo/public/robot, copied from apps/stagger/robot if missing, git-ignored).
+- Performance:
+  - Keep render-on-demand.
+  - No per-frame allocation in the swarm, trail or audio paths.
+  - Measure fps with the existing probe and report it. If the machine is loaded, say so.
+- Commit after each item ("golem-signature: <n> <what>"), staging only skeleton/ and .kiro/specs/golem-signature.
+
+**Finish with:**
+- the tests;
+- the screenshot paths;
+- the fps;
+- anything left open.
+RESUME NOTE: an earlier session on this branch was killed by a power loss. Committed work is done; check git log and the spec tasks, review uncommitted files (finish or discard them), then continue with the next unfinished item.

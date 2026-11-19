@@ -1,0 +1,50 @@
+Create a feature spec named golem-kit for skeleton/src/cli, skeleton/src/mcp and skeleton/kiro-pack: the part of GOLEM that plugs into Kiro. The Kiro configuration is a product feature here, not just how we built it. Scope:
+
+(1) CLI `golem` (package golem-spec, bin golem). It finds the app by walking up from the current directory to a golem.config.json (it names the RobotApp module and the requirements files) or an --app <dir> flag. Commands:
+- `golem check [file]`: compile every EARS acceptance criterion and print diagnostics as file:line:col with suggestions. Exit 1 on any error. JSON output with --json.
+- `golem test [--req id] [--budget n] [--time s] [--workers n] [--json]`: falsify every requirement (pinned seeds first). Print one line per requirement with its status, margin, trials and the shrunk counterexample. Write .golem/report.json.
+- `golem falsify <reqId>`: the same, for one requirement, with live per-generation progress.
+- `golem replay <reqId> [--seed n]`: re-run the counterexample deterministically. Print the trace summary, write .golem/replays/<reqId>.csv, and print a studio URL with the scenario in the hash.
+- `golem gate`: run pinned seeds plus a quick budget. Exit 0 only if every requirement holds. Otherwise exit 2 and print, for each broken requirement, the EARS line, the counterexample and the replay command, in the format Kiro Stop hooks expect: a JSON object {"decision":"block","reason":"..."} on stdout when --kiro is passed.
+- `golem init [--force]`: copy kiro-pack into the project's .kiro/ and write golem.config.json. Never overwrite existing files without --force, and print every file written.
+- `golem mcp`: start the MCP server on stdio.
+
+(2) MCP server (@modelcontextprotocol/sdk, stdio). Tools:
+- list_requirements: returns ids, lines and last status.
+- check_requirement(text): returns diagnostics and the compiled space, with no run.
+- run_requirement(reqId, budget).
+- falsify(reqId, budget).
+- get_counterexample(reqId).
+- replay(reqId, seed?): a trace summary at 10 Hz, the worst moment, and the studio URL.
+- explain_margin(reqId): which signal was closest to breaking, and when.
+- propose_requirement(text): validates the line and writes it to .kiro/specs/<robot>/proposals.md, never to requirements.md.
+
+Tool results: first a plain one-line summary, then JSON. Every tool runs in-process with a worker pool and has a time cap.
+
+(3) kiro-pack templates, copied by golem init:
+- steering/golem-ears.md (fileMatch on requirements.md): how to write robot EARS with units and ranges.
+- hooks/golem.json in Kiro v1 hook format:
+  - PostFileSave on **/requirements.md → command `golem check`.
+  - PostFileSave on controller files → `golem test --budget 24`.
+  - Stop → `golem gate --kiro` (blocks the agent while any requirement is broken).
+  - PreToolUse with a write matcher → a node script that exits 2 when the target is a requirements.md file and the environment says the active agent is golem-tuner. The message says: the tuner may not edit requirements; propose changes with propose_requirement.
+  - PostTaskExec → `golem test` for the spec's robot.
+  - Manual hook "Summon the ghosts" → `golem test --budget 256`.
+- agents/golem-tuner.json: may write only controller/** and tuning files. It has the golem MCP server, its own preToolUse hook guarding requirements files, and a stop hook running golem gate. Its prompt explains the falsify, read counterexample, fix, re-run loop.
+- agents/golem-skeptic.json: read-only on code. It uses falsify and propose_requirement to find harsher believable requirements that break the robot.
+- agents/golem-scribe.json: turns plain-language robot behaviour into GOLEM EARS lines using check_requirement until they compile.
+- Write agents in Kiro CLI V2 fields, then run `kiro-cli agent upgrade` so they are universal V2/V3 files. Validate with `kiro-cli agent validate`.
+- settings/mcp.json: registers `golem mcp`.
+- skills/robot-ears/SKILL.md and skills/falsify-and-fix/SKILL.md.
+- workflows/falsify-and-fix.workflow.json: a repeat node (maxIterations 6, onMaxIterations pause) that runs golem-tuner, then checks `golem gate`, stopping when the gate passes.
+
+(4) A Kiro Power in skeleton/power/: Agent Plugins 1.0 format (plugin.json, mcp.json with type stdio running npx golem-spec mcp, skills/), plus a legacy POWER.md with steering, so `kiro-cli powers install ./skeleton/power` works.
+
+(5) A Kiro Crew app in skeleton/crew-app/ (app.json with agents, skills, mcpServers, and a nightly cron that runs the skeptic and posts a summary). Kept small.
+
+Tests:
+- CLI exit codes (check 1 on error, gate 2 when broken, 0 when held) using the tiny inline test app.
+- init idempotence: a second run writes nothing.
+- The PreToolUse guard blocks requirements writes only for the tuner.
+- MCP tools listed and callable through an in-memory transport.
+- Every generated JSON validates (hooks schema shape, agents through kiro-cli agent validate when available).

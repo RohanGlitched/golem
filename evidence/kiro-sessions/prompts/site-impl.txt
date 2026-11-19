@@ -1,0 +1,59 @@
+You are in a git worktree on branch build/site. Build the GOLEM website in site/.
+
+**The spec.** The golem-site spec has only requirements.md, from an interrupted session. Write a compact design.md and tasks.md (no detailing passes), then implement them yourself, sequentially, in this session. No subagents; on throttling, wait and retry.
+
+**Binding inputs.** design-language.md and experience.md are binding.
+- Lab-notebook pages: a left-aligned single column, at most 72ch.
+- Full-bleed figures.
+- B612 and B612 Mono, self-hosted under site/public/fonts; copy them from skeleton/ui-demo/public/fonts.
+- Gloock for headlines, self-hosted: download its woff2 or ttf from the Google Fonts GitHub repo (google/fonts, ofl/gloock) with its OFL licence.
+- Dark is the default, with a light toggle.
+- Every page runs from the top to a rich footer.
+
+**Structure.**
+- A Vite multi-page build.
+- site/dist must contain the two app studios at /stagger/ and /candy/. Build them from apps/stagger/web and apps/candy/web (candy may still be in progress on another branch: if apps/candy/web is missing, link to /candy/ and make the build tolerate its absence), with each robot's files copied into the build.
+- /404.html.
+
+**Pages.** Use real content only, read from the committed data: site/data/*.json, evidence/REPORT.md, evidence/results/*.summary.json, site/data/kiro.json (regenerate it with `node scripts/kiro-stats.mjs`), docs/cli-transcript.md and docs/reviews/.
+
+1. **/**
+   - The hero is the live G1 studio (mountStudio from golem-spec/ui on apps/stagger, compact mode if available, otherwise the full studio in a tall section). Above it, at most one line: "Shove the robot. Then summon the ghosts." No headline-over-image hero.
+   - Then these sections:
+     - **The problem:** controllers written by AI agents ship with demo videos, not evidence tied to the spec.
+     - **How it works:** EARS line → scenario space and monitor → ghosts → shrink → pinned seed → Stop gate, each with a small figure.
+     - **The two robots,** with links to their studios.
+     - **Measured results,** with headline numbers linking to /evidence: the G1 weakest 62.5 N at 260° vs 240.6 N at 160°; the candy wrist finding from apps/candy/proposals.md P8.
+     - **The kit in 60 seconds.**
+     - **Limits, stated plainly:** "held" means no counterexample within the budget; this is simulation, not the real robot; one policy.
+     - **A closing call to action.**
+   - **Footer:** sitemap, licences (Unitree BSD-3, Menagerie Apache-2.0, MuJoCo Apache-2.0, fonts OFL), the repo link https://github.com/RohanGlitched/golem, and a changelog.
+2. **/kit:** the CLI commands with real output excerpts from docs/cli-transcript.md; the MCP tools; the hooks, agents, skills, Power, workflow and Crew app; the EARS dialect reference generated from both apps' lexicons.
+3. **/evidence:**
+   - The G1 stability map as an interactive polar figure (SVG) from evidence/results/g1-map.jsonl. Hovering shows the direction, the held force and the weakest phase.
+   - The falsifier benchmark reported honestly: guided equals random on these G1 lines at budget 96. Show both rounds, plus the budget-256 round if evidence/results/graded-margin-256 exists. Include the synthetic needle result from docs/reviews/falsify-hardening.md (GOLEM 30/30 vs random 7/30 on a 0.11% region).
+   - The candy measurement, and the agent-gate experiment as "pending".
+   - Methods, the pre-registration link and the limits.
+4. **/how-kiro:** generated from site/data/kiro.json.
+   - Every spec, with its type, requirement, EARS, property and task counts.
+   - The steering files, hooks (root and app), agents, MCP servers, skills, workflow, Power and Crew app.
+   - Which Kiro surfaces did what (CLI v3 headless spec mode and default mode, models Opus 5.5 and Sonnet 5.5).
+   - The three independent audits and the bugfix specs they produced.
+   - What went wrong, honestly: the push direction never reached the sim until the audit caught it; the fallen margin was too flat for guided search; the scheduler doubled frames.
+
+**Quality bar.**
+- Lighthouse performance ≥ 90 on /, /kit and /evidence. The studio loads only on / and the app pages.
+- No sideways scroll at 375 px.
+- Every figure has a text alternative.
+- An Open Graph image (1200x630 PNG rendered from the stage, or a crisp SVG card) and a favicon.
+- Playwright smoke tests at 1440 and 390 in both themes. Take screenshots into site/shots/ (git-ignored) and look at them yourself.
+
+**Rules.**
+- `npm run build -w site` produces site/dist ready for infra/deploy.py.
+- Commit after each page ("golem-site: <n> <what>"), staging only site/, .kiro/specs/golem-site and package files.
+
+**Finish with:**
+- the screenshot paths;
+- the Lighthouse numbers;
+- anything left open.
+RESUME NOTE: an earlier session on this branch was killed by a power loss. Committed work is done; check git log and the spec tasks, review uncommitted files (finish or discard them), then continue with the next unfinished item.

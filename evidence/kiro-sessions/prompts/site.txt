@@ -1,0 +1,29 @@
+Create a feature spec named golem-site for site/: the public website. It is a Vite multi-page static build that also bundles the two app studios at /stagger/ and /candy/, deployable as static files. design-language.md is binding: lab-notebook pages, a left-aligned single column at most 72ch, full-bleed figures, B612 / B612 Mono / Gloock (self-hosted woff2), dark and light themes. Every page runs from top to a rich footer, never ending quickly. Pages:
+
+(1) / (home)
+- The hero IS a live studio: the G1 walking on the stage with three of its requirements on the tablet. The first instruction is "Shove it" (drag the robot), and a button summons the ghosts. There is no headline-over-image hero.
+- Then these sections:
+  - the problem: robot controllers, increasingly written by AI agents, ship with demo videos instead of evidence tied to requirements;
+  - how GOLEM works, as an annotated sequence: EARS line → scenario space and monitor → ghosts (random, guided) → shrink → pinned seed → the agent Stop gate. Each step has a small live or recorded figure;
+  - the two apps, each with a looping recorded replay and a link to its studio;
+  - measured evidence: headline numbers from evidence/, linking to /evidence;
+  - the Kiro kit in 60 seconds (`npx golem-spec init` and what lands in .kiro);
+  - limits stated plainly;
+  - a closing call to action.
+- Footer: sitemap, credits and licences (Unitree BSD-3, Menagerie Apache-2.0, MuJoCo Apache-2.0), changelog, repo link.
+
+(2) /kit
+- Docs for the CLI, the MCP tools, the hooks, agents, skills, power, workflow and Crew app, each with a copyable snippet and what it does in one sentence.
+- The EARS dialect reference generated from the lexicons of both apps: every phrase template and its units.
+
+(3) /evidence
+- The falsifier benchmark (guided vs random), the G1 stability map rendered as an interactive polar figure, and the agent-gate A/B. Methods, budgets, pre-registration link, raw data links, and the limits of each result.
+
+(4) /how-kiro
+- How Kiro built GOLEM, generated from the repo where possible: the list of specs with requirement and task counts, steering files, hooks, agents, MCP servers, powers, skills, workflows, which Kiro surface did what, and honest notes on what went wrong.
+
+Quality bar:
+- Lighthouse performance ≥ 90 on / and /kit; no layout shift; no sideways scroll at 375 px.
+- Every figure has a text alternative.
+- Open Graph image and favicon.
+- Playwright smoke tests at 1440, 390 and 375 px in both themes.

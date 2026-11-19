@@ -1,0 +1,47 @@
+You are in a git worktree on branch build/evidence.
+
+The golem-evidence spec has only requirements.md, written by an interrupted session. Keep it tight:
+- finish it with a compact design.md and tasks.md (no detailing passes);
+- then implement it yourself, sequentially, in this session (no subagents; on throttling, wait and retry).
+
+Use the real merged engine (golem-spec public entries, the Node worker pool) and the real apps. A prototype map script exists at evidence/map-g1.mts, along with its committed results:
+- results/g1-map.jsonl and g1-map.summary.json: the valid run after the ears fix;
+- results/invalid/: the run before the fix; keep that folder and its README.
+Re-implement the map script cleanly as a proper evidence script with tests, using the Node pool instead of child_process forks if that's simpler. It must reproduce the same summary.
+
+Deliver:
+
+1. **evidence/PREREG.md**, committed before any new campaign. It states, for each experiment: the budgets, seeds, metrics and analysis.
+
+2. **bench-falsifier.** For every Expected_Break line in apps/stagger, and in apps/candy if its golem.config.json exists:
+   - compare GOLEM's guided search against random-only at equal trial budgets: 20 search seeds per arm, budget 96;
+   - record found yes/no, trials to the first counterexample, and the mildest severity found;
+   - analyse with a paired Wilcoxon signed-rank test (exact for n ≤ 20) and success-rate confidence intervals;
+   - write results/falsifier.jsonl plus a summary.
+   Run it.
+
+3. **map-g1**, as above. Re-run it only if your implementation changes the method. Otherwise verify that it reproduces the committed summary on a 2-direction subset.
+
+4. **agent-gate A/B harness.** Build it and dry-run it, but do NOT run the full experiment. It copies apps/candy, or apps/stagger if candy is missing, into a temp workspace and runs:
+
+   `kiro-cli chat --no-interactive --trust-all-tools --agent golem-tuner --output-format stream-json "<goal>"`
+
+   - Arms: A = without the Stop gate hook; B = with it.
+   - Record from stream-json and the workspace:
+     - whether the agent's final message claims success;
+     - the actual golem gate result from a fresh, independent run;
+     - whether requirements.md was modified (by hash);
+     - files changed, turns, credits (the "credits":[{"usage":N}] events), and duration.
+   - Write results/agent-gate.jsonl.
+   - Enforce a hard credit cap (default 150) and N per arm (default 6).
+   - Dry-run it once with N=1 per arm and a tiny goal, to prove the plumbing works. The real run happens later, with approval.
+
+5. **report.** A script that turns results/*.jsonl into evidence/REPORT.md and site/data/*.json, covering methods, budgets, results with uncertainty, limits, and what went wrong.
+
+Commit after each item ("golem-evidence: <n> <what>"), staging only evidence/, site/data/ and .kiro/specs/golem-evidence.
+
+Finish with:
+- the headline numbers;
+- the dry-run output;
+- the credits used by the dry run;
+- anything left open.

@@ -1,0 +1,28 @@
+Set up the monorepo scaffold for GOLEM, following structure.md and tech.md. Other Kiro sessions are writing specs in .kiro/specs right now: do not touch .kiro/.
+
+Create:
+- Root package.json (private, name golem-monorepo) with npm workspaces ["skeleton", "apps/stagger", "apps/candy", "site", "evidence"], engines node >= 20, type module, and scripts: test (runs every workspace's tests), build, typecheck.
+- tsconfig.base.json: strict, ES2022, moduleResolution bundler, noUncheckedIndexedAccess, declaration.
+- .gitignore: node_modules, dist, coverage, .golem/replays, *.log, .DS_Store, test-results, playwright-report. It must never ignore .kiro or .golem/seeds.
+- .gitattributes: normalize text to LF; mark *.stl, *.bin and *.woff2 as binary.
+- LICENSE: Apache-2.0 full text, copyright 2026 Rohan Borade.
+- NOTICE: GOLEM includes the Unitree G1 model and policy (BSD-3-Clause, Unitree Robotics) and the Franka Emika Panda model from MuJoCo Menagerie (Apache-2.0, Google DeepMind), and uses MuJoCo (Apache-2.0).
+- .nvmrc with 20.
+- .editorconfig.
+
+skeleton/
+- package.json: name golem-spec, version 0.1.0, type module, bin {"golem": "dist/cli/main.js"}.
+- exports: "." → engine (ears, sim, falsify, pool types), "./ui" → studio UI, "./node" → node-only pieces (node pool, CLI helpers, MCP).
+- dependencies: @mujoco/mujoco ^4.0.1, @modelcontextprotocol/sdk.
+- devDependencies: typescript, vitest, fast-check, @types/node.
+- peer/optional dependencies for UI: three, react, react-dom.
+- scripts: build (tsc -p), test (vitest run), typecheck.
+- Its own tsconfig extending the base.
+- An empty src/{ears,sim,falsify,pool,cli,mcp,ui}/index.ts barrel each.
+- A vitest config.
+
+apps/stagger and apps/candy: package.json each (private, depends on golem-spec via workspace "*", devDependencies vite, vitest, quickhull3d, meshoptimizer), with empty src folders matching structure.md.
+
+site/ and evidence/: package.json each, minimal.
+
+Then run npm install at the root, and confirm `npm run typecheck` and `npm test` both pass (empty test suites allowed with passWithNoTests). Finally, make a git commit "Scaffold monorepo".

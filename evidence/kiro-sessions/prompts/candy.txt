@@ -1,0 +1,61 @@
+Create a feature spec named candy-app for app 2, apps/candy. It has its own folder and package.json, and consumes golem-spec only through public entry points. It is a Franka Emika Panda arm from MuJoCo Menagerie (franka_emika_panda, Apache-2.0; use panda_nohand.xml plus our own suction cup). It sorts Halloween candy into bowls by colour on a doorstep table while trick-or-treaters' hands reach in. Scope:
+
+(1) scripts/fetch-assets.mjs
+- Download the Menagerie Panda files at a pinned commit, and copy the LICENSE to robot/LICENSE.
+- Simplify the visual meshes (meshoptimizer) and keep the collision meshes small.
+- Write scene.xml with:
+  - the table;
+  - a tray where candies spawn;
+  - three bowls (orange, purple, green) built from box and cylinder geoms;
+  - up to 6 candies: free bodies that are small boxes, spheres and capsules, 5–60 g;
+  - a mocap "hand" (sphere palm plus capsule forearm) that starts outside the workspace.
+
+(2) Suction cup
+- A cylinder tool body with a tip site.
+- When suction is on and a candy is within 1 cm of the tip, pull the candy toward the tip with a spring-damper force applied via xfrc_applied.
+- Cap that force at a holding force (default 3 N), so fast moves can shake a heavy candy loose.
+- Release by switching suction off.
+
+(3) controller/
+- Damped-least-squares inverse kinematics on the tip site (mj_jacSite with DoubleBuffer; see mujoco-wasm.md), producing joint position targets for the Menagerie position actuators.
+- A pick-and-place state machine: choose the next candy on the tray, approach above it, descend, suction on, lift, move above the bowl of its colour, release, return home.
+- Speed-and-separation monitoring v1: scale the commanded tip speed down linearly when the hand is within 0.40 m of the suction cup, and stop when it is within 0.15 m.
+- v1 deliberately measures distance only from the suction cup, as a typical first implementation would; GOLEM is expected to find out whether that is enough. Do not add other distance checks in v1.
+
+(4) lexicon.ts
+- Robot names: arm, Panda, robot.
+- Signals:
+  - min_link_hand_distance (mj_geomDistance between every arm collision geom and the hand geoms)
+  - fastest_link_speed
+  - tip_speed
+  - candies_sorted
+  - candies_misplaced
+  - candies_dropped_outside
+  - table_force (normal contact force between arm geoms and the table)
+  - hand_in_workspace
+- Predicates:
+  - 'drop every candy into the bowl of its colour within {duration}'
+  - 'keep every link at least {length} from the hand'
+  - 'keep its fastest link below {speed}'
+  - 'not drop a candy outside the bowls'
+  - 'never press on the table with more than {force}'
+- Perturbations:
+  - 'a hand reaches in from {direction} at {range:speed}': a mocap path from the table edge toward the nearest bowl. The entry time is searched over the episode, and the height over 0.05–0.25 m above the table.
+  - 'the candies weigh {range:mass}'
+  - 'the vacuum weakens to {ratio}'
+  - 'the hand tracker lags by {range:duration}': the controller sees a delayed hand position.
+  - 'candies land anywhere on the tray': spawn positions are searched.
+
+(5) app.ts and the robot's requirements
+- app.ts exports the RobotApp.
+- apps/candy/.kiro/specs/candy-sorter/requirements.md holds the robot's EARS requirements in the standard Kiro format, covering speed-and-separation safety near hands and task success.
+
+(6) web/
+- The studio page for this app, using the skeleton UI.
+- The visitor can also drag the hand into the workspace with the mouse or by touch.
+
+Tests:
+- IK converges to reachable targets within 1 mm in under 200 iterations (a property test over random reachable points).
+- Suction holds a 20 g candy through a 0.5 m/s move.
+- Every requirement line compiles.
+- A 3 s smoke trial runs in Node.

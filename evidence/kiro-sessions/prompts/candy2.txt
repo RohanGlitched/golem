@@ -1,0 +1,21 @@
+You are in a git worktree on branch build/candy2, which holds the merged candy app on top of golem-ears-hardening. Work through the steps below yourself, in order, in this session. Do not use subagents. If you are throttled, wait and retry.
+
+1. **Remove the dims() placeholder-slot workaround in apps/candy/lexicon.ts.**
+   - golem-ears-hardening now builds Dimensions from parsed ranges: see interfaces.md Approved additions and apps/stagger/lexicon.ts for the new per-slot declaration.
+   - Port the candy lexicon to that contract, so hand.angle, hand.entry, tracker.lag and candy placements reach apply.
+   - Prove it with tests that every searched dimension appears in the compiled perturbation params.
+2. **Fix proposal P8: hand paths.**
+   - Trick-or-treaters stand on the doorstep side of the table, so a hand enters only from that half: the table edge facing away from the Panda base, across a direction range of about 120°.
+   - It reaches toward the bowl nearest its entry point, at a height of 0.05–0.25 m above the table, and never passes through the robot base column.
+   - Make 'from any direction' in this app mean that doorstep half, and document it in the lexicon and the requirements Glossary.
+   - Re-measure the v1 controller against a side-on hand at 0.8 m/s. The expected genuine failure is that a link other than the suction cup (e.g. link4/elbow or link5) comes within the separation limit while the tip is still far enough away that SSM_v1 doesn't slow down.
+   - Report the min link-hand distance, which link, and the tip distance at that moment. If v1 does NOT fail this way, report that honestly and don't force it.
+3. **Add golem.config.json for apps/candy** (as apps/stagger has), and run golem check plus golem test --budget 48 on it. Fix what breaks.
+4. **Build the candy studio page (apps/candy/web)**, exactly as apps/stagger/web does with mountStudio:
+   - robot files served from apps/candy/robot;
+   - the requirements file;
+   - app-specific copy (doorstep, trick-or-treaters, suction cup, speed-and-separation monitoring);
+   - the hand draggable with the pointer if the studio supports a per-app pointer hook. If it doesn't, add a minimal one in skeleton/src/ui behind an option, with tests.
+
+Keep all apps/candy tests green, plus the skeleton suite and typecheck. Commit after each step ("candy-app: <what>"). Finish with the step-2 measurement, the test counts and anything left open.
+RESUME NOTE: an earlier session on this branch was killed by a power loss. Committed work is done; check git log and the spec tasks, review uncommitted files (finish or discard them), then continue with the next unfinished item.

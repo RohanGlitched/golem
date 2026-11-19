@@ -1,0 +1,19 @@
+You are on git worktree branch feat/starter of GOLEM. golem-spec is published on npm. Today a new user runs `npm i -D golem-spec` and `npx golem-spec init` in an empty project, then `npx --no-install golem-spec check` fails with "Cannot find module ./app.js", because there is no robot. Judges will try exactly this. Make the first minute work. Implement yourself, sequentially (no subagents; on throttling wait and retry).
+
+Goal: `npx golem-spec init` in a directory with no golem.config.json app also writes a small, real, runnable starter robot, so that these work straight away in a fresh project with only golem-spec installed (plain Node 20+, no TypeScript, no build step, no other dependency):
+
+  npx --no-install golem-spec check      # compiles 3 lines, exit 0
+  npx --no-install golem-spec test --budget 24   # real MuJoCo trials; one line breaks
+  npx --no-install golem-spec gate       # exits 2 naming the broken line
+  npx --no-install golem-spec replay <id>
+
+1. The starter robot is a MuJoCo cart-pole: robot/scene.xml (a slider cart and a hinged pole, sensible masses, timestep 0.002) and app.js, an ES module that default-exports a RobotApp using only golem-spec's public exports (study apps/stagger/app.ts, lexicon.ts, predicates.ts, perturbations.ts and signals.ts for the contract; the RobotApp interface is in skeleton/src/sim/types.ts). Controller: a PD/LQR-style balance law on pole angle and cart position, written so it plainly recovers small pushes and plainly fails big ones. Lexicon phrases in the same EARS dialect as the G1, for example "the cart is pushed with {range:force} for {duration}" and "keep the pole within {angle} of upright" and "keep the cart within {length} of the centre". files() must read robot/ relative to app.js (import.meta.url), so it works from any cwd.
+2. .kiro/specs/cartpole/requirements.md with three numbered EARS lines: one that holds with a comfortable margin, one that breaks (a push well beyond what the controller recovers), and one ubiquitous or state line that holds. Measure them with the real CLI and pick numbers so the verdicts are stable across seeds; write the measured margins into the README you add.
+3. golem.config.json points at ./app.js and that requirements file. A README.md in the scaffold says in five lines what the files are and the four commands above.
+4. Never overwrite an existing app.js, robot/, spec or golem.config.json: if the project already has an app (golem.config.json with an app that exists), init only installs the Kiro pack as today. Add `--no-starter` to skip the starter. --force keeps its current meaning for the pack only.
+5. Ship the starter in the npm package (add it to package.json "files", for example skeleton/starter/), list it in the init output ("wrote app.js ... starter cart-pole robot"), and print the next command to run at the end of init.
+6. Tests: unit tests for the new init planning (starter written in an empty dir; skipped when an app exists; --no-starter), and one end-to-end test that runs init in a temp dir, then check and a small falsify on the breaking line with the built CLI, asserting the exit codes and that the breaking line is found. Keep the full skeleton suite, typecheck and `npm run pack:build` passing.
+7. Verify for real like a judge: run `npm pack` in skeleton/, install the tarball into a fresh temp directory outside the repo with `npm init -y && npm i -D <tarball>`, run the four commands, and paste their output into skeleton/docs/starter-transcript.md.
+8. Update skeleton/README.md (the npm README) quick start to show this flow, and skeleton/CHANGELOG.md under 0.1.1. Do not publish (a human approves publishing).
+
+Commit as "golem-kit: <what>". Finish with the measured margins of the three starter lines, the verdicts, and the list of changed files.

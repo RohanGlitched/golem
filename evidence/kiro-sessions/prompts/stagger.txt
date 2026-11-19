@@ -1,0 +1,57 @@
+Create a feature spec named stagger-app for app 1, apps/stagger. It has its own folder and package.json, and consumes the skeleton package golem-spec only through public entry points. It is a Unitree G1 humanoid (12-DOF legs model) walking under Unitree's published policy, tested by GOLEM. Scope:
+
+(1) scripts/fetch-assets.mjs
+- Download Unitree's g1_12dof MJCF, the STL meshes and deploy/pre_train/g1/motion.pt from github.com/unitreerobotics/unitree_rl_gym at a pinned commit (BSD-3-Clause). Copy its LICENSE into robot/LICENSE.
+- Build convex-hull collision meshes (quickhull3d). Simplify visual meshes to at most 3,000 triangles each (meshoptimizer simplifier). Save both as binary STL.
+- Rewrite the MJCF so collision geoms use the hulls (group 3) and visual geoms use the simplified meshes (group 2, contype 0, conaffinity 0). Write scene.xml with a floor.
+- Extract the policy weights from the TorchScript zip into robot/policy.bin with a small JSON header. motion.pt is a zip, and the tensors are raw little-endian float32 storages at entries policy_lstm_1/data/2 to 9:
+  - 2 = W1 (32x64)
+  - 3 = b1 (32)
+  - 4 = W2 (12x32)
+  - 5 = b2 (12)
+  - 6 = Wih (256x47)
+  - 7 = Whh (256x64)
+  - 8 = bih (256)
+  - 9 = bhh (256)
+- PyTorch LSTM gate order is i, f, g, o.
+- Commit the processed assets so the site needs no build-time download.
+
+(2) The controller
+- controller/policy.ts: LSTM(47->64), then Linear 64->32, ELU, Linear 32->12. Float64, with no allocation per call.
+- controller/walker.ts builds the 47-dim observation exactly as Unitree's deploy script does:
+  - obs[0:3] = angular velocity (qvel[3:6]) * 0.25
+  - obs[3:6] = projected gravity from the pelvis quaternion (0,0,-1 when upright)
+  - obs[6:9] = command * (2, 2, 0.25)
+  - obs[9:21] = qpos[7:] - default
+  - obs[21:33] = qvel[6:] * 0.05
+  - obs[33:45] = previous action
+  - obs[45:47] = sin and cos of the gait phase, period 0.8 s
+- Action target = action * 0.25 + default, where default = [-0.1, 0, 0, 0.3, -0.2, 0] x2.
+- PD torque ctrl = (target - q) * kp - qd * kd, with kp = [100,100,100,150,40,40] x2 and kd = [2,2,2,4,2,2] x2, applied every 2 ms sim step. The policy runs at 50 Hz.
+- Parity regression test (tolerance 1e-3): with the initial joint noise below added to the default pose, after 2 s at a 0.5 m/s command the pelvis is at x=0.79987, y=-0.02247, z=0.76789 (from a Python reference). The noise comes from numpy default_rng(0).normal(0, 0.01, 12): [0.001257302210933933, -0.0013210486329130189, 0.006404226504432821, 0.001049001171530397, -0.005356693731611109, 0.0036159505490948474, 0.013040000451301373, 0.009470809631292421, -0.007037352358069926, -0.012654214710460526, -0.006232744625373522, 0.000413259793472436].
+
+(3) lexicon.ts
+- Robot names: golem, G1, robot.
+- Signals: pelvis_z, tilt_deg, forward_speed (1 s moving average in the heading frame), commanded_speed, lateral_drift.
+- Predicates:
+  - 'stay upright': margin in metres = pelvis_z - 0.5 m, forced to -0.01 m whenever the tilt exceeds 60 deg. Document this.
+  - 'keep its pelvis above {length}'
+  - 'track the commanded speed within {speed}', after 2 s of settling
+  - 'not drift sideways more than {length}'
+- Perturbations:
+  - 'the pelvis is pushed with {range:force} for {duration} from {direction} at {phase}'. Apply the force with xfrc_applied on the pelvis body. Direction is relative to the heading, and the trigger time is offset by the gait phase.
+  - 'walking on a slope of {range:angle}': rotate the gravity vector; no geometry change.
+  - 'carrying a payload of {range:mass}': add mass to the torso body, and re-run mj_setConst if needed.
+  - 'the floor friction drops to {ratio}'
+  - 'the sensor latency rises to {range:duration}': delay observations by whole control steps.
+  - 'commanded to walk at {range:speed}'
+
+(4) app.ts and the robot's requirements
+- app.ts exports the RobotApp.
+- apps/stagger/.kiro/specs/g1-walking/requirements.md holds the robot's EARS requirements in the standard Kiro requirements format, so GOLEM reads them. Some should be expected to hold, and at least two expected to break (for example, a 250 N push from behind).
+
+(5) web/
+- The studio page for this app, using the skeleton UI: stage, ghosts, aura, tablet and reel.
+- App-specific copy: what the G1 is, where the policy comes from, and how to shove it.
+
+Tests: policy parity, observation layout, a compile test for every requirement line, and a 2 s smoke trial in Node.

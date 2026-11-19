@@ -1,0 +1,67 @@
+Create a feature spec named golem-studio-ui for skeleton/src/ui, exported as golem-spec/ui: the shared studio both apps use. Read design-language.md closely; it is binding. Scope:
+
+(1) Stage
+- A plain three.js renderer that builds meshes from any MjModel. Geom types: mesh, box, sphere, capsule, cylinder, ellipsoid, plane. Visual group 2 only.
+- A clay material: unfired clay under a single raking key light with a soft fill, and subtle grain from noise in the shader. No textures to download.
+- A quiet floor, and camera orbit with damping.
+- Render on demand: only while simulating, dragging or replaying.
+- Cap devicePixelRatio at 1.5. Pause when the stage is off-screen (IntersectionObserver) or the tab is hidden.
+
+(2) Live sim and Shove
+- The hero robot simulates in real time on the main thread, with a fixed-step accumulator so sim and render are decoupled.
+- Shove: pointer down on a robot body, then drag. This applies a spring force from the grab point toward the pointer ray on a vertical plane, shown as an arrow with a live label in newtons.
+- Touch support.
+- Keyboard alternative: focus the stage, and the arrow keys push with 100 N for 0.2 s, shown the same way.
+
+(3) Ghost swarm
+- Up to 64 ghosts, rendered with one InstancedMesh per robot geom.
+- A translucent fresnel-rim shader in the --ghost colour: additive blending, depthWrite off.
+- Ghosts play recorded TrialResult poses in sync, generation by generation, from the falsifier's progress callback.
+- Each ghost's push shows as a thin arrow at its trigger time.
+- A ghost whose robustness goes negative turns --break at the time of its worst margin, then fades out over 600 ms. Survivors stay pale.
+- Summoning animation: ghosts rise from the floor over 400 ms. Skip it under prefers-reduced-motion.
+
+(4) Aura
+- A floor decal under the robot, drawn from trial results.
+- For each of 36 direction bins, track the largest force that held and the smallest that broke.
+- Render a soft verdigris region inside the boundary, and cinnabar ticks where breaks happened.
+- Update as trials arrive.
+- Add an accessible text summary: the weakest direction and its boundary force.
+
+(5) Tablet (React 18)
+- The app's requirements as sentences, with EARS keywords styled per design-language.md.
+- Every quantity is a scrubbable number control: drag horizontally, arrow keys step it up and down, or type a value. Set aria-valuenow and the related attributes.
+- Editing a line in a text field recompiles it, with inline diagnostics from golem-ears underlined at the right column.
+- Per-line status:
+  - untested;
+  - running, with a live trial count;
+  - held, with the margin in units;
+  - broken, with the shrunk counterexample summary, e.g. "falls from 168 N at 135 deg, 62% into the stride".
+- A hairline fracture drawn through broken lines.
+- A "Summon 64 ghosts" button on each line, and one for all lines.
+
+(6) Reel
+- For the selected broken requirement: a filmstrip of 8 frames around the worst moment, rendered from the replay.
+- The shrink summary.
+- Buttons:
+  - "Replay the fall": slow motion on the main stage, with a scrubber;
+  - "Copy seed": as JSON;
+  - "Pin seed": saved in the browser's localStorage.
+- A shareable URL hash that encodes the edited requirement text and the seed.
+
+(7) Verdict panel
+- Shows trials, the random vs guided split, the closest call, the 95% failure-rate bound, wall time and pool size.
+- All numbers use tabular figures and animate gently.
+
+(8) Layout, per design-language.md
+- Desktop: a 380 px tablet column to the left of a full-bleed stage, with the reel under the stage.
+- Phones: the stage at 56vh, primary actions directly under it, then the tablet, then the reel. No sideways scroll at 375 px.
+- Light and dark themes via tokens, with a toggle that respects prefers-color-scheme.
+- Visible focus rings, and aria-live announcements for verdicts.
+
+(9) Entry point
+- A mountStudio(el, app, requirementsMarkdown, options) function, so each app page is only a few lines.
+
+Performance
+- 60 fps with 64 ghosts on integrated graphics, measured with a rAF probe in a Playwright test.
+- First meaningful frame in under 4 s on a mid-range laptop.
