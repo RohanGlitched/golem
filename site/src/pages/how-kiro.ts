@@ -16,7 +16,8 @@ const link = (rel: string): string => `<a href="${REPO_URL}/blob/main/${rel}"><c
 
 function specRow(s: KiroSpec): string[] {
   const total = s.tasksDone + s.tasksOpen;
-  return [`<code>${esc(s.name)}</code>`, esc(s.type), String(s.requirements), String(s.earsCriteria), String(s.properties), total === 0 ? '0' : `${s.tasksDone}/${total}`];
+  const tasks = s.status === 'not started' ? `not started, ${s.tasksOpen} open` : total === 0 ? '0' : `${s.tasksDone}/${total}`;
+  return [`<code>${esc(s.name)}</code>`, esc(s.type), String(s.requirements), String(s.earsCriteria), String(s.properties), tasks];
 }
 
 function auditCard(d: SiteData, a: (typeof AUDITS)[number], specs: KiroSpec[]): string {
@@ -30,6 +31,7 @@ export function howKiroPage(d: SiteData): PageSpec {
   const k = d.kiro;
   const t = k.totals;
   const specs = k.workspaces.flatMap((w) => w.specs);
+  const counted = specs.filter((s) => s.status !== 'not started');
   const root = k.workspaces.find((w) => w.path === '.kiro');
   if (!root) throw new Error('site/data/kiro.json has no root .kiro workspace');
   const rootHooks = (() => {
@@ -41,7 +43,7 @@ export function howKiroPage(d: SiteData): PageSpec {
   const prefixes = Object.entries(k.commits.byPrefix).filter(([p]) => p !== 'other' && p !== 'merge').sort((a, b) => b[1] - a[1]);
   const gen = k.generated.slice(0, 10);
   const specRows = specs.map(specRow);
-  const earsTotal = specs.reduce((a, s) => a + s.earsCriteria, 0);
+  const earsTotal = counted.reduce((a, s) => a + s.earsCriteria, 0);
 
   const body = `
 <h1>How Kiro built it</h1>
@@ -54,7 +56,7 @@ export function howKiroPage(d: SiteData): PageSpec {
 </div>
 
 <h2 id="specs">Every spec</h2>
-<p>${specs.length} specs, ${earsTotal.toLocaleString('en-US')} EARS criteria. Bugfix specs have no requirements file of their own: they list tasks that fix the defects of an audit. The G1 and candy rows are the robots' own requirement files, which GOLEM tests.</p>
+<p>${counted.length} specs counted, ${earsTotal.toLocaleString('en-US')} EARS criteria. ${specs.length - counted.length} more ${specs.length - counted.length === 1 ? 'is' : 'are'} listed as not started and left out of every total. Bugfix specs have no requirements file of their own: they list tasks that fix the defects of an audit. The G1 and candy rows are the robots' own requirement files, which GOLEM tests.</p>
 ${table(['Spec', 'Type', 'Requirements', 'EARS criteria', 'Properties', 'Tasks done'], specRows, { caption: 'Specs across .kiro, apps/stagger/.kiro and apps/candy/.kiro', num: [2, 3, 4, 5] })}
 
 <h2 id="config">What is in .kiro</h2>
@@ -101,7 +103,7 @@ ${table(['Where', 'Hook', 'Trigger'], [
 <li>The needle log <code>docs/reviews/falsify-hardening-runs/after-search.txt</code> is UTF-16 (a shell redirect wrote it). The site decodes it.</li>
 <li>The evidence report's pre-registered prediction for line 1.3 was wrong, and the agent-gate experiment has not run. Both are stated on the <a href="/evidence/">evidence page</a>.</li>
 </ul>
-<p class="small muted">Counts above: ${fmt(t['tasksDone'] ?? 0, 0)} tasks done of ${(t['tasksDone'] ?? 0) + (t['tasksOpen'] ?? 0)} counted in the markdown task lists. ${inlineMd('The `golem-cloud` spec is written and not started; it is not part of this build.')}</p>
+<p class="small muted">Counts above: ${fmt(t['tasksDone'] ?? 0, 0)} tasks done of ${fmt((t['tasksDone'] ?? 0) + (t['tasksOpen'] ?? 0), 0)}, counted in the markdown task lists. ${inlineMd('The `golem-cloud` spec is written and not started; it is not part of this build.')}</p>
 `;
   return {
     id: 'how-kiro', path: '/how-kiro/', title: 'How Kiro built it',

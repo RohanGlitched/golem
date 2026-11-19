@@ -29,6 +29,7 @@ Conventions for every task:
     - _Requirements: 2.5, 2.14, 3.5, 6.3, 6.4, 6.5, 9.3_
 
 - [ ] 2. Cross-spec additions (additive only)
+  - **Stays open on purpose.** 2.1 and 2.2 were skipped, not done: both are skeleton changes that the app does not need (see their notes), so they are not ticked and are not counted as done.
   - [ ] 2.1 Add optional `Controller.substep` and `Controller.dispose` to the skeleton
     - **Skipped (superseded).** `Controller.substep` already exists (golem-sim-hardening) and is used as is. `Controller.dispose` is not added: the skeleton is out of scope for this branch, and the Episode_Runner already calls `RobotApp.endTrial(ctx)` in its `finally` block, so the app disposes its controller there (task 13.1). A `dispose` hook in the skeleton can replace that later.
     - Add `substep?(ctx, t): void` and `dispose?(): void` to the `Controller` type in `skeleton/src`, and list both under "Approved additions" in `.kiro/steering/interfaces.md`
@@ -341,30 +342,36 @@ Conventions for every task:
     - File `test/p32-roundtrip.test.ts`
     - **Validates: Requirements 15.7**
 
-- [ ] 15. Studio page
+- [x] 15. Studio page
+  - **Status:** ticked because the studio page is live at `/candy/` and committed in `3cecd19`. It was built as GOLEM's own studio, so 15.1, 15.2 and 15.5 are covered by other files and ticked with a note, and 15.3 and 15.4 (a separate HUD, a live worker) were not built and stay open.
   - **Done differently** (branch build/candy2): the page is GOLEM's own studio (`mountStudio`), not a bespoke one, so 15.1 to 15.5 are replaced by `web/index.html`, `web/main.ts`, `web/worker.ts`, `web/vite.config.ts` (serves `robot/` at `/robot/`), and the skeleton option `dragBody` (`skeleton/src/ui/hero/drag.ts`) with `constrainDraggedHand` in `geometry.ts`. Tests: `test/p38-drag-hand.test.ts`, `test/p39-studio-page.test.ts`, `skeleton/src/ui/__tests__/drag.test.ts`. Not built: a separate HUD, a live worker and a candy tint from userdata (the studio draws the scene in clay).
-  - [ ] 15.1 Implement `web/hand-drag.ts`
+  - [x] 15.1 Implement `web/hand-drag.ts`
+    - **Done as** `constrainDraggedHand` in `geometry.ts` and the skeleton `dragBody` option; tests in `test/p38-drag-hand.test.ts`. There is no `web/hand-drag.ts` or `test/web.test.ts`.
     - Pure helpers: pick-ray to plane `z = h` intersection, clamp to a 1.5 m disc about (0.40, 0), per-frame step limit of `3 m/s * dt`, keyboard step of 0.05 m, height slider range 0.05 m to 0.25 m with Page Up and Page Down steps of 0.05 m
     - Write `test/web.test.ts` (examples): clamp, speed limit, keyboard step, release leaves the hand in place
     - _Requirements: 12.5, 12.6, 12.7, 12.8, 12.9, 12.17_
 
-  - [ ]* 15.2 Write property tests for the hand-drag helpers
+  - [x]* 15.2 Write property tests for the hand-drag helpers
+    - **Done as** the properties in `test/p38-drag-hand.test.ts`, not `test/p-web-hand-drag.test.ts`.
     - Properties from the Testing Strategy (`web.test.ts` row): the target is always within 1.5 m of the Table centre, the per-frame move never exceeds `3 m/s * dt`, a keyboard step is exactly 0.05 m
     - File `test/p-web-hand-drag.test.ts`
     - **Validates: Requirements 12.7, 12.9, 12.17**
 
   - [ ] 15.3 Implement `web/hud.ts` and `web/tablet.ts`
+    - **Open: not built.** The studio's own tablet shows the requirement lines; there is no separate HUD of `min_link_hand_distance`, `tip_speed` and `candies_sorted`.
     - `hud.ts` shows live `min_link_hand_distance`, `tip_speed` and `candies_sorted`; `tablet.ts` binds each requirement line from the candy-sorter file to editable quantity controls, marks a line "running" within 100 ms of an edit, and sends the changed requirement to the TrialPool
     - Write `test/web-ui.test.ts` (examples, DOM stub): each quantity with a unit becomes a control, an edit marks the line running synchronously, HUD values update from a signal frame
     - _Requirements: 12.3, 12.4, 12.10_
 
   - [ ] 15.4 Implement `web/live.worker.ts` and `web/studio.ts`
+    - **Open: not built.** Trials run in `web/worker.ts` through the pool; there is no live worker for the dragged hand and no candy tint from `userdata`.
     - `live.worker.ts`: one MuJoCo instance running the app, receives hand targets, posts poses and signals; `studio.ts`: worker client, ghost swarm, failing ghost in `--break` colour, "Replay the fall" replay, candy tints from `userdata[8 + i]`, render on demand with pixel ratio at most 1.5, paused off-screen, reduced-motion handling, sentence-case errors that say how to fix them
     - Import only from `golem-spec` and `golem-spec/ui`; no network access except static assets and no analytics
     - Write `test/web-studio.test.ts` (examples, stubbed worker): a failing trial adds a `--break` ghost to the reel, reduced motion steps replays frame by frame, a missing-asset error message names `robot/` and the fix
     - _Requirements: 12.1, 12.2, 12.11, 12.12, 12.13, 12.15, 12.16_
 
-  - [ ] 15.5 Add the page shell
+  - [x] 15.5 Add the page shell
+    - **Done as** `web/index.html`, `web/main.ts` and `web/vite.config.ts` (`test/p39-studio-page.test.ts`). There is no `web/style.css` or `test/web-shell.test.ts`: the styles come from `golem-spec/ui`.
     - `web/index.html` (mobile viewport, no external fonts or scripts), `web/main.ts` (boot and wiring), `web/style.css` (design tokens from `design-language.md`, self-hosted B612 and B612 Mono, stage at 56vh on phones with the primary actions "Summon 64 ghosts", "Reach in" and "Reset hand" directly under it, 380 px tablet column from 1024 px)
     - Write `test/web-shell.test.ts` (examples): `index.html` has no external URLs, the CSS declares the 56vh rule and the three primary actions exist
     - _Requirements: 12.1, 12.2, 12.14, 12.15_

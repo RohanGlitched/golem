@@ -1,14 +1,18 @@
 // Counts the Kiro artefacts in this repository, so the "How Kiro built GOLEM" page states only
 // checkable numbers. Usage: node scripts/kiro-stats.mjs  -> writes site/data/kiro.json and prints a table.
+// Counting rules (unique artefacts, specs that were not started) live in kiro-stats-lib.mjs.
 import { execSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { computeTotals, tasksStatus } from './kiro-stats-lib.mjs';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const rel = (p) => relative(root, p).replace(/\\/g, '/');
 const read = (p) => readFileSync(p, 'utf8');
 const ls = (p) => (existsSync(p) ? readdirSync(p) : []);
+const sha = (text) => createHash('sha256').update(text).digest('hex').slice(0, 12);
 const walk = (dir, out = []) => {
   for (const f of ls(dir)) {
     if (f === 'node_modules' || f === 'dist' || f.startsWith('.git')) continue;
@@ -39,6 +43,8 @@ function specStats(dir) {
       tasksDone: (tasks.match(/^\s*- \[x\]/gm) || []).length,
       tasksOpen: (tasks.match(/^\s*- \[ \]/gm) || []).length,
       waves: /"waves"\s*:/.test(tasks),
+      // 'not started' specs are listed but left out of the totals.
+      status: tasksStatus(tasks),
     });
   }
   return specs;
@@ -49,17 +55,24 @@ const out = { generated: new Date().toISOString(), commit: execSync('git rev-par
 for (const dir of kiroDirs) {
   const hooks = [];
   for (const f of jsonFiles(join(dir, 'hooks'))) {
-    try { for (const h of JSON.parse(read(f)).hooks ?? []) hooks.push({ file: rel(f), name: h.name, trigger: h.trigger, action: h.action?.type }); } catch { /* skip */ }
+    try { for (const h of JSON.parse(read(f)).hooks ?? []) hooks.push({ file: rel(f), name: h.name, trigger: h.trigger, action: h.action?.type, command: h.action?.command }); } catch { /* skip */ }
   }
   const agents = jsonFiles(join(dir, 'agents')).map((f) => { const a = JSON.parse(read(f)); return { name: a.name, file: rel(f), hooks: Object.keys(a.hooks ?? {}).length || (Array.isArray(a.hooks) ? a.hooks.length : 0), mcp: Object.keys(a.mcpServers ?? {}) }; });
   let mcp = [];
   try { mcp = Object.keys(JSON.parse(read(join(dir, 'settings', 'mcp.json'))).mcpServers ?? {}); } catch { /* none */ }
+  const steering = ls(join(dir, 'steering')).filter((f) => f.endsWith('.md'));
+  const skills = ls(join(dir, 'skills'));
+  // The identity of each artefact for the totals: a copy of the pack installed in an app has the name and content of its twin.
+  const keys = {
+    agents: jsonFiles(join(dir, 'agents')).map((f) => `${JSON.parse(read(f)).name}:${sha(read(f))}`),
+    hooks: hooks.map((h) => `${h.name}|${h.trigger}|${h.command ?? ''}`),
+    skills: skills.map((s) => { const p = join(dir, 'skills', s, 'SKILL.md'); return `${s}:${existsSync(p) ? sha(read(p)) : 'none'}`; }),
+    steering: steering.map((f) => `${f}:${sha(read(join(dir, 'steering', f)))}`),
+  };
   out.workspaces.push({
     path: rel(dir) || '.kiro',
     specs: specStats(dir),
-    steering: ls(join(dir, 'steering')).filter((f) => f.endsWith('.md')),
-    hooks, agents, mcp,
-    skills: ls(join(dir, 'skills')),
+    steering, hooks, agents, mcp, skills, keys,
     workflows: ls(join(dir, 'workflows')),
   });
 }
@@ -74,16 +87,9 @@ const tests = walk(join(root, 'skeleton', 'src')).concat(walk(join(root, 'apps')
 const src = tests.map(read).join('\n');
 out.tests = { files: tests.length, propertyAsserts: (src.match(/fc\.assert\(/g) || []).length };
 
-const all = out.workspaces.flatMap((w) => w.specs);
-out.totals = {
-  specs: all.length, bugfixSpecs: all.filter((s) => s.type === 'bugfix').length,
-  requirements: all.reduce((n, s) => n + s.requirements, 0), earsCriteria: all.reduce((n, s) => n + s.earsCriteria, 0),
-  properties: all.reduce((n, s) => n + s.properties, 0), tasksDone: all.reduce((n, s) => n + s.tasksDone, 0),
-  steering: out.workspaces.reduce((n, w) => n + w.steering.length, 0), hooks: out.workspaces.reduce((n, w) => n + w.hooks.length, 0),
-  agents: out.workspaces.reduce((n, w) => n + w.agents.length, 0), skills: out.workspaces.reduce((n, w) => n + w.skills.length, 0),
-};
+out.totals = computeTotals(out.workspaces);
 mkdirSync(join(root, 'site', 'data'), { recursive: true });
 writeFileSync(join(root, 'site', 'data', 'kiro.json'), JSON.stringify(out, null, 2) + '\n');
 console.table(out.totals);
-for (const w of out.workspaces) for (const s of w.specs) console.log(`${w.path.padEnd(18)} ${s.type.padEnd(7)} ${s.name.padEnd(24)} req ${String(s.requirements).padStart(3)}  EARS ${String(s.earsCriteria).padStart(3)}  props ${String(s.properties).padStart(3)}  tasks ${s.tasksDone}/${s.tasksDone + s.tasksOpen}`);
+for (const w of out.workspaces) for (const s of w.specs) console.log(`${w.path.padEnd(18)} ${s.type.padEnd(7)} ${s.name.padEnd(24)} req ${String(s.requirements).padStart(3)}  EARS ${String(s.earsCriteria).padStart(3)}  props ${String(s.properties).padStart(3)}  tasks ${s.tasksDone}/${s.tasksDone + s.tasksOpen}  ${s.status}${s.status === 'not started' ? ' (left out of the totals)' : ''}`);
 console.log('commits', out.commits.total, 'test files', out.tests.files, 'fc.assert', out.tests.propertyAsserts);

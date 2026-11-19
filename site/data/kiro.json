@@ -1,6 +1,6 @@
 {
-  "generated": "2026-11-19T17:39:35.613Z",
-  "commit": "bff3921",
+  "generated": "2026-11-19T18:40:20.768Z",
+  "commit": "4b0b833",
   "workspaces": [
     {
       "path": ".kiro",
@@ -12,9 +12,10 @@
           "requirements": 15,
           "earsCriteria": 194,
           "properties": 37,
-          "tasksDone": 76,
-          "tasksOpen": 9,
-          "waves": true
+          "tasksDone": 80,
+          "tasksOpen": 5,
+          "waves": true,
+          "status": "in progress"
         },
         {
           "name": "golem-cloud",
@@ -25,7 +26,8 @@
           "properties": 28,
           "tasksDone": 0,
           "tasksOpen": 65,
-          "waves": true
+          "waves": true,
+          "status": "not started"
         },
         {
           "name": "golem-ears",
@@ -36,7 +38,8 @@
           "properties": 36,
           "tasksDone": 77,
           "tasksOpen": 0,
-          "waves": true
+          "waves": true,
+          "status": "done"
         },
         {
           "name": "golem-ears-hardening",
@@ -47,7 +50,8 @@
           "properties": 0,
           "tasksDone": 20,
           "tasksOpen": 0,
-          "waves": false
+          "waves": false,
+          "status": "done"
         },
         {
           "name": "golem-evidence",
@@ -58,7 +62,8 @@
           "properties": 0,
           "tasksDone": 6,
           "tasksOpen": 0,
-          "waves": false
+          "waves": false,
+          "status": "done"
         },
         {
           "name": "golem-falsify",
@@ -69,7 +74,8 @@
           "properties": 38,
           "tasksDone": 91,
           "tasksOpen": 0,
-          "waves": true
+          "waves": true,
+          "status": "done"
         },
         {
           "name": "golem-falsify-hardening",
@@ -80,7 +86,8 @@
           "properties": 0,
           "tasksDone": 16,
           "tasksOpen": 0,
-          "waves": false
+          "waves": false,
+          "status": "done"
         },
         {
           "name": "golem-kit",
@@ -91,7 +98,8 @@
           "properties": 49,
           "tasksDone": 123,
           "tasksOpen": 0,
-          "waves": true
+          "waves": true,
+          "status": "done"
         },
         {
           "name": "golem-signature",
@@ -102,7 +110,8 @@
           "properties": 8,
           "tasksDone": 28,
           "tasksOpen": 0,
-          "waves": false
+          "waves": false,
+          "status": "done"
         },
         {
           "name": "golem-sim",
@@ -113,7 +122,8 @@
           "properties": 20,
           "tasksDone": 60,
           "tasksOpen": 0,
-          "waves": true
+          "waves": true,
+          "status": "done"
         },
         {
           "name": "golem-sim-hardening",
@@ -124,7 +134,8 @@
           "properties": 0,
           "tasksDone": 15,
           "tasksOpen": 0,
-          "waves": false
+          "waves": false,
+          "status": "done"
         },
         {
           "name": "golem-site",
@@ -135,7 +146,8 @@
           "properties": 0,
           "tasksDone": 7,
           "tasksOpen": 0,
-          "waves": false
+          "waves": false,
+          "status": "done"
         },
         {
           "name": "golem-studio-ui",
@@ -146,7 +158,8 @@
           "properties": 48,
           "tasksDone": 129,
           "tasksOpen": 0,
-          "waves": true
+          "waves": true,
+          "status": "done"
         },
         {
           "name": "stagger-app",
@@ -155,9 +168,10 @@
           "requirements": 21,
           "earsCriteria": 214,
           "properties": 37,
-          "tasksDone": 43,
-          "tasksOpen": 5,
-          "waves": true
+          "tasksDone": 45,
+          "tasksOpen": 3,
+          "waves": true,
+          "status": "in progress"
         }
       ],
       "steering": [
@@ -176,19 +190,22 @@
           "file": ".kiro/hooks/build.json",
           "name": "Typecheck gate",
           "trigger": "Stop",
-          "action": "command"
+          "action": "command",
+          "command": "node scripts/kiro-stop-typecheck.mjs"
         },
         {
           "file": ".kiro/hooks/build.json",
           "name": "Unit tests for the saved engine file",
           "trigger": "PostFileSave",
-          "action": "command"
+          "action": "command",
+          "command": "npx vitest related --run --root skeleton --passWithNoTests"
         },
         {
           "file": ".kiro/hooks/build.json",
           "name": "Compile robot requirements",
           "trigger": "PostFileSave",
-          "action": "command"
+          "action": "command",
+          "command": "node skeleton/dist/cli/main.js check --app apps/stagger && node skeleton/dist/cli/main.js check --app apps/candy"
         }
       ],
       "agents": [
@@ -204,6 +221,28 @@
         "golem-candy"
       ],
       "skills": [],
+      "keys": {
+        "agents": [
+          "golem-auditor:29ae114d44af"
+        ],
+        "hooks": [
+          "Typecheck gate|Stop|node scripts/kiro-stop-typecheck.mjs",
+          "Unit tests for the saved engine file|PostFileSave|npx vitest related --run --root skeleton --passWithNoTests",
+          "Compile robot requirements|PostFileSave|node skeleton/dist/cli/main.js check --app apps/stagger && node skeleton/dist/cli/main.js check --app apps/candy"
+        ],
+        "skills": [],
+        "steering": [
+          "design-language.md:44a209adc255",
+          "ears-for-robots.md:0b727c1e6fe6",
+          "experience.md:6a801099b477",
+          "interfaces.md:73364196627e",
+          "mujoco-wasm.md:f1872c1da58c",
+          "product.md:1e36e153ad4e",
+          "structure.md:9b6767ddb5d8",
+          "tech.md:72f2fa2b3e20",
+          "testing.md:4c832aa84ac7"
+        ]
+      },
       "workflows": []
     },
     {
@@ -218,7 +257,8 @@
           "properties": 0,
           "tasksDone": 0,
           "tasksOpen": 0,
-          "waves": false
+          "waves": false,
+          "status": "no tasks"
         }
       ],
       "steering": [
@@ -226,40 +266,39 @@
       ],
       "hooks": [
         {
-          "file": "apps/candy/.kiro/hooks/gate.json",
-          "name": "Gate the sorter",
-          "trigger": "Stop",
-          "action": "command"
-        },
-        {
           "file": "apps/candy/.kiro/hooks/golem.json",
           "name": "Check requirements on save",
           "trigger": "PostFileSave",
-          "action": "command"
+          "action": "command",
+          "command": "npx --no-install golem-spec check"
         },
         {
           "file": "apps/candy/.kiro/hooks/golem.json",
           "name": "Falsify controller on save",
           "trigger": "PostFileSave",
-          "action": "command"
+          "action": "command",
+          "command": "npx --no-install golem-spec test --budget 24"
         },
         {
           "file": "apps/candy/.kiro/hooks/golem.json",
           "name": "Gate the agent",
           "trigger": "Stop",
-          "action": "command"
+          "action": "command",
+          "command": "npx --no-install golem-spec gate --kiro"
         },
         {
           "file": "apps/candy/.kiro/hooks/golem.json",
           "name": "Test after spec task",
           "trigger": "PostTaskExec",
-          "action": "command"
+          "action": "command",
+          "command": "npx --no-install golem-spec test"
         },
         {
           "file": "apps/candy/.kiro/hooks/golem.json",
           "name": "Summon the ghosts",
           "trigger": "Manual",
-          "action": "command"
+          "action": "command",
+          "command": "npx --no-install golem-spec test --budget 256"
         }
       ],
       "agents": [
@@ -295,6 +334,27 @@
         "falsify-and-fix",
         "robot-ears"
       ],
+      "keys": {
+        "agents": [
+          "golem-scribe:1adb4d1ce028",
+          "golem-skeptic:287b22822210",
+          "golem-tuner:23bfa02b86ba"
+        ],
+        "hooks": [
+          "Check requirements on save|PostFileSave|npx --no-install golem-spec check",
+          "Falsify controller on save|PostFileSave|npx --no-install golem-spec test --budget 24",
+          "Gate the agent|Stop|npx --no-install golem-spec gate --kiro",
+          "Test after spec task|PostTaskExec|npx --no-install golem-spec test",
+          "Summon the ghosts|Manual|npx --no-install golem-spec test --budget 256"
+        ],
+        "skills": [
+          "falsify-and-fix:481a6b6842ef",
+          "robot-ears:d03e01ddcc8c"
+        ],
+        "steering": [
+          "golem-ears.md:3bcf91be53cf"
+        ]
+      },
       "workflows": [
         "falsify-and-fix.workflow.json"
       ]
@@ -311,7 +371,8 @@
           "properties": 0,
           "tasksDone": 0,
           "tasksOpen": 0,
-          "waves": false
+          "waves": false,
+          "status": "no tasks"
         }
       ],
       "steering": [
@@ -322,31 +383,36 @@
           "file": "apps/stagger/.kiro/hooks/golem.json",
           "name": "Check requirements on save",
           "trigger": "PostFileSave",
-          "action": "command"
+          "action": "command",
+          "command": "npx --no-install golem-spec check"
         },
         {
           "file": "apps/stagger/.kiro/hooks/golem.json",
           "name": "Falsify controller on save",
           "trigger": "PostFileSave",
-          "action": "command"
+          "action": "command",
+          "command": "npx --no-install golem-spec test --budget 24"
         },
         {
           "file": "apps/stagger/.kiro/hooks/golem.json",
           "name": "Gate the agent",
           "trigger": "Stop",
-          "action": "command"
+          "action": "command",
+          "command": "npx --no-install golem-spec gate --kiro"
         },
         {
           "file": "apps/stagger/.kiro/hooks/golem.json",
           "name": "Test after spec task",
           "trigger": "PostTaskExec",
-          "action": "command"
+          "action": "command",
+          "command": "npx --no-install golem-spec test"
         },
         {
           "file": "apps/stagger/.kiro/hooks/golem.json",
           "name": "Summon the ghosts",
           "trigger": "Manual",
-          "action": "command"
+          "action": "command",
+          "command": "npx --no-install golem-spec test --budget 256"
         }
       ],
       "agents": [
@@ -382,21 +448,43 @@
         "falsify-and-fix",
         "robot-ears"
       ],
+      "keys": {
+        "agents": [
+          "golem-scribe:1adb4d1ce028",
+          "golem-skeptic:287b22822210",
+          "golem-tuner:23bfa02b86ba"
+        ],
+        "hooks": [
+          "Check requirements on save|PostFileSave|npx --no-install golem-spec check",
+          "Falsify controller on save|PostFileSave|npx --no-install golem-spec test --budget 24",
+          "Gate the agent|Stop|npx --no-install golem-spec gate --kiro",
+          "Test after spec task|PostTaskExec|npx --no-install golem-spec test",
+          "Summon the ghosts|Manual|npx --no-install golem-spec test --budget 256"
+        ],
+        "skills": [
+          "falsify-and-fix:481a6b6842ef",
+          "robot-ears:d03e01ddcc8c"
+        ],
+        "steering": [
+          "golem-ears.md:3bcf91be53cf"
+        ]
+      },
       "workflows": [
         "falsify-and-fix.workflow.json"
       ]
     }
   ],
   "commits": {
-    "total": 234,
+    "total": 243,
     "byPrefix": {
-      "site": 3,
+      "golem-kit": 16,
+      "candy": 1,
+      "stagger": 6,
+      "other": 22,
+      "site": 4,
       "merge": 16,
-      "golem-kit": 12,
       "evidence": 5,
-      "stagger": 4,
       "docs": 1,
-      "other": 21,
       "candy-app": 26,
       "studio": 2,
       "golem-site": 5,
@@ -416,19 +504,21 @@
     }
   },
   "tests": {
-    "files": 383,
-    "propertyAsserts": 485
+    "files": 385,
+    "propertyAsserts": 487
   },
   "totals": {
-    "specs": 16,
+    "specs": 15,
+    "specsNotStarted": 1,
     "bugfixSpecs": 3,
-    "requirements": 233,
-    "earsCriteria": 2306,
-    "properties": 301,
-    "tasksDone": 691,
-    "steering": 11,
-    "hooks": 14,
-    "agents": 7,
-    "skills": 4
+    "requirements": 213,
+    "earsCriteria": 2129,
+    "properties": 273,
+    "tasksDone": 697,
+    "tasksOpen": 8,
+    "steering": 10,
+    "hooks": 8,
+    "agents": 4,
+    "skills": 2
   }
 }
