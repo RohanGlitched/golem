@@ -281,26 +281,26 @@ Conventions for every task:
     - **Property 35: Diagnostic underline ranges**
     - **Validates: Requirements 17.11, 17.12, 17.13**
 
-- [ ] 7. Reel logic
-  - [ ] 7.1 Implement `reel/filmstrip.ts` frame selection
+- [x] 7. Reel logic
+  - [x] 7.1 Implement `reel/filmstrip.ts` frame selection
     - `filmstripFrames(worstTau, frameCount, fps)` returning eight entries spaced over `worstTau ± 0.35 s`, clamped, one marked worst (lowest index on ties). Rendering comes in task 18.
     - Example tests: a worst moment near the start clamps `tau` to 0, a single-frame recording returns eight entries at frame 0.
     - _Requirements: 20.1, 20.2, 20.5_
 
-  - [ ]* 7.2 Write property test for filmstrip frame selection
+  - [x]* 7.2 Write property test for filmstrip frame selection
     - **Property 45: Filmstrip frame selection**
     - **Validates: Requirements 20.1, 20.2**
 
-  - [ ] 7.3 Implement `reel/replay.ts` controller
+  - [x] 7.3 Implement `reel/replay.ts` controller
     - `ReplayController` at 0.25 times real time with `advance`, `seekFrame`, `stepFrame(±1)`, stop at the last frame, Reduced_Motion makes `advance` a no-op, `enter` and `exit` hooks that call injected `hero.snapshot()`, `hero.restore()`, `scheduler.acquire('replaying')` and `scheduler.release('replaying')`.
     - Example tests: enter and exit call the hooks once, "Back to live" restores the snapshot.
     - _Requirements: 21.1, 21.2, 21.4, 21.5, 21.7, 21.8, 21.9, 21.10_
 
-  - [ ]* 7.4 Write property test for replay position
+  - [x]* 7.4 Write property test for replay position
     - **Property 46: Replay position stays in range**
     - **Validates: Requirements 21.2, 21.4, 21.5, 21.8, 21.9**
 
-- [ ] 8. Checkpoint - Pure logic complete
+- [x] 8. Checkpoint - Pure logic complete
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 9. Stage
