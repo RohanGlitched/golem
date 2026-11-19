@@ -29,7 +29,7 @@ Conventions: sources in `skeleton/src/ears/`, tests in `skeleton/src/ears/__test
   - _Bugfix: 9.1–9.5_
 - [x] 9. WHERE features and distinct serialisation (defect 6)
   - _Bugfix: 6.1–6.6_
-- [ ] 10. WHILE with a perturbation state (defect 7)
+- [x] 10. WHILE with a perturbation state (defect 7)
   - _Bugfix: 7.1–7.5_
 - [ ] 11. `within T` as F then G (defect 4)
   - Update the reference monitor and the soundness property to the corrected semantics

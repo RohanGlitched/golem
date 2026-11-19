@@ -25,6 +25,33 @@ export const DEFAULT_EPISODE_SECONDS = 10;
 const normaliseFeature = (s: string): string => s.trim().replace(/\s+/g, ' ').toLowerCase();
 
 
+/**
+ * Matches a WHILE state against both template classes. Exactly one match wins. Two matches are
+ * ambiguous. With none, the diagnostics of the class that matched further into the clause are kept
+ * (the predicate class on a tie, or when the Lexicon has no perturbation template).
+ */
+function matchState(condition: Clause, lexicon: Lexicon): {
+  predicate?: BoundClause<PredicateTemplate>; perturbation?: BoundClause<PerturbationTemplate>; diagnostics: Diagnostic[];
+} {
+  const mp = matchPredicate(condition, lexicon);
+  if (lexicon.perturbations.length === 0) return { ...(mp.bound ? { predicate: mp.bound } : {}), diagnostics: mp.diagnostics };
+  const mt = matchPerturbation(condition, lexicon);
+  if (mp.bound && mt.bound) {
+    return {
+      diagnostics: [makeDiagnostic(
+        'UNKNOWN_PHRASE',
+        `Ambiguous state '${condition.text}' matches the predicate "${mp.bound.template.phrase}" and the perturbation "${mt.bound.template.phrase}".`,
+        condition.span,
+      )],
+    };
+  }
+  if (mp.bound) return { predicate: mp.bound, diagnostics: mp.diagnostics };
+  if (mt.bound) return { perturbation: mt.bound, diagnostics: mt.diagnostics };
+  if (lexicon.predicates.length === 0) return { diagnostics: mt.diagnostics };
+  const reach = (d: readonly Diagnostic[]): number => d.find((x) => x.severity === 'error')?.start ?? -1;
+  return { diagnostics: reach(mt.diagnostics) > reach(mp.diagnostics) ? mt.diagnostics : mp.diagnostics };
+}
+
 /** UNKNOWN_PHRASE when `wanted` (normalised) is not a declared feature, with the closest one. */
 function featureDiagnostic(condition: Clause, wanted: string, features: readonly string[]): Diagnostic | undefined {
   const pos = condition.span;
@@ -162,6 +189,7 @@ export function compileRequirement(
   let triggerDur = 0;
   let disabledFeature = false;
   let stateBound: BoundClause<PredicateTemplate> | undefined;
+  let stateTrigger: BoundClause<PerturbationTemplate> | undefined;
   let dimsSources: (Span | undefined)[] = [];
   let dimsClause: Clause | undefined;
 
@@ -178,9 +206,18 @@ export function compileRequirement(
       dimsClause = condition;
     }
   } else if (pattern === 'state' && condition) {
-    const m = matchPredicate(condition, lexicon);
-    diagnostics.push(...m.diagnostics);
-    stateBound = m.bound;
+    // A state is a predicate that must hold, or a perturbation applied for the whole episode.
+    const s = matchState(condition, lexicon);
+    diagnostics.push(...s.diagnostics);
+    stateBound = s.predicate;
+    if (s.perturbation) {
+      const built = buildDimensions(s.perturbation, condition, true);
+      diagnostics.push(...built.diagnostics);
+      dims = built.dims;
+      dimsSources = built.sources;
+      perturbations.push({ template: s.perturbation.template.phrase, params: built.params });
+      stateTrigger = s.perturbation;
+    }
   } else if (pattern === 'optional' && condition) {
     // The feature clause must name a feature the Lexicon declares; it is enabled only when
     // listed in the options.
@@ -216,7 +253,8 @@ export function compileRequirement(
     : episode;
 
   const spec: Parameters<typeof buildMonitor>[0] = {
-    pattern,
+    // A perturbation state is applied throughout, so its response is monitored as ubiquitous.
+    pattern: stateTrigger ? 'ubiquitous' : pattern,
     predicate: resp.bound.template,
     slots: resp.bound.si,
     wrapper,
