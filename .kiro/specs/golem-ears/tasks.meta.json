@@ -112,6 +112,14 @@
       "status": "failed",
       "failingExample": "line \"0.0 THE robot shall keep with 0.0N within 0.0s\" (lexicon: robotNames [\"robot\"], predicate \"keep with {force}\"). parse(format(parse(line))) differs only in response.text: \"keep with 0.0N within 0.0s\" vs \"keep with 0.0 N within 0.0 s\". Tokens are identical.",
       "lastRunTimestamp": 1795079800597
+    },
+    "14.4 Write property test for skipped lines": {
+      "status": "passed",
+      "lastRunTimestamp": 1795080156974
+    },
+    "14.5 Write property test for layout insensitivity": {
+      "status": "passed",
+      "lastRunTimestamp": 1795080195455
     }
   },
   "executionHistory": {
@@ -1009,6 +1017,11 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795080094002
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795080275753
       }
     ],
     "14.4 Write property test for skipped lines": [
@@ -1021,6 +1034,11 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795080096160
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795080276275
       }
     ],
     "14.5 Write property test for layout insensitivity": [
@@ -1033,6 +1051,11 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795080096218
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795080276635
       }
     ],
     "15.1 Implement `compileRequirementsFile` in `compile.ts`": [
@@ -1062,6 +1085,11 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795080096279
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795080277263
       }
     ],
     "16.1 Wire the exports": [
@@ -1074,6 +1102,11 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795080096332
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795080277564
       }
     ],
     "16.2 Write smoke tests for exports and purity": [
@@ -1081,6 +1114,16 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795076115187
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795080281838
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795080511566
       }
     ],
     "17.1 Write example tests per Diagnostic kind": [
@@ -1088,6 +1131,16 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795076115251
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795080282016
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795080511301
       }
     ],
     "18. Final checkpoint - Ensure all tests pass": [
@@ -1095,6 +1148,16 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795076115308
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795080516107
+      },
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795080649504
       }
     ],
     "1. Foundations: shared types, diagnostics and test support": [
@@ -1179,6 +1242,34 @@
         "executionId": "00cd9399-2844-4909-a391-120380c554c0",
         "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
         "timestamp": 1795080088621
+      }
+    ],
+    "14. Extractor": [
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795080276688
+      }
+    ],
+    "15. File-level compilation": [
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795080277321
+      }
+    ],
+    "17. Diagnostic and Kiro-file example tests": [
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795080511364
+      }
+    ],
+    "16. Public entry point": [
+      {
+        "executionId": "00cd9399-2844-4909-a391-120380c554c0",
+        "chatSessionId": "sess_aeac2a38-afef-456f-bee1-89e9be2f5020",
+        "timestamp": 1795080511626
       }
     ]
   }

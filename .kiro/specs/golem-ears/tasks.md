@@ -216,7 +216,7 @@ Conventions for every task:
     - **Property 32: Canonical text layout and idempotence**
     - **Validates: Requirements 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7, 10.10**
 
-- [ ] 14. Extractor
+- [x] 14. Extractor
   - [x] 14.1 Implement `extract.ts`
     - `extractCriteria(text)`: split on `\r?\n` with a line-start table, track `### Requirement <n>` and `#### Acceptance Criteria`, accept `<m>.` and `<m>)`, ignore `-` and `*` bullets, join indented continuation lines with one space, end at a blank line, a numbered line or a heading. Return `id`, `text`, `line`, `column` and `offset`.
     - Emit `NON_EARS_LINE` warnings for non-EARS and `FOR ALL` lines. Use `R0` plus one warning for a criterion before any requirement heading.
@@ -226,42 +226,42 @@ Conventions for every task:
     - Add `arbRequirementsFile` in `__tests__/generators.file.ts`: headings, `.` or `)` numbering, continuation lines, bullets, non-EARS lines, `FOR ALL` lines, LF or CRLF, each file carrying its expected criteria list.
     - Write example tests that the generated expectation matches a hand-written file.
     - _Requirements: 13.2_
-  - [-] 14.3 Write property test for extraction
+  - [x] 14.3 Write property test for extraction
     - **Property 33: Extractor returns qualifying criteria with unique ordered IDs and exact positions**
     - **Validates: Requirements 11.1, 11.2, 11.4, 11.7, 11.13**
-  - [-] 14.4 Write property test for skipped lines
+  - [x] 14.4 Write property test for skipped lines
     - **Property 34: Extractor skips non-EARS and FOR ALL lines with a warning and ignores bullets**
     - **Validates: Requirements 11.5, 11.8, 11.11, 11.12**
-  - [-] 14.5 Write property test for layout insensitivity
+  - [x] 14.5 Write property test for layout insensitivity
     - **Property 35: Extractor is insensitive to line endings, number format and continuation layout**
     - **Validates: Requirements 11.8, 11.9, 11.10**
 
-- [ ] 15. File-level compilation
+- [x] 15. File-level compilation
   - [x] 15.1 Implement `compileRequirementsFile` in `compile.ts`
     - Extract, compile each criterion independently, and keep every valid requirement in file order. Map diagnostic offsets, lines and columns to file coordinates, using a per-criterion offset map for joined continuation lines. A repeated Requirement ID adds one warning at the second criterion and keeps both.
     - Write example tests: one invalid criterion among valid ones, a diagnostic position in file coordinates, a duplicate ID.
     - _Requirements: 8.14, 12.8, 12.9, 12.10_
-  - [-] 15.2 Write property test for file compilation
+  - [x] 15.2 Write property test for file compilation
     - **Property 36: File compilation isolates failures and reports in file coordinates**
     - **Validates: Requirements 12.8, 12.9, 12.10, 8.14**
 
-- [ ] 16. Public entry point
-  - [-] 16.1 Wire the exports
+- [x] 16. Public entry point
+  - [x] 16.1 Wire the exports
     - Create `skeleton/src/ears/index.ts` exporting `compileRequirement`, `compileRequirementsFile`, `extractCriteria`, `tokenize`, `parse`, `format`, `parseQuantity`, `toSI`, `fromSI`, `tokenEditDistance` and the public types.
     - Re-export them from `skeleton/src/index.ts` so apps import from `golem-spec`. Do not deep-import `skeleton/src/ears/...` anywhere outside the module.
     - _Requirements: 12.14_
-  - [~] 16.2 Write smoke tests for exports and purity
+  - [x] 16.2 Write smoke tests for exports and purity
     - Test that `golem-spec` (the `skeleton/src/index.ts` entry) exposes every public function.
     - Test that no file under `ears/` (excluding `__tests__`) mentions `Math.random`, `Date.now`, `performance.now`, `fetch` or `node:fs`.
     - _Requirements: 12.12, 12.14_
 
-- [ ] 17. Diagnostic and Kiro-file example tests
-  - [~] 17.1 Write example tests per Diagnostic kind
+- [x] 17. Diagnostic and Kiro-file example tests
+  - [x] 17.1 Write example tests per Diagnostic kind
     - One test for each of `PATTERN_MISMATCH`, `MISSING_UNIT`, `UNKNOWN_PHRASE`, `BAD_RANGE`, `UNKNOWN_ROBOT` and `NON_EARS_LINE`, asserting `kind`, one-based `line` and one-based `column`, going through the public entry point.
     - Add a test that compiles a Kiro-style `requirements.md` containing lines with and without the comma before THE and asserts ids, texts, lines and columns.
     - _Requirements: 13.10, 13.11, 13.14_
 
-- [~] 18. Final checkpoint - Ensure all tests pass
+- [x] 18. Final checkpoint - Ensure all tests pass
   - Run `npx vitest --run` in `skeleton/`, and run the TypeScript type check. Ensure all tests pass, ask the user if questions arise.
 
 ## Notes
