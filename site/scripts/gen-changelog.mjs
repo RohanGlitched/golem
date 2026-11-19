@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const out = fileURLToPath(new URL('../data/changelog.json', import.meta.url));
 const log = execFileSync('git', ['log', '--format=%ad%x09%h%x09%s', '--date=short', '-n', '400'], { cwd: root, encoding: 'utf8' });
-const MILESTONE = /^(Merge |golem-site: \d|README|infra:|golem-evidence: [0-5] |evidence: |.*final checkpoint)/;
+const MILESTONE = /^(golem-site: \d|README|infra:|golem-evidence: [0-5] |evidence: |site: |golem-kit: |.*final checkpoint)/;
 
 const entries = log.split('\n').filter(Boolean).map((l) => {
   const [date, hash, ...rest] = l.split('\t');

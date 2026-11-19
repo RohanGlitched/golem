@@ -1,6 +1,6 @@
 # Kiro CLI sessions
 
-Every headless Kiro CLI session that built or repaired GOLEM, as its raw stream-json log (gzipped), with the prompt it was given.
+The headless Kiro CLI runs that built or repaired GOLEM and whose logs we kept (40 runs in 33 sessions; a resumed run continues its session), each as its raw stream-json log (gzipped), with the prompt it was given. `prompts/` also holds a few prompts whose runs left no log. The agent-gate experiment's own runs are in `evidence/results/agent-gate*.streams/`.
 
 - `index.json`: one row per session: Kiro session ids, mode (`spec`, `vibe` = Kiro's default mode, or a custom agent such as `golem-tuner`), credits used (summed from the log's own `credits` records), tool calls, files written, and the final message.
 - `<name>.jsonl.gz`: the log. `zcat ears-fix.jsonl.gz | head` to read one.

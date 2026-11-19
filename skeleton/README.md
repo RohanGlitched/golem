@@ -31,7 +31,7 @@ WHEN the pelvis is pushed with up to 100 N for 0.2 s from any direction
 at any point in its stride, THE robot SHALL stay upright for 3 s
 ```
 
-The trigger defines what to search: force 0–100 N, any angle, any gait phase. The response becomes a monitor with a signed margin in physical units, compiled to `G[t₀, t₀+3 s] margin("stay upright") > 0 m`. A failing trial reports the mildest scenario that still breaks the line, for example *falls from 62.5 N pushed from its left (80°), 20% into the stride* on the Unitree G1 in the demo. With the balance reflex that Kiro's `golem-tuner` agent wrote under the gate, the same 4,860-trial map gives a weakest push of 101.6 N.
+The trigger defines what to search: force 0–100 N, any angle, any gait phase. The response becomes a monitor with a signed margin in physical units, compiled to `G[t₀, t₀+3 s] margin("stay upright") > 0 m`. A failing trial reports the mildest scenario that still breaks the line, for example *falls at 64.1 N pushed from its left (80°), 20% into the stride* on the Unitree G1 in the demo. With the balance reflex that Kiro's `golem-tuner` agent wrote under the gate, the same 4,860-trial map gives a weakest push of 101.6 N.
 
 ## What's inside
 

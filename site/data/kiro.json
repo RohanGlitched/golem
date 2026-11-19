@@ -1,6 +1,6 @@
 {
-  "generated": "2026-11-19T19:39:33.205Z",
-  "commit": "e3cf4fb",
+  "generated": "2026-11-19T20:13:39.094Z",
+  "commit": "52e31eb",
   "workspaces": [
     {
       "path": ".kiro",
@@ -475,15 +475,15 @@
     }
   ],
   "commits": {
-    "total": 273,
+    "total": 278,
     "byPrefix": {
+      "evidence": 12,
+      "other": 28,
+      "site": 9,
       "docs": 2,
       "merge": 20,
       "stagger": 7,
       "golem-kit": 25,
-      "site": 8,
-      "evidence": 9,
-      "other": 27,
       "candy": 1,
       "apps": 1,
       "studios": 1,

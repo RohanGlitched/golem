@@ -15,17 +15,22 @@ src = Path(sys.argv[1])
 out = Path(__file__).resolve().parent.parent / 'evidence' / 'kiro-sessions'
 out.mkdir(parents=True, exist_ok=True)
 
-TMP = re.compile(r'[A-Za-z]:(?:\\\\|\\|/)Users(?:\\\\|\\|/)[^\\/"]+(?:\\\\|\\|/)AppData(?:\\\\|\\|/)Local(?:\\\\|\\|/)Temp(?:\\\\|\\|/)[^"\s]*?scratchpad', re.I)
+SEP = r'(?:\\|/|%5C|%2F)+'
+TMP = re.compile(r'[A-Za-z](?::|%3A)' + SEP + 'Users' + SEP + r'[^\/"%\s]+' + SEP + 'AppData' + SEP + 'Local' + SEP + 'Temp' + SEP + r'[^"\s]*?scratchpad', re.I)
 TMP2 = re.compile(r'/c/Users/[^/"]+/AppData/Local/Temp/[^"\s]*?scratchpad', re.I)
-HOME = re.compile(r'[A-Za-z]:(?:\\\\|\\|/)Users(?:\\\\|\\|/)rohan', re.I)
-HOME2 = re.compile(r'/c/Users/rohan', re.I)
+WORK = re.compile(r'(?:file:///)?(?:[Ii](?::|%3A)|/[Ii](?=' + SEP + 'Programs))' + SEP + 'Programs' + SEP + 'ListofHackathon(?:' + SEP + 'hackathons' + SEP + '39-kiroween)?', re.I)
+HOME = re.compile(r'(?:file:///)?(?:[Cc](?::|%3A)|/[Cc](?=' + SEP + 'Users))' + SEP + 'Users' + SEP + 'rohan', re.I)
+USER = re.compile('Users' + SEP + 'rohan', re.I)
+USER2 = re.compile('Users(?:%252F|%255C)+rohan', re.I)  # double percent-encoded paths in Kiro's file URIs
 
 
 def redact(s: str) -> str:
     s = TMP.sub('<tmp>', s)
     s = TMP2.sub('<tmp>', s)
+    s = WORK.sub('<work>', s)
     s = HOME.sub('<home>', s)
-    return HOME2.sub('<home>', s)
+    s = USER2.sub('Users%252F%253Cuser%253E', s)
+    return USER.sub('Users/<user>', s)
 
 
 def walk(x, f):

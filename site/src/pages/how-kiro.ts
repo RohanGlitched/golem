@@ -58,13 +58,13 @@ export function howKiroPage(d: SiteData): PageSpec {
 <h2 id="tuner">The best session: a Kiro agent fixing the robot under the gate</h2>
 <p class="lede">The task: make requirement 1.3 hold (a 100 N push from any direction), changing only <code>controller/reflex.ts</code>, without breaking any line that holds today. The agent was <code>golem-tuner</code> from the kit pack, run headless in Kiro CLI on Opus 5.5. It took 13.6 minutes and 11.3 credits.</p>
 <ol class="try-steps">
-<li><b>It used GOLEM to look first.</b> Through the MCP server it called <code>list_requirements</code>, <code>falsify</code>, <code>get_counterexample</code>, <code>explain_margin</code> and <code>replay</code> before touching code. The counterexample: 55.6 N, early in the stride, below even line 1.1’s 60 N.</li>
+<li><b>It used GOLEM to look first.</b> Through the MCP server it called <code>list_requirements</code>, <code>falsify</code>, <code>get_counterexample</code>, <code>explain_margin</code> and <code>replay</code> before touching code. The counterexample: 55.6 N, early in the stride (this session ran before the push-angle convention was fixed, so its angles use the old convention).</li>
 <li><b>Its first reflex made 1.3 hold and broke two other lines.</b> Correcting forward speed too, it fell on a 6.89° slope (3.1) and at 30.2 ms of sensor latency (6.1). GOLEM caught both on the next <code>golem test</code>.</li>
 <li><b>It narrowed the reflex.</b> Sideways only, and only sudden changes: smooth over 0.06 s, subtract a 1.5 s average, so a push counts and a slope’s steady drift does not. 3.1 and 6.1 held again.</li>
 <li><b>A different search seed broke it again.</b> With a gain of 1.6, 1.3 fell at 79.9 N from 108°: the command outran the robot and it kept accelerating sideways. A gain of 0.8 held under the default search and three more search seeds.</li>
-<li><b>It stopped honestly.</b> The gate was still red, only on the three lines marked Expected_Break, and it said so: the gate did not read the Expectation table yet. It also reported that the MCP server kept running the old reflex after the edit, and that our push-angle convention looked backwards. Both were real bugs, and both were fixed afterwards.</li>
+<li><b>It stopped honestly.</b> The gate was still red, only on the three lines marked Expected_Break, and it said so: the gate did not read the Expectation table yet. It also reported that the MCP server kept running the old reflex after the edit, and that our push-angle convention looked backwards. All three were real bugs, and all three are fixed.</li>
 </ol>
-<p>The reflex ships as a switch, <code>GOLEM_REFLEX=kiro</code>. Re-measured afterwards over the full 4,860-trial stability map, the weakest push it survives rose from 62.5 N to 101.6 N, and all 36 directions hold 100 N (<a href="/evidence/#kiro-reflex">evidence</a>). The prompt and the full session log are in <a href="${REPO_URL}/tree/main/evidence/results/tuner"><code>evidence/results/tuner/</code></a>; the logs of every other Kiro session are in <a href="${REPO_URL}/tree/main/evidence/kiro-sessions"><code>evidence/kiro-sessions/</code></a>.</p>
+<p>The reflex ships as a switch, <code>GOLEM_REFLEX=kiro</code>. Re-measured afterwards over the full 4,860-trial stability map, the weakest push it survives rose from 62.5 N to 101.6 N, and all 36 directions hold 100 N (<a href="/evidence/#kiro-reflex">evidence</a>). The prompt and the full session log are in <a href="${REPO_URL}/tree/main/evidence/results/tuner"><code>evidence/results/tuner/</code></a>; the logs of the other Kiro runs are in <a href="${REPO_URL}/tree/main/evidence/kiro-sessions"><code>evidence/kiro-sessions/</code></a>.</p>
 
 <h2 id="specs">Every spec</h2>
 <p>${counted.length} specs counted, ${earsTotal.toLocaleString('en-US')} EARS criteria. ${specs.length - counted.length} more ${specs.length - counted.length === 1 ? 'is' : 'are'} listed as not started and left out of every total. Bugfix specs have no requirements file of their own: they list tasks that fix the defects of an audit. The G1 and candy rows are the robots' own requirement files, which GOLEM tests.</p>
@@ -91,14 +91,14 @@ ${table(['Where', 'Hook', 'Trigger'], [
 <h2 id="surfaces">Which Kiro surface did what</h2>
 <ul>
 <li><b>Kiro CLI v3, headless, spec mode</b> wrote the requirements, designs and tasks of the feature specs and the three bugfix specs.</li>
-<li><b>Kiro CLI v3, headless, default mode</b> carried out the tasks and committed them by task; commit subjects start with the spec name, for example <code>golem-ears-hardening: 7 ...</code>. Some sessions committed several finished tasks in a burst at the end of the run, so a few commits are seconds apart. The raw log of every session is in <code>evidence/kiro-sessions/</code>.</li>
+<li><b>Kiro CLI v3, headless, default mode</b> carried out the tasks and committed them by task; commit subjects start with the spec name, for example <code>golem-ears-hardening: 7 ...</code>. Some sessions committed several finished tasks in a burst at the end of the run, so a few commits are seconds apart. The raw logs of the 40 headless runs we kept (33 Kiro sessions; resumed runs share a session) are in <code>evidence/kiro-sessions/</code>.</li>
 <li><b>Models:</b> Opus 5.5 and Sonnet 5.5. The <code>golem-auditor</code> agent is pinned to Sonnet 5.5.</li>
-<li><b>Hooks:</b> the Stop gate and the save hooks above ran inside those sessions. Hook behaviour was checked on kiro-cli 3.5.0: a Stop hook that blocks continues the agent, but fires once per user turn.</li>
+<li><b>Hooks:</b> the root hooks were added after the engine and hardening specs; the Stop gate and the save hooks ran inside the sessions after that (the kit, candy, evidence and tuner runs). Hook behaviour was checked on kiro-cli 3.5.0: a Stop hook that blocks continues the agent, but fires once per user turn.</li>
 </ul>
 <p class="small muted">${k.commits.total} commits counted. By spec prefix: ${prefixes.slice(0, 10).map(([p, n]) => `${esc(p)} ${n}`).join(', ')}.</p>
 
 <h2 id="audits">Three independent audits</h2>
-<p>After the engine specs were done, a separate agent reviewed each module with probes against real inputs, not the module's own tests. Each audit became a bugfix spec.</p>
+<p>After the engine specs were done, each module got an independent review with probes against real inputs, not the module's own tests. Each review became a Kiro bugfix spec. The <code>golem-auditor</code> agent, which now does this job inside Kiro, was written afterwards; its first audit, of the Expectation-aware gate, is in <code>docs/reviews/gate-audit.md</code> with its session log.</p>
 <div class="cards">${AUDITS.map((a) => auditCard(d, a, specs)).join('')}</div>
 
 <h2 id="wrong">What went wrong</h2>
@@ -110,9 +110,9 @@ ${table(['Where', 'Hook', 'Trigger'], [
 <p>In the studio, a render tick that called <code>requestOnce</code> while a reason to render was held queued a second animation-frame callback. The callbacks doubled every frame, and the G1 page took seconds per frame. It was found in the browser while building the signature moments, fixed in <code>RenderScheduler</code>, and given a regression test (commit <code>3d9f56c</code>).</p>
 <h3>Smaller ones, found while building this site</h3>
 <ul>
-<li>The root <code>.kiro/hooks/build.json</code> is not valid JSON: two matchers hold single backslashes. <code>kiro-stats.mjs</code> therefore counts no hooks for the root workspace, and Kiro may not load that file. The site reads it leniently.</li>
+<li>The root <code>.kiro/hooks/build.json</code> was not valid JSON for a while (two matchers held single backslashes), so Kiro may not have loaded it; it is fixed and parses now.</li>
 <li>The needle log <code>docs/reviews/falsify-hardening-runs/after-search.txt</code> is UTF-16 (a shell redirect wrote it). The site decodes it.</li>
-<li>The evidence report's pre-registered prediction for line 1.3 was wrong, and the agent-gate experiment has not run. Both are stated on the <a href="/evidence/">evidence page</a>.</li>
+<li>The evidence report's pre-registered prediction for line 1.3 was wrong, and the agent-gate pilot found no false claims to stop (0 of 6 in both arms). Both are on the <a href="/evidence/">evidence page</a>.</li>
 </ul>
 <p class="small muted">Counts above: ${fmt(t['tasksDone'] ?? 0, 0)} tasks done of ${fmt((t['tasksDone'] ?? 0) + (t['tasksOpen'] ?? 0), 0)}, counted in the markdown task lists. ${inlineMd('The `golem-cloud` spec is written and not started; it is not part of this build.')}</p>
 `;

@@ -37,7 +37,7 @@ function section(ts: TranscriptSection[], cmd: string): TranscriptSection {
 function cliBlock(name: string, s: TranscriptSection | undefined, maxLines: number): string {
   let out = `<h3 id="cmd-${name}"><code>golem ${name}</code></h3><p>${esc(WHAT[name] as string)}</p>${codeBlock(USAGE[name] as string, `usage of golem ${name}`)}`;
   if (s) {
-    const ex = excerpt(s.code.split('\n').map((l) => clip(l, 200)).join('\n'), maxLines);
+    const ex = excerpt(s.code.split('\n').map((l) => clip(l, 260)).join('\n'), maxLines);
     const more = ex.omitted > 0 ? `\n... ${ex.omitted} more lines in docs/cli-transcript.md` : '';
     out += `<p class="small muted">Real output, ${esc(s.title)}. Node 21 on Windows, the G1 app, 11 lines.</p>${codeBlock(ex.text + more, `output of golem ${name}`)}`;
   } else {
@@ -132,7 +132,7 @@ ${cliBlock('falsify', byName('falsify'), 6)}
 ${cliBlock('replay', byName('replay'), 8)}
 ${cliBlock('gate', byName('gate'), 24)}
 <p>The same gate with Kiro's balance reflex (<code>GOLEM_REFLEX=kiro</code>), where requirement 1.3 now holds:</p>
-${codeBlock(excerpt(reflexGate.code.split('\n').map((l) => clip(l, 200)).join('\n'), 30).text, 'output of golem gate with the Kiro reflex')}
+${codeBlock(excerpt(reflexGate.code.split('\n').map((l) => clip(l, 260)).join('\n'), 30).text, 'output of golem gate with the Kiro reflex')}
 ${cliBlock('init', undefined, 0)}
 ${cliBlock('mcp', byName('mcp'), 10)}
 

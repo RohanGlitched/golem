@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 // Home: the Summoning Circle (a recorded G1 campaign replayed as you scroll), then the argument in plain order:
 // what it is, the npm package, Kiro making the robot stronger, the live studio, how it works, the evidence, the limits.
 import type { SiteData } from '../build/data';
@@ -43,7 +44,7 @@ function pipeline(d: SiteData): string {
     { h: 'Write a sentence', p: 'The acceptance criterion is an EARS sentence in the Kiro spec, with a unit on every number.', fig: earsFigure(line12.source) },
     { h: 'Compile it', p: 'The ranges in the WHEN part become the space to search. The SHALL part becomes a margin in metres or newtons.', fig: spaceFigure(line12) },
     { h: 'Summon ghosts', p: `Each trial is a ghost: one MuJoCo run of the robot. ${d.map.meta.dirs} directions of pushes trace where it holds and where it breaks.`, fig: ghostFigure(d.mapCells) },
-    { h: 'Shrink the failure', p: `GOLEM halves the push until it finds the mildest one that still breaks the sentence: ${fmt(wc.heldN)} N from ${sideName(weakDir.dirDeg)} (${d.map.meta.weakest.dirDeg}°).`, fig: shrinkFigure(wc.heldN, wc.brokeN, weakDir.dirDeg) },
+    { h: 'Shrink the failure', p: `GOLEM halves the push until it brackets the boundary: from ${sideName(weakDir.dirDeg)} (${d.map.meta.weakest.dirDeg}°) the G1 survives ${fmt(wc.heldN)} N and falls at ${fmt(wc.brokeN)} N.`, fig: shrinkFigure(wc.heldN, wc.brokeN, weakDir.dirDeg) },
     { h: 'Pin the seed', p: 'The failing scenario and its random seed are saved to a file. Saved seeds run first, every time.', fig: seedFigure(seed, '.golem/seeds/stagger/1.3.json') },
     { h: 'Gate the agent', p: 'A Kiro Stop hook runs golem gate. While any sentence is false, the agent cannot end its turn as done.', fig: gateFigure(gateLine, block) },
   ];
@@ -88,7 +89,9 @@ export function homePage(d: SiteData): PageSpec {
   const h = headlineNumbers(d);
   const g1 = d.lexicons.find((l) => l.app === 'stagger');
   const candy = d.lexicons.find((l) => l.app === 'candy');
-  const expectedBreaks = d.falsifier.summary.length;
+  // lines the G1 spec marks Expected_Break in its Expectation table
+  const specText = readFileSync(new URL('../../../apps/stagger/.kiro/specs/g1-walking/requirements.md', import.meta.url), 'utf8');
+  const expectedBreaks = specText.split('\n').filter((l) => /^\|\s*\d+\.\d+\s*\|.*\|\s*Expected_Break\s*\|\s*$/.test(l.trim())).length;
   const r12 = d.graded.summary.find((x) => x.reqId === '1.2');
   if (!r12) throw new Error('evidence/results/graded-margin/falsifier.summary.json has no row for 1.2');
   const gate = gateSummary(d);
@@ -165,7 +168,7 @@ ${ringsSection(d)}
 
 <h2 id="robots">Two robots, one package</h2>
 <div class="cards wide">
-<article class="card"><h3>Stagger: a Unitree G1</h3><p>A humanoid walking under Unitree’s published policy. ${g1?.lines.length ?? 0} requirement lines cover pushes, speed tracking, slopes, payload, slipping and sensor latency. ${expectedBreaks} of them are written to break, so the gate has something to catch.</p><p><a class="btn" href="/stagger/">Open the G1 studio</a></p></article>
+<article class="card"><h3>Stagger: a Unitree G1</h3><p>A humanoid walking under Unitree’s published policy. ${g1?.lines.length ?? 0} requirement lines cover pushes, speed tracking, slopes, payload, slipping and sensor latency. ${expectedBreaks} of them are marked Expected_Break: the spec says they must break, and the gate checks that they do.</p><p><a class="btn" href="/stagger/">Open the G1 studio</a></p></article>
 <article class="card"><h3>Candy: a Franka Panda</h3><p>A suction cup sorts Halloween candy into bowls while a trick-or-treater’s hand reaches into the workspace. ${candy?.lines.length ?? 0} lines cover task success and keeping the arm clear of hands.</p><p><a class="btn" href="/candy/">Open the candy studio</a></p></article>
 </div>
 

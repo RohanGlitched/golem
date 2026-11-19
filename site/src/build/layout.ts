@@ -83,7 +83,7 @@ export function renderDocument(p: PageSpec, changelog: ChangelogEntry[]): string
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="A polar plot of the largest push the Unitree G1 survives from each direction, drawn in clay and cinnabar on a dark ground.">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="/og.png">
+<meta name="twitter:image" content="${SITE_URL}/og.png">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/fonts/B612-Regular.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/Gloock-Regular.woff2" as="font" type="font/woff2" crossorigin>

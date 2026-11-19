@@ -1,5 +1,24 @@
 [
  {
+  "name": "audit-gate",
+  "file": "audit-gate.jsonl.gz",
+  "sessions": [
+   "sess_2714ec4d-6242-447d-936f-15293e6d3bf0"
+  ],
+  "modes": [
+   "golem-auditor",
+   "vibe"
+  ],
+  "models": [
+   "auto",
+   "claude-sonnet-5.5"
+  ],
+  "credits": 0.0,
+  "toolCalls": 42,
+  "filesWritten": 3,
+  "finalMessage": ""
+ },
+ {
   "name": "candy",
   "file": "candy.jsonl.gz",
   "sessions": [
@@ -606,6 +625,24 @@
   "toolCalls": 53,
   "filesWritten": 5,
   "finalMessage": ""
+ },
+ {
+  "name": "skeptic",
+  "file": "skeptic.jsonl.gz",
+  "sessions": [
+   "sess_d758421f-4734-4037-b3b0-ea52e6cd27ab"
+  ],
+  "modes": [
+   "golem-skeptic",
+   "vibe"
+  ],
+  "models": [
+   "auto"
+  ],
+  "credits": 0.19,
+  "toolCalls": 0,
+  "filesWritten": 0,
+  "finalMessage": "I didn't run the night watch, because the tools it depends on aren't available in this session. I have no `list_requirements`, `falsify`, `get_counterexample`, `explain_margin`, `check_requirement` or `propose_requirement`. My only tools are code intelligence, a PowerShell shell, file search and read, and skill loading.\n\nYou told me to submit proposals only through `propose_requirement` and never to touch a requirements or controller file. So I haven't substituted anything. I haven't edited files, and I haven't run `golem-spec` from the shell to imitate the missing tools. Proposals made that way would not reach the proposal queue. They would also lack the budgeted counterexamples and seeds the rationale needs.\n\n- **Proposals:** none, with no ids.\n- **Requirements with a broken latest verdict:** unknown, because I couldn't read the list.\n- **Budget used:** 0 trials and no meaningful wall time.\n\nTo get the run done, you could do either of these:\n1. Re-run it in a session where the golem-skeptic tool server is connected.\n2. Tell me to use the `golem-spec` CLI (`npx --no-install golem-spec test` and `gate run`) read-only to find breakable requirements. I would report the harsher lines and counterexamples in chat for you to submit, and I wouldn't write any files.The hook output says `golem-spec@0.1.0` isn't installed locally, so `npx --no-install golem-spec` can't run. The CLI fallback I offered isn't available either, and the run is still blocked.\n\nI haven't installed anything. I"
  },
  {
   "name": "stagger",

@@ -1,13 +1,48 @@
 [
   {
     "date": "2026-11-20",
+    "hash": "52e31eb",
+    "subject": "evidence: pre-register experiment 3b (agent-gate with an unreachable 200 N target) before running it"
+  },
+  {
+    "date": "2026-11-20",
+    "hash": "741f4a7",
+    "subject": "evidence: the agent-gate pilot ran (6 runs per arm, 13.5 credits): 0/6 false claims in both arms, independent gate green 6/6 without the Stop hook and 5/6 with it; evidence page shows every run"
+  },
+  {
+    "date": "2026-11-20",
     "hash": "d5f5b92",
     "subject": "evidence: raw logs and prompts of every Kiro CLI session that built GOLEM (40 sessions, local paths redacted), with an index"
   },
   {
     "date": "2026-11-20",
-    "hash": "eee33d1",
-    "subject": "Merge branch 'fix/polish2'"
+    "hash": "275d012",
+    "subject": "site: refresh Kiro counts"
+  },
+  {
+    "date": "2026-11-20",
+    "hash": "a2d6200",
+    "subject": "golem-kit: the counterexample reel shows a labelled loading message instead of eight empty boxes, and draws the frames as soon as the poses exist"
+  },
+  {
+    "date": "2026-11-20",
+    "hash": "29b200e",
+    "subject": "golem-kit: the live robot holds still while ghosts run, so the swarm-following camera keeps it in frame; a shove or reset ends the hold"
+  },
+  {
+    "date": "2026-11-20",
+    "hash": "995edeb",
+    "subject": "golem-kit: the selected line's response is 28 px in the 380 px tablet column (sentence 20 px, wraps, never overflows), so the verdict panel is not pushed down; 39-61 px only when stacked and 600 px wide"
+  },
+  {
+    "date": "2026-11-20",
+    "hash": "29940e3",
+    "subject": "site: the G1 studio switches between Unitree's policy and + Kiro's reflex, on the live robot and in every trial worker; default Unitree"
+  },
+  {
+    "date": "2026-11-20",
+    "hash": "c7febd5",
+    "subject": "golem-kit: the starter says its gate is red on purpose (1.2 breaks today, no Expectation table); transcript re-run"
   },
   {
     "date": "2026-11-20",
@@ -16,47 +51,12 @@
   },
   {
     "date": "2026-11-20",
+    "hash": "802e63e",
+    "subject": "golem-kit: a held line says the failure-rate bound is from the uniformly random trials only (CLI, MCP, gate summary, studio verdict panel)"
+  },
+  {
+    "date": "2026-11-20",
     "hash": "e797e78",
     "subject": "README: spec count sentence"
-  },
-  {
-    "date": "2026-11-20",
-    "hash": "559d354",
-    "subject": "README: spec count wording"
-  },
-  {
-    "date": "2026-11-20",
-    "hash": "174ddaf",
-    "subject": "README: Kiro counts from the corrected stats script"
-  },
-  {
-    "date": "2026-11-20",
-    "hash": "7dfd31b",
-    "subject": "evidence: agent-gate workspaces carry the pinned seeds and restore them before the independent gate; deviations recorded in PREREG.md"
-  },
-  {
-    "date": "2026-11-20",
-    "hash": "93bcade",
-    "subject": "Merge branch 'fix/judge1'"
-  },
-  {
-    "date": "2026-11-20",
-    "hash": "8c3a48a",
-    "subject": "evidence: map-g1 takes --dir-offset <deg> and --seed-base <n> to re-run the map on held-out directions and seeds (default runs are unchanged)"
-  },
-  {
-    "date": "2026-11-20",
-    "hash": "f4d485f",
-    "subject": "evidence: kiro-stats counts unique artefacts, reports tasksOpen, leaves not-started specs out of the totals; how-kiro reads N done of M; stagger and candy task lists ticked or annotated"
-  },
-  {
-    "date": "2026-11-20",
-    "hash": "09212d2",
-    "subject": "README: captioned screens section"
-  },
-  {
-    "date": "2026-11-20",
-    "hash": "eae6c19",
-    "subject": "Merge branch 'fix/crew'"
   }
 ]

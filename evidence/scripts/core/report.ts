@@ -199,7 +199,7 @@ Repository commit when generated: \`${inp.repoCommit}\`.`);
 - "Trials to first counterexample" counts results in completion order inside a 32-trial generation, so it is exact to within one generation. Both arms share this.
 - The map is deterministic: its values are measured bounds with a resolution of 1.5625 N, not estimates with sampling error. Direction and phase are on a grid (10 degrees, 0.2 of a stride), so a narrower weak spot between grid points could be missed.
 - The agent experiment has N = 6 per arm. That cannot support a firm conclusion; the claim rule is a keyword match whose input text is stored for audit.
-- \`apps/candy\` is not part of the falsifier benchmark or the agent experiment, which both use \`apps/stagger\`; its own measurement is the separation study below.`);
+- \`apps/candy\` is not part of the falsifier benchmark or the agent experiment, which both use \`apps/stagger\`; its own measurement is the candy separation study in its own section.`);
   parts.push(`## What went wrong
 
 ${inp.notes.trim()}`);

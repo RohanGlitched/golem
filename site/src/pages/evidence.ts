@@ -6,6 +6,8 @@ import { REPO_URL } from '../build/layout';
 import { polarFigure } from '../figures/polar-figure';
 import { ringStats, sideName } from '../figures/rings';
 
+const PRIOR_ART: string[][] = [["NASA FRET", "Structured English (FRETish) to temporal logic and runtime monitors", "No physics search of its own; exports to analysis tools", "GOLEM reads the EARS lines an AI agent already writes in a Kiro spec, and searches a physics simulation for the scenario that breaks them."], ["S-TaLiRo, Breach", "Signal temporal logic, written by hand", "Robustness-guided falsification of Simulink models in MATLAB", "Same idea of robustness-guided falsification; GOLEM runs it on MuJoCo in Node and the browser, with no MATLAB, and adds shrinking and pinned regression seeds."], ["RTAMT", "STL specifications, written by hand", "Online and offline monitoring (Python, C++)", "A monitor library only; GOLEM compiles its monitors from sentences and drives the search and the gate."], ["VerifAI with Scenic", "A scenario language", "Falsification with samplers, including cross-entropy, for autonomous vehicles", "The nearest ancestor. GOLEM starts from requirement sentences instead of a scenario program, and gates an AI coding agent on the result."], ["nl2spec, NL2TL", "Free natural language, translated by an LLM", "Translation only", "GOLEM parses a fixed EARS dialect deterministically: no language model decides what a line means or whether it held."], ["Property-based testing (Hypothesis, fast-check)", "Code properties", "Random generation and shrinking", "GOLEM borrows shrinking and seed pinning, and applies them to physics trials stated in a spec."], ["Runtime action gates for robots", "Rules on actions at run time", "Blocks unsafe robot actions while running", "Those gate the robot. GOLEM gates the coding agent's claim that the work is done, before anything ships."]].map((r) => r.map((c) => c.replace(/&/g, '&amp;').replace(/</g, '&lt;')));
+
 export interface NeedleRow { margin: string; budget: number; randomFound: number; fullFound: number; n: number }
 
 /** Reads the synthetic-needle probe (docs/reviews/falsify-hardening-runs/after-search.txt), block "(1b)": a 0.11 % region. */
@@ -89,10 +91,11 @@ export function evidencePage(d: SiteData): PageSpec {
 <p>For each push direction and stride phase, the largest 0.2 s pelvis push the Unitree G1 survives for 3 s. The weakest direction is ${m.weakest.dirDeg}° at ${fmt(m.weakest.minHeldN)} N (stride phase ${m.weakest.weakestPhase}). The strongest is ${m.strongest.dirDeg}° at ${fmt(m.strongest.minHeldN)} N. That is a factor of ${fmt(m.strongest.minHeldN / m.weakest.minHeldN)}.</p>
 <section class="bleed" aria-label="G1 stability map"><div class="bleed-in">${polarFigure(d.mapCells, d.map)}</div></section>
 <p>Each cell is a bisection on force (one trial at 400 N, then 8 steps), and every trial is deterministic given its scenario and seed. An earlier run, made before the push direction reached the simulator, gave the same boundary in every direction. It is kept as invalid in <code>evidence/results/invalid/</code> and is not used.</p>
+<p><b>Why three different "weakest" numbers appear on this site.</b> The map tests a grid: 36 directions, 5 stride phases, 3 seeds. Its 62.5 N is the weakest push on that grid. The falsifier searches between grid points, at any angle, any stride phase and any seed, so it can find a push from about the same side that breaks the line with less force: the CLI transcript's gate shrinks one to 72.1 N at 88.1° and 28 % of the stride, and the golem-tuner's first search found 55.6 N. All three say the same thing: the G1 on Unitree's policy falls from its left well under 100 N.</p>
 
 ${kiroReflexSection(d)}
 <h2 id="benchmark">The falsifier benchmark</h2>
-<p><b>Result: on these G1 lines, guided search found counterexamples no more often and no sooner than random sampling.</b> Both arms ran the same 4 lines that are written to break, with the same 20 search seeds, at budget ${d.falsifier.meta.budget}.</p>
+<p><b>Result: on these G1 lines, guided search found counterexamples no more often and no sooner than random sampling.</b> Both arms ran the same 4 lines that were marked to break at the time (1.2, 1.3, 4.2, 6.2; 1.3 became Expected_Hold on 2026-11-20, after Kiro's reflex), with the same 20 search seeds, at budget ${d.falsifier.meta.budget}.</p>
 <h3>Round 1: the fall margin was flat</h3>
 <p>A fall scored a fixed −0.01 m, so guided search had no slope to follow.</p>
 ${roundTable('Round 1', d.falsifier)}
@@ -120,6 +123,10 @@ ${needleFlat ? `<p>The flat-margin row is the defect that round 1 hit on the G1:
 
 <h2 id="agent-gate">Does the Stop gate stop false "done" claims?</h2>
 ${agentGateSection(d)}
+
+<h2 id="prior-art">Prior art, and what GOLEM adds</h2>
+<p>None of the pieces is new on its own. Falsifying cyber-physical systems against temporal logic is an established field, and property-based testing gave us shrinking. What is new is the loop: the requirement is the sentence an AI agent wrote in its own spec, the test runs in the browser or in CI with no MATLAB, and the result gates the agent.</p>
+${table(['Work', 'Input', 'What it does', 'How GOLEM differs'], PRIOR_ART, { caption: 'Prior art. GOLEM adds no new falsification algorithm; its search is Latin-hypercube sampling, cross-entropy and shrinking.' })}
 
 <h2 id="methods">Methods</h2>
 <ul>
