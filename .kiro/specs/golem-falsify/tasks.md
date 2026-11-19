@@ -196,7 +196,7 @@ Test rules for every task (`testing.md`):
   - [x] 13.9 Write property test for progress events
     - **Property 26: Progress events**
     - **Validates: Requirements 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 9.7, 9.8, 9.9, 9.11**
-  - [~] 13.10 Write property test for result forwarding
+  - [x] 13.10 Write property test for result forwarding
     - **Property 27: Result forwarding**
     - **Validates: Requirements 9.12, 9.13**
   - [x] 13.11 Write property test for the random-only Phase 1 prefix
@@ -217,44 +217,44 @@ Test rules for every task (`testing.md`):
     - Write example tests for each script action and for detached buffers after transfer.
     - _Requirements: 20.6, 20.7, 21.14, 21.15_
 
-- [ ] 15. TrialScheduler
-  - [~] 15.1 Implement scheduler core: dispatch, ordering, results, trial errors and close
+- [x] 15. TrialScheduler
+  - [x] 15.1 Implement scheduler core: dispatch, ordering, results, trial errors and close
     - Slot state machine, one in-flight job per slot, FIFO queue by run creation then input index, results in input order with `results[i].spec` equal to `specs[i]`, `onResult` once per result in completion order before `run` resolves, per-run isolation with concurrent `run` calls, `TrialError` naming app, `reqId`, seed with `cause`, `ready` promise, shared idempotent `close`, `PoolClosedError`, `CancelledError`, no `onResult` after `close` resolves, `size` validation.
     - Write example tests: empty run resolves with `[]`, trial error leaves the pool usable, `close` twice, `run` after `close`, `close` during a run.
     - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.6, 12.7, 12.8, 12.9, 12.10, 12.11, 12.12, 16.1, 16.2, 16.7_
-  - [~] 15.2 Add backpressure to the scheduler
+  - [x] 15.2 Add backpressure to the scheduler
     - Delivery bound (`deliveryBound`, default `2 * size`, integer at least 1) for `record: 'poses'`, results held while `onResult` promises are pending, dispatch resumes in the same turn that capacity frees, throwing `onResult` counts as delivered and rejects its run with `cause`, construction error naming field and value.
     - Write example tests: a slow async `onResult` never exceeds the bound, a throwing `onResult`, `deliveryBound = 0` rejected.
     - _Requirements: 16.3, 16.4, 16.5, 16.6, 16.8, 16.9_
-  - [~] 15.3 Add cancellation to the scheduler
+  - [x] 15.3 Add cancellation to the scheduler
     - `AbortSignal` in `run` options: reject with `AbortError` in the same turn, discard undispatched jobs, ignore late results, already-aborted signal dispatches nothing, queued runs keep order, `cancel` message and grace timer (`abortGraceMs`, default 2000, range 100 to 60000), terminate and replace a stuck worker without counting a restart, `size` constant once the replacement is ready, fatal failure when an abort replacement fails to load.
     - Write example tests with fake timers: grace timer replacement, late result before the timer returns the slot to idle, replacement load failure rejects later runs with the message.
     - _Requirements: 17.1, 17.2, 17.3, 17.4, 17.5, 17.8, 17.9, 17.10, 17.11, 17.12_
-  - [~] 15.4 Add crash recovery and load failure handling to the scheduler
+  - [x] 15.4 Add crash recovery and load failure handling to the scheduler
     - Replace a crashed worker in the same slot, requeue its job at the front once, reject with `TrialCrashError` on the second crash, `maxRestarts` per slot (default 5) with reset on a completed trial, `RestartLimitError` naming the slot and last message, load failure at startup failing the scheduler with `LoadError`, crash replacement load failure counted as a restart, stale messages from terminated workers ignored, `size` constant.
     - Write example tests: one crash then success with an identical spec, two crashes reject only that run, restart limit exceeded then `close` still resolves, load failure of the first worker.
     - _Requirements: 14.4, 14.7, 15.10, 15.11, 15.12, 18.1, 18.2, 18.3, 18.4, 18.5, 18.6, 18.7, 18.8_
-  - [~] 15.5 Write property test for run ordering across concurrent calls
+  - [x] 15.5 Write property test for run ordering across concurrent calls
     - **Property 34: Run ordering across concurrent calls**
     - **Validates: Requirements 16.7, 18.2**
-  - [~] 15.6 Write property test for close semantics
+  - [x] 15.6 Write property test for close semantics
     - **Property 38: Close semantics**
     - **Validates: Requirements 12.6, 12.7, 12.8, 12.9, 16.9**
-  - [~] 15.7 Write property test for backpressure
+  - [x] 15.7 Write property test for backpressure
     - **Property 33: Backpressure**
     - **Validates: Requirements 16.1, 16.2, 16.3, 16.4, 16.5**
-  - [~] 15.8 Write property test for abort leaving the pool reusable
+  - [x] 15.8 Write property test for abort leaving the pool reusable
     - **Property 35: Abort leaves pool reusable and database unchanged** (pool part: `AbortError`, no `onResult` after abort, queued run still resolves, later run equals a fresh pool, for the scheduler with `FakeWorker` and for `InProcessPool`)
     - **Validates: Requirements 13.4, 13.5, 13.6, 17.2, 17.3, 17.4, 17.5, 17.8, 17.9**
-  - [~] 15.9 Write property test for crash retry
+  - [x] 15.9 Write property test for crash retry
     - **Property 36: Crash retry once, then error**
     - **Validates: Requirements 18.1, 18.2, 18.3, 18.7**
-  - [~] 15.10 Write property test for the restart limit
+  - [x] 15.10 Write property test for the restart limit
     - **Property 37: Restart limit and reset**
     - **Validates: Requirements 18.4, 18.5, 18.6**
 
-- [ ] 16. In-process pool
-  - [~] 16.1 Implement `InProcessPool`
+- [x] 16. In-process pool
+  - [x] 16.1 Implement `InProcessPool`
     - `size = 1`, sequential in input order, yields to the macrotask queue between trials so a timer-fired abort is seen, abort check before each trial, `TrialError` naming app, `reqId`, scenario and seed with `cause`, no later trial and no `onResult` for the failed trial, usable afterwards, no Worker and no `Math.random()`.
     - Write example tests: already-aborted signal runs nothing, abort from a timer mid-run, throwing trial, results equal the injected function's output, closed pool rejects.
     - _Requirements: 12.1, 12.13, 13.1, 13.2, 13.3, 13.4, 13.5, 13.6, 13.7, 13.8, 13.9, 17.13_
