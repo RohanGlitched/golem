@@ -19,7 +19,9 @@ describe('Property 10: guard ignores everything except the payload (latency)', (
         const r = runs[0] as (typeof runs)[number];
         expect(runs.every((x) => x.code === guard.decide(p).code)).toBe(true);
         expect(Math.min(...runs.map((x) => x.ms))).toBeLessThan(500);
-        if (r.code === 2) expect(r.stderr.trim()).toBe(guard.BLOCK_MESSAGE);
+        // A blocked call prints the message decide gives: the requirements block, or the fail-closed message for a payload it
+        // cannot read (golem-gate-hardening made the guard fail closed on 'not json').
+        if (r.code === 2) expect(r.stderr.trim()).toBe((guard.decide(p).stderr ?? '').trim());
       }
     }
   }, 30000);
