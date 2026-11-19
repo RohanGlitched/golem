@@ -37,6 +37,43 @@ describe('planCells and cellScenario', () => {
   });
 });
 
+describe('cellScenario with --dir-offset and --seed-base', () => {
+  const grid = { dirs: 36, phases: 5 };
+  const cell = fc.record({ dirIndex: fc.integer({ min: 0, max: 35 }), phaseIndex: fc.integer({ min: 0, max: 4 }), seedIndex: fc.integer({ min: 0, max: 2 }) });
+
+  it('is unchanged when neither is given or both are zero and 1000 (property)', () => {
+    fc.assert(fc.property(cell, (c) => {
+      const base = cellScenario(c, grid);
+      expect(cellScenario(c, { ...grid, dirOffset: 0, seedBase: 1000 })).toEqual(base);
+      expect(base.seed).toBe(1000 + c.seedIndex);
+    }));
+  });
+
+  it('shifts every direction by the offset, modulo 360, and keeps the angle equal to the direction in radians (property)', () => {
+    fc.assert(fc.property(cell, fc.double({ min: -720, max: 720, noNaN: true }), (c, off) => {
+      const s = cellScenario(c, { ...grid, dirOffset: off });
+      const want = (((10 * c.dirIndex + off) % 360) + 360) % 360;
+      expect(s.dirDeg).toBeGreaterThanOrEqual(0);
+      expect(s.dirDeg).toBeLessThan(360);
+      const d = Math.abs(s.dirDeg - want);
+      expect(Math.min(d, 360 - d)).toBeLessThan(1e-9);
+      expect(s.angle).toBeCloseTo((s.dirDeg * Math.PI) / 180, 12);
+      expect(s.angle).toBeLessThan(2 * Math.PI);
+    }));
+  });
+
+  it('puts the first seed at seedBase and the others after it', () => {
+    expect(cellScenario({ dirIndex: 0, phaseIndex: 0, seedIndex: 0 }, { ...grid, seedBase: 5000 }).seed).toBe(5000);
+    expect(cellScenario({ dirIndex: 0, phaseIndex: 0, seedIndex: 2 }, { ...grid, seedBase: 5000 }).seed).toBe(5002);
+  });
+
+  it('moves a 36-direction grid onto the midpoints with an offset of 5 deg', () => {
+    const degs = Array.from({ length: 36 }, (_v, i) => cellScenario({ dirIndex: i, phaseIndex: 0, seedIndex: 0 }, { ...grid, dirOffset: 5 }).dirDeg);
+    expect(degs[0]).toBe(5);
+    expect(degs[35]).toBe(355);
+  });
+});
+
 describe('summarizeMap on the committed run', () => {
   const rows = parseJsonl<MapRow>(readFileSync(results('g1-map.jsonl'), 'utf8'));
   const committed = JSON.parse(readFileSync(results('g1-map.summary.json'), 'utf8')) as ReturnType<typeof summarizeMap>;

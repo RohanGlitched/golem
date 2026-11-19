@@ -1,7 +1,11 @@
 // Experiment 2 pure core: bisection for the largest push that holds, the cell grid and the summary.
 export interface MapRow { dirDeg: number; phase: number; seed: number; heldN: number; brokeN: number | null; trials: number }
 
-export interface MapParams { line: string; dirs: number; phases: number; seeds: number; steps: number; fmax: number }
+/**
+ * `dirOffset` (degrees) shifts every direction by the same amount and `seedBase` is the first trial seed (default 1000), so that
+ * the map can be run again on held-out directions and seeds. Both are absent from a default run, and a default run is unchanged.
+ */
+export interface MapParams { line: string; dirs: number; phases: number; seeds: number; steps: number; fmax: number; dirOffset?: number; seedBase?: number }
 
 export interface Cell { dirIndex: number; phaseIndex: number; seedIndex: number }
 
@@ -19,10 +23,16 @@ export function planCells(p: Pick<MapParams, 'dirs' | 'phases' | 'seeds'>, dirIn
 
 export const cellKey = (r: { dirDeg: number; phase: number; seed: number }): string => `${r.dirDeg}|${r.phase}|${r.seed}`;
 
-export function cellScenario(c: Cell, p: Pick<MapParams, 'dirs' | 'phases'>): { dirDeg: number; phase: number; seed: number; angle: number } {
-  return { dirDeg: (360 * c.dirIndex) / p.dirs, phase: c.phaseIndex / p.phases, seed: BASE_SEED + c.seedIndex, angle: (2 * Math.PI * c.dirIndex) / p.dirs };
-}
+const wrap360 = (deg: number): number => ((deg % 360) + 360) % 360;
 
+export function cellScenario(c: Cell, p: Pick<MapParams, 'dirs' | 'phases'> & Partial<Pick<MapParams, 'dirOffset' | 'seedBase'>>): { dirDeg: number; phase: number; seed: number; angle: number } {
+  const offset = p.dirOffset ?? 0;
+  const seed = (p.seedBase ?? BASE_SEED) + c.seedIndex;
+  const phase = c.phaseIndex / p.phases;
+  if (offset === 0) return { dirDeg: (360 * c.dirIndex) / p.dirs, phase, seed, angle: (2 * Math.PI * c.dirIndex) / p.dirs };
+  const dirDeg = wrap360((360 * c.dirIndex) / p.dirs + offset);
+  return { dirDeg, phase, seed, angle: (dirDeg * Math.PI) / 180 };
+}
 /**
  * The largest force on [0, fmax] that holds, by `steps` bisection steps. `robustnessAt(force)` is >= 0 when the
  * requirement holds. One trial at fmax first: if it holds, the cell is `heldN = fmax` and `brokeN = null`.
