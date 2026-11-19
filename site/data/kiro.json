@@ -1,6 +1,6 @@
 {
-  "generated": "2026-11-19T16:02:15.157Z",
-  "commit": "5e41314",
+  "generated": "2026-11-19T17:39:35.613Z",
+  "commit": "bff3921",
   "workspaces": [
     {
       "path": ".kiro",
@@ -94,6 +94,17 @@
           "waves": true
         },
         {
+          "name": "golem-signature",
+          "path": ".kiro/specs/golem-signature",
+          "type": "feature",
+          "requirements": 9,
+          "earsCriteria": 33,
+          "properties": 8,
+          "tasksDone": 28,
+          "tasksOpen": 0,
+          "waves": false
+        },
+        {
           "name": "golem-sim",
           "path": ".kiro/specs/golem-sim",
           "type": "feature",
@@ -160,7 +171,26 @@
         "tech.md",
         "testing.md"
       ],
-      "hooks": [],
+      "hooks": [
+        {
+          "file": ".kiro/hooks/build.json",
+          "name": "Typecheck gate",
+          "trigger": "Stop",
+          "action": "command"
+        },
+        {
+          "file": ".kiro/hooks/build.json",
+          "name": "Unit tests for the saved engine file",
+          "trigger": "PostFileSave",
+          "action": "command"
+        },
+        {
+          "file": ".kiro/hooks/build.json",
+          "name": "Compile robot requirements",
+          "trigger": "PostFileSave",
+          "action": "command"
+        }
+      ],
       "agents": [
         {
           "name": "golem-auditor",
@@ -191,19 +221,83 @@
           "waves": false
         }
       ],
-      "steering": [],
+      "steering": [
+        "golem-ears.md"
+      ],
       "hooks": [
         {
           "file": "apps/candy/.kiro/hooks/gate.json",
           "name": "Gate the sorter",
           "trigger": "Stop",
           "action": "command"
+        },
+        {
+          "file": "apps/candy/.kiro/hooks/golem.json",
+          "name": "Check requirements on save",
+          "trigger": "PostFileSave",
+          "action": "command"
+        },
+        {
+          "file": "apps/candy/.kiro/hooks/golem.json",
+          "name": "Falsify controller on save",
+          "trigger": "PostFileSave",
+          "action": "command"
+        },
+        {
+          "file": "apps/candy/.kiro/hooks/golem.json",
+          "name": "Gate the agent",
+          "trigger": "Stop",
+          "action": "command"
+        },
+        {
+          "file": "apps/candy/.kiro/hooks/golem.json",
+          "name": "Test after spec task",
+          "trigger": "PostTaskExec",
+          "action": "command"
+        },
+        {
+          "file": "apps/candy/.kiro/hooks/golem.json",
+          "name": "Summon the ghosts",
+          "trigger": "Manual",
+          "action": "command"
         }
       ],
-      "agents": [],
-      "mcp": [],
-      "skills": [],
-      "workflows": []
+      "agents": [
+        {
+          "name": "golem-scribe",
+          "file": "apps/candy/.kiro/agents/golem-scribe.json",
+          "hooks": 0,
+          "mcp": [
+            "golem"
+          ]
+        },
+        {
+          "name": "golem-skeptic",
+          "file": "apps/candy/.kiro/agents/golem-skeptic.json",
+          "hooks": 0,
+          "mcp": [
+            "golem"
+          ]
+        },
+        {
+          "name": "golem-tuner",
+          "file": "apps/candy/.kiro/agents/golem-tuner.json",
+          "hooks": 2,
+          "mcp": [
+            "golem"
+          ]
+        }
+      ],
+      "mcp": [
+        "golem"
+      ],
+      "skills": [
+        "falsify-and-fix",
+        "robot-ears"
+      ],
+      "workflows": [
+        "falsify-and-fix.workflow.json"
+      ]
     },
     {
       "path": "apps/stagger/.kiro",
@@ -294,20 +388,24 @@
     }
   ],
   "commits": {
-    "total": 199,
+    "total": 234,
     "byPrefix": {
-      "golem-site": 4,
-      "other": 18,
-      "evidence": 2,
+      "site": 3,
+      "merge": 16,
+      "golem-kit": 12,
+      "evidence": 5,
+      "stagger": 4,
+      "docs": 1,
+      "other": 21,
+      "candy-app": 26,
+      "studio": 2,
+      "golem-site": 5,
+      "golem-signature": 5,
       "infra": 1,
       "stage-look": 4,
-      "stagger": 2,
       "golem-evidence": 7,
-      "merge": 11,
       "integration": 4,
-      "candy-app": 18,
       "golem-falsify-hardening": 17,
-      "golem-kit": 10,
       "golem-ears-hardening": 21,
       "golem-studio-ui": 18,
       "golem-sim-hardening": 16,
@@ -318,19 +416,19 @@
     }
   },
   "tests": {
-    "files": 368,
-    "propertyAsserts": 461
+    "files": 383,
+    "propertyAsserts": 485
   },
   "totals": {
-    "specs": 15,
+    "specs": 16,
     "bugfixSpecs": 3,
-    "requirements": 224,
-    "earsCriteria": 2273,
-    "properties": 293,
-    "tasksDone": 663,
-    "steering": 10,
-    "hooks": 6,
-    "agents": 4,
-    "skills": 2
+    "requirements": 233,
+    "earsCriteria": 2306,
+    "properties": 301,
+    "tasksDone": 691,
+    "steering": 11,
+    "hooks": 14,
+    "agents": 7,
+    "skills": 4
   }
 }
