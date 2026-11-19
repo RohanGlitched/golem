@@ -164,26 +164,26 @@ Conventions for every task:
     - **Property 28: Aura summary names the weakest direction**
     - **Validates: Requirements 14.7, 14.8, 14.9, 14.12**
 
-- [ ] 4. Ghost state and push arrow maths
-  - [ ] 4.1 Implement `ghosts/ghost-state.ts`
+- [x] 4. Ghost state and push arrow maths
+  - [x] 4.1 Implement `ghosts/ghost-state.ts`
     - Constants `SUMMON_S`, `FADE_S`, `RETIRE_S`, `OPACITY_RUNNING`, `OPACITY_SURVIVOR`, and `evalGhost` writing into a reused struct (frame index, alpha, `breakMix`, opacity, rise, hidden), including Reduced_Motion steps and `-Infinity` robustness.
     - Example tests: survivor opacity is below running opacity, reduced motion has zero rise and a step fade.
     - _Requirements: 10.5, 10.6, 10.7, 11.1, 11.2, 11.3, 11.4, 11.5, 11.6, 11.7, 11.8, 11.9_
 
-  - [ ] 4.2 Write property test for the break state
+  - [x] 4.2 Write property test for the break state
     - **Property 15: Break state if and only if robustness is below zero**
     - **Validates: Requirements 11.1, 11.3, 11.8, 11.9**
 
-  - [ ]* 4.3 Write property test for break fade and summon bounds
+  - [x]* 4.3 Write property test for break fade and summon bounds
     - **Property 16: Break fade and summon bounds**
     - **Validates: Requirements 11.2, 11.4, 11.5, 11.6, 11.7**
 
-  - [ ] 4.4 Implement `ghosts/push-arrow.ts`
+  - [x] 4.4 Implement `ghosts/push-arrow.ts`
     - `resolveArrow` from `PerturbationCall`, template `visual` and scenario (string params look up dimension names), length `clamp(0.3·|F|/100, 0.05, 0.9)`, no arrow for a zero force or a missing `visual`.
     - Example tests: missing `visual` gives no arrow, a 100 N force gives 0.3 m.
     - _Requirements: 12.1, 12.2, 12.3, 12.7, 12.8_
 
-  - [ ]* 4.5 Write property test for push arrow direction and length
+  - [x]* 4.5 Write property test for push arrow direction and length
     - **Property 23: Push arrow direction and length**
     - **Validates: Requirements 12.1, 12.2, 12.3, 12.7, 12.8**
 
