@@ -410,6 +410,16 @@ This revision follows the current requirements and design:
     - Test in-process with a fixture pack: the guard is copied to `.kiro/hooks/golem-guard-requirements.mjs` byte-identical, the steering file is copied byte-identical, the placeholder config passes the field checks of Requirement 1.4.
     - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.5, 9.6, 9.10, 9.13, 9.16, 16.5, 22.4, 22.5, 28.22_
 
+  - [x] 8.20 Add the starter robot to `golem init`
+    - Ship `skeleton/starter/` (`app.js`, `robot/scene.xml`, `requirements.md`, `README.md`) in the package `files`. Extend `skeleton/src/cli/init.ts` (`STARTER_FILES`, `STARTER_CONFIG`, `starterBlocker`, `starterWritten`) so `buildPlan` takes `starterRoot` and plans four `starter` entries before the config, and `executePlan` prints `wrote app.js (starter cart-pole robot)`, `skipped starter robot (<reason>)` and `wrote golem.config.json (replaced the empty placeholder)`. Add `--no-starter` to `args.ts` and `commands/init.ts`, which ends with `next: npx --no-install golem-spec check` when `app.js` was written.
+    - Test in `skeleton/src/cli/__tests__/init-starter.test.ts` on a memory project: starter written in an empty project, no starter when the config names an app that exists, never overwrites `app.js`, `robot/`, the cartpole spec or `README.md`, `--force` leaves a working config alone, `--no-starter`, placeholder replaced, second run skips, unreadable starter file exits 1 with nothing written, symlinked specs directory refused.
+    - _Requirements: 9.2, 9.3, 9.4, 9.6, 9.8, 9.17, 9.19, 9.20, 9.21, 9.22, 9.23, 9.24, 9.25_
+
+  - [x] 8.21 Load ES module apps in CommonJS packages and test the starter end to end
+    - In `skeleton/src/cli/adapters/app-loader.ts` import a self-contained ES module `.js` app from a package without `"type": "module"` through a cached `.mjs` copy (`import.meta.url` rewritten to the original file) and fail with a message that asks for `"type": "module"` when the module also has relative imports. Test in `app-loader.test.ts`.
+    - Add `skeleton/test/starter.app.test.ts` (signals, controller, lexicon phrases) and `skeleton/test/starter.e2e.test.ts` (built CLI in an empty CommonJS project: `init`, `check` prints `3 requirements compiled, 0 warnings`, `falsify 1.2` breaks and pins a seed between 10 N and 20 N, `falsify 1.1` holds, a second `init` changes nothing).
+    - _Requirements: 9.18, 9.26, 28.27_
+
 - [x] 9. MCP server and tools
   - [x] 9.1 Implement the server factory and the in-memory test harness
     - Create `skeleton/src/mcp/server.ts` with `McpAppContext`, `ToolDef`, `ToolCtx`, `createGolemServer` (low-level `Server`, `ListTools` and `CallTool` handlers, schema validation, lazy pool with retry, logs on stderr only, default registry that loads the eight `tools/*.ts` modules by name, each exporting `tool: ToolDef`) and `runStdioServer` (closes the pool when stdin closes).
@@ -1042,8 +1052,8 @@ Edges show direct dependencies after transitive reduction. The table lists every
 | 2 | 2.2 (after 2.1); 2.3 (after 2.1); 2.4 (after 1.2); 2.9 (after 2.8); 2.11 (after 2.10); 2.13 (after 2.12); 3.2 (after 3.1); 3.3 (after 3.1); 3.5 (after 3.4); 3.6 (after 3.4); 3.7 (after 3.4); 3.9 (after 3.8); 3.10 (after 3.8); 3.11 (after 3.8); 3.12 (after 3.8); 3.13 (after 3.8); 3.14 (after 1.2); 4.2 (after 4.1); 4.3 (after 4.1); 4.5 (after 4.4); 4.7 (after 4.6); 4.9 (after 4.8); 4.10 (after 4.8); 5.2 (after 5.1); 5.3 (after 5.1); 6.1 (after 1.2); 6.2 (after 1.2 4.8); 6.3 (after 1.2); 11.2 (after 1.2 11.1); 11.6 (after 1.2); 11.10 (after 11.9); 11.11 (after 11.9); 11.12 (after 11.9); 11.13 (after 1.1 11.9); 12.3 (after 12.1 12.2); 12.4 (after 12.1 12.2) |
 | 3 | 2.5 (after 2.4); 2.6 (after 2.4); 2.7 (after 2.4); 3.15 (after 3.14); 4.11 (after 1.2 3.14); 8.1 (after 1.2 2.4 3.1 3.4 3.14 6.3); 8.4 (after 1.2 2.1 2.4); 8.14 (after 1.2 2.4 3.14); 9.1 (after 1.2 2.4 3.14 4.1 4.4 4.6); 11.3 (after 11.2); 11.4 (after 11.1 11.2); 11.14 (after 1.2 11.9 11.13) |
 | 4 | 4.12 (after 4.11); 8.2 (after 8.1); 8.3 (after 8.1); 8.5 (after 8.1 8.4 3.4); 8.6 (after 8.1 8.4 3.1 3.4 3.14); 8.8 (after 8.1 8.4 3.4); 8.9 (after 8.1 8.4 2.8 2.10 2.12 3.14 6.1 6.3); 8.10 (after 8.1 8.4 3.1 3.4 3.14); 8.11 (after 8.1 8.4 3.1 3.4 3.8 3.14); 8.15 (after 8.14); 8.16 (after 8.14); 8.17 (after 8.14); 8.18 (after 8.14); 8.19 (after 8.4 8.14); 9.2 (after 9.1 8.1 3.14); 9.3 (after 9.1 8.1 4.6); 9.6 (after 9.1 8.1 2.8 2.12 4.8 6.1 6.2 6.3); 9.7 (after 9.1 8.1 4.11); 9.10 (after 9.1 8.4 2.4); 11.15 (after 11.14) |
-| 5 | 8.7 (after 8.6); 8.12 (after 8.11); 8.13 (after 8.6 8.8 8.10); 9.4 (after 9.3); 9.5 (after 9.3); 9.8 (after 9.7); 9.9 (after 9.2 9.3 9.6 9.7); 11.16 (after 11.9 11.15); 11.17 (after 8.19 11.2 11.5 11.6 11.7 11.8 11.15); 12.6 (after 11.5 11.6 11.15 12.1 12.5); 13.4 (after 6.1 8.11 11.2 11.8 11.15 12.1 12.5); 7 (after 1.1 1.2 2.1 2.2 2.3 2.4 2.5 2.6 2.7 2.8 2.9 2.10 2.11 2.12 2.13 3.1 3.2 3.3 3.4 3.5 3.6 3.7 3.8 3.9 3.10 3.11 3.12 3.13 3.14 3.15 4.1 4.2 4.3 4.4 4.5 4.6 4.7 4.8 4.9 4.10 4.11 4.12 5.1 5.2 5.3 6.1 6.2 6.3) |
-| 6 | 12.7 (after 12.6); 12.8 (after 12.1 12.5 12.6); 13.3 (after 8.5 8.6 8.8 8.9 8.10 8.11 8.19 9.9 9.10); 14.1 (after 8.5 8.6 8.9 8.10 8.11 8.19 11.17); 14.2 (after 9.9 11.17); 10 (after 8.1 8.2 8.3 8.4 8.5 8.6 8.7 8.8 8.9 8.10 8.11 8.12 8.13 8.14 8.15 8.16 8.17 8.18 8.19 9.1 9.2 9.3 9.4 9.5 9.6 9.7 9.8 9.9 9.10) |
+| 5 | 8.7 (after 8.6); 8.12 (after 8.11); 8.13 (after 8.6 8.8 8.10); 8.20 (after 8.14 8.19); 8.21 (after 8.20); 9.4 (after 9.3); 9.5 (after 9.3); 9.8 (after 9.7); 9.9 (after 9.2 9.3 9.6 9.7); 11.16 (after 11.9 11.15); 11.17 (after 8.19 11.2 11.5 11.6 11.7 11.8 11.15); 12.6 (after 11.5 11.6 11.15 12.1 12.5); 13.4 (after 6.1 8.11 11.2 11.8 11.15 12.1 12.5); 7 (after 1.1 1.2 2.1 2.2 2.3 2.4 2.5 2.6 2.7 2.8 2.9 2.10 2.11 2.12 2.13 3.1 3.2 3.3 3.4 3.5 3.6 3.7 3.8 3.9 3.10 3.11 3.12 3.13 3.14 3.15 4.1 4.2 4.3 4.4 4.5 4.6 4.7 4.8 4.9 4.10 4.11 4.12 5.1 5.2 5.3 6.1 6.2 6.3) |
+| 6 | 8.21 (after 8.20); 12.7 (after 12.6); 12.8 (after 12.1 12.5 12.6); 13.3 (after 8.5 8.6 8.8 8.9 8.10 8.11 8.19 9.9 9.10); 14.1 (after 8.5 8.6 8.9 8.10 8.11 8.19 11.17); 14.2 (after 9.9 11.17); 10 (after 8.1 8.2 8.3 8.4 8.5 8.6 8.7 8.8 8.9 8.10 8.11 8.12 8.13 8.14 8.15 8.16 8.17 8.18 8.19 9.1 9.2 9.3 9.4 9.5 9.6 9.7 9.8 9.9 9.10) |
 | 7 | 15 (after 10 11.1 11.2 11.3 11.4 11.5 11.6 11.7 11.8 11.9 11.10 11.11 11.12 11.13 11.14 11.15 11.16 11.17 12.1 12.2 12.3 12.4 12.5 12.6 12.7 12.8 13.1 13.2 13.3 13.4 14.1 14.2) |
 
 ```json
@@ -1054,8 +1064,8 @@ Edges show direct dependencies after transitive reduction. The table lists every
     { "id": 2, "tasks": ["2.2", "2.3", "2.4", "2.9", "2.11", "2.13", "3.2", "3.3", "3.5", "3.6", "3.7", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14", "4.2", "4.3", "4.5", "4.7", "4.9", "4.10", "5.2", "5.3", "6.1", "6.2", "6.3", "11.2", "11.6", "11.10", "11.11", "11.12", "11.13", "12.3", "12.4"] },
     { "id": 3, "tasks": ["2.5", "2.6", "2.7", "3.15", "4.11", "8.1", "8.4", "8.14", "9.1", "11.3", "11.4", "11.14"] },
     { "id": 4, "tasks": ["4.12", "8.2", "8.3", "8.5", "8.6", "8.8", "8.9", "8.10", "8.11", "8.15", "8.16", "8.17", "8.18", "8.19", "9.2", "9.3", "9.6", "9.7", "9.10", "11.15"] },
-    { "id": 5, "tasks": ["8.7", "8.12", "8.13", "9.4", "9.5", "9.8", "9.9", "11.16", "11.17", "12.6", "13.4", "7"] },
-    { "id": 6, "tasks": ["12.7", "12.8", "13.3", "14.1", "14.2", "10"] },
+    { "id": 5, "tasks": ["8.7", "8.12", "8.13", "8.20", "9.4", "9.5", "9.8", "9.9", "11.16", "11.17", "12.6", "13.4", "7"] },
+    { "id": 6, "tasks": ["8.21", "12.7", "12.8", "13.3", "14.1", "14.2", "10"] },
     { "id": 7, "tasks": ["15"] }
   ]
 }

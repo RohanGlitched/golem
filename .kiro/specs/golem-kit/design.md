@@ -25,7 +25,7 @@ The loop it supports: a controller file is saved, a hook runs `golem test`, a co
 | D5 | MCP uses the low-level `Server` of `@modelcontextprotocol/sdk` with hand-written JSON-schema `inputSchema`s and a 60-line validator. No `zod` import. | Requirement 27.4 allows no runtime dependency beyond the SDK and `tech.md`. Our validator also produces the "names the invalid field" messages that 11.9 needs. | 11.9, 27.4 |
 | D6 | The CLI and the MCP server share one `RunService` (compile, pool, falsify, pin, report). The CLI wraps it with printing and exit codes. The MCP wraps it with queue, time cap and Tool_Result. | One code path means one set of determinism guarantees. | 4, 5, 12, 27.2 |
 | D7 | Replay needs the trace, which `TrialResult` does not carry. The kit asks for it through `KitDeps.runTraced`, backed by the approved optional trace exposure of `golem-sim`. | Keeps `interfaces.md` untouched. | 6.3, 6.4, 13, 27.7 |
-| D8 | `init` computes a `WritePlan` first and executes it second. Every write is temp file plus rename. | Idempotence and containment are properties of the pure plan. A failure stops before the next file. | 9 |
+| D8 | `init` computes a `WritePlan` first and executes it second. Every write is temp file plus rename. | Idempotence and containment are properties of the pure plan. A failure stops before the next file. The starter robot is part of the same plan. | 9 |
 | D9 | Agent files go through a pipeline: committed V2 source templates, `kiro-cli agent upgrade <dir>`, a deterministic `finalizeAgent` step that appends the Deny_Rule (with `exclude`) that V2 cannot express, then `kiro-cli agent validate`. The committed result is the finalized universal file. | The upgrade turns V2 `toolsSettings` into V3 `permissions.rules`, but V2 has no way to say "deny everything except these paths". Verified on `kiro-cli` 3.5.0 (see X5). | 19.2, 20.1, 20.6, 21 |
 | D10 | `golem gate` has two output protocols chosen by `--kiro`. With it, every outcome exits 0 and the block is carried by stdout JSON. Without it, a red gate exits 2. One pure function `gateExitCode(verdicts, kiro, startError)` holds the mapping. Under `--kiro`, a compile error in a Requirements_File is a Red_Gate that the counter counts, with a block output that lists the Diagnostics. Only a usage or Config_File error exits 1. | Kiro's Stop contract needs exit 0 with JSON. CI and the repair workflow need a non-zero code. A broken spec must not let the agent stop. | 7.11, 8.1, 8.9, 8.22 |
 
@@ -370,7 +370,7 @@ Per-command flags:
 | `falsify` | `<reqId>` required | `--budget`, `--time`, `--workers`, `--search-seed` |
 | `replay` | `<reqId>` required | `--seed` posint |
 | `gate` | none | `--kiro` bool, `--budget`, `--time`, `--workers`, `--search-seed` |
-| `init` | `[dir]` | `--force` bool |
+| `init` | `[dir]` | `--force` bool, `--no-starter` bool |
 | `mcp` | none | none |
 
 Parser rules (Requirement 2): a `bool` flag takes no value; a value flag takes the next argument or the text after the first `=`; a missing or empty value fails naming the flag (2.9); an unknown flag lists every accepted flag (2.2); a numeric flag that is not positive, finite and decimal fails naming flag and value as written (2.3); a missing required positional prints the usage line (2.4); everything after the first `--` is positional and the `--` is dropped (2.5); repeated flags and extra positionals fail naming the flag or first extra argument (2.11); an unknown or missing command lists the valid names (2.10). Global flags are accepted before or after the command name (1.7). `--help` returns `{ help: true }` before any other check except syntax errors. A parse failure prints on stderr, returns 1 and starts no simulation (2.8).
@@ -563,11 +563,16 @@ declare const handlers: Record<CommandName, CommandHandler>;
 ```ts
 interface PackManifest { files: { rel: string; sha256: string; kind: 'copy' | 'merge-mcp' }[] }   // rel is relative to kiro-pack and to .kiro/; agent-src/ is not listed
 type PlanAction = 'write' | 'skip' | 'merge';
-interface PlanEntry { rel: string; target: string; kind: 'copy' | 'merge-mcp' | 'config'; action: PlanAction; reason?: string }
-interface WritePlan { targetDir: string; entries: PlanEntry[] }
+interface PlanEntry {
+  rel: string; target: string; kind: 'copy' | 'merge-mcp' | 'config' | 'starter'; action: PlanAction; reason?: string;
+  src?: string;                          // starter entries: path under the starter root
+  config?: 'placeholder' | 'starter';    // config entry: which text to write
+  note?: string;                         // printed after the path, e.g. 'starter cart-pole robot'
+}
+interface WritePlan { targetDir: string; entries: PlanEntry[]; starter?: { root: string; skipped?: string } }
 
 declare function readManifest(fs: KitFs, packRoot: string): Promise<PackManifest>;                // throws PackError naming packRoot (9.15)
-declare function buildPlan(fs: KitFs, targetDir: string, m: PackManifest, o: { force: boolean }): Promise<WritePlan>;
+declare function buildPlan(fs: KitFs, targetDir: string, m: PackManifest, o: { force: boolean; starterRoot?: string }): Promise<WritePlan>;
 declare function executePlan(fs: KitFs, plan: WritePlan, packRoot: string, o: { force: boolean }, say: (line: string) => void): Promise<void>;
 declare function mergeMcpSettings(existing: string | undefined, template: string, force: boolean):
   { text: string; outcome: 'created' | 'added' | 'kept' | 'replaced' };      // A9, A10: throws on invalid JSON
@@ -578,7 +583,11 @@ declare function containedIn(realTarget: string, realCandidate: string): boolean
 
 `mergeMcpSettings` rules: no existing text gives the template (`created`); an existing file without `golem` gets the template entry (`added`); an existing `golem` entry is left unchanged without `force` (`kept`); with `force`, only `mcpServers.golem` is replaced by the template entry (`replaced`). Every other `mcpServers` entry and every other top-level field is preserved (9.4, 22.5). Output is re-serialised with 2 spaces and a trailing newline, and a second merge returns the same text.
 
-`executePlan` runs entries in manifest order through `atomicWriteFile`, prints `wrote <rel>` or `skipped <rel> (exists)` (with `/` separators, relative to `targetDir`), copies bytes unchanged (9.11), sets no executable bit (9.9), and on the first failure removes its temp file, leaves the old target as it was, prints the failing path and stops (9.14). For the `merge` entry it also prints one line `merged settings/mcp.json: golem entry <added|kept|replaced>` (22.5). A `kept` merge prints `skipped settings/mcp.json (exists)` and writes nothing, so a second run prints one skipped line per file (9.6). The guard `hooks/golem-guard-requirements.mjs` is an ordinary `copy` entry (9.16). The config placeholder is `{ app: "./app.js", requirements: [".kiro/specs/robot/requirements.md"] }` (9.2), which passes the field checks of 1.4.
+`executePlan` runs entries in manifest order through `atomicWriteFile`, prints `wrote <rel>` or `skipped <rel> (exists)` (with `/` separators, relative to `targetDir`), copies bytes unchanged (9.11), sets no executable bit (9.9), and on the first failure removes its temp file, leaves the old target as it was, prints the failing path and stops (9.14). For the `merge` entry it also prints one line `merged settings/mcp.json: golem entry <added|kept|replaced>` (22.5). A `kept` merge prints `skipped settings/mcp.json (exists)` and writes nothing, so a second run prints one skipped line per file (9.6). The guard `hooks/golem-guard-requirements.mjs` is an ordinary `copy` entry (9.16). The placeholder config is `{ app: "./app.js", requirements: [".kiro/specs/robot/requirements.md"] }` (9.2), which passes the field checks of 1.4.
+
+**Starter robot (9.17 to 9.26).** `buildPlan` takes `starterRoot` (the package's `starter/`, absent with `--no-starter` or when the package has none). `starterBlocker` is read-only and returns why the starter must stand down: the config exists and is not the placeholder (`golem.config.json names an app that exists` when its `app` file exists, else `golem.config.json exists`), or `app.js`, `robot/scene.xml` or `.kiro/specs/cartpole/requirements.md` exists (`<path> exists`), or `robot/` exists (`robot/ exists`). `README.md` is the one starter file that may already exist: it is skipped and the rest is written. When there is no blocker, the plan holds four `starter` entries, in the order `app.js`, `robot/scene.xml`, `.kiro/specs/cartpole/requirements.md`, `README.md`, before the config entry, each checked for containment like a pack file. A `starter` entry is never `write` over an existing file, whatever `--force` says. The config entry then carries `config: 'starter'` (`STARTER_CONFIG`: `app` `./app.js`, `requirements` `[".kiro/specs/cartpole/requirements.md"]`, `robot` `cartpole`, `signalUnits` `{ pole_angle: "rad", cart_x: "m" }`); an existing placeholder config is replaced and noted `replaced the empty placeholder` (9.23). When the starter stands down, an existing config that names an app that exists stays even under `--force` and prints `skipped golem.config.json (names an app that exists)` (9.22). `executePlan` reads every pack and starter file before writing, so an unreadable starter file exits 1 with the starter path named and nothing written (9.25). It prints `wrote app.js (starter cart-pole robot)`, `skipped starter robot (<reason>)` when the plan carries a blocker, and `golem init` ends with `next: npx --no-install golem-spec check` only when `app.js` was written (9.24).
+
+The app loader (`cli/adapters/app-loader.ts`) imports a `.js` ES module app from a package without `"type": "module"` through a cached `app-<hash>.mjs` copy whose `import.meta.url` is rewritten to the original file URL, so `./robot/scene.xml` still resolves. A module that uses ES syntax and relative imports fails with a message that asks for `"type": "module"` (9.26). The starter ships in the package (`skeleton/starter/`, listed in `files`).
 
 ## MCP server
 
@@ -1314,6 +1323,8 @@ skeleton/src/cli/__tests__/
   service.test.ts         Properties 18, 22, 23
   gate-kiro.test.ts       Property 19 (scripted verdicts through main)
   init.test.ts            Properties 26, 27, 28, 29 and example runs
+  init-starter.test.ts    starter robot rules of 9.17 to 9.25 on a memory project
+  app-loader.test.ts      ES module app in a CommonJS package (9.26)
   commands.test.ts        in-process main() examples: exit codes of check, test, falsify, replay, gate, gate --kiro
   determinism.test.ts     Property 40
 skeleton/src/mcp/__tests__/
@@ -1331,6 +1342,8 @@ skeleton/test/
   agents.test.ts          Properties 43, 44, 45, 46, build-script examples (fake runner)
   pack.test.ts            JSON validity of every shipped file, steering and skill content, workflow shape pin
   power.test.ts           Properties 47, 48, 49, no scripts, no executable bit
+  starter.app.test.ts     the starter app: signals, controller, lexicon phrases
+  starter.e2e.test.ts     init, check and falsify through the built CLI in a CommonJS project (skips without dist)
   crew.test.ts            app.json against the documented manifest fields, cron fixes hour and minute, icon and screenshot sizes, README names the doc pages
   scans.test.ts           no `Math.random` in cli and mcp sources, no network, only SDK and tech.md dependencies
   kiro-cli.test.ts        runs `kiro-cli agent validate --path` on each agent and a second `kiro-cli agent upgrade` on a temp copy when installed; otherwise one skip line naming kiro-cli
@@ -1364,7 +1377,7 @@ skeleton/test/
 | 6 `golem replay` | `commands/replay.ts`, `replay-target.ts`, `studio-url.ts`, `csv.ts`, `KitDeps.runTraced` | Properties 6, 7, 8; examples |
 | 7 `golem gate` | `commands/gate.ts`, `applyPinnedRule`, `gateExitCode`, `gateBlock` | Properties 16, 18, 19, 22, 23, 24; examples |
 | 8 `golem gate --kiro` | `gate-counter.ts`, `store.ts` gate state, `buildReason`, `HookExit` | Properties 11, 12, 13, 14, 15, 16, 19, 20, 21; examples |
-| 9 `golem init` | `init.ts`, `kiro-pack/manifest.json`, `config.formatConfig` | Properties 3, 26, 27, 28, 29 |
+| 9 `golem init` | `init.ts`, `starter/`, `adapters/app-loader.ts`, `kiro-pack/manifest.json`, `config.formatConfig` | Properties 3, 26, 27, 28, 29; `init-starter.test.ts`, `app-loader.test.ts`, `starter.e2e.test.ts` |
 | 10 `golem mcp` lifecycle | `server.ts`, `commands/mcp.ts` | `server.test.ts` examples; Properties 4, 22 |
 | 11 MCP listing and checking | `tools/list.ts`, `check.ts`, `counterexample.ts`, `schema.ts` | Property 30; examples |
 | 12 MCP running | `tools/run.ts`, `falsify.ts`, `cap.ts`, `queue.ts` | Properties 23, 33, 34, 35 |
