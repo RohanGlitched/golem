@@ -59,18 +59,18 @@ Rules that apply to every task:
     - Example tests with real MuJoCo: the first load resolves in 2 s or less and exposes `MjModel`, `MjData`, `mj_step`, `mj_name2id`, `mj_geomDistance`, `DoubleBuffer` and `FS`. A second call returns the same object in 10 ms or less.
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 1.10_
 
-- [ ] 5. File writer
-  - [~] 5.1 Implement `file-writer.ts` (`validateRobotPaths`, `writeRobotFiles`)
+- [x] 5. File writer
+  - [x] 5.1 Implement `file-writer.ts` (`validateRobotPaths`, `writeRobotFiles`)
     - Validate every path and the scene file before the first write (all-or-nothing). Reject empty, absolute, drive-letter, backslash, `..` and empty-segment paths, a missing scene file and an empty record. Then write with `mj.FS.mkdirTree` and `mj.FS.writeFile` in record-key order, never `MjVFS.addBuffer`. Wrap FS errors with app id, path and cause.
     - Example tests (fake `Mj`): one error test per rejection case asserting the message names the path or scene file and that the FS is unchanged, `mkdirTree` throwing names app id, path and cause, a 0-byte file, a 50 MiB file, overwrite on a second call, existing directory accepted, key-order writes, and no `addBuffer` call.
     - Timing example (real `Mj`, short): 200 small files of 20 MiB or less in total finish in 500 ms or less.
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 2.10, 2.11, 2.12_
 
-  - [~] 5.2 Write property test for the file round trip
+  - [x] 5.2 Write property test for the file round trip
     - **Property 15: File round trip**
     - **Validates: Requirements 2.1, 2.3, 2.4, 2.5, 2.8, 15.7**
 
-  - [~] 5.3 Write property test for invalid paths
+  - [x] 5.3 Write property test for invalid paths
     - **Property 16: Invalid paths change nothing**
     - **Validates: Requirements 2.6, 2.7, 2.10**
 
