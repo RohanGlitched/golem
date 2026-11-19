@@ -1,0 +1,326 @@
+{
+  "pbtResults": {},
+  "executionHistory": {
+    "1.1 Create `errors.ts`, `types.ts` and shared test support": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076535545
+      },
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076561248
+      },
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076617458
+      },
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076622351
+      },
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076658695
+      }
+    ],
+    "1.2 Implement `prng.ts` (`mulberry32`)": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076535604
+      }
+    ],
+    "2.1 Implement `handles.ts`": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076535645
+      }
+    ],
+    "2.2 Write property test for the handle registry": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076535682
+      }
+    ],
+    "3.1 Create `test-fixtures.ts` with `withFakeMj()`": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076535729
+      }
+    ],
+    "4.1 Implement `loader.ts` (`loadMujoco`, `__setLoadFnForTests`)": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076535784
+      }
+    ],
+    "5.1 Implement `file-writer.ts` (`validateRobotPaths`, `writeRobotFiles`)": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076535829
+      }
+    ],
+    "5.2 Write property test for the file round trip": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076535881
+      }
+    ],
+    "5.3 Write property test for invalid paths": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076535928
+      }
+    ],
+    "6.1 Implement `model-cache.ts` (`ModelCache`)": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076535977
+      }
+    ],
+    "6.2 Write property test for the model cache": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076536026
+      }
+    ],
+    "7.1 Implement `helpers.ts` (`withDoubleBuffer`, `geomDistance`, `forEachContact`)": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076536077
+      }
+    ],
+    "7.2 Write property test for the helpers": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076536123
+      }
+    ],
+    "8.1 Implement `context.ts` (`buildContext`)": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076536175
+      }
+    ],
+    "9.1 Implement `validate.ts` (`validateTrial`, `normaliseScenario`)": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076536223
+      }
+    ],
+    "9.2 Write property test for scenario normalisation": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076536267
+      }
+    ],
+    "10.1 Implement `pose-recorder.ts` (`PoseRecorder`)": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076536312
+      }
+    ],
+    "11.1 Implement `test-app.ts` (`testApp`, `makeTestRequirement`, `makeAlwaysHook`, `makeEventuallyHook`)": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076536364
+      }
+    ],
+    "12.1 Add app wrappers to `test-fixtures.ts`": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076536412
+      }
+    ],
+    "13. Checkpoint - Building blocks complete": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076536467
+      }
+    ],
+    "14.1 Implement `episode.ts`: setup and warm-up": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076536521
+      }
+    ],
+    "14.2 Extend `episode.ts`: trigger, perturbations, sampling, monitor, result": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076536577
+      }
+    ],
+    "14.3 Extend `episode.ts`: divergence, early stop, poses": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076536630
+      }
+    ],
+    "14.4 Extend `episode.ts`: view refresh and allocation discipline": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076536670
+      }
+    ],
+    "15.1 Write property test for determinism": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076536724
+      }
+    ],
+    "15.2 Write property test for trace length": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076536774
+      }
+    ],
+    "15.3 Write property test for the exact time axis": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076536816
+      }
+    ],
+    "15.4 Write property test for the trigger event": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076536864
+      }
+    ],
+    "15.5 Write property test for warm-up isolation": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076536912
+      }
+    ],
+    "15.6 Write property test for early-stop soundness": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076536953
+      }
+    ],
+    "15.7 Write property test for perturbation call order": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076536999
+      }
+    ],
+    "15.8 Write property test for handle leaks": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076537047
+      }
+    ],
+    "15.9 Write property test for failed-trial identity": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076537089
+      }
+    ],
+    "15.10 Write property test for finite robustness unless diverged": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076537136
+      }
+    ],
+    "15.11 Write property test for the pose frame layout": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076537186
+      }
+    ],
+    "15.12 Write property test for pose-recording invariance": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076537234
+      }
+    ],
+    "15.13 Write property test for the unchanged cached model": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076537286
+      }
+    ],
+    "15.14 Write property test for PRNG and seed behaviour": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076537333
+      }
+    ],
+    "16.1 Write `errors.catalogue.test.ts`": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076537386
+      }
+    ],
+    "17.1 Wire `skeleton/src/sim/index.ts`, `skeleton/src/index.ts` and `skeleton/src/node.ts`": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076537427
+      }
+    ],
+    "18.1 Add `evidence/sim-model-load.bench.ts`": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076537475
+      }
+    ],
+    "18.2 Add `evidence/sim-cross-runtime.ts`": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076537530
+      }
+    ],
+    "19. Final checkpoint - Ensure all tests pass": [
+      {
+        "executionId": "230e1f79-9168-4b57-b172-15416cf97284",
+        "chatSessionId": "sess_1be4f21b-dc9f-42fb-9729-871c6649d675",
+        "timestamp": 1795076537582
+      }
+    ]
+  }
+}
