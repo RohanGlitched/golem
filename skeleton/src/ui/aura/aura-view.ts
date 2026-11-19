@@ -23,26 +23,47 @@ export const AURA_FRAG = /* glsl */ `
 uniform sampler2D uAura;
 uniform vec3 uHold;
 uniform vec3 uBreak;
+uniform vec3 uInk;
 uniform float uRmax;
 uniform float uOpacity;
+uniform vec2 uRefs;
 varying vec2 vLocal;
 const float TAU = 6.28318530718;
+// Circularly smoothed boundary: a 7-tap Gaussian over neighbouring bins (sigma about 1.5 bins = 15 deg).
+float boundary(float u) {
+  float w[7]; w[0] = 0.0702; w[1] = 0.1311; w[2] = 0.1907; w[3] = 0.2160; w[4] = 0.1907; w[5] = 0.1311; w[6] = 0.0702;
+  float s = 0.0, ws = 0.0;
+  for (int k = 0; k < 7; k++) {
+    float r = texture2D(uAura, vec2(u + float(k - 3) / 36.0, 0.5)).r;
+    if (r > 0.004) { s += w[k] * r; ws += w[k]; }
+  }
+  return ws > 0.0 ? s / ws : 0.0;
+}
 void main() {
   float r = length(vLocal);
   float ang = atan(vLocal.y, vLocal.x);
   float u = fract(ang / TAU);
-  vec4 t = texture2D(uAura, vec2(u, 0.5));
-  float R = t.r * uRmax;
-  if (R < 0.004) discard;
+  float own = texture2D(uAura, vec2(u, 0.5)).r;
+  float broke = texture2D(uAura, vec2(u, 0.5)).g;
+  float R = boundary(u) * uRmax;
   float px = max(fwidth(r), 1e-4);
-  float edge = 1.0 - smoothstep(R - 2.0 * px, R, r);
-  float ring = smoothstep(R - 3.0 * px, R - 2.0 * px, r) * (1.0 - smoothstep(R - px, R, r));
-  float solid = step(0.5, t.g);
-  float dash = step(0.5, fract(ang * 90.0 / TAU));
-  ring *= mix(dash, 1.0, solid);
-  float a = uOpacity * edge + 0.8 * ring;
-  if (a <= 0.002) discard;
-  gl_FragColor = vec4(uHold, a);
+  // reference rings (100 N, 200 N) as faint etched circles
+  float ref1 = uRefs.x > 0.0 ? 1.0 - smoothstep(0.0, 1.2 * px, abs(r - uRefs.x * uRmax)) : 0.0;
+  float ref2 = uRefs.y > 0.0 ? 1.0 - smoothstep(0.0, 1.2 * px, abs(r - uRefs.y * uRmax)) : 0.0;
+  float dashRef = step(0.5, fract(ang * 72.0 / TAU));
+  float refs = max(ref1, ref2) * dashRef * 0.22;
+  // the measured boundary: a crisp 2 px line, dashed where this direction has no data yet
+  float line = R > 0.004 ? 1.0 - smoothstep(0.6 * px, 1.6 * px, abs(r - R)) : 0.0;
+  line *= own > 0.004 ? 1.0 : step(0.5, fract(ang * 48.0 / TAU));
+  // the held region: a faint fill that brightens toward the boundary
+  float inside = R > 0.004 ? (1.0 - smoothstep(R - px, R, r)) * smoothstep(0.0, R, r) : 0.0;
+  vec3 col = uHold;
+  float a = uOpacity * 0.55 * inside + 0.9 * line;
+  vec3 c = col * (a > 0.0 ? 1.0 : 0.0);
+  float aa = max(a, refs);
+  if (aa <= 0.002) discard;
+  vec3 outc = a >= refs ? c : uInk;
+  gl_FragColor = vec4(outc, aa);
   #include <colorspace_fragment>
 }
 `;
@@ -100,6 +121,8 @@ export class AuraView {
         uBreak: { value: new T.Color(tokens.break) },
         uRmax: { value: AURA_RMAX },
         uOpacity: { value: AURA_OPACITY },
+        uInk: { value: new T.Color(tokens.ink) },
+        uRefs: { value: new T.Vector2(0, 0) },
       },
       transparent: true, depthWrite: false, blending: T.NormalBlending,
       polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1,
@@ -136,6 +159,8 @@ export class AuraView {
       this.tickGeo.instanceCount = 0;
     } else {
       encodeTexels(m, this.texels);
+      const refs = this.decalMat.uniforms['uRefs']!.value as THREE_NS.Vector2;
+      refs.set(m.forceMax > 100 ? 100 / m.forceMax : 0, m.forceMax > 200 ? 200 / m.forceMax : 0);
       const arr = this.tickAttr.array as Float32Array;
       const n = m.ticks.length;
       for (let i = 0; i < n; i++) {
@@ -156,6 +181,7 @@ export class AuraView {
   setTheme(tokens: TokenSet): void {
     (this.decalMat.uniforms['uHold']!.value as THREE_NS.Color).set(tokens.hold);
     (this.decalMat.uniforms['uBreak']!.value as THREE_NS.Color).set(tokens.break);
+    (this.decalMat.uniforms['uInk']!.value as THREE_NS.Color).set(tokens.ink);
     (this.tickMat.uniforms['uBreak']!.value as THREE_NS.Color).set(tokens.break);
   }
 

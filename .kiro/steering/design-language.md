@@ -38,6 +38,7 @@ Contrast: body text ≥ 7:1 on `--ground`, and `--break` / `--hold` text ≥ 4.5
 ## Layout
 - **Studio** (each app): a full-bleed stage; the tablet is a 380 px column at the left on ≥1024 px; the counterexample **reel** is a strip under the stage. On phones: the stage is 56vh, primary actions sit directly under it, then the tablet, then the reel.
 - **Site** pages read like a lab notebook: left-aligned single column (≤72ch) with full-bleed figures that break out of it.
+- The stage alone carries a soft radial lighting vignette (CSS, on `.golem-stage::after`); no other gradient anywhere.
 - Radii: 2 px for controls, 0 for the stage. Borders are 1 px `--clay` at 35% opacity. No drop shadows on cards; elevation comes from `--ground-2`.
 
 ## Motion

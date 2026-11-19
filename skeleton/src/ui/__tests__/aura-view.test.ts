@@ -40,7 +40,7 @@ describe('AuraView', () => {
   it('draws no glow or shadow and discards unknown bins', () => {
     const { v } = view();
     expect(v.decal.castShadow || v.decal.receiveShadow).toBe(false);
-    expect(AURA_FRAG).toMatch(/if \(R < 0\.004\) discard;/);
+    expect(AURA_FRAG).toMatch(/if \(aa <= 0\.002\) discard;/);
     expect(AURA_FRAG + TICK_VERT).not.toMatch(/time/i);
   });
   it('re-centres on the hero base', () => {

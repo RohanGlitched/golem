@@ -12,8 +12,11 @@ afterEach(cleanup);
 
 describe('studio CSS', () => {
   const css = studioCss('/fonts/');
-  it('has no gradient, no box-shadow and no Gloock', () => {
-    expect(css).not.toMatch(/gradient/i);
+  it('has no gradient outside the stage vignette, no box-shadow and no Gloock', () => {
+    // The only gradient is the stage's lighting vignette (design-language.md, Layout).
+    const withoutVignette = css.replace(/\.golem-stage::after\{[^}]*\}/g, '');
+    expect(withoutVignette).not.toMatch(/gradient/i);
+    expect(css).toMatch(/\.golem-stage::after\{[^}]*radial-gradient/);
     expect(css).not.toMatch(/box-shadow/i);
     expect(css).not.toMatch(/Gloock/i);
   });
