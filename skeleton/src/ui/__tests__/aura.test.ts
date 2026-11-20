@@ -94,6 +94,20 @@ describe('AuraModel', () => {
     expect(both?.force.name).toBe('f');
     expect(both?.angle.name).toBe('a');
   });
+
+  it('reads a rising ratio as the push size when there is no force dimension', () => {
+    const r = auraDims({
+      dims: [
+        { name: 'friction', kind: 'ratio', min: 0, max: 1, severity: 'down' },
+        { name: 'push.weight', kind: 'ratio', min: 0, max: 1, severity: 'up' },
+        { name: 'push.angle', kind: 'angle', min: 0, max: 6, severity: 'none', wrap: true },
+      ],
+    });
+    expect(r?.force.name).toBe('push.weight');
+    const m = new AuraModel(1, 'push.weight');
+    m.add(1.6, 0.574, -0.2);
+    expect(auraSummary(m)).toBe('Weakest sector, around 95 deg: breaks at push.weight = 57.4 %');
+  });
 });
 
 describe('auraSummary', () => {

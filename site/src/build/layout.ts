@@ -20,6 +20,7 @@ export interface PageSpec {
 
 export const NAV: { href: string; label: string; id: string }[] = [
   { href: '/stagger/', label: 'Studio', id: 'stagger' },
+  { href: '/yard/', label: 'Yard', id: 'yard' },
   { href: '/kit/', label: 'Kit', id: 'kit' },
   { href: '/evidence/', label: 'Evidence', id: 'evidence' },
   { href: '/how-kiro/', label: 'How Kiro built it', id: 'how-kiro' },
@@ -37,6 +38,7 @@ export const SITEMAP: { href: string; label: string; note: string }[] = [
   { href: '/stagger/', label: 'Stagger studio', note: 'Unitree G1 walking under Unitree’s policy' },
   { href: '/candy/', label: 'Candy studio', note: 'Franka Panda sorting candy near hands' },
   { href: '/hover/', label: 'Hover studio', note: 'Skydio X2 holding a point in gusts' },
+  { href: '/yard/', label: 'The yard', note: 'One spec on seven Menagerie robots' },
   { href: '/kit/', label: 'The kit', note: 'CLI, MCP, hooks, agents, EARS dialect' },
   { href: '/evidence/', label: 'Evidence', note: 'Stability map, benchmark, limits' },
   { href: '/how-kiro/', label: 'How Kiro built it', note: 'Specs, audits, what went wrong' },
@@ -47,6 +49,7 @@ export const LICENCES: { what: string; licence: string; href: string }[] = [
   { what: 'Unitree G1 model and walking policy (unitree_rl_gym)', licence: 'BSD-3-Clause', href: '/stagger/robot/LICENSE.txt' },
   { what: 'Franka Panda (MuJoCo Menagerie)', licence: 'Apache-2.0', href: '/candy/robot/LICENSE.txt' },
   { what: 'Skydio X2 (MuJoCo Menagerie)', licence: 'Apache-2.0', href: '/hover/robot/LICENSE.txt' },
+  { what: 'Yard robots (MuJoCo Menagerie: Unitree, Boston Dynamics, ANYbotics, Berkeley, Booster)', licence: 'see each LICENSE', href: `${REPO_URL}/tree/main/apps/yard` },
   { what: 'MuJoCo', licence: 'Apache-2.0', href: 'https://github.com/google-deepmind/mujoco/blob/main/LICENSE' },
   { what: 'B612 and B612 Mono (Airbus)', licence: 'SIL OFL 1.1', href: '/fonts/OFL.txt' },
   { what: 'Gloock', licence: 'SIL OFL 1.1', href: '/fonts/OFL-Gloock.txt' },
@@ -54,7 +57,7 @@ export const LICENCES: { what: string; licence: string; href: string }[] = [
 
 export function renderHeader(current: string): string {
   const studio = STUDIOS.some((st) => st.id === current);
-  const links = NAV.map((n) => `<a href="${n.href}"${n.id === current || (studio && n.id === 'stagger') ? ' aria-current="page"' : ''}>${esc(n.label)}</a>`).join('');
+  const links = NAV.map((n) => `<a href="${n.href}"${n.id === current || (studio && n.id === 'stagger') || (current.startsWith('yard-') && n.id === 'yard') ? ' aria-current="page"' : ''}>${esc(n.label)}</a>`).join('');
   // On a studio page, a switcher between the three robots sits next to the wordmark.
   const switcher = studio
     ? `<nav class="studio-switch" aria-label="Robot">${STUDIOS.map((st) => `<a href="${st.href}"${st.id === current ? ' aria-current="page"' : ''}>${esc(st.label)}</a>`).join('')}</nav>`

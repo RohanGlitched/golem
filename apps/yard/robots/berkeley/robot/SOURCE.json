@@ -1,0 +1,44 @@
+{
+  "commit": "370c43965323c0944b433b202aac5058b5f907a9",
+  "repository": "https://github.com/google-deepmind/mujoco_menagerie",
+  "folder": "berkeley_humanoid",
+  "licence": "see robot/LICENSE (unchanged from the upstream folder)",
+  "sources": {
+    "assets/ll_faa.stl": "17377ec6b12f3144e3a9f9d1fdb9e8845d94b6faae5f4ea2e0b2cd785c2011c0",
+    "assets/ll_ffe.stl": "160ef4e3f8a9ef12768516816bf5a2cb3d0f983d0eadb019ff864eabff8554e5",
+    "assets/ll_haa.stl": "b1efd0fc5b5eafbd0b653b8d37167404191e636044e6618f11f2dc7e7e3e84d7",
+    "assets/ll_hfe.stl": "8b1eb85e225774a1be94e6fe30b96975f717bfbb72465a90aef843ffe64717e0",
+    "assets/ll_hr.stl": "fefe4987b5083997998d54ecbc37c572a0d12386b156e3bf0e1d63640643e07f",
+    "assets/ll_kfe.stl": "2fc9922c04cb1d448ee7a1e39299b3ceb7b736befc291c8a163a7a6032223a87",
+    "assets/lr_faa.stl": "75d3f99828e3d6d266a7de3b3e49b6ba3a8957fc8cd03ece2b458577381bb2c8",
+    "assets/lr_ffe.stl": "3ab76f46df958e447a77572e885d89d53c353dcaab029fe73443a274ee4ab076",
+    "assets/lr_haa.stl": "7a02529bef9bfa19c5806bd3696628c9b0b7f1f6686129e83464a364668c9f37",
+    "assets/lr_hfe.stl": "6adf0e5566516a3bb9cd160f708fea8315a4f9822ab8fccc0135118e57548818",
+    "assets/lr_hr.stl": "fe8a4d5e017234abfbf902c79af944d6f8b53a9b2e222f71281398d0935878fa",
+    "assets/lr_kfe.stl": "3e5ed0c1d7aaf3ce9502d729f5f4f42e9ef3ebf0296bbbd45e2b4d0b760f2f32",
+    "assets/torso.stl": "7a1fab7e03010c19f1737be88b4ee8555eb449db8d25ec01e9adf0a8c9decc06",
+    "berkeley_humanoid.xml": "253d161d2928de8f69920b9d3c7467a6b28cf0c0257b233b8bfefc474ca17e71",
+    "LICENSE": "a5a4e7c801bc9673459872f5a86886ac29eee4ba93bb1e907f2e49d4198a1dd0"
+  },
+  "generated": {
+    "scene.xml": "scripts/fetch-assets.mjs (sceneXml)"
+  },
+  "outputs": {
+    "assets/ll_faa.stl": "17377ec6b12f3144e3a9f9d1fdb9e8845d94b6faae5f4ea2e0b2cd785c2011c0",
+    "assets/ll_ffe.stl": "160ef4e3f8a9ef12768516816bf5a2cb3d0f983d0eadb019ff864eabff8554e5",
+    "assets/ll_haa.stl": "b1efd0fc5b5eafbd0b653b8d37167404191e636044e6618f11f2dc7e7e3e84d7",
+    "assets/ll_hfe.stl": "8b1eb85e225774a1be94e6fe30b96975f717bfbb72465a90aef843ffe64717e0",
+    "assets/ll_hr.stl": "fefe4987b5083997998d54ecbc37c572a0d12386b156e3bf0e1d63640643e07f",
+    "assets/ll_kfe.stl": "2fc9922c04cb1d448ee7a1e39299b3ceb7b736befc291c8a163a7a6032223a87",
+    "assets/lr_faa.stl": "75d3f99828e3d6d266a7de3b3e49b6ba3a8957fc8cd03ece2b458577381bb2c8",
+    "assets/lr_ffe.stl": "3ab76f46df958e447a77572e885d89d53c353dcaab029fe73443a274ee4ab076",
+    "assets/lr_haa.stl": "7a02529bef9bfa19c5806bd3696628c9b0b7f1f6686129e83464a364668c9f37",
+    "assets/lr_hfe.stl": "6adf0e5566516a3bb9cd160f708fea8315a4f9822ab8fccc0135118e57548818",
+    "assets/lr_hr.stl": "fe8a4d5e017234abfbf902c79af944d6f8b53a9b2e222f71281398d0935878fa",
+    "assets/lr_kfe.stl": "3e5ed0c1d7aaf3ce9502d729f5f4f42e9ef3ebf0296bbbd45e2b4d0b760f2f32",
+    "assets/torso.stl": "7a1fab7e03010c19f1737be88b4ee8555eb449db8d25ec01e9adf0a8c9decc06",
+    "berkeley_humanoid.xml": "253d161d2928de8f69920b9d3c7467a6b28cf0c0257b233b8bfefc474ca17e71",
+    "LICENSE": "a5a4e7c801bc9673459872f5a86886ac29eee4ba93bb1e907f2e49d4198a1dd0",
+    "scene.xml": "bdaca9599aa4fa77b0b196f815cf6292b8b70a4199c4051c2f8a99d167a4d9b7"
+  }
+}

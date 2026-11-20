@@ -1,0 +1,30 @@
+{
+  "commit": "370c43965323c0944b433b202aac5058b5f907a9",
+  "repository": "https://github.com/google-deepmind/mujoco_menagerie",
+  "folder": "unitree_a1",
+  "licence": "see robot/LICENSE (unchanged from the upstream folder)",
+  "sources": {
+    "a1.xml": "cd8468fdd5e77bf7393f74c4bf399606a0c52a82dc2cf08d2dcfa163c5da607b",
+    "assets/calf.obj": "76e4c432d597a15e02d2afd31410b143f421a1d67bc86d7f3802dc6f391f0a1e",
+    "assets/hip.obj": "db1c7bf190915376e78f7d50ea2ab3b625d1b6edd02ec2ed0d02d7c1e195aabb",
+    "assets/thigh_mirror.obj": "03cca79a14e307d00aa303d64dc364f4e62ca16138d58f9789f4e17be3dd2f58",
+    "assets/thigh.obj": "9146a38aeb231b253f5fc132168ae6ce7485502bc6b6fad3d8af088724c620b9",
+    "assets/trunk_A1.png": "512e8cfa5ebedfc4199afe172590d3d486461e42244ab5d439020111f9fc7e78",
+    "assets/trunk.obj": "c29e82d0addb4c7e0f02b59057fccc53e9b6f2b149d4140cc2644712a39b8878",
+    "LICENSE": "2b794acf1e250f5545ae5a47d81e5685ea5488ce077d1087ed8be5f81e9ba5c0"
+  },
+  "generated": {
+    "scene.xml": "scripts/fetch-assets.mjs (sceneXml)"
+  },
+  "outputs": {
+    "a1.xml": "cd8468fdd5e77bf7393f74c4bf399606a0c52a82dc2cf08d2dcfa163c5da607b",
+    "assets/calf.obj": "76e4c432d597a15e02d2afd31410b143f421a1d67bc86d7f3802dc6f391f0a1e",
+    "assets/hip.obj": "db1c7bf190915376e78f7d50ea2ab3b625d1b6edd02ec2ed0d02d7c1e195aabb",
+    "assets/thigh_mirror.obj": "03cca79a14e307d00aa303d64dc364f4e62ca16138d58f9789f4e17be3dd2f58",
+    "assets/thigh.obj": "9146a38aeb231b253f5fc132168ae6ce7485502bc6b6fad3d8af088724c620b9",
+    "assets/trunk_A1.png": "512e8cfa5ebedfc4199afe172590d3d486461e42244ab5d439020111f9fc7e78",
+    "assets/trunk.obj": "c29e82d0addb4c7e0f02b59057fccc53e9b6f2b149d4140cc2644712a39b8878",
+    "LICENSE": "2b794acf1e250f5545ae5a47d81e5685ea5488ce077d1087ed8be5f81e9ba5c0",
+    "scene.xml": "de65f8b15511c65df899207c640ed40439167be6741aa2ee91372c0bfa745a8d"
+  }
+}

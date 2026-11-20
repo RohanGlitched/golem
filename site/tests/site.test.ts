@@ -150,7 +150,7 @@ describe('pages', () => {
     expect(after).toContain('tools/call falsify');
     expect(after).toMatch(/Expected_(Hold|Break)/);
   });
-  const ids = ['home', 'kit', 'evidence', 'how-kiro', 'notfound', 'stagger', 'candy', 'hover'];
+  const ids = ['home', 'kit', 'evidence', 'how-kiro', 'yard', 'notfound', 'stagger', 'candy', 'hover'];
   it.each(ids)('renders %s with one h1 and no stray placeholder', (id) => {
     const html = renderPage(id, data).body;
     expect((html.match(/<h1[ >]/g) ?? []).length).toBe(1);

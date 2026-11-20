@@ -285,3 +285,25 @@ details[open]>summary{color:var(--ink)}
 .circle-toggle button:not([aria-pressed='true']):hover{color:var(--ink)}
 .circle-stage[data-mode='pack-kiro'] .circle-cap .k{color:var(--ghost)}
 @media (max-width:760px){.circle-toggle{left:12px;top:clamp(104px,14vh,130px);bottom:auto;transform:none}}
+
+/* The yard: stance roses */
+.roses{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,250px),1fr));gap:28px 32px;margin:28px 0}
+.page>.roses{grid-column:text-start/wide-end;max-width:1180px}
+.rose-card{margin:0}
+.rose-card svg{width:100%;max-width:300px;height:auto;display:block}
+.rose-card .ring{fill:none;stroke:var(--rule-2);stroke-width:1;stroke-dasharray:3 3}
+.rose-card .axis{stroke:var(--rule);stroke-width:1}
+.rose-card .rose{fill:var(--clay);fill-opacity:.22;stroke:var(--lamp);stroke-width:1.5;stroke-linejoin:round}
+.rose-card .dot{fill:var(--lamp)}
+.rose-card .dot.held-dot{fill:var(--hold)}
+.rose-card .weak-ray{stroke:var(--break);stroke-width:2}
+.rose-card .fallen{fill:var(--break)}
+.rose-card text{font-family:var(--mono);font-size:10px;fill:var(--ink-3)}
+.rose-card text.dir{fill:var(--ink-2);font-family:var(--sans)}
+.rose-card figcaption{font-size:var(--s15);color:var(--ink-2);margin-top:8px}
+.rose-card figcaption b{color:var(--ink)}
+.ears-list{padding-left:0;list-style:none}
+.ears-list li{margin:0 0 12px}
+.yard-switch{display:flex;flex-wrap:wrap;gap:6px;margin:12px var(--pad) 0;font-size:var(--s13)}
+.yard-switch a{border:1px solid var(--rule-2);border-radius:999px;padding:4px 12px;text-decoration:none;color:var(--ink-2);min-height:28px;display:inline-flex;align-items:center}
+.yard-switch a[aria-current='page']{background:var(--lamp);color:#1A1411;font-weight:700;border-color:var(--lamp)}

@@ -1,0 +1,13 @@
+{
+  "commit": "370c43965323c0944b433b202aac5058b5f907a9",
+  "repository": "google-deepmind/mujoco_menagerie",
+  "robots": [
+    { "id": "go1", "name": "Unitree Go1", "kind": "quadruped", "folder": "unitree_go1", "model": "go1.xml", "key": "home", "base": "trunk" },
+    { "id": "a1", "name": "Unitree A1", "kind": "quadruped", "folder": "unitree_a1", "model": "a1.xml", "key": "home", "base": "trunk" },
+    { "id": "spot", "name": "Boston Dynamics Spot", "kind": "quadruped", "folder": "boston_dynamics_spot", "model": "spot.xml", "key": "home", "base": "body" },
+    { "id": "anymal_c", "name": "ANYbotics ANYmal C", "kind": "quadruped", "folder": "anybotics_anymal_c", "model": "anymal_c.xml", "key": null, "base": "base" },
+    { "id": "berkeley", "name": "Berkeley Humanoid", "kind": "humanoid", "folder": "berkeley_humanoid", "model": "berkeley_humanoid.xml", "key": "home", "base": "torso" },
+    { "id": "t1", "name": "Booster T1", "kind": "humanoid", "folder": "booster_t1", "model": "t1.xml", "key": "home", "base": "Trunk" },
+    { "id": "g1", "name": "Unitree G1 (29 joints)", "kind": "humanoid", "folder": "unitree_g1", "model": "g1.xml", "key": "stand", "base": "pelvis" }
+  ]
+}

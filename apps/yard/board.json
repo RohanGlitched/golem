@@ -1,0 +1,1124 @@
+{
+ "commit": "370c43965323c0944b433b202aac5058b5f907a9",
+ "requirements": "apps/yard/.kiro/specs/stand-push/requirements.md",
+ "budget": 128,
+ "searchSeed": 1,
+ "directions": 24,
+ "bisectSteps": 9,
+ "robots": [
+  {
+   "id": "go1",
+   "name": "Unitree Go1",
+   "kind": "quadruped",
+   "folder": "unitree_go1",
+   "lines": [
+    {
+     "id": "1.1",
+     "status": "held",
+     "trials": 128,
+     "closest": 0.10236415253768558,
+     "counterexample": null
+    },
+    {
+     "id": "1.2",
+     "status": "held",
+     "trials": 128,
+     "closest": 0.10009000703233663,
+     "counterexample": null
+    },
+    {
+     "id": "1.3",
+     "status": "held",
+     "trials": 128,
+     "closest": 0.09695650279941057,
+     "counterexample": null
+    },
+    {
+     "id": "1.4",
+     "status": "broken",
+     "trials": 15,
+     "closest": -0.6747867702571637,
+     "counterexample": {
+      "weight": 0.5735943106421928,
+      "deg": 97.60070225747768,
+      "shrunk": false
+     }
+    },
+    {
+     "id": "2.1",
+     "status": "held",
+     "trials": 128,
+     "closest": 0.04502282467136024,
+     "counterexample": null
+    }
+   ],
+   "rose": [
+    {
+     "deg": 0,
+     "breaks": null
+    },
+    {
+     "deg": 15,
+     "breaks": null
+    },
+    {
+     "deg": 30,
+     "breaks": 0.879
+    },
+    {
+     "deg": 45,
+     "breaks": 0.717
+    },
+    {
+     "deg": 60,
+     "breaks": 0.623
+    },
+    {
+     "deg": 75,
+     "breaks": 0.574
+    },
+    {
+     "deg": 90,
+     "breaks": 0.568
+    },
+    {
+     "deg": 105,
+     "breaks": 0.588
+    },
+    {
+     "deg": 120,
+     "breaks": 0.641
+    },
+    {
+     "deg": 135,
+     "breaks": 0.748
+    },
+    {
+     "deg": 150,
+     "breaks": 0.951
+    },
+    {
+     "deg": 165,
+     "breaks": 0.914
+    },
+    {
+     "deg": 180,
+     "breaks": 0.883
+    },
+    {
+     "deg": 195,
+     "breaks": 0.912
+    },
+    {
+     "deg": 210,
+     "breaks": 0.949
+    },
+    {
+     "deg": 225,
+     "breaks": 0.74
+    },
+    {
+     "deg": 240,
+     "breaks": 0.633
+    },
+    {
+     "deg": 255,
+     "breaks": 0.58
+    },
+    {
+     "deg": 270,
+     "breaks": 0.561
+    },
+    {
+     "deg": 285,
+     "breaks": 0.566
+    },
+    {
+     "deg": 300,
+     "breaks": 0.613
+    },
+    {
+     "deg": 315,
+     "breaks": 0.705
+    },
+    {
+     "deg": 330,
+     "breaks": 0.861
+    },
+    {
+     "deg": 345,
+     "breaks": null
+    }
+   ],
+   "weakest": {
+    "deg": 270,
+    "breaks": 0.561
+   },
+   "strongestBreak": 0.951,
+   "seconds": {
+    "verdicts": 69,
+    "rose": 153.5
+   }
+  },
+  {
+   "id": "a1",
+   "name": "Unitree A1",
+   "kind": "quadruped",
+   "folder": "unitree_a1",
+   "lines": [
+    {
+     "id": "1.1",
+     "status": "held",
+     "trials": 128,
+     "closest": 0.0883863580217075,
+     "counterexample": null
+    },
+    {
+     "id": "1.2",
+     "status": "held",
+     "trials": 128,
+     "closest": 0.08648899545261657,
+     "counterexample": null
+    },
+    {
+     "id": "1.3",
+     "status": "held",
+     "trials": 128,
+     "closest": 0.08427337140098412,
+     "counterexample": null
+    },
+    {
+     "id": "1.4",
+     "status": "broken",
+     "trials": 43,
+     "closest": -0.6749759833989206,
+     "counterexample": {
+      "weight": 0.6555363550196489,
+      "deg": 97.60070225747768,
+      "shrunk": true
+     }
+    },
+    {
+     "id": "2.1",
+     "status": "held",
+     "trials": 128,
+     "closest": 0.04613712227397316,
+     "counterexample": null
+    }
+   ],
+   "rose": [
+    {
+     "deg": 0,
+     "breaks": null
+    },
+    {
+     "deg": 15,
+     "breaks": null
+    },
+    {
+     "deg": 30,
+     "breaks": null
+    },
+    {
+     "deg": 45,
+     "breaks": 0.834
+    },
+    {
+     "deg": 60,
+     "breaks": 0.715
+    },
+    {
+     "deg": 75,
+     "breaks": 0.656
+    },
+    {
+     "deg": 90,
+     "breaks": 0.645
+    },
+    {
+     "deg": 105,
+     "breaks": 0.668
+    },
+    {
+     "deg": 120,
+     "breaks": 0.734
+    },
+    {
+     "deg": 135,
+     "breaks": 0.869
+    },
+    {
+     "deg": 150,
+     "breaks": null
+    },
+    {
+     "deg": 165,
+     "breaks": 0.992
+    },
+    {
+     "deg": 180,
+     "breaks": 0.949
+    },
+    {
+     "deg": 195,
+     "breaks": 0.984
+    },
+    {
+     "deg": 210,
+     "breaks": null
+    },
+    {
+     "deg": 225,
+     "breaks": 0.854
+    },
+    {
+     "deg": 240,
+     "breaks": 0.719
+    },
+    {
+     "deg": 255,
+     "breaks": 0.654
+    },
+    {
+     "deg": 270,
+     "breaks": 0.629
+    },
+    {
+     "deg": 285,
+     "breaks": 0.641
+    },
+    {
+     "deg": 300,
+     "breaks": 0.699
+    },
+    {
+     "deg": 315,
+     "breaks": 0.811
+    },
+    {
+     "deg": 330,
+     "breaks": null
+    },
+    {
+     "deg": 345,
+     "breaks": null
+    }
+   ],
+   "weakest": {
+    "deg": 270,
+    "breaks": 0.629
+   },
+   "strongestBreak": 0.992,
+   "seconds": {
+    "verdicts": 89.2,
+    "rose": 163.8
+   }
+  },
+  {
+   "id": "spot",
+   "name": "Boston Dynamics Spot",
+   "kind": "quadruped",
+   "folder": "boston_dynamics_spot",
+   "lines": [
+    {
+     "id": "1.1",
+     "status": "held",
+     "trials": 128,
+     "closest": 0.15720582866613944,
+     "counterexample": null
+    },
+    {
+     "id": "1.2",
+     "status": "held",
+     "trials": 128,
+     "closest": 0.1557345293948984,
+     "counterexample": null
+    },
+    {
+     "id": "1.3",
+     "status": "held",
+     "trials": 128,
+     "closest": 0.1540282171679919,
+     "counterexample": null
+    },
+    {
+     "id": "1.4",
+     "status": "broken",
+     "trials": 42,
+     "closest": -0.6742413142581019,
+     "counterexample": {
+      "weight": 0.6164307173069119,
+      "deg": 236.95305444533005,
+      "shrunk": true
+     }
+    },
+    {
+     "id": "2.1",
+     "status": "held",
+     "trials": 128,
+     "closest": 0.0380585931045421,
+     "counterexample": null
+    }
+   ],
+   "rose": [
+    {
+     "deg": 0,
+     "breaks": null
+    },
+    {
+     "deg": 15,
+     "breaks": null
+    },
+    {
+     "deg": 30,
+     "breaks": 0.861
+    },
+    {
+     "deg": 45,
+     "breaks": 0.701
+    },
+    {
+     "deg": 60,
+     "breaks": 0.588
+    },
+    {
+     "deg": 75,
+     "breaks": 0.537
+    },
+    {
+     "deg": 90,
+     "breaks": 0.523
+    },
+    {
+     "deg": 105,
+     "breaks": 0.545
+    },
+    {
+     "deg": 120,
+     "breaks": 0.602
+    },
+    {
+     "deg": 135,
+     "breaks": 0.713
+    },
+    {
+     "deg": 150,
+     "breaks": 0.934
+    },
+    {
+     "deg": 165,
+     "breaks": 0.99
+    },
+    {
+     "deg": 180,
+     "breaks": 0.965
+    },
+    {
+     "deg": 195,
+     "breaks": 0.992
+    },
+    {
+     "deg": 210,
+     "breaks": 0.932
+    },
+    {
+     "deg": 225,
+     "breaks": 0.709
+    },
+    {
+     "deg": 240,
+     "breaks": 0.6
+    },
+    {
+     "deg": 255,
+     "breaks": 0.543
+    },
+    {
+     "deg": 270,
+     "breaks": 0.521
+    },
+    {
+     "deg": 285,
+     "breaks": 0.533
+    },
+    {
+     "deg": 300,
+     "breaks": 0.582
+    },
+    {
+     "deg": 315,
+     "breaks": 0.691
+    },
+    {
+     "deg": 330,
+     "breaks": 0.844
+    },
+    {
+     "deg": 345,
+     "breaks": null
+    }
+   ],
+   "weakest": {
+    "deg": 270,
+    "breaks": 0.521
+   },
+   "strongestBreak": 0.992,
+   "seconds": {
+    "verdicts": 74.9,
+    "rose": 152.6
+   }
+  },
+  {
+   "id": "anymal_c",
+   "name": "ANYbotics ANYmal C",
+   "kind": "quadruped",
+   "folder": "anybotics_anymal_c",
+   "lines": [
+    {
+     "id": "1.1",
+     "status": "held",
+     "trials": 128,
+     "closest": 0.2200879380959986,
+     "counterexample": null
+    },
+    {
+     "id": "1.2",
+     "status": "held",
+     "trials": 128,
+     "closest": 0.21035158238216856,
+     "counterexample": null
+    },
+    {
+     "id": "1.3",
+     "status": "held",
+     "trials": 128,
+     "closest": 0.19750253654392005,
+     "counterexample": null
+    },
+    {
+     "id": "1.4",
+     "status": "broken",
+     "trials": 42,
+     "closest": -0.6392741692361235,
+     "counterexample": {
+      "weight": 0.7246483553643657,
+      "deg": 251.97478841553675,
+      "shrunk": true
+     }
+    },
+    {
+     "id": "2.1",
+     "status": "held",
+     "trials": 128,
+     "closest": 0.016713986255697456,
+     "counterexample": null
+    }
+   ],
+   "rose": [
+    {
+     "deg": 0,
+     "breaks": 0.613
+    },
+    {
+     "deg": 15,
+     "breaks": 0.629
+    },
+    {
+     "deg": 30,
+     "breaks": 0.764
+    },
+    {
+     "deg": 45,
+     "breaks": 0.814
+    },
+    {
+     "deg": 60,
+     "breaks": 0.766
+    },
+    {
+     "deg": 75,
+     "breaks": 0.721
+    },
+    {
+     "deg": 90,
+     "breaks": 0.719
+    },
+    {
+     "deg": 105,
+     "breaks": 0.721
+    },
+    {
+     "deg": 120,
+     "breaks": 0.766
+    },
+    {
+     "deg": 135,
+     "breaks": 0.814
+    },
+    {
+     "deg": 150,
+     "breaks": 0.764
+    },
+    {
+     "deg": 165,
+     "breaks": 0.627
+    },
+    {
+     "deg": 180,
+     "breaks": 0.611
+    },
+    {
+     "deg": 195,
+     "breaks": 0.627
+    },
+    {
+     "deg": 210,
+     "breaks": 0.762
+    },
+    {
+     "deg": 225,
+     "breaks": 0.814
+    },
+    {
+     "deg": 240,
+     "breaks": 0.766
+    },
+    {
+     "deg": 255,
+     "breaks": 0.721
+    },
+    {
+     "deg": 270,
+     "breaks": 0.719
+    },
+    {
+     "deg": 285,
+     "breaks": 0.721
+    },
+    {
+     "deg": 300,
+     "breaks": 0.766
+    },
+    {
+     "deg": 315,
+     "breaks": 0.814
+    },
+    {
+     "deg": 330,
+     "breaks": 0.764
+    },
+    {
+     "deg": 345,
+     "breaks": 0.629
+    }
+   ],
+   "weakest": {
+    "deg": 180,
+    "breaks": 0.611
+   },
+   "strongestBreak": 0.814,
+   "seconds": {
+    "verdicts": 101.1,
+    "rose": 152
+   }
+  },
+  {
+   "id": "berkeley",
+   "name": "Berkeley Humanoid",
+   "kind": "humanoid",
+   "folder": "berkeley_humanoid",
+   "lines": [
+    {
+     "id": "1.1",
+     "status": "broken",
+     "trials": 32,
+     "closest": -0.23909664368168804,
+     "counterexample": {
+      "weight": 0,
+      "deg": 163.328710385249,
+      "shrunk": true
+     }
+    },
+    {
+     "id": "1.2",
+     "status": "broken",
+     "trials": 32,
+     "closest": -0.23910481517289514,
+     "counterexample": {
+      "weight": 0,
+      "deg": 4.502462664968333,
+      "shrunk": true
+     }
+    },
+    {
+     "id": "1.3",
+     "status": "broken",
+     "trials": 32,
+     "closest": -0.23910878064842855,
+     "counterexample": {
+      "weight": 0,
+      "deg": 19.261217631865296,
+      "shrunk": true
+     }
+    },
+    {
+     "id": "1.4",
+     "status": "broken",
+     "trials": 32,
+     "closest": -0.23934781712665543,
+     "counterexample": {
+      "weight": 0,
+      "deg": 163.328710385249,
+      "shrunk": true
+     }
+    },
+    {
+     "id": "2.1",
+     "status": "held",
+     "trials": 128,
+     "closest": 0.04746503855126255,
+     "counterexample": null
+    }
+   ],
+   "rose": [
+    {
+     "deg": 0,
+     "breaks": 0
+    },
+    {
+     "deg": 15,
+     "breaks": 0
+    },
+    {
+     "deg": 30,
+     "breaks": 0
+    },
+    {
+     "deg": 45,
+     "breaks": 0
+    },
+    {
+     "deg": 60,
+     "breaks": 0
+    },
+    {
+     "deg": 75,
+     "breaks": 0
+    },
+    {
+     "deg": 90,
+     "breaks": 0
+    },
+    {
+     "deg": 105,
+     "breaks": 0
+    },
+    {
+     "deg": 120,
+     "breaks": 0
+    },
+    {
+     "deg": 135,
+     "breaks": 0
+    },
+    {
+     "deg": 150,
+     "breaks": 0
+    },
+    {
+     "deg": 165,
+     "breaks": 0
+    },
+    {
+     "deg": 180,
+     "breaks": 0
+    },
+    {
+     "deg": 195,
+     "breaks": 0
+    },
+    {
+     "deg": 210,
+     "breaks": 0
+    },
+    {
+     "deg": 225,
+     "breaks": 0
+    },
+    {
+     "deg": 240,
+     "breaks": 0
+    },
+    {
+     "deg": 255,
+     "breaks": 0
+    },
+    {
+     "deg": 270,
+     "breaks": 0
+    },
+    {
+     "deg": 285,
+     "breaks": 0
+    },
+    {
+     "deg": 300,
+     "breaks": 0
+    },
+    {
+     "deg": 315,
+     "breaks": 0
+    },
+    {
+     "deg": 330,
+     "breaks": 0
+    },
+    {
+     "deg": 345,
+     "breaks": 0
+    }
+   ],
+   "weakest": {
+    "deg": 0,
+    "breaks": 0
+   },
+   "strongestBreak": 0,
+   "seconds": {
+    "verdicts": 55.2,
+    "rose": 24.2
+   }
+  },
+  {
+   "id": "t1",
+   "name": "Booster T1",
+   "kind": "humanoid",
+   "folder": "booster_t1",
+   "lines": [
+    {
+     "id": "1.1",
+     "status": "broken",
+     "trials": 32,
+     "closest": -0.2809463366188729,
+     "counterexample": {
+      "weight": 0,
+      "deg": 155.48519082076382,
+      "shrunk": true
+     }
+    },
+    {
+     "id": "1.2",
+     "status": "broken",
+     "trials": 32,
+     "closest": -0.28048596532387715,
+     "counterexample": {
+      "weight": 0,
+      "deg": 338.3820578822633,
+      "shrunk": true
+     }
+    },
+    {
+     "id": "1.3",
+     "status": "broken",
+     "trials": 32,
+     "closest": -0.4029413629733601,
+     "counterexample": {
+      "weight": 0,
+      "deg": 19.261217631865296,
+      "shrunk": true
+     }
+    },
+    {
+     "id": "1.4",
+     "status": "broken",
+     "trials": 32,
+     "closest": -0.40318607887091024,
+     "counterexample": {
+      "weight": 0,
+      "deg": 4.502462664968333,
+      "shrunk": true
+     }
+    },
+    {
+     "id": "2.1",
+     "status": "broken",
+     "trials": 32,
+     "closest": -0.7175696405283832,
+     "counterexample": {
+      "weight": 0,
+      "deg": 251.97478841553675,
+      "shrunk": true
+     }
+    }
+   ],
+   "rose": [
+    {
+     "deg": 0,
+     "breaks": 0
+    },
+    {
+     "deg": 15,
+     "breaks": 0
+    },
+    {
+     "deg": 30,
+     "breaks": 0
+    },
+    {
+     "deg": 45,
+     "breaks": 0
+    },
+    {
+     "deg": 60,
+     "breaks": 0
+    },
+    {
+     "deg": 75,
+     "breaks": 0
+    },
+    {
+     "deg": 90,
+     "breaks": 0
+    },
+    {
+     "deg": 105,
+     "breaks": 0
+    },
+    {
+     "deg": 120,
+     "breaks": 0
+    },
+    {
+     "deg": 135,
+     "breaks": 0
+    },
+    {
+     "deg": 150,
+     "breaks": 0
+    },
+    {
+     "deg": 165,
+     "breaks": 0
+    },
+    {
+     "deg": 180,
+     "breaks": 0
+    },
+    {
+     "deg": 195,
+     "breaks": 0
+    },
+    {
+     "deg": 210,
+     "breaks": 0
+    },
+    {
+     "deg": 225,
+     "breaks": 0
+    },
+    {
+     "deg": 240,
+     "breaks": 0
+    },
+    {
+     "deg": 255,
+     "breaks": 0
+    },
+    {
+     "deg": 270,
+     "breaks": 0
+    },
+    {
+     "deg": 285,
+     "breaks": 0
+    },
+    {
+     "deg": 300,
+     "breaks": 0
+    },
+    {
+     "deg": 315,
+     "breaks": 0
+    },
+    {
+     "deg": 330,
+     "breaks": 0
+    },
+    {
+     "deg": 345,
+     "breaks": 0
+    }
+   ],
+   "weakest": {
+    "deg": 0,
+    "breaks": 0
+   },
+   "strongestBreak": 0,
+   "seconds": {
+    "verdicts": 20.1,
+    "rose": 24.9
+   }
+  },
+  {
+   "id": "g1",
+   "name": "Unitree G1 (29 joints)",
+   "kind": "humanoid",
+   "folder": "unitree_g1",
+   "lines": [
+    {
+     "id": "1.1",
+     "status": "held",
+     "trials": 128,
+     "closest": 0.2108049081476158,
+     "counterexample": null
+    },
+    {
+     "id": "1.2",
+     "status": "broken",
+     "trials": 43,
+     "closest": -0.43499047793290474,
+     "counterexample": {
+      "weight": 0.15420793477557027,
+      "deg": 163.328710385249,
+      "shrunk": true
+     }
+    },
+    {
+     "id": "1.3",
+     "status": "broken",
+     "trials": 42,
+     "closest": -0.4350959120392142,
+     "counterexample": {
+      "weight": 0.21014780225971208,
+      "deg": 234.77083082136235,
+      "shrunk": true
+     }
+    },
+    {
+     "id": "1.4",
+     "status": "broken",
+     "trials": 37,
+     "closest": -0.43489447611349935,
+     "counterexample": {
+      "weight": 0.11726668053597677,
+      "deg": 4.502462664968333,
+      "shrunk": true
+     }
+    },
+    {
+     "id": "2.1",
+     "status": "held",
+     "trials": 128,
+     "closest": 0.01679946517128704,
+     "counterexample": null
+    }
+   ],
+   "rose": [
+    {
+     "deg": 0,
+     "breaks": 0.113
+    },
+    {
+     "deg": 15,
+     "breaks": 0.117
+    },
+    {
+     "deg": 30,
+     "breaks": 0.127
+    },
+    {
+     "deg": 45,
+     "breaks": 0.148
+    },
+    {
+     "deg": 60,
+     "breaks": 0.193
+    },
+    {
+     "deg": 75,
+     "breaks": 0.313
+    },
+    {
+     "deg": 90,
+     "breaks": 0.318
+    },
+    {
+     "deg": 105,
+     "breaks": 0.328
+    },
+    {
+     "deg": 120,
+     "breaks": 0.229
+    },
+    {
+     "deg": 135,
+     "breaks": 0.188
+    },
+    {
+     "deg": 150,
+     "breaks": 0.166
+    },
+    {
+     "deg": 165,
+     "breaks": 0.154
+    },
+    {
+     "deg": 180,
+     "breaks": 0.148
+    },
+    {
+     "deg": 195,
+     "breaks": 0.154
+    },
+    {
+     "deg": 210,
+     "breaks": 0.166
+    },
+    {
+     "deg": 225,
+     "breaks": 0.188
+    },
+    {
+     "deg": 240,
+     "breaks": 0.229
+    },
+    {
+     "deg": 255,
+     "breaks": 0.328
+    },
+    {
+     "deg": 270,
+     "breaks": 0.318
+    },
+    {
+     "deg": 285,
+     "breaks": 0.313
+    },
+    {
+     "deg": 300,
+     "breaks": 0.193
+    },
+    {
+     "deg": 315,
+     "breaks": 0.148
+    },
+    {
+     "deg": 330,
+     "breaks": 0.127
+    },
+    {
+     "deg": 345,
+     "breaks": 0.117
+    }
+   ],
+   "weakest": {
+    "deg": 0,
+    "breaks": 0.113
+   },
+   "strongestBreak": 0.328,
+   "seconds": {
+    "verdicts": 133,
+    "rose": 296.2
+   }
+  }
+ ]
+}

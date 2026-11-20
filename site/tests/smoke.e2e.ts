@@ -6,7 +6,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const shots = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../shots');
-const PAGES = ['/', '/kit/', '/evidence/', '/how-kiro/', '/stagger/', '/candy/', '/hover/', '/no-such-page'];
+const PAGES = ['/', '/kit/', '/evidence/', '/how-kiro/', '/yard/', '/stagger/', '/candy/', '/hover/', '/no-such-page'];
 const SIZES = [{ name: '1440', width: 1440, height: 900 }, { name: '390', width: 390, height: 844 }];
 const THEMES = ['dark', 'light'] as const;
 const PORT = 4179;

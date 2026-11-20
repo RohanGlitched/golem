@@ -1,0 +1,11 @@
+{
+  "app": "./app.ts",
+  "requirements": ["../../.kiro/specs/stand-push/requirements.md"],
+  "robot": "yard-a1",
+  "signalUnits": {
+    "base_height_ratio": "1",
+    "tilt_deg": "deg",
+    "drift": "m",
+    "stand_height": "m"
+  }
+}

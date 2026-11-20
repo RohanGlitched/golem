@@ -17,11 +17,12 @@ export function auraSummary(m: AuraModel | undefined): string {
     const h = m.held[i] as number;
     if (h !== -Infinity && (strong < 0 || h > (m.held[strong] as number))) strong = i;
   }
+  const size = (v: number): string => (m.ratioName === undefined ? `${formatSig(v, 3)} N` : `${m.ratioName} = ${formatSig(v * 100, 3)} %`);
   if (weak >= 0) {
-    return `Weakest sector, around ${binCentreDeg(weak)} deg: breaks at ${formatSig(m.broke[weak] as number, 3)} N`;
+    return `Weakest sector, around ${binCentreDeg(weak)} deg: breaks at ${size(m.broke[weak] as number)}`;
   }
   if (strong >= 0) {
-    return `No break found. Strongest push held: ${formatSig(m.held[strong] as number, 3)} N at ${binCentreDeg(strong)} deg in ${m.total} trials`;
+    return `No break found. Strongest push held: ${size(m.held[strong] as number)} at ${binCentreDeg(strong)} deg in ${m.total} trials`;
   }
   return NO_TRIALS_TEXT;
 }

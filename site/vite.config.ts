@@ -24,6 +24,8 @@ export const alias = [
   { find: /^@app\/stagger$/, replacement: appFile('stagger', 'app.ts') },
   { find: /^@app\/candy$/, replacement: appFile('candy', 'app.ts') },
   { find: /^@app\/hover$/, replacement: appFile('hover', 'app.ts') },
+  { find: /^@app\/yard-stand$/, replacement: appFile('yard', 'stand.ts') },
+  { find: /^@spec\/yard(\?.*)?$/, replacement: appFile('yard', '.kiro/specs/stand-push/requirements.md', '.md') + '$1' },
   { find: /^@spec\/stagger(\?.*)?$/, replacement: appFile('stagger', '.kiro/specs/g1-walking/requirements.md', '.md') + '$1' },
   { find: /^@spec\/candy(\?.*)?$/, replacement: appFile('candy', '.kiro/specs/candy-sorter/requirements.md', '.md') + '$1' },
   { find: /^@spec\/hover(\?.*)?$/, replacement: appFile('hover', '.kiro/specs/hover-hold/requirements.md', '.md') + '$1' },

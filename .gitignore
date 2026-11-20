@@ -10,3 +10,7 @@ playwright-reportskeleton/ui-demo/public/robot/
 # per-run report written by golem test/gate
 **/.golem/report.json
 **/.golem/gate-state.json
+
+# yard: robot meshes are fetched at a pinned commit (apps/yard/scripts/fetch-assets.mjs); only the manifests are committed
+apps/yard/robots/*/robot/*
+!apps/yard/robots/*/robot/SOURCE.json

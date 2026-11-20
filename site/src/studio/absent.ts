@@ -2,3 +2,4 @@
 const app = undefined as never;
 export default app;
 export function setRobotBase(_base: string | URL): void { /* nothing to point at */ }
+export const standApp = undefined as never;

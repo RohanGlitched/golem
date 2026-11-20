@@ -18,9 +18,12 @@ export function binOf(angle: number): number {
 /** Centre direction of bin i in degrees: 5 + 10 i. */
 export const binCentreDeg = (i: number): number => 5 + 10 * i;
 
-/** The force and direction dimensions the Aura reads: the first of kind force and of kind angle. */
+/**
+ * The push-size and direction dimensions the Aura reads: the first of kind force (else the first ratio whose severity
+ * rises, such as a push written as a share of the robot's weight) and the first of kind angle.
+ */
 export function auraDims(space: ScenarioSpace): { force: Dimension; angle: Dimension } | undefined {
-  const force = space.dims.find((d) => d.kind === 'force');
+  const force = space.dims.find((d) => d.kind === 'force') ?? space.dims.find((d) => d.kind === 'ratio' && d.severity === 'up');
   const angle = space.dims.find((d) => d.kind === 'angle');
   return force && angle ? { force, angle } : undefined;
 }
@@ -37,7 +40,12 @@ export class AuraModel {
   ignored = 0;
   total = 0;
 
-  constructor(public forceMax: number) {}
+  /**
+   * @param forceMax the largest push the line searches, in the unit of its dimension
+   * @param ratioName set when the push is a ratio (a share of something) rather than a force: the summary then names
+   *   the dimension and prints the value as a percentage instead of newtons
+   */
+  constructor(public forceMax: number, public ratioName?: string) {}
 
   add(angle: number, force: number, robustness: number): void {
     this.total++;

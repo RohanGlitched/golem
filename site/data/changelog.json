@@ -1,6 +1,51 @@
 [
   {
     "date": "2026-11-20",
+    "hash": "22c0ce3",
+    "subject": "README: demo video v4 (problem stated up front, the gate's confirmation line on screen)"
+  },
+  {
+    "date": "2026-11-20",
+    "hash": "e501f53",
+    "subject": "evidence: 48 Kiro CLI logs (41 sessions) packed, with the ci, gatefix, drone, confirm, audit and scribe runs and their prompts; gzip mtime 0 and an LF index so a repack only changes what changed; README counts regenerated and a link to the demo video"
+  },
+  {
+    "date": "2026-11-20",
+    "hash": "20466a0",
+    "subject": "evidence: the 3b re-check with the 0.1.2 gate (3 of 4 false claims now red, B-2 still passes) on the evidence and home pages, read from confirm-check.md; README no longer says one lucky search cannot pass"
+  },
+  {
+    "date": "2026-11-20",
+    "hash": "176e7ad",
+    "subject": "golem-kit: the guard latency test expects the message decide gives (the fail-closed message for a payload it cannot read)"
+  },
+  {
+    "date": "2026-11-20",
+    "hash": "2853751",
+    "subject": "evidence: confirmation gate on the stagger controllers and the 3b reflexes (docs/cli-transcript.md steps 5 and 6 re-recorded; confirm-check.md)"
+  },
+  {
+    "date": "2026-11-20",
+    "hash": "9d45078",
+    "subject": "golem-kit: the hold message no longer tells a drone or an arm to walk"
+  },
+  {
+    "date": "2026-11-20",
+    "hash": "e115eb6",
+    "subject": "golem-kit: confirm a green gate with a second, independent search seed (0.1.2)"
+  },
+  {
+    "date": "2026-11-20",
+    "hash": "754f755",
+    "subject": "evidence: experiment 3b ran (unreachable 200 N target): false claims 3/6 without the Stop hook, 1/6 with it (p = 0.55, pilot); agents trusted a quick 24-trial green that another search seed broke; evidence and home pages report it"
+  },
+  {
+    "date": "2026-11-20",
+    "hash": "c913f11",
+    "subject": "golem-gate-hardening: 13 final checkpoint, probes and mutants after the fixes, before/after report"
+  },
+  {
+    "date": "2026-11-20",
     "hash": "1449ac5",
     "subject": "golem-kit: Property 32 compares onResult calls by identity, not by seed (two specs may share a seed; CI on Linux found the tie)"
   },
@@ -13,50 +58,5 @@
     "date": "2026-11-20",
     "hash": "741f4a7",
     "subject": "evidence: the agent-gate pilot ran (6 runs per arm, 13.5 credits): 0/6 false claims in both arms, independent gate green 6/6 without the Stop hook and 5/6 with it; evidence page shows every run"
-  },
-  {
-    "date": "2026-11-20",
-    "hash": "d5f5b92",
-    "subject": "evidence: raw logs and prompts of every Kiro CLI session that built GOLEM (40 sessions, local paths redacted), with an index"
-  },
-  {
-    "date": "2026-11-20",
-    "hash": "275d012",
-    "subject": "site: refresh Kiro counts"
-  },
-  {
-    "date": "2026-11-20",
-    "hash": "a2d6200",
-    "subject": "golem-kit: the counterexample reel shows a labelled loading message instead of eight empty boxes, and draws the frames as soon as the poses exist"
-  },
-  {
-    "date": "2026-11-20",
-    "hash": "29b200e",
-    "subject": "golem-kit: the live robot holds still while ghosts run, so the swarm-following camera keeps it in frame; a shove or reset ends the hold"
-  },
-  {
-    "date": "2026-11-20",
-    "hash": "995edeb",
-    "subject": "golem-kit: the selected line's response is 28 px in the 380 px tablet column (sentence 20 px, wraps, never overflows), so the verdict panel is not pushed down; 39-61 px only when stacked and 600 px wide"
-  },
-  {
-    "date": "2026-11-20",
-    "hash": "29940e3",
-    "subject": "site: the G1 studio switches between Unitree's policy and + Kiro's reflex, on the live robot and in every trial worker; default Unitree"
-  },
-  {
-    "date": "2026-11-20",
-    "hash": "c7febd5",
-    "subject": "golem-kit: the starter says its gate is red on purpose (1.2 breaks today, no Expectation table); transcript re-run"
-  },
-  {
-    "date": "2026-11-20",
-    "hash": "c518ed9",
-    "subject": "evidence: agent-gate subject is the registered controller (Kiro's later reflex is the identity reflex in each workspace); deviation 3 recorded"
-  },
-  {
-    "date": "2026-11-20",
-    "hash": "802e63e",
-    "subject": "golem-kit: a held line says the failure-rate bound is from the uniformly random trials only (CLI, MCP, gate summary, studio verdict panel)"
   }
 ]

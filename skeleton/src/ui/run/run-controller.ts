@@ -145,7 +145,7 @@ export class RunController {
     this.active = a;
     this.d.onActivity?.();
     const dims = auraDims(req.space);
-    const aura = dims ? new AuraModel(Math.max(dims.force.max, 0)) : undefined;
+    const aura = dims ? new AuraModel(Math.max(dims.force.max, 0), dims.force.kind === 'ratio' ? dims.force.name : undefined) : undefined;
     if (aura) this.auras.set(lineId, aura); else this.auras.delete(lineId);
     this.d.swarm()?.clear();
     this.d.store.update((s) => ({

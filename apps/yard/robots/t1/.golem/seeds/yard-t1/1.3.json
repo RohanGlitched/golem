@@ -1,0 +1,25 @@
+[
+  {
+    "boundarySensitive": false,
+    "classification": "robust",
+    "foundAfter": 1,
+    "reqId": "1.3",
+    "robustness": -0.278869580309962,
+    "scenario": {
+      "push.angle": 0.33617166561923445,
+      "push.weight": 0
+    },
+    "seed": 2916678175,
+    "shrunk": true,
+    "verificationRobustness": [
+      -0.4029413629733601,
+      -0.4029413629733601,
+      -0.4029413629733601
+    ],
+    "verificationSeeds": [
+      1448352424,
+      3254842707,
+      1536383744
+    ]
+  }
+]
