@@ -22,6 +22,11 @@
 2. **Summon the ghosts.** 64 translucent copies are pushed at once, in your browser's worker threads. The ones that fall turn red.
 3. **Read the verdict.** Each requirement either holds, with its margin in metres, or breaks with the mildest failing push it found, which you can replay.
 
+| | |
+|---|---|
+| <img src="site/public/media/circle.gif" alt="The home page circle: 36 ghost trials of the G1 are shoved from every direction; the ones pushed from its left fall red and the ring of text cracks there." width="100%"> | <img src="site/public/media/studio-g1.gif" alt="The G1 studio: 64 ghosts of the robot are shoved at once in the browser while the live robot keeps walking; the failing ones turn red." width="100%"> |
+| **The circle.** Requirement 1.3 written around the robot; where a shove topples it, the sentence cracks. | **The studio.** Real MuJoCo in your browser: summon 64 ghosts on a line and watch which ones fall. |
+
 ---
 
 ## What it does
@@ -38,6 +43,8 @@ at any point in its stride, THE robot SHALL stay upright for 3 s
 3. **Gate.** Kiro hooks run `golem check` when a requirements file is saved, and `golem test` when a controller is saved. A **Stop hook runs `golem gate`**, so the agent can't finish while a requirement is red. A green is confirmed (since golem-spec 0.1.2): the gate searches every `Expected_Hold` line a second time with a second search seed derived from the first, so a green needs two different searches to agree. Re-gated this way, 3 of the 4 controllers that falsely claimed success in experiment 3b come out red; one still passes, so a second seed lowers the odds of a lucky green without removing them ([re-check](evidence/results/agent-gate-hard/confirm-check.md)). A guard stops the tuning agent editing the requirement instead of the robot.
 
 The engine is MuJoCo 4 compiled to WebAssembly, the same build in Node and the browser. Every trial is reproducible from its scenario and seed.
+
+<img src="docs/architecture.jpg" alt="Architecture: in Kiro, the spec, hooks, agents with MCP and CI; in the golem-spec package, three stages (compile each EARS line to a scenario space and a monitor, falsify with pinned seeds, Latin hypercube, cross-entropy and shrinking, gate on the Expectation table with a confirming second seed, where RED blocks the agent's Stop); in simulation, the robot app (lexicon, controller in TypeScript, JavaScript or Python, MuJoCo model) running on MuJoCo 4 in WebAssembly in Node workers or browser Web Workers." width="100%">
 
 ## Kiro made the robot stronger, and GOLEM measured it
 
@@ -93,6 +100,8 @@ The three apps above each have their own controller. [`apps/yard`](apps/yard) as
 ```
 WHEN the base is pushed with up to 25% of its weight for 0.2 s from any direction THE robot SHALL stay upright for 3 s
 ```
+
+<img src="site/public/media/yard-go1.gif" alt="A Unitree Go1 in its yard studio: ghosts of it pushed with up to its full weight flip onto their backs while the live robot keeps standing." width="100%">
 
 | Robot | 10% | 25% | 50% | 100% | Weakest push that topples it |
 |---|---|---|---|---|---|

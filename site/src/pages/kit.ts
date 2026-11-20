@@ -123,6 +123,7 @@ export function kitPage(d: SiteData): PageSpec {
   const body = `
 <h1>The kit</h1>
 <p class="lede">One package, <code>golem-spec</code>, with one command, <code>golem</code>. It reads the EARS lines of a Kiro spec, runs them as physics tests, and hands counterexamples to the agent.</p>
+<figure class="wide"><img src="/media/architecture.jpg" width="1800" height="1100" loading="lazy" alt="How GOLEM works: Kiro writes the spec and the controller; golem-spec compiles each EARS line to a scenario space and a monitor, falsifies it with pinned seeds, Latin-hypercube trials, a cross-entropy search and shrinking, and gates the agent on the Expectation table, confirming a green with a second search seed; the trials run in MuJoCo 4 in WebAssembly, in Node workers or browser Web Workers." style="width:100%;height:auto;border:1px solid var(--rule);border-radius:6px"><figcaption class="small muted">How the pieces fit: Kiro on the left, the package in the middle, the simulation on the right.</figcaption></figure>
 <p>The output below is copied from <code>docs/cli-transcript.md</code>, a run on the real G1 app. Long blocks are cut at the line shown and the file has the rest.</p>
 
 <h2 id="cli">Commands</h2>

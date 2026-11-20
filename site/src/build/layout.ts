@@ -74,15 +74,24 @@ export function renderHeader(current: string): string {
   return `<header class="site-head"><a class="wordmark" href="/" aria-label="GOLEM, home">GOLEM</a>${switcher}<nav aria-label="Main">${links}<a href="${REPO_URL}" rel="noopener">Source</a></nav><button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to the light theme">Light</button></header>`;
 }
 
+/** The footer's Links column. */
+export const FOOT_LINKS: { href: string; label: string; note: string }[] = [
+  { href: 'https://www.npmjs.com/package/golem-spec', label: 'golem-spec on npm', note: 'npm i -D golem-spec' },
+  { href: 'https://youtu.be/Rln7SGtquCg', label: 'Demo video', note: '2 min 49 s' },
+  { href: 'https://devpost.com/software/golem-iavky4', label: 'Devpost entry', note: 'Kiroween 2026, Skeleton Crew' },
+  { href: `${REPO_URL}/tree/main/evidence/kiro-sessions`, label: 'Kiro session logs', note: 'Every headless run we kept, with its prompt' },
+];
+
 export function renderFooter(changelog: ChangelogEntry[]): string {
   const sitemap = SITEMAP.map((s) => `<li><a href="${s.href}">${esc(s.label)}</a><span>${esc(s.note)}</span></li>`).join('');
   const lic = LICENCES.map((l) => `<li><a href="${l.href}"${l.href.startsWith('http') ? ' rel="noopener"' : ''}>${esc(l.what)}</a><span>${esc(l.licence)}</span></li>`).join('');
-  const log = changelog.slice(0, 8).map((c) => `<li><time datetime="${esc(c.date)}">${esc(c.date)}</time> <a href="${REPO_URL}/commit/${esc(c.hash)}" rel="noopener"><code>${esc(c.hash)}</code></a> ${esc(c.subject)}</li>`).join('');
+  void changelog; // the commit log is on GitHub; the footer no longer lists it
+  const links = FOOT_LINKS.map((l) => `<li><a href="${l.href}" rel="noopener">${esc(l.label)}</a><span>${esc(l.note)}</span></li>`).join('');
   return `<footer class="site-foot"><div class="foot-grid">
 <section aria-labelledby="f-map"><h2 id="f-map">Sitemap</h2><ul class="foot-list">${sitemap}</ul></section>
 <section aria-labelledby="f-lic"><h2 id="f-lic">Licences</h2><ul class="foot-list">${lic}</ul></section>
 <section aria-labelledby="f-repo"><h2 id="f-repo">Repository</h2><p><a href="${REPO_URL}" rel="noopener">github.com/RohanGlitched/golem</a></p><p class="foot-small">A pass in GOLEM means no counterexample was found within the stated search budget. It is not a proof. Verdicts come from deterministic monitors, never from a language model.</p></section>
-<section aria-labelledby="f-log"><h2 id="f-log">Changelog</h2><ul class="foot-log">${log}</ul></section>
+<section aria-labelledby="f-links"><h2 id="f-links">Links</h2><ul class="foot-list">${links}</ul></section>
 </div><p class="foot-end">Built with Kiro. Simulation only: no real robot ran any of these tests.</p></footer>`;
 }
 

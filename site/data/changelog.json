@@ -1,6 +1,11 @@
 [
   {
     "date": "2026-11-20",
+    "hash": "b55373d",
+    "subject": "golem-kit: the truncated-normal sampler returns the bound when the quantile overflows at the edge of the mass, keeping draws monotone in u (CI fast-check counterexample, seed 42908426); regression test"
+  },
+  {
+    "date": "2026-11-20",
     "hash": "a107c9c",
     "subject": "README: demo video v6 (the tuner beat says it stopped red and the green is a later re-gate; captions below the terminal output); yard run-locally step"
   },
@@ -53,10 +58,5 @@
     "date": "2026-11-20",
     "hash": "c913f11",
     "subject": "golem-gate-hardening: 13 final checkpoint, probes and mutants after the fixes, before/after report"
-  },
-  {
-    "date": "2026-11-20",
-    "hash": "1449ac5",
-    "subject": "golem-kit: Property 32 compares onResult calls by identity, not by seed (two specs may share a seed; CI on Linux found the tie)"
   }
 ]
