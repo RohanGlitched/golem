@@ -34,3 +34,14 @@ describe('normal properties', () => {
     );
   });
 });
+
+describe('drawTruncatedNormal at the edge of the mass', () => {
+  // The CI counterexample (seed 42908426): an upper bound 8 sigma out, u just below 1. The quantile rounds to +Infinity,
+  // which must give the upper bound, not mu.
+  it('stays monotone when the quantile overflows', () => {
+    const xa = drawTruncatedNormal(0, 0.01, 0, 0.08292361075813597, 1.1102230246251568e-16);
+    const xb = drawTruncatedNormal(0, 0.01, 0, 0.08292361075813597, 0.9999999999999999);
+    expect(xb).toBeGreaterThanOrEqual(xa);
+    expect(xb).toBeLessThanOrEqual(0.08292361075813597);
+  });
+});

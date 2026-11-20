@@ -1,5 +1,9 @@
 ﻿# Changelog
 
+## Unreleased
+
+- The truncated-normal sampler of the cross-entropy search returns the bound, not the mean, when a draw at the very edge of the mass rounds to a quantile of ±Infinity, so its draws stay monotone (a fast-check counterexample from CI: an upper bound 8 sigma out and u just below 1).
+
 ## 0.1.3
 
 - Python controllers. `pythonController(...)` in `golem-spec/node` runs a controller written in Python as a GOLEM `Controller`: each trial worker starts the script once, sends a reset before every trial and the observation every control step, and blocks (`Atomics.wait`) until the action returns, so trials stay deterministic and synchronous. About 80 µs per step on a laptop. Node only (CLI, gate, MCP); the browser studio still runs JavaScript controllers.

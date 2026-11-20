@@ -101,6 +101,8 @@ export function drawTruncatedNormal(mu: number, sigma: number, lo: number, hi: n
   } else {
     x = clamp(mu, lo, hi);
   }
-  if (!Number.isFinite(x)) x = clamp(mu, lo, hi);
+  // A draw at the very edge of the mass can round to a quantile of exactly 0 or 1 (±Infinity): that is the bound on
+  // that side, so the draw stays monotone in u. Only NaN falls back to mu.
+  if (!Number.isFinite(x)) x = x > 0 ? hi : x < 0 ? lo : clamp(mu, lo, hi);
   return clamp(x, lo, hi);
 }
