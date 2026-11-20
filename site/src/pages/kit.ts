@@ -136,6 +136,11 @@ ${codeBlock(excerpt(reflexGate.code.split('\n').map((l) => clip(l, 260)).join('\
 ${cliBlock('init', undefined, 0)}
 ${cliBlock('mcp', byName('mcp'), 10)}
 
+<h2 id="python">Controllers in Python</h2>
+<p>Since 0.1.3, <code>pythonController(...)</code> in <code>golem-spec/node</code> runs a controller written in Python, unchanged, inside GOLEM's trials. Each trial worker starts the script once; before every trial it sends a reset, and at every control step the observation, then blocks until the action comes back (about 80 µs a step), so trials stay deterministic. The starter ships <code>controller.py</code> with the same balance law as <code>app.js</code> and <code>golem_bridge.py</code>, the Python side, standard library only.</p>
+${codeBlock("$env:GOLEM_CONTROLLER = 'python'      # bash: export GOLEM_CONTROLLER=python\nnpx --no-install golem-spec test --budget 24", 'run the starter with its Python controller')}
+<p>It prints the same verdicts, margins and counterexamples as the JavaScript controller; the CI starter job checks that on every push. Python controllers run in the CLI, the gate and the MCP server. The browser studio still runs JavaScript controllers only.</p>
+
 <h2 id="mcp">MCP tools</h2>
 <p><code>golem mcp</code> speaks MCP over stdio. A Kiro agent gets these tools, so it can falsify, read a counterexample and explain the margin without a shell.</p>
 ${mcpTools()}

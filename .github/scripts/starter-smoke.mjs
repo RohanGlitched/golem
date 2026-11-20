@@ -23,9 +23,9 @@ const win = process.platform === 'win32';
 let failed = false;
 
 /** Runs a command in the temp project, echoes it and its output, and returns { code, out }. */
-function run(label, cmd, args) {
-  console.log(`\n$ ${[cmd, ...args].join(' ')}`);
-  const r = spawnSync(win && cmd === 'npx' ? 'npx.cmd' : cmd, args, { cwd: proj, encoding: 'utf8', shell: win, maxBuffer: 64 << 20 });
+function run(label, cmd, args, env) {
+  console.log(`\n$ ${env ? Object.entries(env).map(([k, v]) => `${k}=${v} `).join('') : ''}${[cmd, ...args].join(' ')}`);
+  const r = spawnSync(win && cmd === 'npx' ? 'npx.cmd' : cmd, args, { cwd: proj, encoding: 'utf8', shell: win, maxBuffer: 64 << 20, env: { ...process.env, ...(env ?? {}) } });
   const out = `${r.stdout ?? ''}${r.stderr ?? ''}`;
   process.stdout.write(out.endsWith('\n') ? out : `${out}\n`);
   console.log(`[${label}] exit ${r.status}`);
@@ -44,7 +44,7 @@ try {
 
   const init = run('init', 'npx', ['--no-install', 'golem-spec', 'init']);
   expect(init.code === 0, 'init exits 0');
-  for (const f of ['app.js', 'golem.config.json', 'robot/scene.xml', '.kiro/specs/cartpole/requirements.md', '.kiro/hooks/golem.json']) {
+  for (const f of ['app.js', 'golem.config.json', 'robot/scene.xml', '.kiro/specs/cartpole/requirements.md', '.kiro/hooks/golem.json', 'controller.py', 'golem_bridge.py']) {
     expect(existsSync(join(proj, f)), `init wrote ${f}`);
   }
 
@@ -56,6 +56,13 @@ try {
   expect(/^1\.1\s+HELD/m.test(test.out), 'test: 1.1 held');
   expect(/^1\.2\s+BROKEN/m.test(test.out), 'test: 1.2 broken');
   expect(/^2\.1\s+HELD/m.test(test.out), 'test: 2.1 held');
+
+  // The same law in controller.py, through the Python bridge, gives the same verdicts, margins and counterexamples.
+  // Both runs start from the same state: the first one pinned its counterexample in .golem/, so clear it.
+  const same = (o) => o.replace(/in [0-9.]+ s\b/g, 'in T s').trim();
+  rmSync(join(proj, '.golem'), { recursive: true, force: true });
+  const testPy = run('test (python)', 'npx', ['--no-install', 'golem-spec', 'test', '--budget', '24'], { GOLEM_CONTROLLER: 'python', GOLEM_PYTHON: win ? 'python' : 'python3' });
+  expect(testPy.code === 2 && same(testPy.out) === same(test.out), 'test with GOLEM_CONTROLLER=python prints the same verdicts as the JavaScript controller');
 
   const gate = run('gate', 'npx', ['--no-install', 'golem-spec', 'gate', '--json']);
   expect(gate.code === 2, 'gate exits 2 on line 1.2 (red on purpose)');

@@ -38,6 +38,8 @@ export const STARTER_FILES: readonly { src: string; dest: string }[] = [
   { src: 'robot/scene.xml', dest: 'robot/scene.xml' },
   { src: 'requirements.md', dest: '.kiro/specs/cartpole/requirements.md' },
   { src: 'README.md', dest: 'README.md' },
+  { src: 'controller.py', dest: 'controller.py' },
+  { src: 'golem_bridge.py', dest: 'golem_bridge.py' },
 ];
 /** The README may already be the project's own; every other starter file makes the starter stand down when it exists. */
 const STARTER_OPTIONAL = 'README.md';

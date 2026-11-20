@@ -3,6 +3,10 @@
 // `lexicon` below, and the controller is `makeController`. Plain ES module, no build step.
 // Edit the controller to change what the requirements in .kiro/specs/cartpole/requirements.md find.
 import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+
+// GOLEM_CONTROLLER=python runs the same law from controller.py instead (through golem-spec's Python bridge).
+const python = process.env.GOLEM_CONTROLLER === 'python' ? await import('golem-spec/node') : undefined;
 
 const RAD2DEG = 180 / Math.PI;
 
@@ -99,6 +103,7 @@ const app = {
 
   makeController(ctx) {
     stateOf(ctx);
+    if (python) return pythonMakeController(ctx);
     return {
       step(c) {
         const s = stateOf(c);
@@ -114,5 +119,20 @@ const app = {
     out.cart_x = s.qpos[s.slideQpos]; // m from the centre of the rail
   },
 };
+
+// The Python controller sees [x, theta, xdot, thetadot] and returns [force]; the clamp to the motor's range stays here.
+const pythonMakeController = python?.pythonController({
+  script: fileURLToPath(new URL('./controller.py', import.meta.url)),
+  observe(ctx, out) {
+    const s = stateOf(ctx);
+    out[0] = s.qpos[s.slideQpos]; out[1] = s.qpos[s.hingeQpos]; out[2] = s.qvel[s.slideDof]; out[3] = s.qvel[s.hingeDof];
+    return 4;
+  },
+  apply(ctx, action) {
+    const s = stateOf(ctx);
+    const u = action[0];
+    s.ctrl[s.drive] = u > FORCE_LIMIT ? FORCE_LIMIT : u < -FORCE_LIMIT ? -FORCE_LIMIT : u;
+  },
+});
 
 export default app;

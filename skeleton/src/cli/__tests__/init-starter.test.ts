@@ -14,6 +14,8 @@ const STARTER: Record<string, string> = {
   'robot/scene.xml': '<mujoco/>\n',
   'requirements.md': '1. THE robot SHALL keep the cart within 0.3 m of the centre\n',
   'README.md': '# starter\n',
+  'controller.py': 'from golem_bridge import serve\n',
+  'golem_bridge.py': 'def serve(make):\n    pass\n',
 };
 const SRC_OF = Object.fromEntries(STARTER_FILES.map((f) => [f.dest, f.src]));
 const DESTS = STARTER_FILES.map((f) => f.dest);

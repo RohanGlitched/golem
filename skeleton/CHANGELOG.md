@@ -1,5 +1,11 @@
 ﻿# Changelog
 
+## 0.1.3
+
+- Python controllers. `pythonController(...)` in `golem-spec/node` runs a controller written in Python as a GOLEM `Controller`: each trial worker starts the script once, sends a reset before every trial and the observation every control step, and blocks (`Atomics.wait`) until the action returns, so trials stay deterministic and synchronous. About 80 µs per step on a laptop. Node only (CLI, gate, MCP); the browser studio still runs JavaScript controllers.
+- The starter gains `controller.py` (the same law as `app.js`) and `golem_bridge.py` (the Python side, standard library only, little-endian float64 frames on stdin and stdout). `GOLEM_CONTROLLER=python` makes the starter use them; its verdicts, margins and counterexamples are the same as with the JavaScript controller, and the CI starter job checks that.
+- `golem init` writes the two Python files with the rest of the starter.
+
 ## 0.1.2
 
 - `golem gate` confirms a green. When every line meets its expectation, each `Expected_Hold` line is searched again with a second search seed, derived from the first, before the gate prints green. Experiment 3b found agents trusting a 24-trial green that another search seed broke (a 200 N push that still breaks requirement 1.3).

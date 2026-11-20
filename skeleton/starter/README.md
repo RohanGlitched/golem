@@ -13,6 +13,17 @@ npx --no-install golem-spec gate               # exits 2 and names 1.2 (red on p
 npx --no-install golem-spec replay 1.2         # re-runs the shrunk counterexample, writes .golem/replays/1.2.csv
 ```
 
+## Write the controller in Python
+
+`controller.py` is the same balance law in Python, and `golem_bridge.py` (standard library only) connects it to GOLEM's MuJoCo trials. Set `GOLEM_CONTROLLER=python` and every command uses it instead of the law in `app.js`:
+
+```
+$env:GOLEM_CONTROLLER = 'python'   # PowerShell; in bash: export GOLEM_CONTROLLER=python
+npx --no-install golem-spec test --budget 24
+```
+
+It prints the same verdicts, margins and counterexamples as the JavaScript controller. GOLEM starts the script once per trial worker, calls `make_controller()` before each trial and the controller once per control step with `[x, theta, xdot, thetadot]`; it returns `[force]`. Replace its body with your own controller (numpy, a trained policy, anything Python runs). The interpreter is `python` on Windows and `python3` elsewhere; set `GOLEM_PYTHON` to use another. Python controllers run in the CLI, the gate and the MCP server; the browser studio runs JavaScript controllers only.
+
 ## What to expect
 
 Measured with `test --budget 24` over six search seeds (1, 2, 3, 7, 99, 12345):

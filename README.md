@@ -63,6 +63,8 @@ npx golem-spec gate        # exit 0 only if everything holds, under two search s
 
 Use `npx golem-spec`, not `npx golem`: a bare `npx golem` resolves to an unrelated npm package.
 
+**Controllers in Python.** Since 0.1.3, `pythonController(...)` (in `golem-spec/node`) runs a controller written in Python, unchanged, inside GOLEM's trials: one Python process per trial worker, a reset before each trial, one observation and action per control step over stdin and stdout, about 80 µs a step. The starter ships `controller.py` with the same law as `app.js`; `GOLEM_CONTROLLER=python npx --no-install golem-spec test` prints the same verdicts, margins and counterexamples as the JavaScript controller, and CI checks that. The browser studio still runs JavaScript controllers only.
+
 | What lands in `.kiro/` | What it does |
 |---|---|
 | `hooks/golem.json` | check on save, falsify on controller save, the Stop gate, test after each spec task, and a manual "Summon the ghosts" |
