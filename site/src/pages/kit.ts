@@ -23,7 +23,7 @@ const WHAT: Record<string, string> = {
   test: 'Runs every requirement: pinned seeds, random trials, guided search, shrinking. Exit 2 when any line is broken.',
   falsify: 'Hunts one requirement. Pinned seeds re-run first.',
   replay: 'Re-runs a pinned counterexample exactly and writes its trace to .golem/replays/.',
-  gate: 'Exit 0 only when every line meets its row of the Expectation table (Expected_Hold holds, Expected_Break breaks; no row means Expected_Hold) and no pinned seed fails. From golem-spec 0.1.2 (in the repository; not yet on npm), before it prints green it searches every Expected_Hold line again with a second search seed derived from the first (--confirm-budget sets that budget, --no-confirm skips it); a line that breaks the second time makes the gate red. With --kiro it blocks an agent Stop with JSON on stdout and exits 0.',
+  gate: 'Exit 0 only when every line meets its row of the Expectation table (Expected_Hold holds, Expected_Break breaks; no row means Expected_Hold) and no pinned seed fails. From golem-spec 0.1.2, before it prints green it searches every Expected_Hold line again with a second search seed derived from the first (--confirm-budget sets that budget, --no-confirm skips it); a line that breaks the second time makes the gate red. With --kiro it blocks an agent Stop with JSON on stdout and exits 0.',
   init: 'Copies the Kiro pack (hooks, steering, agents, skills, MCP entry) into the project .kiro/.',
   mcp: 'Starts the stdio MCP server for Kiro agents.',
 };
