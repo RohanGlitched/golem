@@ -1,6 +1,7 @@
 // Document shell shared by every page: head, header with the theme toggle, and the rich footer (identical everywhere).
 import type { ChangelogEntry } from './data';
 import { esc } from './html';
+import { readRepoJson } from './repo';
 
 export const REPO_URL = 'https://github.com/RohanGlitched/golem';
 export const SITE_NAME = 'GOLEM';
@@ -33,12 +34,20 @@ export const STUDIOS: { href: string; label: string; id: string }[] = [
   { href: '/hover/', label: 'X2', id: 'hover' },
 ];
 
+/** A small count in words (seven), digits above twelve: the yard's robot count is read from apps/yard/robots.json. */
+export function countWord(n: number): string {
+  const words = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
+  return words[n] ?? String(n);
+}
+
+const YARD_ROBOTS = readRepoJson<{ robots: unknown[] }>('apps/yard/robots.json').robots.length;
+
 export const SITEMAP: { href: string; label: string; note: string }[] = [
   { href: '/', label: 'Home', note: 'Shove the G1, summon the ghosts' },
   { href: '/stagger/', label: 'Stagger studio', note: 'Unitree G1 walking under Unitree’s policy' },
   { href: '/candy/', label: 'Candy studio', note: 'Franka Panda sorting candy near hands' },
   { href: '/hover/', label: 'Hover studio', note: 'Skydio X2 holding a point in gusts' },
-  { href: '/yard/', label: 'The yard', note: 'One spec on seven Menagerie robots' },
+  { href: '/yard/', label: 'The yard', note: `One spec on ${countWord(YARD_ROBOTS)} Menagerie robots` },
   { href: '/kit/', label: 'The kit', note: 'CLI, MCP, hooks, agents, EARS dialect' },
   { href: '/evidence/', label: 'Evidence', note: 'Stability map, benchmark, limits' },
   { href: '/how-kiro/', label: 'How Kiro built it', note: 'Specs, audits, what went wrong' },
@@ -49,7 +58,7 @@ export const LICENCES: { what: string; licence: string; href: string }[] = [
   { what: 'Unitree G1 model and walking policy (unitree_rl_gym)', licence: 'BSD-3-Clause', href: '/stagger/robot/LICENSE.txt' },
   { what: 'Franka Panda (MuJoCo Menagerie)', licence: 'Apache-2.0', href: '/candy/robot/LICENSE.txt' },
   { what: 'Skydio X2 (MuJoCo Menagerie)', licence: 'Apache-2.0', href: '/hover/robot/LICENSE.txt' },
-  { what: 'Yard robots (MuJoCo Menagerie: Unitree, Boston Dynamics, ANYbotics, Berkeley, Booster)', licence: 'see each LICENSE', href: `${REPO_URL}/tree/main/apps/yard` },
+  { what: 'Yard robots (MuJoCo Menagerie: Unitree, Boston Dynamics, ANYbotics, Berkeley, Booster, Apptronik)', licence: 'see each LICENSE', href: `${REPO_URL}/tree/main/apps/yard` },
   { what: 'MuJoCo', licence: 'Apache-2.0', href: 'https://github.com/google-deepmind/mujoco/blob/main/LICENSE' },
   { what: 'B612 and B612 Mono (Airbus)', licence: 'SIL OFL 1.1', href: '/fonts/OFL.txt' },
   { what: 'Gloock', licence: 'SIL OFL 1.1', href: '/fonts/OFL-Gloock.txt' },

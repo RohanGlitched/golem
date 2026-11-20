@@ -35,8 +35,17 @@ export function referencedFiles(xml) {
   return [...out].sort();
 }
 
-/** scene.xml: the upstream model, our timestep, and a floor in geom group 2 (the group the studio draws). */
-export function sceneXml(robot) {
+/** The `<contact>` block of an upstream scene.xml (some models declare their floor contacts there), or '. */
+export function contactBlock(sceneText) {
+  return /<contact\b[\s\S]*?<\/contact>/.exec(sceneText)?.[0] ?? '';
+}
+
+/**
+ * scene.xml: the upstream model, our timestep, and a floor in geom group 2 (the group the studio draws). `contact` is the
+ * upstream scene's `<contact>` block, copied verbatim: a model whose geoms all have contype 0 (the Apollo) only touches the
+ * floor through the pairs declared there, and they name the geom "floor".
+ */
+export function sceneXml(robot, contact = '') {
   return `<mujoco model="${robot.name} in the GOLEM yard">
   <include file="${robot.model}"/>
 
@@ -48,7 +57,7 @@ export function sceneXml(robot) {
 
   <worldbody>
     <geom name="floor" type="plane" size="0 0 0.05" group="2" rgba="0.55 0.5 0.45 1"/>
-  </worldbody>
+  </worldbody>${contact ? `\n\n  ${contact}` : ''}
 </mujoco>
 `;
 }
@@ -64,7 +73,14 @@ async function build(robot, check) {
   const manifestPath = join(dir, 'SOURCE.json');
   const old = existsSync(manifestPath) ? JSON.parse(await readFile(manifestPath, 'utf8')) : undefined;
   const pinned = old?.commit === META.commit ? old.sources : undefined;
-  const scene = new TextEncoder().encode(sceneXml(robot));
+  // Upstream scene.xml's <contact> block: read from the manifest when one is pinned (so a rebuild needs no network), else fetched.
+  let sceneContact = pinned ? old.sceneContact : undefined;
+  if (!pinned && !check) {
+    const upstream = await fetchBytes(raw(robot.folder, 'scene.xml')).catch((e) => (String(e).includes('HTTP 404') ? undefined : Promise.reject(e)));
+    const xml = upstream ? contactBlock(new TextDecoder().decode(upstream)) : '';
+    if (xml) sceneContact = { from: 'scene.xml', sha256: sha256(upstream), xml };
+  }
+  const scene = new TextEncoder().encode(sceneXml(robot, sceneContact?.xml));
 
   if (check) {
     if (!pinned) return `${robot.id}: no SOURCE.json for the pinned commit`;
@@ -101,6 +117,7 @@ async function build(robot, check) {
     licence: 'see robot/LICENSE (unchanged from the upstream folder)',
     sources: Object.fromEntries(Object.entries(sources).sort(([a], [b]) => a.localeCompare(b))),
     generated: { 'scene.xml': 'scripts/fetch-assets.mjs (sceneXml)' },
+    ...(sceneContact ? { sceneContact } : {}),
     outputs: Object.fromEntries(Object.entries({ ...sources, 'scene.xml': sha256(scene) }).sort(([a], [b]) => a.localeCompare(b))),
   };
   await writeFile(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
