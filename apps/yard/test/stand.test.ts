@@ -8,7 +8,7 @@ import {
   ROBOTS, SIM_DT, UPRIGHT_HEIGHT_RATIO, UPRIGHT_TILT_LIMIT, TILT_TO_M, headingOf, pushDirection, robotById, robotFileList,
   standApp, tiltDeg, uprightMargin,
 } from '../stand';
-import { referencedFiles, sceneXml, SIM_DT as SCRIPT_DT } from '../scripts/fetch-assets.mjs';
+import { contactBlock, referencedFiles, sceneXml, SIM_DT as SCRIPT_DT } from '../scripts/fetch-assets.mjs';
 
 const REQ = readFileSync(new URL('../.kiro/specs/stand-push/requirements.md', import.meta.url), 'utf8');
 const robotDir = (id: string): URL => new URL(`../robots/${id}/robot/`, import.meta.url);
@@ -49,8 +49,8 @@ describe('helpers', () => {
 });
 
 describe('robots.json and the asset script', () => {
-  it('lists seven robots with unique ids and a free-base body each', () => {
-    expect(ROBOTS).toHaveLength(7);
+  it('lists eight robots with unique ids and a free-base body each', () => {
+    expect(ROBOTS).toHaveLength(8);
     expect(new Set(ROBOTS.map((r) => r.id)).size).toBe(ROBOTS.length);
     for (const r of ROBOTS) expect(r.base).toMatch(/^\w+$/);
     expect(() => robotById('nope')).toThrow(/known: go1/);
@@ -62,6 +62,17 @@ describe('robots.json and the asset script', () => {
     expect(xml).toContain('<include file="spot.xml"/>');
     expect(xml).toContain(`timestep="${SIM_DT}"`);
     expect(xml).toMatch(/name="floor"[^>]*group="2"/);
+  });
+
+  it('copies the upstream scene contact block into the scene, and adds nothing when there is none', () => {
+    const upstream = '<mujoco><worldbody/><contact>\n    <pair geom1="sole" geom2="floor" condim="6"/>\n  </contact></mujoco>';
+    const block = contactBlock(upstream);
+    expect(block).toMatch(/^<contact>[\s\S]*<pair geom1="sole" geom2="floor"[\s\S]*<\/contact>$/);
+    expect(contactBlock('<mujoco><worldbody/></mujoco>')).toBe('');
+    const apollo = robotById('apollo');
+    expect(sceneXml(apollo, block)).toContain(block);
+    expect(sceneXml(apollo)).toBe(sceneXml(apollo, ''));
+    expect(sceneXml(apollo)).not.toContain('<contact');
   });
 
   it('finds mesh and texture files under their compiler directories', () => {
@@ -76,6 +87,7 @@ describe('robots.json and the asset script', () => {
       expect(m.folder).toBe(r.folder);
       expect(robotFileList(new TextEncoder().encode(JSON.stringify(m)))).toContain('scene.xml');
       expect(m.sources[r.model]).toMatch(/^[0-9a-f]{64}$/);
+      if (m.sceneContact) expect(sceneXml(r, m.sceneContact.xml)).toContain(m.sceneContact.xml);
       expect(m.sources['LICENSE']).toMatch(/^[0-9a-f]{64}$/);
     }
   });
@@ -93,16 +105,20 @@ describe('the shared requirements', () => {
 });
 
 describe('a real trial per fetched robot', () => {
-  const cache = new ModelCache();
   for (const r of ROBOTS) {
     it.skipIf(!fetched(r.id))(`${r.id}: no push is a finite margin, and a push of its full weight from its left topples it`, async () => {
+      // One cache per robot, disposed after it: all eight models in one WASM heap run out of memory at the eighth.
+      const cache = new ModelCache();
       const app = standApp(r.id, robotDir(r.id));
       const req = compileRequirementsFile(REQ, app.lexicon as never).requirements.find((q) => q.id === '1.4')!;
       const run = (ratio: number) => runTrial(app as never, req, { app: app.id, reqId: '1.4', scenario: { 'push.weight': ratio, 'push.angle': Math.PI / 2 }, seed: 1 }, { cache });
-      const calm = await run(0);
-      expect(Number.isFinite(calm.robustness)).toBe(true);
-      const hard = await run(1);
-      expect(hard.robustness).toBeLessThan(0);
+      try {
+        const calm = await run(0);
+        // Above -1 m: a robot that falls over lands on the floor (at worst -0.6 x its height); a robot with no floor contact at all falls through it (-99 m).
+        expect(calm.robustness).toBeGreaterThan(-1);
+        const hard = await run(1);
+        expect(hard.robustness).toBeLessThan(0);
+      } finally { cache.dispose(); }
     });
   }
 });
