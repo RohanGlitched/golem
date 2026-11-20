@@ -76,6 +76,8 @@ describe('the findings and the search-versus-rose table', () => {
     const html = crosscheckSection(board.robots);
     const standing = board.robots.filter((r) => r.weakest && r.weakest.breaks > 0).length;
     expect((html.match(/<tr>/g) ?? []).length).toBe(standing + 1);
+    expect(html).toContain('An independent re-measurement');
+    expect(html).toMatch(/within \d+(\.\d)?% of the weight/);
   });
 
   it('falls back to no findings for an empty board', () => {

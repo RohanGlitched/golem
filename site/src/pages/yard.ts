@@ -90,7 +90,7 @@ export function findings(robots: YardRow[]): string {
   }
   const any = by('anymal_c');
   if (any && roseAt(any, 0) !== undefined) {
-    out.push(`<li><b>ANYmal C is the other way round.</b> It is weakest pushed from the front or behind (${pctOr(roseAt(any, 0))} and ${pctOr(roseAt(any, 180))}) and takes ${pctOr(roseAt(any, 90))} from the side: its rose is a four-leaf shape where the other dogs' are long ovals.</li>`);
+    out.push(`<li><b>ANYmal C is the other way round.</b> It is weakest pushed from the front or behind (${pctOr(roseAt(any, 0))} and ${pctOr(roseAt(any, 180))}) and takes ${pctOr(roseAt(any, 90))} from the side: its rose is a rounded square where the other dogs' are long ovals.</li>`);
   }
   const g1 = by('g1');
   if (g1?.weakest) {
@@ -116,7 +116,7 @@ export function crosscheckSection(robots: YardRow[]): string {
   let py = '';
   try {
     const txt = readRepoText('apps/yard/crosscheck.txt');
-    const lines = [...txt.matchAll(/^(\w+)\s+(\d+)°\s+(\S+)\s+(\S+)$/gm)];
+    const lines = [...txt.matchAll(/^(\w+)\s+(\d+) deg\s+(\S+)\s+(\S+)\s*$/gm)];
     const num = (s: string): number | null => (s === 'holds' ? null : Number(s.replace('%', '')) / 100);
     const pairs = lines.map((m) => ({ id: m[1] as string, deg: Number(m[2]), py: num(m[3] as string), golem: num(m[4] as string) }));
     const both = pairs.filter((p) => p.py !== null && p.golem !== null && (p.golem as number) > 0);
@@ -146,6 +146,7 @@ function verdictCell(l: YardLine | undefined): string {
   if (l.status === 'held') return '<span class="held">held</span>';
   if (l.status === 'broken') {
     const ce = l.counterexample;
+    if (ce && ce.weight === 0) return '<span class="broken">broken</span><span class="small muted"> with no push</span>';
     return `<span class="broken">broken</span>${ce ? `<span class="small muted"> at ${pct(ce.weight)}, ${Math.round(ce.deg)}°</span>` : ''}`;
   }
   return esc(l.status);
