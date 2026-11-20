@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { crosscheckSection, findings, roseSvg, sideName, yardPage, yardStudioPage, type YardBoard, type YardRow } from '../src/pages/yard';
 import { readRepoJson } from '../src/build/repo';
 import { PAGE_ENTRIES, YARD_IDS } from '../src/build/pages-plugin';
+import { SITEMAP, countWord } from '../src/build/layout';
 
 const row = (rose: YardRow['rose'], weakest: YardRow['weakest']): YardRow => ({
   id: 'x', name: 'Test Dog', kind: 'quadruped', folder: 'x', lines: [], rose, weakest, strongestBreak: null, seconds: { verdicts: 1, rose: 1 },
@@ -51,6 +52,19 @@ describe('the yard pages', () => {
     expect(p.body).toContain('id="board"');
     expect(p.body.match(/class="rose-card"/g)?.length).toBeGreaterThanOrEqual(1);
     expect(p.body.match(/<li><span class="mono muted">/g)).toHaveLength(5);
+  });
+
+  it('says the robot count from robots.json, not a number typed into the text', () => {
+    const n = readRepoJson<{ robots: unknown[] }>('apps/yard/robots.json').robots.length;
+    const p = yardPage();
+    expect(n).toBeGreaterThanOrEqual(8);
+    expect(countWord(n)).toBe('eight');
+    expect(p.title).toBe('The yard: one spec, ' + countWord(n) + ' robots');
+    expect(p.body).toContain('One requirements file, ' + countWord(n) + ' robots. GOLEM fetched ' + countWord(n) + ' models');
+    expect(p.body).toContain('<b>' + n + '</b><span>Menagerie robots');
+    expect(SITEMAP.find((s) => s.href === '/yard/')?.note).toBe('One spec on ' + countWord(n) + ' Menagerie robots');
+    expect(YARD_IDS).toHaveLength(n);
+    expect(YARD_IDS).toContain('apollo');
   });
 
   it('gives each studio page its robot and a switcher with the current robot marked', () => {

@@ -1,7 +1,7 @@
-// The yard page: one requirements file on seven MuJoCo Menagerie robots, read from apps/yard/board.json.
+// The yard page: one requirements file on every MuJoCo Menagerie robot in apps/yard/robots.json, read from apps/yard/board.json.
 import { codeBlock, earsHtml, esc, table } from '../build/html';
 import type { PageSpec } from '../build/layout';
-import { REPO_URL } from '../build/layout';
+import { REPO_URL, countWord } from '../build/layout';
 import { readRepoJson, readRepoText } from '../build/repo';
 
 export interface YardLine {
@@ -177,7 +177,7 @@ ${roseSvg(r)}
 </figure>`).join('\n');
 
   const body = `<h1>The yard</h1>
-<p class="lede">One requirements file, seven robots. GOLEM fetched seven models from <a href="https://github.com/google-deepmind/mujoco_menagerie">MuJoCo Menagerie</a> at one pinned commit, stood each in its keyframe pose on its own position servos, and ran the same five EARS lines against all of them. ${standing.length} stand; ${fallen.length} fall over before anyone pushes them.</p>
+<p class="lede">One requirements file, ${countWord(robots.length)} robots. GOLEM fetched ${countWord(robots.length)} models from <a href="https://github.com/google-deepmind/mujoco_menagerie">MuJoCo Menagerie</a> at one pinned commit, stood each in its keyframe pose on its own position servos, and ran the same five EARS lines against all of them. ${standing.length} stand; ${fallen.length} fall over before anyone pushes them.</p>
 <p>No robot here runs its real controller. The servos hold the pose at the gains the model ships with, and nothing balances. So this board compares the stances that come in the box, not the robots. Its point is the method: the push lines are written as a share of the robot's weight, so the same sentence asks the same thing of a 12 kg dog and a 50 kg one, and adding a robot is one row in a JSON file.</p>
 
 <div class="stats">
@@ -207,19 +207,19 @@ ${crosscheckSection(robots)}
 <ol class="ears-list">${lines.map(([id, l]) => `<li><span class="mono muted">${esc(id)}</span> ${earsHtml(l as string)}</li>`).join('')}</ol>
 
 <h2 id="add-a-robot">Add a robot</h2>
-<p>Any Menagerie model with position servos and a free base works the same way. Add one row to <a href="${REPO_URL}/blob/main/apps/yard/robots.json"><code>apps/yard/robots.json</code></a> (its folder, model file, keyframe and base body), copy a folder under <code>apps/yard/robots/</code>, then:</p>
+<p>Any Menagerie model with position servos and a free base works the same way. Add one row to <a href="${REPO_URL}/blob/main/apps/yard/robots.json"><code>apps/yard/robots.json</code></a> (its folder, model file, keyframe and base body), copy another robot's folder under <code>apps/yard/robots/</code> (its <code>app.ts</code> and <code>golem.config.json</code>, with the id changed), then:</p>
 ${codeBlock('node apps/yard/scripts/fetch-assets.mjs <id>\nnpx golem-spec test --app apps/yard/robots/<id>\nnpx vite-node apps/yard/scripts/board.ts <id>', 'adding a robot to the yard')}
-<p class="small muted">The first command downloads the model's files at the pinned commit and records their SHA-256, the second runs the five lines on it, and the third adds its row and rose to this page.</p>
+<p class="small muted">The first command downloads the model's files at the pinned commit and records their SHA-256, the second runs the five lines on it, and the third re-runs them with the board's settings (<code>--budget ${b.budget} --search-seed ${b.searchSeed}</code>; give the second the same flags to get the same verdicts) and adds the robot's row and rose to this page. Some models only touch the floor through <code>&lt;contact&gt;</code> pairs in their upstream <code>scene.xml</code> (the Apollo); the first command copies that block into the yard's scene.</p>
 <p>The stand app is one file, <a href="${REPO_URL}/blob/main/apps/yard/stand.ts"><code>apps/yard/stand.ts</code></a>: it reads the keyframe, writes the servo targets, pushes the base and reports three signals. A robot whose actuators are torque motors (the Go2, the H1) needs a PD law first, which the yard does not have yet.</p>`;
 
   return {
-    id: 'yard', path: '/yard/', title: 'The yard: one spec, seven robots',
+    id: 'yard', path: '/yard/', title: `The yard: one spec, ${countWord(robots.length)} robots`,
     description: `The same five EARS requirements on ${robots.length} MuJoCo Menagerie robots, with a stance rose for each.`,
     body,
   };
 }
 
-/** /yard/<id>/: the studio on one yard robot, with links to the other six. */
+/** /yard/<id>/: the studio on one yard robot, with links to the other yard robots. */
 export function yardStudioPage(id: string): PageSpec {
   const b = readRepoJson<YardBoard>('apps/yard/board.json');
   const row = b.robots.find((r) => r.id === id);
