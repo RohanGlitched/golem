@@ -887,5 +887,23 @@
   "toolCalls": 60,
   "filesWritten": 4,
   "finalMessage": "The spec for `golem-studio-ui` is written: requirements, design and tasks. `validate_spec_format` reports no issues on any of the three. I wrote no implementation code, and I skipped the tightening pass as you asked.\n\n**What changed from the approved requirements**\n- Summon now records poses for every trial of each generation (at most 64). Each generation replaces the swarm. The aura, reel and verdict panel use all trials. Held poses are bounded: the previous generation's poses are dropped, except the closest call and the best counterexample.\n- I added one criterion beyond what you asked: Requirement 10.18, a count property. The test list in Requirement 30 doesn't include it yet.\n\n**Design decisions that depart from the requirements or rest on an assumption**\n- **Contrast:** The steering colours fail the 4.5:1 requirement for text. Dark `--break` is 3.43:1 on `--ground`, and light `--hold` is 3.76:1. The design adds two text-only tokens, `--break-text` and `--hold-text`. The eight steering tokens stay unchanged.\n- **Additive ghosts in light theme:** Additive blending on the light ground brightens the background instead of drawing a ghost. The design uses additive blending in dark and normal alpha blending in light, which departs from your additive spec in the light theme only.\n- **Hero sleep:** Requirements 6.10 and 5.11 conflict for a walking robot, since one wants it always simulating and the other wants an idle page to draw nothing. The design sleeps the hero after 10 s wi"
+ },
+ {
+  "name": "yard-apollo",
+  "file": "yard-apollo.jsonl.gz",
+  "sessions": [
+   "sess_95ffce46-a989-4807-b5e3-1fe924cb53df"
+  ],
+  "modes": [
+   "vibe"
+  ],
+  "models": [
+   "auto",
+   "claude-sonnet-5.5"
+  ],
+  "credits": 24.04,
+  "toolCalls": 74,
+  "filesWritten": 1,
+  "finalMessage": "I'll start by looking at the yard app and the site page.\nFetch worked (45 s). Now the test.\nThat was my error: Windows PowerShell's `-Encoding utf8` adds a BOM. I'll rewrite both files as byte copies of the go1 files with the id swapped.\nMy PowerShell quoting mangled the new test, so I'll fix it with a proper edit.\nIndent the try body properly, then run.\nThe new assertion fails on the pre-fix scene and passes after it, and the scene is restored. Now the site tests.\nThe Apollo is now the eighth yard robot. It stands, but every one of the five lines is broken, and the \"Add a robot\" instructions were not enough as written.\n\nApollo's model, keyframe and base came from its XML: `apptronik_apollo.xml`, key `stand`, base body `base_link`. The yard tests pass (18) and so do the site tests (58), both type checks are clean, and `vite build` produces `/yard/apollo/`. I did not open the Apollo studio in a browser.\n\n## Apollo's verdicts (`--budget 128 --search-seed 1`)\n\n| Line | Verdict | Counterexample |\n|---|---|---|\n| 1.1 (10%) | BROKEN | 9.33% of its weight from 174° |\n| 1.2 (25%) | BROKEN | 23.1% from 4.5° |\n| 1.3 (50%) | BROKEN | 23.8% from 19.3° |\n| 1.4 (100%) | BROKEN | 31.2% from 57° |\n| 2.1 (stays within 5 cm) | BROKEN | 9.38% from 198° |\n\n- **Weakest push:** 9.4% of its weight from behind (180°). Pushes from 120° to 240° topple it at 15.4% or less.\n- **Strongest side:** 34% from the left. No direction holds 100%.\n- **Margins:** −1 m and −1.6 m are not fall depths. Once it tips,"
  }
 ]

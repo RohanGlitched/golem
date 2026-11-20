@@ -16,5 +16,14 @@ This product includes software and assets developed by third parties:
   Copyright Google DeepMind. Licensed under the Apache License, Version 2.0.
   Used in apps/hover.
 
+- Yard robots from MuJoCo Menagerie (fetched at a pinned commit by apps/yard/scripts/fetch-assets.mjs, not stored
+  in this repository; the site serves each with its LICENSE):
+  Unitree Go1, A1 and G1: Copyright Unitree Robotics, BSD-3-Clause.
+  Boston Dynamics Spot: Copyright Clearpath Robotics, BSD-3-Clause.
+  ANYbotics ANYmal C: Copyright ANYbotics AG, BSD-3-Clause.
+  Berkeley Humanoid: Copyright Hybrid Robotics, BSD-3-Clause.
+  Booster T1 and Apptronik Apollo: Apache License, Version 2.0.
+  Used in apps/yard.
+
 - MuJoCo
   Copyright Google DeepMind. Licensed under the Apache License, Version 2.0.

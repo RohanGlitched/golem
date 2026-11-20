@@ -95,7 +95,12 @@ export function findings(robots: YardRow[]): string {
   const g1 = by('g1');
   if (g1?.weakest) {
     const l11 = g1.lines.find((l) => l.id === '1.1')?.status, l12 = g1.lines.find((l) => l.id === '1.2')?.status;
-    out.push(`<li><b>The G1 stands, barely.</b> The 29-joint G1 holds its stand pose but topples at ${pct(g1.weakest.breaks)} of its weight from ${sideName(g1.weakest.deg)} and ${pctOr(roseAt(g1, 90))} from the side.${l11 === 'held' && l12 === 'broken' ? ` So line 1.1 (10%) holds and line 1.2 (25%) breaks: the one robot here whose verdict changes between two neighbouring lines.` : ''}</li>`);
+    out.push(`<li><b>The G1 stands, barely.</b> The 29-joint G1 holds its stand pose but topples at ${pct(g1.weakest.breaks)} of its weight from ${sideName(g1.weakest.deg)} and ${pctOr(roseAt(g1, 90))} from the side.${l11 === 'held' && l12 === 'broken' ? ` So it holds line 1.1 (10%) and breaks line 1.2 (25%), where every dog holds up to 50%.` : ''}</li>`);
+  }
+  const apollo = by('apollo');
+  if (apollo?.weakest && apollo.weakest.breaks > 0) {
+    const broken = apollo.lines.filter((l) => l.status === 'broken').length;
+    out.push(`<li><b>The Apollo stands, and breaks every line.</b> The 80 kg Apptronik Apollo holds its stand pose on its 32 servos, then topples at ${pct(apollo.weakest.breaks)} of its weight from ${sideName(apollo.weakest.deg)}, below the 10% of line 1.1${broken === apollo.lines.length ? `: all ${broken} lines break` : ''}. Its strongest side takes ${pctOr(apollo.strongestBreak)}.</li>`);
   }
   const fell = robots.filter((r) => r.rose.every((p) => p.breaks === 0));
   if (fell.length) {
@@ -179,7 +184,7 @@ ${roseSvg(r)}
 
   const body = `<h1>The yard</h1>
 <p class="lede">One requirements file, ${countWord(robots.length)} robots. GOLEM fetched ${countWord(robots.length)} models from <a href="https://github.com/google-deepmind/mujoco_menagerie">MuJoCo Menagerie</a> at one pinned commit, stood each in its keyframe pose on its own position servos, and ran the same five EARS lines against all of them. ${standing.length} stand; ${fallen.length} fall over before anyone pushes them.</p>
-<p>No robot here runs its real controller. The servos hold the pose at the gains the model ships with, and nothing balances. So this board compares the stances that come in the box, not the robots. Its point is the method: the push lines are written as a share of the robot's weight, so the same sentence asks the same thing of a 12 kg dog and a 50 kg one, and adding a robot is one row in a JSON file.</p>
+<p>No robot here runs its real controller. The servos hold the pose at the gains the model ships with, and nothing balances. So this board compares the stances that come in the box, not the robots. Its point is the method: the push lines are written as a share of the robot's weight, so the same sentence asks the same thing of a 12 kg dog and an 80 kg humanoid, and adding a robot needs no new code: a row in a JSON file and three commands. <a href="#kiro-added-one">A Kiro agent tested that claim</a> by adding the eighth robot, and found what it left out.</p>
 
 <div class="stats">
 <div class="stat"><b>${robots.length}</b><span>Menagerie robots, one requirements file, no per-robot code.</span></div>
@@ -211,7 +216,10 @@ ${crosscheckSection(robots)}
 <p>Any Menagerie model with position servos and a free base works the same way. Add one row to <a href="${REPO_URL}/blob/main/apps/yard/robots.json"><code>apps/yard/robots.json</code></a> (its folder, model file, keyframe and base body), copy another robot's folder under <code>apps/yard/robots/</code> (its <code>app.ts</code> and <code>golem.config.json</code>, with the id changed), then:</p>
 ${codeBlock('node apps/yard/scripts/fetch-assets.mjs <id>\nnpx golem-spec test --app apps/yard/robots/<id>\nnpx vite-node apps/yard/scripts/board.ts <id>', 'adding a robot to the yard')}
 <p class="small muted">The first command downloads the model's files at the pinned commit and records their SHA-256, the second runs the five lines on it, and the third re-runs them with the board's settings (<code>--budget ${b.budget} --search-seed ${b.searchSeed}</code>; give the second the same flags to get the same verdicts) and adds the robot's row and rose to this page. Some models only touch the floor through <code>&lt;contact&gt;</code> pairs in their upstream <code>scene.xml</code> (the Apollo); the first command copies that block into the yard's scene.</p>
-<p>The stand app is one file, <a href="${REPO_URL}/blob/main/apps/yard/stand.ts"><code>apps/yard/stand.ts</code></a>: it reads the keyframe, writes the servo targets, pushes the base and reports three signals. A robot whose actuators are torque motors (the Go2, the H1) needs a PD law first, which the yard does not have yet.</p>`;
+<p>The stand app is one file, <a href="${REPO_URL}/blob/main/apps/yard/stand.ts"><code>apps/yard/stand.ts</code></a>: it reads the keyframe, writes the servo targets, pushes the base and reports three signals. A robot whose actuators are torque motors (the Go2, the H1) needs a PD law first, which the yard does not have yet.</p>
+
+<h3 id="kiro-added-one">Kiro added the eighth robot</h3>
+<p>We gave one Kiro CLI session (default mode, Sonnet 5.5) only this section and the yard's files, and asked it to add the Apptronik Apollo and to write down honestly whether the instructions were enough. They were not. Its record, <a href="${REPO_URL}/blob/main/apps/yard/ADDING-A-ROBOT.md"><code>apps/yard/ADDING-A-ROBOT.md</code></a>, opens with "The claim is not true as written". The Apollo's collision geoms touch nothing by default; it meets the floor only through contact pairs in its upstream <code>scene.xml</code>, which the yard's scene left out, so every line first broke with no push at all, because the robot fell through the floor. The agent found that, fixed the scene generator so it copies the block (none of the other seven models has one, and their files still match their manifests), made the tests catch a robot that falls through the floor, and ran the board. It took 38 minutes and 24 credits, of which the three commands in their final form took 3 minutes 14 seconds. The text above now says what it found.</p>`;
 
   return {
     id: 'yard', path: '/yard/', title: `The yard: one spec, ${countWord(robots.length)} robots`,

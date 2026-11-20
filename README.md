@@ -84,6 +84,28 @@ Three different jobs for three different users: push recovery for a humanoid, ke
 | [`apps/candy`](apps/candy) | Franka Panda with a suction cup, sorting Halloween candy while trick-or-treaters reach in | At a hand speed of 0.8 m/s, 57 of 228 trials break "keep every link at least 0.10 m from the hand". Its speed-and-separation controller slows and stops the arm by the cup's distance to the hand, and stops too late for the **wrist**: link 7 is the closest link in 48 of the breaks, while the cup is still about 0.14 m away in most of them. |
 | [`apps/hover`](apps/hover) | Skydio X2 quadrotor holding a hover point 1.0 m above the floor under wind gusts, a sagging battery and a lagging position estimate (a cascaded PD controller; the third app, built on the same skeleton with a lexicon, a controller and the model file) | Line 1.3 asks it to stay within 1.0 m in a gust of up to 20 N, and it breaks from **9.98 N** (the smallest gust that broke it over three search seeds of 64 trials, from any direction). Line 1.1, a gust of up to 2 N within 0.25 m, holds with at least 0.0966 m to spare. A position estimate that lags by 0.275 s breaks line 3.2 (0.30 s asked) while 0.10 s holds (line 3.1). The numbers are read from the real CLI output in [`apps/hover/docs/cli-transcript.md`](apps/hover/docs/cli-transcript.md). |
 
+## The yard: one spec, eight more robots
+
+The three apps above each have their own controller. [`apps/yard`](apps/yard) asks a different question: how far does one requirements file go without writing robot code? It stands eight MuJoCo Menagerie robots in their keyframe poses on their own position servos at stock gains (no balance controller, so it measures the stance that comes in the box, not the robot), and runs the same five EARS lines on each. The pushes are written as a share of the robot's weight, so one sentence asks the same of a 12 kg dog and an 80 kg humanoid:
+
+```
+WHEN the base is pushed with up to 25% of its weight for 0.2 s from any direction THE robot SHALL stay upright for 3 s
+```
+
+| Robot | 10% | 25% | 50% | 100% | Weakest push that topples it |
+|---|---|---|---|---|---|
+| Unitree Go1 | held | held | held | broken | 56.1% of its weight, from the right |
+| Unitree A1 | held | held | held | broken | 62.9%, from the right |
+| Boston Dynamics Spot | held | held | held | broken | 52.1%, from the right |
+| ANYbotics ANYmal C | held | held | held | broken | 61.1%, from behind |
+| Unitree G1 (29 joints) | held | broken | broken | broken | 11.3%, from the front |
+| Apptronik Apollo | broken | broken | broken | broken | 9.4%, from behind |
+| Berkeley Humanoid, Booster T1 | broken | broken | broken | broken | fall over before any push |
+
+Verdicts from `golem test --budget 128 --search-seed 1` per robot; the weakest push from a 24-direction bisection with GOLEM's trial runner (a "stance rose" per robot on the [yard page](https://d23v187fnxad7l.cloudfront.net/yard/)). An independent script with MuJoCo 3.3.7's Python bindings, sharing only the scene files, finds the same breaking pushes within 2.2% of the weight at the front, left, back and right of every robot ([`crosscheck.txt`](apps/yard/crosscheck.txt)). It also shows that a falsifier is not a boundary map: for ANYmal C the search broke the 100% line at 72.5% from the side, while 61.1% from behind already topples it.
+
+The eighth robot was added by a Kiro CLI session told only the page's "Add a robot" steps, and asked to report honestly whether they were enough. They were not: the Apollo meets the floor only through contact pairs in its upstream scene, which the yard's scene left out, so it first fell through the floor. The agent found it, fixed the scene generator, made the tests catch it, and wrote everything down in [`apps/yard/ADDING-A-ROBOT.md`](apps/yard/ADDING-A-ROBOT.md) (38 minutes, 24 credits). Each yard robot also has a live studio at `/yard/<id>/`.
+
 ## Prior art, and what GOLEM adds
 
 Falsifying cyber-physical systems against temporal logic is an established field, and property-based testing gave us shrinking. GOLEM adds no new search algorithm. What is new is the loop: the requirement is the sentence an AI agent wrote in its own Kiro spec, the test runs in the browser or in CI with no MATLAB, and the result gates the agent.
@@ -111,6 +133,8 @@ Falsifying cyber-physical systems against temporal logic is an established field
 | **The studio.** Real MuJoCo in the browser: drag to shove, or summon 64 ghosts on a line and read the verdict. | **Before and after,** from the full 4,860-trial stability map: weakest push 62.5 → 101.6 N. |
 | <img src="docs/screens/candy.jpg" alt="The candy studio: a Franka Panda arm on a table with bowls and a child's hand reaching in."> | <img src="docs/screens/hover.jpg" alt="The hover studio: a clay Skydio X2 quadrotor on its hover-point marker; translucent ghosts of it are blown sideways by a gust, the failing ones in red.">
 | **Candy.** A Franka Panda sorting Halloween candy while a hand reaches in; GOLEM found the wrist too close to it. | **Hover.** A Skydio X2 holding its point in the wind. Line 1.3 asks for 20 N; GOLEM shrinks the gust that blows it out to about 10 N. |
+| <img src="docs/screens/yard.jpg" alt="Four yard studios mid-run: ghost copies of a Unitree Go1 flipping onto its back, a Spot rolling over, an ANYmal C toppling sideways and a G1 whose knees buckle in red, each beside the live robot still standing."> | <img src="docs/screens/yard-roses.jpg" alt="Eight stance roses: for each robot the smallest push that topples it in 24 directions, drawn over four dashed rings for the 10%, 25%, 50% and 100% lines. The dogs are long ovals, ANYmal C a rounded square, the G1 and Apollo small, and two humanoids a single red dot."> |
+| **The yard.** One requirements file on eight Menagerie robots, each in its own studio: summon ghosts on the 100% line and watch them fall. | **Stance roses.** Where a rose dips inside a ring, that line breaks from that side. |
 
 ## Evidence
 
@@ -118,7 +142,7 @@ Every number here comes from committed raw data in [`evidence/`](evidence), usin
 
 ## How Kiro built GOLEM
 
-Kiro CLI did the building: 16 specs, among them 4 bugfix specs written from audits in [`docs/reviews/`](docs/reviews) and the three robots' own requirement files, which GOLEM tests (a 17th, golem-cloud, is written and not started). Together they hold 217 requirements, 2,157 EARS acceptance criteria and 273 correctness properties; 728 of 736 tasks are done, and the tests make 543 property-test assertions in 415 files (counted by `scripts/kiro-stats.mjs`, with pack copies installed into the apps counted once). The root [`.kiro/`](.kiro) holds the steering, specs, hooks, agents and MCP config used to build it. The full account is on the site's [How Kiro built it](https://d23v187fnxad7l.cloudfront.net/how-kiro/) page, and the raw logs of the 51 headless Kiro runs we kept (44 sessions) are in [`evidence/kiro-sessions/`](evidence/kiro-sessions).
+Kiro CLI did the building: 16 specs, among them 4 bugfix specs written from audits in [`docs/reviews/`](docs/reviews) and the three robots' own requirement files, which GOLEM tests (a 17th, golem-cloud, is written and not started). Together they hold 217 requirements, 2,157 EARS acceptance criteria and 273 correctness properties; 728 of 736 tasks are done, and the tests make 543 property-test assertions in 415 files (counted by `scripts/kiro-stats.mjs`, with pack copies installed into the apps counted once). The root [`.kiro/`](.kiro) holds the steering, specs, hooks, agents and MCP config used to build it. The full account is on the site's [How Kiro built it](https://d23v187fnxad7l.cloudfront.net/how-kiro/) page, and the raw logs of the 52 headless Kiro runs we kept (45 sessions) are in [`evidence/kiro-sessions/`](evidence/kiro-sessions).
 
 ## Run it locally
 
