@@ -14,6 +14,8 @@
 - The red gate lines agree in number: `gate RED: 1 of 3 requirements is not held`, `gate RED: 1 of 11 requirements does not meet its expectation`.
 - The starter README and spec give a fix that is checked to turn the gate green (a 60 N motor and doubled gains). A stronger motor alone is not enough, and the old text implied it was.
 - Studio: the verdict panel's margin row says how to read its sign (`Worst margin (below 0 = broke)`), the floor summary names a direction sector (`Weakest sector, around 245 deg`) so it no longer seems to disagree with the exact angle of the counterexample, and the counterexample's seed classification reads `fails again with other seeds` instead of `classification: robust`.
+- Studio: a new `shippedSeeds` option re-runs an app's committed counterexamples (its `.golem/seeds`) first when a line is summoned, before seeds pinned in the browser and before the search, as `golem test` does; so a line the CLI found broken shows broken in the studio too, whatever the browser's budget.
+- Studio: the floor aura also reads a push written as a ratio (such as a share of the robot's weight) when a line has no force dimension, and its summary prints it as `push.weight = 58.5 %`.
 
 ## 0.1.1
 

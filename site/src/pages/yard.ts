@@ -146,6 +146,36 @@ ${table(['Robot', 'Counterexample to 1.4 (search seed 1)', 'Weakest push on the 
 ${py}`;
 }
 
+interface StrongestRow {
+  id: string; name: string; roseWeakest?: number; strongest: number | null; note?: string;
+  runs: { percent: number; green: boolean; seconds: number }[];
+}
+
+/** The strongest push line each robot's gate turns green (apps/yard/strongest.json), next to its rose. */
+export function strongestSection(robots: YardRow[]): string {
+  let data: { budget: number; command: string; robots: StrongestRow[] };
+  try { data = readRepoJson('apps/yard/strongest.json'); } catch { return ''; }
+  const rows = data.robots.filter((r) => r.strongest !== null);
+  if (rows.length === 0) return '';
+  const over = rows.filter((r) => r.roseWeakest !== undefined && (r.strongest as number) / 100 > (r.roseWeakest as number) + 0.01);
+  const fmt = (r: StrongestRow): string[] => {
+    const yr = robots.find((x) => x.id === r.id);
+    const rose = r.roseWeakest !== undefined ? `${pct(r.roseWeakest)}${yr?.weakest ? ` from ${esc(sideName(yr.weakest.deg))}` : ''}` : '–';
+    const runs = r.runs.map((x) => `${x.percent}% ${x.green ? '<span class="held">green</span>' : '<span class="broken">red</span>'}`).join(', ');
+    const flag = over.includes(r) ? ' <span class="broken">(above the rose)</span>' : '';
+    return [esc(r.name), `up to ${r.strongest}%${flag}`, rose, runs];
+  };
+  const ex = rows[0] as StrongestRow;
+  return `<h2 id="strongest">The strongest sentence the gate accepts</h2>
+<p>The board asks five fixed questions. This turns it round: for each robot that stands, a script writes one line, <span class="mono small">${earsHtml(`WHEN the base is pushed with up to P% of its weight for 0.2 s from any direction THE robot SHALL stay upright for 3 s`)}</span>, runs the real <code>${esc(data.command)}</code> on it (which confirms a green with a second search seed), and steps P by one from the rose's weakest push until the gate flips. The result is the strongest version of the sentence the gate turns green, for example "up to ${ex.strongest}%" for the ${esc(ex.name)}.</p>
+<div class="wide">${table(['Robot', 'Gate green', 'Rose: weakest push that topples it', 'Every gate run'], rows.map(fmt), { caption: 'Raw: apps/yard/strongest.json, from apps/yard/scripts/strongest.mjs. The two humanoids that fall unpushed are left out.' })}</div>
+${over.length ? `<p><b>Where green is not true.</b> ${over.map((r) => {
+    const yr = robots.find((x) => x.id === r.id);
+    const weak = (yr?.rose ?? []).filter((p) => p.breaks !== null && p.breaks > 0 && p.breaks * 100 < (r.strongest as number)).map((p) => `${p.deg}°`);
+    return `For the ${esc(r.name)} the gate stays green up to ${r.strongest}%, while the rose shows ${pct(r.roseWeakest as number)} already topples it; only ${weak.length} of its ${yr?.rose.length ?? 0} measured directions (${weak.join(', ')}) break below ${r.strongest}%`;
+  }).join('; ')}. A sector that narrow is easy for two searches of ${data.budget} trials to miss. That is what a held line means here: no counterexample found within the budget, never a proof. A wider sweep, such as the rose, can still find one.</p>` : ''}`;
+}
+
 function verdictCell(l: YardLine | undefined): string {
   if (!l) return '–';
   if (l.status === 'held') return '<span class="held">held</span>';
@@ -207,6 +237,7 @@ ${roses}
 ${findings(robots)}
 </ul>
 ${crosscheckSection(robots)}
+${strongestSection(robots)}
 
 <h2 id="spec">The requirements</h2>
 <p>The whole file is in <a href="${REPO_URL}/blob/main/${b.requirements}"><code>${esc(b.requirements)}</code></a>. These are its five lines, compiled once per robot:</p>
@@ -234,14 +265,14 @@ export function yardStudioPage(id: string): PageSpec {
   const row = b.robots.find((r) => r.id === id);
   const robots = (readRepoJson<{ robots: { id: string; name: string }[] }>('apps/yard/robots.json')).robots;
   const name = robots.find((r) => r.id === id)?.name ?? id;
-  const others = `<nav class="yard-switch" aria-label="Yard robots">${robots.map((r) => `<a href="/yard/${esc(r.id)}/"${r.id === id ? ' aria-current="page"' : ''}>${esc(r.name)}</a>`).join('')}</nav>`;
+  const others = `<nav class="yard-switch" aria-label="Yard robots"><a class="yard-back" href="/yard/">The yard board</a>${robots.map((r) => `<a href="/yard/${esc(r.id)}/"${r.id === id ? ' aria-current="page"' : ''}>${esc(r.name)}</a>`).join('')}</nav>`;
   const verdict = row?.rose.every((p) => p.breaks === 0)
     ? 'On the board it falls during the warm-up, before any push.'
     : row?.weakest ? `On the board the smallest push that topples it is ${pct(row.weakest.breaks)} of its weight from ${sideName(row.weakest.deg)}.` : '';
   return {
     id: `yard-${id}`, path: `/yard/${id}/`, title: `${name} in the yard`,
     description: `${name} (MuJoCo Menagerie) standing on its stock servos, tested against the yard's shared requirements.`,
-    body: `<h1 class="sr-only">${esc(name)} in the yard</h1><div class="flush studio-page"><div class="hero-studio" id="studio" data-studio="yard" data-robot="${esc(id)}" data-status="Waking the golem…"><noscript><p class="hero-fallback">The studio needs JavaScript. The board does not: <a href="/yard/">open the yard</a>.</p></noscript></div><p class="studio-note">${esc(name)} stands in its keyframe pose on its own servos, with no balance controller. ${verdict} Summon ghosts on a line, or drag the base to shove it. <a href="/yard/">Back to the board</a>.</p>${others}</div>`,
+    body: `<h1 class="sr-only">${esc(name)} in the yard</h1><div class="flush studio-page">${others}<div class="hero-studio" id="studio" data-studio="yard" data-robot="${esc(id)}" data-status="Waking the golem…"><noscript><p class="hero-fallback">The studio needs JavaScript. The board does not: <a href="/yard/">open the yard</a>.</p></noscript></div><p class="studio-note">${esc(name)} stands in its keyframe pose on its own servos, with no balance controller. ${verdict} Summon ghosts on a line, or drag the base to shove it. <a href="/yard/">Back to the board</a>.</p></div>`,
     modules: ['/src/studio/load.ts'],
     mainClass: 'studio-main',
   };

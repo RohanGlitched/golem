@@ -4,10 +4,11 @@ import requirements from '@spec/candy?raw';
 import appWorker from './candy-worker.ts?worker&url';
 import './fetch-shim';
 import { mountSiteStudio } from './common';
+import shippedSeeds from 'virtual:golem-seeds/candy';
 import type { StudioHandle } from 'golem-spec/ui';
 
 setRobotBase(new URL('/candy/robot/', location.href));
 
 export function mount(el: HTMLElement): StudioHandle {
-  return mountSiteStudio({ el, app, requirements, workerUrl: new URL(appWorker, location.href).href, entryUrl: new URL(appWorker, location.href).href });
+  return mountSiteStudio({ el, app, requirements, workerUrl: new URL(appWorker, location.href).href, entryUrl: new URL(appWorker, location.href).href, options: { shippedSeeds } });
 }

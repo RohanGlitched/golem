@@ -90,8 +90,12 @@ export async function mountCircle(el: HTMLElement, o: CircleOptions): Promise<{ 
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(f32(g.verts), 3));
     geo.setIndex(new THREE.BufferAttribute(u16(g.index), 1));
-    geo.computeVertexNormals();
-    return geo;
+    // The packed meshes are decimated and some triangles are wound the other way, so shared-vertex normals cancel and
+    // render as black patches. Per-face normals on a non-indexed copy, drawn double-sided, light every face.
+    const flat = geo.toNonIndexed();
+    geo.dispose();
+    flat.computeVertexNormals();
+    return flat;
   });
   const local = pack.geoms.map((g) => new THREE.Matrix4().compose(new THREE.Vector3(...(g.pos as [number, number, number])), quatWXYZ(g.quat, new THREE.Quaternion()), new THREE.Vector3(1, 1, 1)));
 
@@ -134,7 +138,7 @@ export async function mountCircle(el: HTMLElement, o: CircleOptions): Promise<{ 
   }
 
   // ---- the clay hero
-  const clay = new THREE.MeshStandardMaterial({ color: CLAY, roughness: 0.82, metalness: 0 });
+  const clay = new THREE.MeshStandardMaterial({ color: CLAY, roughness: 0.82, metalness: 0, side: THREE.DoubleSide });
   const hero = new THREE.Group();
   const heroMeshes = geos.map((g) => { const m = new THREE.Mesh(g, clay); m.castShadow = true; m.matrixAutoUpdate = false; hero.add(m); return m; });
   scene.add(hero);

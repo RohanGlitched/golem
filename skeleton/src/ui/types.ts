@@ -172,6 +172,12 @@ export interface StudioOptions {
   /** Signal name → the Response_Clause words it binds to, for the fracture of a broken line. */
   signalWords?: Record<string, string[]>;
   testHooks?: StudioTestHooks;
+  /**
+   * Counterexamples that ship with the app (its committed `.golem/seeds`). A summon re-runs a line's shipped seeds first,
+   * before any it pinned in this browser and before the search, as `golem test` re-runs pinned seeds; so a line the CLI
+   * found broken shows broken in the studio too, whatever the browser's budget.
+   */
+  shippedSeeds?: Counterexample[];
 }
 
 export interface StudioHandle {

@@ -4,7 +4,17 @@ import load from '@mujoco/mujoco';
 import { SimError, errorMessage } from './errors.js';
 import type { Mj } from './types.js';
 
-const defaultLoad = (): Promise<Mj> => load() as Promise<Mj>;
+/**
+ * Emscripten prints "still waiting on run dependencies" (with "dependency: wasm-instantiate" and "(end of list)") to
+ * stderr every few seconds while a cold WASM download is in flight. That is progress, not an error, so it is dropped;
+ * everything else MuJoCo prints to stderr still goes to console.error.
+ */
+export function isLoadProgressNoise(text: string): boolean {
+  return /^(still waiting on run dependencies:|dependency: wasm-instantiate|\(end of list\))/.test(text.trim());
+}
+const printErr = (text: string): void => { if (!isLoadProgressNoise(text)) console.error(text); };
+
+const defaultLoad = (): Promise<Mj> => (load as unknown as (opts: object) => Promise<Mj>)({ printErr });
 
 let loadFn: () => Promise<Mj> = defaultLoad;
 let inflight: Promise<Mj> | undefined;

@@ -586,7 +586,13 @@ export function mountStudio(el: HTMLElement, app: RobotApp, requirementsMarkdown
   }
   const rc = new RunController({
     appId: app.id, warmup: app.warmup, store, pool, falsify,
-    pins: { read: (a: string, r: string) => [...(sharedSeeds.get(r) ?? []), ...pins.read(a, r)] } as unknown as PinnedSeedStore,
+    pins: {
+      read: (a: string, r: string) => [
+        ...(sharedSeeds.get(r) ?? []),
+        ...(options.shippedSeeds ?? []).filter((s) => s.reqId === r),
+        ...pins.read(a, r),
+      ],
+    } as unknown as PinnedSeedStore,
     announcer, now, budget, seed, generationSize,
     swarm: () => swarm,
     auraChanged: (m) => { pendingAura = m; scheduler.requestOnce(); },

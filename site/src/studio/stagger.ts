@@ -6,6 +6,7 @@ import requirements from '@spec/stagger?raw';
 import appWorker from './stagger-worker.ts?worker&url';
 import './fetch-shim';
 import { mountSiteStudio } from './common';
+import shippedSeeds from 'virtual:golem-seeds/stagger';
 import { mountControllerBar } from './controller-bar';
 import { CONTROLLER_CHANNEL, hostControllerChoice } from './stagger-controller';
 import type { StudioHandle } from 'golem-spec/ui';
@@ -19,7 +20,7 @@ function resetLiveRobot(el: HTMLElement): void {
 }
 
 export function mount(el: HTMLElement): StudioHandle {
-  const handle = mountSiteStudio({ el, app, requirements, workerUrl: new URL(appWorker, location.href).href, entryUrl: new URL(appWorker, location.href).href });
+  const handle = mountSiteStudio({ el, app, requirements, workerUrl: new URL(appWorker, location.href).href, entryUrl: new URL(appWorker, location.href).href, options: { shippedSeeds } });
   // Without BroadcastChannel the workers could not follow the choice, so the control is not offered.
   if (typeof BroadcastChannel === 'undefined') return handle;
   const choice = hostControllerChoice(new BroadcastChannel(CONTROLLER_CHANNEL), setReflex);

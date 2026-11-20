@@ -2,7 +2,7 @@
 import { defineConfig } from 'vite';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { pagesPlugin, robotFilesPlugin, PAGE_ENTRIES } from './src/build/pages-plugin';
+import { pagesPlugin, robotFilesPlugin, seedsPlugin, PAGE_ENTRIES } from './src/build/pages-plugin';
 
 const here = (p: string): string => fileURLToPath(new URL(p, import.meta.url));
 const skeleton = (p: string): string => here(`../skeleton/src/${p}`);
@@ -33,7 +33,7 @@ export const alias = [
 
 export default defineConfig({
   appType: 'mpa',
-  plugins: [pagesPlugin(), robotFilesPlugin()],
+  plugins: [pagesPlugin(), robotFilesPlugin(), seedsPlugin()],
   resolve: { alias },
   optimizeDeps: { exclude: ['@mujoco/mujoco'] },
   esbuild: { jsx: 'automatic' },

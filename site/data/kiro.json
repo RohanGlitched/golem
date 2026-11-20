@@ -1,6 +1,6 @@
 {
-  "generated": "2026-11-19T23:55:10.143Z",
-  "commit": "e501f53",
+  "generated": "2026-11-20T08:20:18.582Z",
+  "commit": "179750d",
   "workspaces": [
     {
       "path": ".kiro",
@@ -599,17 +599,47 @@
       "workflows": [
         "falsify-and-fix.workflow.json"
       ]
+    },
+    {
+      "path": "apps/yard/.kiro",
+      "specs": [
+        {
+          "name": "stand-push",
+          "path": "apps/yard/.kiro/specs/stand-push",
+          "type": "feature",
+          "requirements": 2,
+          "earsCriteria": 5,
+          "properties": 0,
+          "tasksDone": 0,
+          "tasksOpen": 0,
+          "waves": false,
+          "status": "no tasks"
+        }
+      ],
+      "steering": [],
+      "hooks": [],
+      "agents": [],
+      "mcp": [],
+      "skills": [],
+      "keys": {
+        "agents": [],
+        "hooks": [],
+        "skills": [],
+        "steering": []
+      },
+      "workflows": []
     }
   ],
   "commits": {
-    "total": 320,
+    "total": 332,
     "byPrefix": {
+      "other": 34,
+      "yard": 7,
+      "merge": 24,
       "evidence": 16,
       "golem-kit": 29,
       "hover": 9,
-      "merge": 23,
       "docs": 4,
-      "other": 30,
       "golem-gate-hardening": 13,
       "ci": 5,
       "site": 9,
@@ -636,15 +666,15 @@
     }
   },
   "tests": {
-    "files": 415,
+    "files": 416,
     "propertyAsserts": 543
   },
   "totals": {
-    "specs": 17,
+    "specs": 18,
     "specsNotStarted": 1,
     "bugfixSpecs": 4,
-    "requirements": 217,
-    "earsCriteria": 2157,
+    "requirements": 219,
+    "earsCriteria": 2162,
     "properties": 273,
     "tasksDone": 728,
     "tasksOpen": 8,

@@ -119,7 +119,7 @@ ${table(['Where', 'Hook', 'Trigger'], [
 <ul>
 <li>The root <code>.kiro/hooks/build.json</code> was not valid JSON for a while (two matchers held single backslashes), so Kiro may not have loaded it; it is fixed and parses now.</li>
 <li>The needle log <code>docs/reviews/falsify-hardening-runs/after-search.txt</code> is UTF-16 (a shell redirect wrote it). The site decodes it.</li>
-<li>The evidence report's pre-registered prediction for line 1.3 was wrong, and the agent-gate pilot found no false claims to stop (0 of 6 in both arms). Both are on the <a href="/evidence/">evidence page</a>.</li>
+<li>The evidence report's pre-registered prediction for line 1.3 was wrong, and the first agent-gate pilot found no false claims to stop (0 of 6 in both arms). The second, with a target the agents could not reach, found 3 of 6 false claims without the Stop hook and 1 of 6 with it (a pilot: p = 0.55), and led to the gate's second search seed. All of it is on the <a href="/evidence/#agent-gate-hard">evidence page</a>.</li>
 </ul>
 <p class="small muted">Counts above: ${fmt(t['tasksDone'] ?? 0, 0)} tasks done of ${fmt((t['tasksDone'] ?? 0) + (t['tasksOpen'] ?? 0), 0)}, counted in the markdown task lists. ${inlineMd('The `golem-cloud` spec is written and not started; it is not part of this build.')}</p>
 `;

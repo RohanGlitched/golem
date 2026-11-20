@@ -1,6 +1,6 @@
 // Vite plugins: render each page from the committed data, and ship the robots' files with the studios.
 import type { Plugin } from 'vite';
-import { copyFileSync, cpSync, existsSync, mkdirSync, readFileSync, statSync } from 'node:fs';
+import { copyFileSync, cpSync, existsSync, mkdirSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { REPO_ROOT, loadSiteData } from './data';
 import { renderDocument } from './layout';
@@ -62,6 +62,42 @@ const MIME: Record<string, string> = {
 };
 
 /** Copies apps/<id>/robot into the build at /<id>/robot, and serves it the same way in dev. */
+/** Every counterexample in the .json files under `dir` (one level of robot folders, as `.golem/seeds/<robot>/<id>.json`). */
+export function readSeedDir(dir: string): unknown[] {
+  const out: unknown[] = [];
+  if (!existsSync(dir)) return out;
+  for (const sub of readdirSync(dir)) {
+    const d = path.join(dir, sub);
+    if (!statSync(d).isDirectory()) continue;
+    for (const f of readdirSync(d).filter((x) => x.endsWith('.json')).sort()) {
+      const v = JSON.parse(readFileSync(path.join(d, f), 'utf8')) as unknown;
+      if (Array.isArray(v)) out.push(...v);
+    }
+  }
+  return out;
+}
+
+/**
+ * `virtual:golem-seeds/<app>`: the app's committed pinned seeds (apps/<app>/.golem/seeds), so the site studios re-run them
+ * first as the CLI does. `virtual:golem-seeds/yard` maps each yard robot id to its seeds.
+ */
+export function seedsPlugin(): Plugin {
+  const PREFIX = 'virtual:golem-seeds/';
+  return {
+    name: 'golem-seeds',
+    resolveId(id) { return id.startsWith(PREFIX) ? `\0${id}` : undefined; },
+    load(id) {
+      if (!id.startsWith(`\0${PREFIX}`)) return undefined;
+      const app = id.slice(PREFIX.length + 1);
+      if (app === 'yard') {
+        const map = Object.fromEntries(YARD_IDS.map((r) => [r, readSeedDir(path.join(REPO_ROOT, 'apps/yard/robots', r, '.golem/seeds'))]));
+        return `export default ${JSON.stringify(map)};`;
+      }
+      return `export default ${JSON.stringify(readSeedDir(path.join(REPO_ROOT, 'apps', app, '.golem/seeds')))};`;
+    },
+  };
+}
+
 export function robotFilesPlugin(): Plugin {
   const dirOf = (id: string): string => path.join(REPO_ROOT, 'apps', id, 'robot');
   const yardDir = (id: string): string => path.join(REPO_ROOT, 'apps', 'yard', 'robots', id, 'robot');

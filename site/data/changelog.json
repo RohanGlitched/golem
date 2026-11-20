@@ -1,6 +1,11 @@
 [
   {
     "date": "2026-11-20",
+    "hash": "179750d",
+    "subject": "README: demo video v5 (adds the yard: one spec on eight Menagerie robots, and the Kiro run that added the eighth)"
+  },
+  {
+    "date": "2026-11-20",
     "hash": "22c0ce3",
     "subject": "README: demo video v4 (problem stated up front, the gate's confirmation line on screen)"
   },
@@ -53,10 +58,5 @@
     "date": "2026-11-20",
     "hash": "52e31eb",
     "subject": "evidence: pre-register experiment 3b (agent-gate with an unreachable 200 N target) before running it"
-  },
-  {
-    "date": "2026-11-20",
-    "hash": "741f4a7",
-    "subject": "evidence: the agent-gate pilot ran (6 runs per arm, 13.5 credits): 0/6 false claims in both arms, independent gate green 6/6 without the Stop hook and 5/6 with it; evidence page shows every run"
   }
 ]

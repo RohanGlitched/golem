@@ -35,7 +35,7 @@ at any point in its stride, THE robot SHALL stay upright for 3 s
    - a *scenario space*: force 0–100 N, angle 0–360°, gait phase 0–1;
    - a *monitor* with quantitative semantics: a signed margin in physical units. It prints the compiled formula too: `G[t₀, t₀+3 s] margin("stay upright") > 0 m`.
 2. **Falsify.** It re-runs pinned seeds first, then random Latin-hypercube trials, then a cross-entropy search toward the lowest margin. It **shrinks** each failure to the mildest push that still breaks the line, then re-checks it on fresh seeds and at half the timestep, so a solver artefact isn't reported as a robot failure.
-3. **Gate.** Kiro hooks run `golem check` when a requirements file is saved, and `golem test` when a controller is saved. A **Stop hook runs `golem gate`**, so the agent can't finish while a requirement is red. A green is confirmed: the gate searches every `Expected_Hold` line a second time with a second search seed derived from the first, so a green needs two different searches to agree. Re-gated this way, 3 of the 4 controllers that falsely claimed success in experiment 3b come out red; one still passes, so a second seed lowers the odds of a lucky green without removing them ([re-check](evidence/results/agent-gate-hard/confirm-check.md)). A guard stops the tuning agent editing the requirement instead of the robot.
+3. **Gate.** Kiro hooks run `golem check` when a requirements file is saved, and `golem test` when a controller is saved. A **Stop hook runs `golem gate`**, so the agent can't finish while a requirement is red. A green is confirmed (since golem-spec 0.1.2, which is in this repo; npm still serves 0.1.1, a single-seed gate, until 0.1.2 is published): the gate searches every `Expected_Hold` line a second time with a second search seed derived from the first, so a green needs two different searches to agree. Re-gated this way, 3 of the 4 controllers that falsely claimed success in experiment 3b come out red; one still passes, so a second seed lowers the odds of a lucky green without removing them ([re-check](evidence/results/agent-gate-hard/confirm-check.md)). A guard stops the tuning agent editing the requirement instead of the robot.
 
 The engine is MuJoCo 4 compiled to WebAssembly, the same build in Node and the browser. Every trial is reproducible from its scenario and seed.
 
@@ -58,7 +58,7 @@ The agent's session log is in [`evidence/results/tuner/`](evidence/results/tuner
 npm i -D golem-spec
 npx golem-spec init        # installs hooks, agents, MCP, skills, steering and a workflow into .kiro/
 npx golem-spec test        # falsify every requirement
-npx golem-spec gate        # exit 0 only if everything holds, under two search seeds
+npx golem-spec gate        # exit 0 only if everything holds (under two search seeds from 0.1.2)
 ```
 
 Use `npx golem-spec`, not `npx golem`: a bare `npx golem` resolves to an unrelated npm package.
@@ -120,6 +120,9 @@ Falsifying cyber-physical systems against temporal logic is an established field
 | VerifAI with Scenic | Falsification with samplers, including cross-entropy, for autonomous vehicles | The nearest ancestor. GOLEM starts from requirement sentences instead of a scenario program, and gates an AI coding agent on the result. |
 | nl2spec, NL2TL | Translation only | GOLEM parses a fixed EARS dialect deterministically: no language model decides what a line means or whether it held. |
 | Eureka and other LLM plus simulation loops | A language model writes reward or controller code and keeps what scores best in simulation | There the model judges itself by a score it optimises. In GOLEM a fixed monitor decides, and the agent cannot finish while a line misses its expectation. |
+| FRET, Ogma and Copilot for ROS 2 (Perez et al., 2022) | Structured-English requirements compiled into hard real-time runtime monitors for ROS 2 robots | The closest monitor pipeline for robots. GOLEM compiles monitors too, but its job is to search simulation for the scenario that breaks the line, before anything runs, and to gate the agent on it. |
+| LLM-Falsifier (2026) | A language model as the optimiser in STL falsification of cyber-physical systems | GOLEM's search and verdict are deterministic (LHS, cross-entropy, shrinking) so a result can be replayed from its seed; no model decides whether a line held. |
+| Test-driven agentic controller synthesis (2026) | An agent writes and repairs robot navigation controllers against test suites in Webots | The nearest agent loop. GOLEM's tests come from the spec's own sentences, are searched for the worst case rather than run as fixed cases, and the agent cannot finish while one is false. |
 | Property-based testing (Hypothesis, fast-check) | Random generation and shrinking | GOLEM borrows shrinking and seed pinning, and applies them to physics trials stated in a spec. |
 | Runtime action gates for robots | Blocks unsafe robot actions while running | Those gate the robot. GOLEM gates the coding agent's claim that the work is done, before anything ships. |
 
@@ -142,7 +145,7 @@ Every number here comes from committed raw data in [`evidence/`](evidence), usin
 
 ## How Kiro built GOLEM
 
-Kiro CLI did the building: 16 specs, among them 4 bugfix specs written from audits in [`docs/reviews/`](docs/reviews) and the three robots' own requirement files, which GOLEM tests (a 17th, golem-cloud, is written and not started). Together they hold 217 requirements, 2,157 EARS acceptance criteria and 273 correctness properties; 728 of 736 tasks are done, and the tests make 543 property-test assertions in 415 files (counted by `scripts/kiro-stats.mjs`, with pack copies installed into the apps counted once). The root [`.kiro/`](.kiro) holds the steering, specs, hooks, agents and MCP config used to build it. The full account is on the site's [How Kiro built it](https://d23v187fnxad7l.cloudfront.net/how-kiro/) page, and the raw logs of the 52 headless Kiro runs we kept (45 sessions) are in [`evidence/kiro-sessions/`](evidence/kiro-sessions).
+Kiro CLI did the building: 18 specs, among them 4 bugfix specs written from audits in [`docs/reviews/`](docs/reviews) and the four robot apps' own requirement files (the G1, the Panda, the drone and the yard), which GOLEM tests (a 19th, golem-cloud, is written and not started). Together they hold 219 requirements, 2,162 EARS acceptance criteria and 273 correctness properties; 728 of 736 tasks are done, and the tests make 543 property-test assertions in 415 files (counted by `scripts/kiro-stats.mjs`, with pack copies installed into the apps counted once). The root [`.kiro/`](.kiro) holds the steering, specs, hooks, agents and MCP config used to build it. The full account is on the site's [How Kiro built it](https://d23v187fnxad7l.cloudfront.net/how-kiro/) page, and the raw logs of the 52 headless Kiro runs we kept (45 sessions) are in [`evidence/kiro-sessions/`](evidence/kiro-sessions).
 
 ## Run it locally
 
@@ -151,6 +154,8 @@ npm ci
 npm run dev -w apps/stagger    # the G1 studio
 npm run dev -w apps/candy      # the candy studio
 npm run dev -w apps/hover      # the hover studio
+node apps/yard/scripts/fetch-assets.mjs   # the yard's eight robots, fetched at a pinned commit and hash-checked (not stored in git)
+npx golem-spec test --app apps/yard/robots/go1
 npm test                       # every workspace
 ```
 

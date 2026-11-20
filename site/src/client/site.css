@@ -156,7 +156,7 @@ dl.defs dd{margin:2px 0 0;color:var(--ink-2)}
 .circle-stage{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:var(--night)}
 .circle-stage canvas{display:block;position:absolute;inset:0}
 .circle-stage::after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(26,20,17,.82) 0,rgba(26,20,17,.35) 34%,transparent 52%),linear-gradient(0deg,rgba(26,20,17,.9),transparent 22%)}
-.circle-cap{position:absolute;z-index:2;left:var(--pad);bottom:clamp(72px,14vh,150px);max-width:min(32rem,88vw)}
+.circle-cap{position:absolute;z-index:2;left:var(--pad);bottom:clamp(72px,14vh,150px);max-width:min(28rem,33vw,88vw);text-shadow:0 0 14px var(--night),0 0 4px var(--night)}
 .circle-cap .k{display:block;font-family:var(--mono);font-size:var(--s13);color:var(--lamp);margin-bottom:12px;letter-spacing:.04em}
 .circle-cap h1,.circle-cap .cap-h{font-family:var(--display);font-weight:400;font-size:clamp(32px,4.4vw,56px);line-height:1.05;margin:0 0 14px;transition:opacity .45s;text-wrap:balance}
 .circle-cap p{font-size:var(--s17);line-height:1.55;color:var(--ink-2);margin:0;transition:opacity .45s}
@@ -304,6 +304,7 @@ details[open]>summary{color:var(--ink)}
 .rose-card figcaption b{color:var(--ink)}
 .ears-list{padding-left:0;list-style:none}
 .ears-list li{margin:0 0 12px}
-.yard-switch{display:flex;flex-wrap:wrap;gap:6px;margin:12px var(--pad) 0;font-size:var(--s13)}
+.yard-switch{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0;padding:10px var(--pad);font-size:var(--s13);border-bottom:1px solid var(--rule)}
+.yard-switch a.yard-back{border:none;padding:4px 10px 4px 0;margin-right:6px;color:var(--ink);text-decoration:underline;text-decoration-color:rgba(243,217,174,.45)}
 .yard-switch a{border:1px solid var(--rule-2);border-radius:999px;padding:4px 12px;text-decoration:none;color:var(--ink-2);min-height:28px;display:inline-flex;align-items:center}
 .yard-switch a[aria-current='page']{background:var(--lamp);color:#1A1411;font-weight:700;border-color:var(--lamp)}

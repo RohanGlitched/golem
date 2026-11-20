@@ -4,6 +4,7 @@ import requirements from '@spec/hover?raw';
 import appWorker from './hover-worker.ts?worker&url';
 import './fetch-shim';
 import { mountSiteStudio } from './common';
+import shippedSeeds from 'virtual:golem-seeds/hover';
 import type { StudioHandle } from 'golem-spec/ui';
 
 setRobotBase(new URL('/hover/robot/', location.href));
@@ -16,5 +17,5 @@ const STUDIO_OPTIONS = {
 }
 
 export function mount(el: HTMLElement): StudioHandle {
-  return mountSiteStudio({ el, app, requirements, workerUrl: new URL(appWorker, location.href).href, entryUrl: new URL(appWorker, location.href).href, options: STUDIO_OPTIONS });
+  return mountSiteStudio({ el, app, requirements, workerUrl: new URL(appWorker, location.href).href, entryUrl: new URL(appWorker, location.href).href, options: { ...STUDIO_OPTIONS, shippedSeeds } });
 }

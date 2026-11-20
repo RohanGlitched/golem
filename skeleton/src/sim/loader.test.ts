@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { SimError } from './errors.js';
-import { __setLoadFnForTests, loadMujoco } from './loader.js';
+import { __setLoadFnForTests, isLoadProgressNoise, loadMujoco } from './loader.js';
 import type { Mj } from './types.js';
 
 afterEach(() => __setLoadFnForTests(undefined));
@@ -67,5 +67,15 @@ describe('loadMujoco with real MuJoCo', () => {
     const again = await loadMujoco();
     expect(performance.now() - t1).toBeLessThanOrEqual(10);
     expect(again).toBe(mj);
+  });
+});
+
+describe('isLoadProgressNoise', () => {
+  it("drops Emscripten's cold-load progress lines and keeps everything else", () => {
+    expect(isLoadProgressNoise('still waiting on run dependencies:')).toBe(true);
+    expect(isLoadProgressNoise('dependency: wasm-instantiate')).toBe(true);
+    expect(isLoadProgressNoise('(end of list)')).toBe(true);
+    expect(isLoadProgressNoise('XML Error: Schema violation')).toBe(false);
+    expect(isLoadProgressNoise('Aborted(OOM)')).toBe(false);
   });
 });

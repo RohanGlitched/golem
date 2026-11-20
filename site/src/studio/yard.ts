@@ -5,6 +5,7 @@ import requirements from '@spec/yard?raw';
 import appWorker from './yard-worker.ts?worker&url';
 import './fetch-shim';
 import { mountSiteStudio } from './common';
+import yardSeeds from 'virtual:golem-seeds/yard';
 import type { StudioHandle } from 'golem-spec/ui';
 
 export function mount(el: HTMLElement): StudioHandle {
@@ -17,6 +18,7 @@ export function mount(el: HTMLElement): StudioHandle {
     options: {
       // a shove pushes the base, as the requirements do
       primaryPushBody: app.robot.base,
+      shippedSeeds: yardSeeds[id] ?? [],
       signalWords: { base_height_ratio: ['upright'], tilt_deg: ['upright'], drift: ['move'] },
     },
   });

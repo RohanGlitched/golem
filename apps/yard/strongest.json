@@ -1,0 +1,187 @@
+{
+ "budget": 128,
+ "searchSeed": 1,
+ "command": "golem gate --budget 128 --search-seed 1",
+ "robots": [
+  {
+   "id": "go1",
+   "name": "Unitree Go1",
+   "roseWeakest": 0.561,
+   "strongest": 56,
+   "line": "WHEN the base is pushed with up to 56% of its weight for 0.2 s from any direction THE robot SHALL stay upright for 3 s",
+   "runs": [
+    {
+     "percent": 56,
+     "exit": 0,
+     "green": true,
+     "seconds": 26.6,
+     "verdict": "confirmed: 1 Expected_Hold line searched again with a second search seed derived from the first (search seed 1, then confirmation seed 588244584; 128 trials per line; 128 confirmation trials, 256 in total)"
+    },
+    {
+     "percent": 57,
+     "exit": 2,
+     "green": false,
+     "seconds": 15.1,
+     "verdict": "gate RED: 1 of 1 requirement is not held"
+    }
+   ]
+  },
+  {
+   "id": "a1",
+   "name": "Unitree A1",
+   "roseWeakest": 0.629,
+   "strongest": 63,
+   "line": "WHEN the base is pushed with up to 63% of its weight for 0.2 s from any direction THE robot SHALL stay upright for 3 s",
+   "runs": [
+    {
+     "percent": 62,
+     "exit": 0,
+     "green": true,
+     "seconds": 19,
+     "verdict": "confirmed: 1 Expected_Hold line searched again with a second search seed derived from the first (search seed 1, then confirmation seed 588244584; 128 trials per line; 128 confirmation trials, 256 in total)"
+    },
+    {
+     "percent": 63,
+     "exit": 0,
+     "green": true,
+     "seconds": 17.3,
+     "verdict": "confirmed: 1 Expected_Hold line searched again with a second search seed derived from the first (search seed 1, then confirmation seed 588244584; 128 trials per line; 128 confirmation trials, 256 in total)"
+    },
+    {
+     "percent": 64,
+     "exit": 2,
+     "green": false,
+     "seconds": 12.5,
+     "verdict": "gate RED: 1 of 1 requirement is not held"
+    }
+   ]
+  },
+  {
+   "id": "spot",
+   "name": "Boston Dynamics Spot",
+   "roseWeakest": 0.521,
+   "strongest": 52,
+   "line": "WHEN the base is pushed with up to 52% of its weight for 0.2 s from any direction THE robot SHALL stay upright for 3 s",
+   "runs": [
+    {
+     "percent": 52,
+     "exit": 0,
+     "green": true,
+     "seconds": 18.5,
+     "verdict": "confirmed: 1 Expected_Hold line searched again with a second search seed derived from the first (search seed 1, then confirmation seed 588244584; 128 trials per line; 128 confirmation trials, 256 in total)"
+    },
+    {
+     "percent": 53,
+     "exit": 2,
+     "green": false,
+     "seconds": 15.2,
+     "verdict": "gate RED: 1 of 1 requirement is not held"
+    }
+   ]
+  },
+  {
+   "id": "anymal_c",
+   "name": "ANYbotics ANYmal C",
+   "roseWeakest": 0.611,
+   "strongest": 64,
+   "line": "WHEN the base is pushed with up to 64% of its weight for 0.2 s from any direction THE robot SHALL stay upright for 3 s",
+   "runs": [
+    {
+     "percent": 61,
+     "exit": 0,
+     "green": true,
+     "seconds": 24.1,
+     "verdict": "confirmed: 1 Expected_Hold line searched again with a second search seed derived from the first (search seed 1, then confirmation seed 588244584; 128 trials per line; 128 confirmation trials, 256 in total)"
+    },
+    {
+     "percent": 62,
+     "exit": 0,
+     "green": true,
+     "seconds": 20.4,
+     "verdict": "confirmed: 1 Expected_Hold line searched again with a second search seed derived from the first (search seed 1, then confirmation seed 588244584; 128 trials per line; 128 confirmation trials, 256 in total)"
+    },
+    {
+     "percent": 63,
+     "exit": 0,
+     "green": true,
+     "seconds": 18.8,
+     "verdict": "confirmed: 1 Expected_Hold line searched again with a second search seed derived from the first (search seed 1, then confirmation seed 588244584; 128 trials per line; 128 confirmation trials, 256 in total)"
+    },
+    {
+     "percent": 64,
+     "exit": 0,
+     "green": true,
+     "seconds": 18.8,
+     "verdict": "confirmed: 1 Expected_Hold line searched again with a second search seed derived from the first (search seed 1, then confirmation seed 588244584; 128 trials per line; 128 confirmation trials, 256 in total)"
+    },
+    {
+     "percent": 65,
+     "exit": 2,
+     "green": false,
+     "seconds": 20,
+     "verdict": "gate RED: 1 of 1 requirement is not held"
+    }
+   ]
+  },
+  {
+   "id": "berkeley",
+   "name": "Berkeley Humanoid",
+   "strongest": null,
+   "note": "falls before any push",
+   "runs": []
+  },
+  {
+   "id": "t1",
+   "name": "Booster T1",
+   "strongest": null,
+   "note": "falls before any push",
+   "runs": []
+  },
+  {
+   "id": "g1",
+   "name": "Unitree G1 (29 joints)",
+   "roseWeakest": 0.113,
+   "strongest": 11,
+   "line": "WHEN the base is pushed with up to 11% of its weight for 0.2 s from any direction THE robot SHALL stay upright for 3 s",
+   "runs": [
+    {
+     "percent": 11,
+     "exit": 0,
+     "green": true,
+     "seconds": 59.9,
+     "verdict": "confirmed: 1 Expected_Hold line searched again with a second search seed derived from the first (search seed 1, then confirmation seed 588244584; 128 trials per line; 128 confirmation trials, 256 in total)"
+    },
+    {
+     "percent": 12,
+     "exit": 2,
+     "green": false,
+     "seconds": 42.5,
+     "verdict": "gate RED: 1 of 1 requirement is not held"
+    }
+   ]
+  },
+  {
+   "id": "apollo",
+   "name": "Apptronik Apollo",
+   "roseWeakest": 0.094,
+   "strongest": 9,
+   "line": "WHEN the base is pushed with up to 9% of its weight for 0.2 s from any direction THE robot SHALL stay upright for 3 s",
+   "runs": [
+    {
+     "percent": 9,
+     "exit": 0,
+     "green": true,
+     "seconds": 42.2,
+     "verdict": "confirmed: 1 Expected_Hold line searched again with a second search seed derived from the first (search seed 1, then confirmation seed 588244584; 128 trials per line; 128 confirmation trials, 256 in total)"
+    },
+    {
+     "percent": 10,
+     "exit": 2,
+     "green": false,
+     "seconds": 29,
+     "verdict": "gate RED: 1 of 1 requirement is not held"
+    }
+   ]
+  }
+ ]
+}
